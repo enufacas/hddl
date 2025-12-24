@@ -1,0 +1,322 @@
+# HDDL Simulation Concept
+
+**Status:** Canon
+**Purpose:** Capture a concrete simulation concept that renders HDDL Canon objects into an inspectable, time-based experience.
+**Scope:** This document describes *how* HDDL concepts could be experienced, not new normative requirements.
+**Confidence:** Medium
+
+---
+
+## 1. Why a Simulation Exists
+
+HDDL introduces first-class concepts—decision authority, envelopes, stewardship, and revision—that are intentionally abstract.
+
+A simulation exists to:
+- make these concepts **inspectable**
+- demonstrate how they interact over time
+- reduce the sense of a "black box" decision workspace
+
+The simulation is **not predictive** and **not operational**.
+It is a *replay and inspection surface* over decision authority.
+
+---
+
+## 2. Core Simulation Frame
+
+**Mental model:** Time-based replay of decision authority.
+
+The simulation progresses through a sequence of moments in time.
+At each moment, the system answers three questions:
+
+1. What decision authority existed?
+2. What was the system allowed to do?
+3. What outcomes and signals were observed?
+
+### Canon ties
+- **Decision Authority**
+- **Decision Envelopes**
+- **Decision Telemetry**
+- **Decision Memory**
+- **Steward-led Revision**
+
+---
+
+## 3. Primary Simulation Object: Decision Envelope
+
+### Canon concept
+**Decision Envelope**
+Defines the bounds within which automation, agents, or humans may act.
+
+### Simulation rule
+**Nothing occurs in the simulation without an active envelope.**
+
+- Events reference envelope IDs
+- Capabilities are expressed as envelope-bounded
+- Revisions create new envelope versions
+- Learning attaches to envelope lineage
+
+### UI surface: Decision Authority Panel
+Shows, at a given time:
+- Active envelopes
+- Owners (stewards / domains)
+- Constraints and escalation paths
+- Revision history and diffs
+
+**Expandable design area**
+- Envelope comparison view
+- Visual boundary changes over time
+- Assumption annotations per envelope
+
+---
+
+## 4. Timeline as Envelope Lifecycle
+
+The timeline is not a log of events.
+It is a **lifecycle view of envelopes**.
+
+Example progression:
+- Envelope promoted
+- Envelope expanded
+- Signals diverge from assumptions
+- Incident occurs
+- Envelope revised or narrowed
+
+### Canon ties
+- **Decision Revision**
+- **Authority Drift**
+- **Outcome Attribution**
+
+### UI surface: Timeline Scrubber
+- Scrub through time
+- Select a moment to inspect envelopes, signals, and system behavior
+- Branch timelines only by revising envelopes (not behavior)
+
+**Expandable design area**
+- Branch comparison
+- Revision cadence metrics
+- "What if" envelope diffs
+
+---
+
+## 5. System & Automation View (Constrained Capability)
+
+### Canon concept
+- **Bounded Autonomy**
+- **Human-Preferential Constraints**
+
+This view answers:
+> "Given the envelopes, what *could* the system do?"
+
+It does not show:
+- execution details
+- code
+- model internals
+
+It shows:
+- agents or tools that are enabled
+- explicit prohibitions
+- escalation requirements
+
+### UI surface: System Capability Panel
+- Enabled capabilities (envelope-bounded)
+- Disabled or forbidden actions
+- Dependencies on human attribution
+
+**Expandable design area**
+- Capability grouping by envelope
+- Historical comparison of allowed vs disallowed actions
+
+---
+
+## 6. Signals, Outcomes, and Incidents
+
+### Canon concept
+- **Decision Telemetry**
+- **Outcome Attribution**
+- **Incidents without System Failure**
+
+Signals are evaluated **against envelope assumptions**, not system health.
+
+An incident may occur even when:
+- systems are healthy
+- automation behaved correctly
+- metrics look "green"
+
+### UI surface: Signals & Outcomes Panel
+- Observed signals (metrics, complaints, escalations)
+- Incident summaries
+- Clear linkage to envelope assumptions
+
+**Expandable design area**
+- Soft signals (trust, confusion, sentiment)
+- Signal-to-assumption mismatch indicators
+
+---
+
+## 7. Steward Deep-Dive Panels (Inspection Lenses)
+
+Deep-dive panels are optional inspection surfaces opened by stewards.
+They do not control execution.
+
+### 7.1 Decision Memory & Embeddings
+**Canon ties**
+- Decision Memory
+- Embeddings as recall, not authority
+
+Shows:
+- Related envelope histories
+- Similar decision shapes
+- Explainable similarity (textual, not numeric)
+
+**Expandable**
+- Envelope lineage maps
+- Assumption similarity clustering
+
+---
+
+### 7.2 Decision-Centric Metrics
+**Canon ties**
+- Stewardship health
+- Authority stability
+
+Metrics are attached to:
+- decisions
+- envelopes
+- revisions
+
+Not:
+- individuals
+- teams
+
+**Expandable**
+- Drift indicators
+- Revision frequency trends
+
+---
+
+### 7.3 Customer Experience View
+**Canon ties**
+- Customer Steward
+- Human-preferential outcomes
+
+Shows:
+- Customer journey aligned to timeline
+- What customers experienced, not what systems did
+- Linkage to envelope constraints and assumptions
+
+**Expandable**
+- Trust impact annotations
+- Customer-visible policy changes
+
+---
+
+### 7.4 Assumptions & Constraints Review
+**Canon ties**
+- Decision assumptions
+- Revisability
+
+Extracts:
+- Declared assumptions from envelopes
+- Indicates which assumptions no longer hold
+
+**Expandable**
+- Assumption confidence tracking
+- Steward annotations over time
+
+---
+
+### 7.5 Steward Action Surface
+**Canon ties**
+- Steward authority
+- Non-ownership of execution
+
+Permitted actions:
+- Narrow or expand envelope
+- Add escalation
+- Revise assumptions
+- Annotate decision memory
+- Trigger Decision Stewardship Group review
+
+Explicitly excluded:
+- Code changes
+- Model tuning
+- Execution overrides
+
+---
+
+## 8. Decision Stewardship Group (DSG) in the Simulation
+
+### Canon concept
+**Decision Stewardship Group**
+
+DSG appears only when:
+- envelopes intersect across domains
+- authority revision exceeds local steward scope
+- people-affecting decisions cross boundaries
+
+### UI surface: DSG Review Event
+- Trigger reason
+- Involved envelopes
+- Participating stewards
+- Outcome as envelope revision
+
+DSG is represented as an **artifact-producing event**, not a meeting UI.
+
+**Expandable**
+- Cross-domain impact visualization
+- Historical DSG outcomes
+
+---
+
+## 9. Role Views as Lenses
+
+Role selection does not change the simulation.
+
+It changes:
+- emphasis
+- default panels
+- language
+
+### Canon ties
+- Multiple stewards, one system of record
+
+Examples:
+- Domain Engineer: incident alignment, revision impact
+- HR Steward: people-affecting envelopes, embedding constraints
+- Customer Steward: trust and experience outcomes
+- Executive: risk exposure and revision cadence
+
+---
+
+## 10. Relationship to Models and AI
+
+Models may:
+- summarize outcomes
+- recall similar envelopes
+- propose revisions
+
+Models do not:
+- own authority
+- finalize decisions
+- bypass stewardship
+
+AI participates as **constrained infrastructure**, consistent with HDDL production assumptions.
+
+---
+
+## 11. What This Simulation Is Not
+
+- Not a dashboard
+- Not an agent control panel
+- Not a prediction engine
+- Not a product specification
+
+It is:
+> A concrete way to experience HDDL concepts interacting over time.
+
+---
+
+## 12. Open Design Areas (Intentional)
+
+- Standard envelope schemas for interoperability
+

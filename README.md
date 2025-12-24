@@ -1,2 +1,7 @@
 # hddl
-An exploratory idea introducing the idea of a “Human-Derived Decision Layer” (HDDL): a way to reason about who is allowed to decide what in automated and AI-assisted systems.
+
+Canonical docs live in docs/, with the main entrypoint at:
+
+- docs/README.md
+
+Legacy source material outside the canonical set has been removed to keep the repository single-sourced.
