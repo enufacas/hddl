@@ -18,7 +18,7 @@ It exists to:
 - Minimal sufficiency
 - No reasoning capture
 - Short retention
-- Aggregation over surveillance
+- Prefer aggregation over individual-level instrumentation
 
 ---
 
@@ -51,7 +51,62 @@ Examples (illustrative):
 
 ---
 
-## Forbidden Signals
+## Wide Events and Replayability (Agent-Driven Work)
+
+Understanding and operating agent-driven systems requires **replayable, high-context events** similar in spirit to modern observability (e.g., wide events used for query-first investigation).
+
+In HDDL, these events are:
+- **bounded** (DTS allow-list enforced)
+- **structured** (queryable fields, not free-form transcripts)
+- **replayable** (to reconstruct what happened at the decision/action level)
+- **operationally useful** while remaining within DTS boundaries
+
+### Intent
+Wide events exist so stewards and operators can answer:
+- What envelope authorized this?
+- What decision class was executed, where, and when?
+- What tool/action was invoked?
+- What outcome occurred and how did it degrade over time?
+- Where did boundaries get touched (escalations, overrides, deferrals)?
+
+### Event shape (canonical fields)
+Concrete implementations vary, but DTS assumes an event stream where each event can be joined via stable identifiers:
+- `timestamp`
+- `decision_id`
+- `envelope_id` (and optional `envelope_version`)
+- `decision_class`
+- `actor_type` (human/agent/system) and `actor_id` (non-personal, role/service scoped)
+- `tool_id` / `capability_id` (what was invoked)
+- `boundary_interaction` (none/escalated/overridden/deferred)
+- `outcome` (success/failure/reversal/rollback)
+- `failure_class` (if applicable)
+- `latency_bucket` (coarse)
+- `environment` (prod/stage)
+- `correlation_id` (request/run/trace id)
+
+### Replay scope
+Replay means **reconstructing the observable decision lifecycle** from bounded events (what was authorized, executed, and observed), not reproducing model internals.
+Replay must never require storing or recovering:
+- chain-of-thought
+- deliberation traces
+- private human communications
+- content-level transcripts of human reasoning
+
+---
+
+## Event-to-Embedding Use (Decision Memory)
+
+Some DTS-allowed event elements may be converted into embeddings and included in Decision Memory to support recall and precedent discovery.
+
+Guardrails:
+- Only **explicitly allowed** event fields (or steward-approved summaries) may be embedded.
+- Embeddings derived from events are **non-authoritative**; they only assist retrieval.
+- Event-derived memory must preserve linkage back to authoritative artifacts (e.g., `decision_id`, `envelope_id`).
+- Embedding pipelines must restrict inputs to DTS-allowed fields and steward-approved summaries.
+
+---
+
+## Excluded Signals
 
 - keystrokes
 - screen/audio/video capture
@@ -62,7 +117,7 @@ Examples (illustrative):
 - content-level logging of human deliberation
 - covert behavioral inference
 
-Principle: telemetry about decisions, never telemetry of thinking.
+These exclusions keep telemetry focused on decisions, outcomes, and boundary interactions rather than turning into a transcript of internal deliberation.
 
 ---
 

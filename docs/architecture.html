@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>HDDL Architecture Diagram</title>
+
+    <!--
+      Standalone page for local preview + GitHub Pages publishing.
+      Served by MkDocs as a static asset at /architecture.html.
+    -->
+    <link rel="stylesheet" href="stylesheets/diagrams.css" />
+    <style>
+      :root {
+        color-scheme: light;
+      }
+
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial;
+        line-height: 1.5;
+        color: #0f172a;
+        background: #ffffff;
+      }
+
+      .page {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 24px 16px 56px;
+      }
+
+      header {
+        margin-bottom: 16px;
+      }
+
+      h1 {
+        font-size: 24px;
+        margin: 0 0 6px 0;
+      }
+
+      .sub {
+        margin: 0;
+        color: rgba(15, 23, 42, 0.75);
+        font-size: 14px;
+      }
+
+      .divider {
+        height: 1px;
+        background: rgba(0, 0, 0, 0.08);
+        margin: 18px 0;
+      }
+
+      /* Provide reasonable fallbacks when not rendered inside Material */
+      .hddl-arch {
+        --md-default-bg-color: #ffffff;
+        --md-code-bg-color: rgba(0, 0, 0, 0.03);
+        --md-default-fg-color--lightest: rgba(0, 0, 0, 0.12);
+      }
+
+      .hint {
+        margin-top: 14px;
+        font-size: 13px;
+        color: rgba(15, 23, 42, 0.75);
+      }
+
+      code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        font-size: 0.95em;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="page">
+      <header>
+        <h1>HDDL Architecture Diagram</h1>
+        <p class="sub">Standalone HTML view of the high-level HDDL architecture.</p>
+      </header>
+
+      <div class="divider"></div>
+
+      <div class="hddl-arch" role="group" aria-label="HDDL high-level architecture diagram">
+        <p class="hddl-arch__title">HDDL high-level architecture</p>
+
+        <div class="hddl-arch__grid">
+          <section class="hddl-arch__lane" aria-label="Decision Authority Layer">
+            <p class="hddl-arch__lane-title">Decision Authority Layer (HDDL)</p>
+            <div class="hddl-arch__cards">
+              <div class="hddl-arch__card">
+                <p class="hddl-arch__card-title">Domain Stewards / JSG</p>
+                <p class="hddl-arch__card-sub">Define and revise envelopes</p>
+              </div>
+              <div class="hddl-arch__card">
+                <p class="hddl-arch__card-title">Decision Envelopes</p>
+                <p class="hddl-arch__card-sub">Versioned bounds and escalation rules</p>
+              </div>
+              <div class="hddl-arch__card">
+                <p class="hddl-arch__card-title">Decision Workspace</p>
+                <p class="hddl-arch__card-sub">Artifacts, revisions, inspection surface</p>
+              </div>
+              <div class="hddl-arch__card">
+                <p class="hddl-arch__card-title">Decision Memory</p>
+                <p class="hddl-arch__card-sub">Recall and precedent discovery (non-authoritative)</p>
+              </div>
+              <div class="hddl-arch__card">
+                <p class="hddl-arch__card-title">DSG</p>
+                <p class="hddl-arch__card-sub">Cross-domain arbitration only (produces envelope revisions)</p>
+              </div>
+
+              <div class="hddl-arch__flow" aria-label="Authority flow">
+                <div class="hddl-arch__flow-item">Stewards <code>define / revise</code> Envelopes</div>
+                <div class="hddl-arch__flow-item">DSG <code>arbitrates</code> boundary conflicts into envelope revisions</div>
+                <div class="hddl-arch__flow-item">Decision Memory <code>suggests precedent</code> (never grants authority)</div>
+              </div>
+            </div>
+          </section>
+
+          <section class="hddl-arch__lane" aria-label="Execution Layer">
+            <p class="hddl-arch__lane-title">Execution Layer</p>
+            <div class="hddl-arch__cards">
+              <div class="hddl-arch__card">
+                <p class="hddl-arch__card-title">Humans</p>
+                <p class="hddl-arch__card-sub">Operate within envelopes</p>
+              </div>
+              <div class="hddl-arch__card">
+                <p class="hddl-arch__card-title">Agents / Automation</p>
+                <p class="hddl-arch__card-sub">Operate within envelopes; use tools/models</p>
+              </div>
+              <div class="hddl-arch__card">
+                <p class="hddl-arch__card-title">Tools / Models</p>
+                <p class="hddl-arch__card-sub">Execution capability (not authority)</p>
+              </div>
+
+              <div class="hddl-arch__flow" aria-label="Execution flow">
+                <div class="hddl-arch__flow-item">Envelopes <code>bound</code> what humans and agents are allowed to do</div>
+                <div class="hddl-arch__flow-item">Agents <code>use</code> tools/models to execute inside those bounds</div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div class="hddl-arch__divider" aria-label="Telemetry">
+          <span class="hddl-arch__divider-title">Decision Telemetry</span>
+          <p class="hddl-arch__divider-text">Bounded signals that inform calibration (not auto-remediation)</p>
+        </div>
+
+        <p class="hddl-arch__note">Key idea: the envelope is the enforceable boundary; execution happens inside it.</p>
+      </div>
+
+      <p class="hint">Tip: For best preview fidelity, view via MkDocs (`mkdocs serve`) rather than opening this file directly.</p>
+    </div>
+  </body>
+</html>

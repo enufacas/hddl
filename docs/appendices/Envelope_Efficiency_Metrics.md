@@ -11,8 +11,8 @@ Core constraint: these metrics tune envelopes and systems — **never people**.
 
 - **Attach to artifacts**: envelopes, envelope revisions, and decision lifecycle artifacts.
 - **Guide revision**: metrics inform envelope shaping (narrow/clarify/retire/promote), not ad hoc exception-making.
-- **Stay DTS-aligned**: telemetry about decisions, never telemetry of thinking.
-- **Avoid surveillance**: nothing here authorizes individual scoring, ranking, productivity inference, or psychological inference.
+- **Stay DTS-aligned**: keep telemetry oriented to decisions/outcomes and boundary interactions.
+- **Avoid people metrics**: nothing here authorizes individual scoring, ranking, or evaluative inference.
 
 ---
 

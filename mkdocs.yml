@@ -1,0 +1,69 @@
+site_name: HDDL
+site_url: https://enufacas.github.io/hddl/
+
+docs_dir: docs
+site_dir: site
+
+exclude_docs: |
+  README.md
+
+theme:
+  name: material
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.sections
+    - navigation.top
+    - content.code.copy
+
+markdown_extensions:
+  - admonition
+  - toc:
+      permalink: true
+
+extra_css:
+  - stylesheets/diagrams.css
+
+nav:
+  - Home: index.md
+  - Architecture Diagram: architecture.html
+  - Canon Registry: Canon_Registry.md
+  - Glossary: Glossary.md
+  - Foundations:
+      - System Overview: foundations/HDDL_System_Overview.md
+      - Executive Reference: foundations/Executive_Reference.md
+      - Decision Telemetry Specification: foundations/Decision_Telemetry_Specification.md
+      - Decision Memory and AI-Native Operations: foundations/Decision_Memory_and_AI_Native_Operations.md
+      - Foundational Principles: foundations/Human_Derived_Decision_Layer_Foundational_Principles.md
+      - Manifesto (Legacy): foundations/Human_Derived_Decision_Layer_Manifesto.md
+  - Groups:
+      - Judgment Stewardship Group: groups/Judgment_Stewardship_Group.md
+      - Decision Stewardship Group: groups/Decision_Stewardship_Group.md
+  - Roles:
+      - Business Domain Steward: roles/Business_Domain_Steward.md
+      - Data Steward: roles/Data_Steward.md
+      - Domain Engineer: roles/Domain_Engineer.md
+      - Domain Steward: roles/Domain_Steward.md
+      - Engineering Steward: roles/Engineering_Steward.md
+      - Human Resources Steward: roles/Human_Resources_Steward.md
+      - Resiliency Steward: roles/Resiliency_Steward.md
+      - Sales Steward: roles/Sales_Steward.md
+  - Operations:
+      - Continuous Stewardship: operations/Continuous_Stewardship.md
+      - Steward-Led Decision Calibration: operations/Steward_Led_Decision_Calibration.md
+      - Ceremonies and Operating Cadence: operations/Ceremonies_and_Operating_Cadence.md
+      - Steward Playbook: operations/Steward_Playbook.md
+      - Request Lifecycle Walkthrough: operations/Request_Lifecycle_Walkthrough.md
+  - Narratives:
+      - Tuesday in the Near Future: narratives/Narrative_Tuesday_in_the_Near_Future.md
+      - Thursday Two Years Later: narratives/Narrative_Thursday_Two_Years_Later.md
+      - Year Five — The Exit: narratives/Narrative_Year_Five_The_Exit.md
+      - Year Eight — The Data Steward Kevin: narratives/Narrative_Year_Eight_The_Data_Steward_Kevin.md
+      - The Glen — Sales Stewardship: narratives/Narrative_The_Glen_Sales_Stewardship.md
+      - The Glen — Judgment Drift: narratives/Narrative_The_Glen_Judgment_Drift.md
+      - Fractional HR and Human Resources Steward: narratives/Narrative_Fractional_HR_and_Human_Resources_Steward.md
+  - Appendices:
+      - HDDL vs AgentOps vs AI Gateway: appendices/HDDL_vs_AgentOps_vs_AI_Gateway.md
+      - HDDL Simulation Concept: appendices/HDDL_Simulation_Concept.md
+      - Envelope Efficiency Metrics: appendices/Envelope_Efficiency_Metrics.md
+      - Individual Human Judgment Balance Sheet: appendices/Individual_Human_Judgment_Balance_Sheet.md

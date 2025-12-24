@@ -52,7 +52,7 @@ The Human Resources Steward has already co-owned the Decision Telemetry Specific
 The payments domain has an active DTS boundary document and the defaults are familiar:
 
 - Minimal sufficiency
-- Aggregation over surveillance
+- Aggregation over individual-level instrumentation
 - Short retention
 - No reasoning capture
 - No screen/audio/video capture
@@ -99,9 +99,11 @@ At 8:17 a.m., she opened her laptop and saw three things waiting for her:
 
 That last one mattered most.
 
-## Decisions Without Surveillance
+## Decisions Without Transcripts
 
 The packet wasn’t a log. There was no transcript. No replay of internal reasoning. No step-by-step explanation of how the system had arrived at its recommendation.
+
+But there *was* a bounded, replayable trail of decision events—enough to investigate what happened without becoming a transcript.
 
 Instead, it contained:
 

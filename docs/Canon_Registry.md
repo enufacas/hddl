@@ -13,6 +13,7 @@ Any document not listed here is non-canonical.
   - Flagged remaining unqualified “judgment” phrasing for targeted editorial refinement
 
 ## Foundations
+- Glossary.md
 - foundations/HDDL_System_Overview.md
 - foundations/Executive_Reference.md
 - foundations/Decision_Telemetry_Specification.md

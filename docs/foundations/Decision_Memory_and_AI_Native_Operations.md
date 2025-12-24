@@ -34,6 +34,24 @@ Embeddings are the enabling mechanism for Decision Memory.
 
 ---
 
+## Event-Derived Memory (From Decision Telemetry)
+
+In agent-driven systems, the most reliable substrate for collective operational memory is the stream of **DTS-allowed wide events**:
+- envelope-bounded actions
+- boundary interactions (escalations, overrides, deferrals)
+- outcomes, reversals, rollbacks
+- failure classes and coarse performance buckets
+
+Selected, steward-approved elements of these events may be transformed into embeddings so the system can retrieve:
+- similar prior envelope contexts
+- precedent decisions and outcomes
+- drift patterns and recurring boundary touches
+
+This is intentionally **not** a transcript of reasoning.
+It is a compact, replayable record of what happened at the decision/action level.
+
+---
+
 ## Embeddings and Autonomous Decisions
 
 Embeddings in HDDL may inform and drive autonomous decisions **within an explicitly authorized decision envelope**.
@@ -99,3 +117,6 @@ The following are intended as **hard requirements** (not optional guidance):
 - Authority boundaries must be inspectable at rest
 - Autonomous actions must emit traceable events
 - No silent authority expansion
+
+Additional constraint:
+- Embeddings may only be derived from DTS-allowed event fields and steward-approved artifacts (never from forbidden signals).

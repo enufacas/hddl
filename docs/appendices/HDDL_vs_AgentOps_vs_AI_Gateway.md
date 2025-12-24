@@ -42,8 +42,8 @@ The integration point is simple: envelopes define constraints; gateways and Agen
 ## Boundaries (Non-Negotiables)
 
 - HDDL governs decision authority; it does not own execution details.
-- AgentOps reliability data must remain consistent with DTS posture: telemetry about decisions, never telemetry of thinking.
-- AI Gateway logging must obey the same constraint. “Helpful debugging” cannot turn into covert surveillance.
+- AgentOps reliability data must remain consistent with DTS posture: focus on decisions, outcomes, and boundary interactions.
+- AI Gateway logging must obey the same constraint. “Helpful debugging” should not become a reasoning transcript or an employee-monitoring surface.
 - Retention should remain short by default for granular telemetry (days to low weeks), consistent with DTS.
 
 ## Common Anti-Patterns

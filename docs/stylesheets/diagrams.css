@@ -1,0 +1,106 @@
+/*
+  HDDL HTML/CSS diagrams
+  - Use Material theme variables where available
+  - Avoid hard-coded brand colors; rely on existing theme primitives
+*/
+
+.hddl-arch {
+  border: 1px solid var(--md-default-fg-color--lightest, rgba(0, 0, 0, 0.12));
+  border-radius: 12px;
+  padding: 16px;
+  background: var(--md-default-bg-color, #fff);
+}
+
+.hddl-arch__title {
+  font-weight: 700;
+  margin: 0 0 12px 0;
+}
+
+.hddl-arch__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 900px) {
+  .hddl-arch__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.hddl-arch__lane {
+  border: 1px solid var(--md-default-fg-color--lightest, rgba(0, 0, 0, 0.12));
+  border-radius: 12px;
+  padding: 12px;
+  background: var(--md-code-bg-color, rgba(0, 0, 0, 0.03));
+}
+
+.hddl-arch__lane-title {
+  font-weight: 700;
+  margin: 0 0 10px 0;
+}
+
+.hddl-arch__cards {
+  display: grid;
+  gap: 10px;
+}
+
+.hddl-arch__card {
+  border: 1px solid var(--md-default-fg-color--lightest, rgba(0, 0, 0, 0.12));
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: var(--md-default-bg-color, #fff);
+}
+
+.hddl-arch__card-title {
+  font-weight: 650;
+  margin: 0 0 4px 0;
+}
+
+.hddl-arch__card-sub {
+  margin: 0;
+  font-size: 0.9em;
+  opacity: 0.85;
+}
+
+.hddl-arch__divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 16px 0 0 0;
+  padding-top: 14px;
+  border-top: 1px dashed var(--md-default-fg-color--lightest, rgba(0, 0, 0, 0.12));
+}
+
+.hddl-arch__divider-title {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.hddl-arch__divider-text {
+  margin: 0;
+  font-size: 0.9em;
+  opacity: 0.85;
+}
+
+.hddl-arch__note {
+  margin: 10px 0 0 0;
+  font-size: 0.9em;
+  opacity: 0.85;
+}
+
+.hddl-arch__flow {
+  display: grid;
+  gap: 6px;
+  margin-top: 8px;
+  padding-left: 2px;
+}
+
+.hddl-arch__flow-item {
+  font-size: 0.92em;
+  opacity: 0.9;
+}
+
+.hddl-arch__flow-item code {
+  font-size: 0.95em;
+}

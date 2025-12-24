@@ -32,6 +32,9 @@ At each moment, the system answers three questions:
 2. What was the system allowed to do?
 3. What outcomes and signals were observed?
 
+The simulation can be powered by **bounded, replayable wide events** (DTS-aligned) in the same spirit as modern observability: high-context events that can be queried and reassembled into an investigative story.
+The UI, however, intentionally renders those events as an **envelope lifecycle** and **decision authority** surface rather than a raw event log.
+
 ### Canon ties
 - **Decision Authority**
 - **Decision Envelopes**
@@ -73,6 +76,8 @@ Shows, at a given time:
 
 The timeline is not a log of events.
 It is a **lifecycle view of envelopes**.
+
+Implementation note: a raw event stream may exist underneath (for replay and investigation), but the primary simulation artifact remains envelope state, revision, and assumption fit.
 
 Example progression:
 - Envelope promoted
@@ -187,6 +192,17 @@ Metrics are attached to:
 Not:
 - individuals
 - teams
+
+---
+
+### 7.2a Wide Event Replay (Investigation Lens)
+
+This lens is a query-first replay surface over DTS-allowed events ("wide events"):
+- filter by `decision_id`, `envelope_id`, `decision_class`, `tool_id`, `outcome`, `boundary_interaction`
+- correlate across a run via `correlation_id`
+- view coarse timing and failure classes
+
+It does not render model internals or private deliberation; it stays at the decision/action and outcome level.
 
 **Expandable**
 - Drift indicators

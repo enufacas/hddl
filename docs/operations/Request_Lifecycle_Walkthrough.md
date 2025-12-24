@@ -63,8 +63,10 @@ Ownership of execution remains with Domain Engineers and operators.
 
 Outcomes are observed using Decision Telemetry (DTS) consistent with HDDL constraints:
 - telemetry about decisions and outcomes
-- never telemetry of thinking
+- keep telemetry focused on outcomes and boundary interactions
 - short retention
+
+In agent-driven execution, this is typically implemented as replayable, DTS-allowed **wide events** (structured, queryable event records) so stewards can investigate what happened without capturing internal reasoning.
 
 ### 7) Stewardship refines envelopes
 
