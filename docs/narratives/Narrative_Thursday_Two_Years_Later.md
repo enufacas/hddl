@@ -37,7 +37,7 @@ The difference was not power.
 
 It was scope.
 
-JSGs still owned their domains. They calibrated, compressed, and evolved their own decision envelopes continuously. The DSG only existed for one reason:
+Domain stewards still owned their domains. They calibrated, compressed, and evolved their own decision envelopes continuously. The DSG only existed for one reason:
 
 **When decisions crossed boundaries, humans had to meet each other.**
 

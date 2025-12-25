@@ -69,7 +69,7 @@ Stewards:
 
 The **Decision Stewardship Group (DSG)** exists to arbitrate conflicts between envelopes, resolve overlapping authority, and review decisions that exceed local steward scope.
 
-The **Judgment Stewardship Group (JSG)** is the domain-scoped construct that owns calibrated envelopes and routine domain decision stewardship within calibrated bounds.
+**Domain Stewards** own calibrated envelopes and routine domain decision stewardship within their domain bounds.
 
 DSG:
 - does not approve routine work
@@ -103,7 +103,7 @@ In agent-driven work, this is typically powered by **replayable, DTS-allowed wid
       <p class="hddl-arch__lane-title">Decision Authority Layer (HDDL)</p>
       <div class="hddl-arch__cards">
         <div class="hddl-arch__card">
-          <p class="hddl-arch__card-title">Domain Stewards / JSG</p>
+          <p class="hddl-arch__card-title">Domain Stewards</p>
           <p class="hddl-arch__card-sub">Define and revise envelopes</p>
         </div>
         <div class="hddl-arch__card">

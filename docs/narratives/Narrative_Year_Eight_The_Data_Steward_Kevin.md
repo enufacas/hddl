@@ -38,7 +38,7 @@ hddl envelope promote --id ENV-DATA-009 --from shadow --to live
 **Steward Execution**
 ```bash
 stewardctl data health \
-  --domains payments.recon,finance.close \
+  --domains leasing.ops,finance.close \
   --signals freshness,drift,join-integrity,schema-churn \
   --window 72h
 ```

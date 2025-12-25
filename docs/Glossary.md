@@ -31,12 +31,9 @@ Envelope versions create lineage (what changed, when, and why) and enable inspec
 The inspection and governance surface where envelopes, revisions, stewardship artifacts, and decision records are stored and reviewed.
 This is where authority becomes durable.
 
-## JSG (Judgment Stewardship Group)
-The domain-scoped stewardship construct that owns calibrated envelopes and routine stewardship within domain bounds.
-See: groups/Judgment_Stewardship_Group.md
-
 ## DSG (Decision Stewardship Group)
-The cross-domain arbitration construct that resolves envelope boundary collisions and produces envelope revisions.
+The stewardship construct that resolves envelope boundary collisions, arbitrates cross-domain conflicts, and produces envelope revisions.
+Domain stewards handle domain-scoped calibration; DSG handles cross-domain arbitration.
 DSG does not gate routine execution.
 See: groups/Decision_Stewardship_Group.md
 
@@ -73,7 +70,7 @@ A stable identifier that links telemetry, memory, and artifacts back to an autho
 Canon requirement: embedding-driven actions must reference a `decision_id`.
 
 ## Decision Class
-A category of decisions used for aggregation, routing, and stewardship review (e.g., "payments.recon exception handling").
+A category of decisions used for aggregation, routing, and stewardship review (e.g., "leasing.showings scheduling exception handling").
 Decision classes help observe patterns without capturing reasoning transcripts.
 
 ## Boundary Interaction

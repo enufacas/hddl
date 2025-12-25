@@ -1,8 +1,8 @@
-# The Glen Narrative: Judgment Drift
+# The Glen Narrative: Decision Drift
 **Confidence:** Medium
 
 Glen was not reckless. He was competent, trusted, and overloaded.
-That is how judgment drift begins.
+That is how decision drift begins.
 
 By the time Glen inherited the system, most decisions already “worked.”
 The problem was that no one could clearly say *why* they worked, or where the boundaries were anymore.
@@ -63,11 +63,11 @@ That is precisely the problem.
 **System Interpretation**
 > • Intent: reduce autonomy
 > • Constraint change: reintroduce human checkpoints
-> • Risk: unknown accumulated judgment debt
+> • Risk: unknown accumulated decision debt
 
 **Steward Execution**
 ```bash
-stewardctl calibration freeze   --domain operations.settlement   --reason "unowned judgment drift detected"   --mode stabilize
+stewardctl calibration freeze   --domain operations.settlement   --reason "unowned decision drift detected"   --mode stabilize
 ```
 
 **Result**

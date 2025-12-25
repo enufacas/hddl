@@ -6,19 +6,19 @@ This narrative illustrates HDDL in its earliest mature form: decision authority 
 ### Interface Moment: Steward-Led Interpretation
 
 **Human (Natural Language)**
-> “I want to reduce the invoice exception backlog without making the system reckless.
+> “I want to reduce the showing scheduling exception backlog without making the system reckless.
 > If confidence drops, a human should intervene.”
 
 **System Interpretation**
-> • Domain: payments.recon
+> • Domain: leasing.ops
 > • Objective: reduce exceptions
 > • Risk posture: conservative
 > • Constraints: no new data, human review below threshold
-> • Owner: DSG / Payments Recon
+> • Owner: DSG / Leasing Ops
 
 **Steward Execution**
 ```bash
-stewardctl request compile   --domain payments.recon   --intent "Reduce exception backlog without increasing risk"   --constraints "no-new-signals;human-review-required;confidence>=baseline"   --owner dsg/payments-recon
+stewardctl request compile   --domain leasing.ops   --intent "Reduce scheduling exception backlog without increasing risk"   --constraints "no-new-signals;human-review-required;confidence>=baseline"   --owner dsg/leasing-ops
 ````markdown
 # A Tuesday in the Near Future
 **Confidence:** High
@@ -26,8 +26,8 @@ stewardctl request compile   --domain payments.recon   --intent "Reduce exceptio
 It’s not a launch day.
 Nothing is on fire.
 
-The payments team has a backlog of invoice exceptions that have been piling up for weeks.
-The work is repetitive, the failure modes are boring, and the cost is real: cash collection slows because people are stuck re-checking the same classes of issues.
+The leasing ops team has a backlog of showing scheduling exceptions that have been piling up for weeks.
+The work is repetitive, the failure modes are boring, and the cost is real: occupancy slows because people are stuck re-checking the same classes of issues.
 
 This is the kind of work HDDL was built for: compounding human steering into bounded decision authority.
 
@@ -49,7 +49,7 @@ They want the system to act inside a bounded space and surface boundary conditio
 ## DTS Is the First Constraint
 
 The Human Resources Steward has already co-owned the Decision Telemetry Specification (DTS) boundaries.
-The payments domain has an active DTS boundary document and the defaults are familiar:
+The leasing ops domain has an active DTS boundary document and the defaults are familiar:
 
 - Minimal sufficiency
 - Aggregation over individual-level instrumentation
@@ -57,7 +57,7 @@ The payments domain has an active DTS boundary document and the defaults are fam
 - No reasoning capture
 - No screen/audio/video capture
 
-The payments lead says it plainly:
+The leasing lead says it plainly:
 
 > “Measure the *system* and the *envelope*. Don’t measure the people.”
 
@@ -65,22 +65,22 @@ The payments lead says it plainly:
 
 ## Interface Moment: Steward-Led Interpretation
 
-The domain’s JSG (payments.recon) meets for thirty minutes.
+The domain stewards (leasing.ops) meet for thirty minutes.
 Not to approve a request.
 To define decision authority.
 
 **Human (Natural Language)**
-> “Reduce the invoice exception backlog without increasing risk.
+> “Reduce the showing scheduling exception backlog without increasing risk.
 > Stay conservative. No new telemetry signals.
 > If the confidence drops, route to human review.”
 
 **System Interpretation**
-> • Domain: payments.recon
+> • Domain: leasing.ops
 > • Objective: reduce exceptions
 > • Risk posture: conservative
 > • Constraints: no-new-signals; human-review-required
 > • DTS: aggregate-only; short-retention; no reasoning capture
-> • Owner: JSG/payments.recon
+> • Owner: Domain Stewards/leasing.ops
 
 **Steward Execution**
 ```bash
@@ -93,7 +93,7 @@ She was a director in Operations. She ran escalation reviews, signed off on vend
 
 At 8:17 a.m., she opened her laptop and saw three things waiting for her:
 
-1. A flagged decision packet from her domain’s Judgment Stewardship Group (JSG)
+1. A flagged decision packet from her domain stewards
 2. A quiet annotation from the Human Resources Steward (HRS)
 3. A green checkmark indicating that everything else had proceeded without her
 

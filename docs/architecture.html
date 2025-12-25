@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>HDDL Architecture Diagram</title>
+    <title>HDDL Architecture — Logical View</title>
 
     <!--
       Standalone page for local preview + GitHub Pages publishing.
@@ -73,78 +73,163 @@
   <body>
     <div class="page">
       <header>
-        <h1>HDDL Architecture Diagram</h1>
-        <p class="sub">Standalone HTML view of the high-level HDDL architecture.</p>
+        <h1>HDDL Architecture (Logical View)</h1>
+        <p class="sub">Composable components and boundaries (4+1: Logical view).</p>
       </header>
 
       <div class="divider"></div>
 
       <div class="hddl-arch" role="group" aria-label="HDDL high-level architecture diagram">
-        <p class="hddl-arch__title">HDDL high-level architecture</p>
-
-        <div class="hddl-arch__grid">
-          <section class="hddl-arch__lane" aria-label="Decision Authority Layer">
-            <p class="hddl-arch__lane-title">Decision Authority Layer (HDDL)</p>
-            <div class="hddl-arch__cards">
-              <div class="hddl-arch__card">
-                <p class="hddl-arch__card-title">Domain Stewards / JSG</p>
-                <p class="hddl-arch__card-sub">Define and revise envelopes</p>
-              </div>
-              <div class="hddl-arch__card">
-                <p class="hddl-arch__card-title">Decision Envelopes</p>
-                <p class="hddl-arch__card-sub">Versioned bounds and escalation rules</p>
-              </div>
-              <div class="hddl-arch__card">
-                <p class="hddl-arch__card-title">Decision Workspace</p>
-                <p class="hddl-arch__card-sub">Artifacts, revisions, inspection surface</p>
-              </div>
-              <div class="hddl-arch__card">
-                <p class="hddl-arch__card-title">Decision Memory</p>
-                <p class="hddl-arch__card-sub">Recall and precedent discovery (non-authoritative)</p>
-              </div>
-              <div class="hddl-arch__card">
-                <p class="hddl-arch__card-title">DSG</p>
-                <p class="hddl-arch__card-sub">Cross-domain arbitration only (produces envelope revisions)</p>
-              </div>
-
-              <div class="hddl-arch__flow" aria-label="Authority flow">
-                <div class="hddl-arch__flow-item">Stewards <code>define / revise</code> Envelopes</div>
-                <div class="hddl-arch__flow-item">DSG <code>arbitrates</code> boundary conflicts into envelope revisions</div>
-                <div class="hddl-arch__flow-item">Decision Memory <code>suggests precedent</code> (never grants authority)</div>
-              </div>
-            </div>
-          </section>
-
-          <section class="hddl-arch__lane" aria-label="Execution Layer">
-            <p class="hddl-arch__lane-title">Execution Layer</p>
-            <div class="hddl-arch__cards">
-              <div class="hddl-arch__card">
-                <p class="hddl-arch__card-title">Humans</p>
-                <p class="hddl-arch__card-sub">Operate within envelopes</p>
-              </div>
-              <div class="hddl-arch__card">
-                <p class="hddl-arch__card-title">Agents / Automation</p>
-                <p class="hddl-arch__card-sub">Operate within envelopes; use tools/models</p>
-              </div>
-              <div class="hddl-arch__card">
-                <p class="hddl-arch__card-title">Tools / Models</p>
-                <p class="hddl-arch__card-sub">Execution capability (not authority)</p>
-              </div>
-
-              <div class="hddl-arch__flow" aria-label="Execution flow">
-                <div class="hddl-arch__flow-item">Envelopes <code>bound</code> what humans and agents are allowed to do</div>
-                <div class="hddl-arch__flow-item">Agents <code>use</code> tools/models to execute inside those bounds</div>
-              </div>
-            </div>
-          </section>
+        <div class="hddl-arch__header">
+          <h2 class="hddl-arch__title">HDDL System Architecture</h2>
+          <p class="hddl-arch__subtitle">Composable layers for human-governed decision automation</p>
         </div>
 
-        <div class="hddl-arch__divider" aria-label="Telemetry">
-          <span class="hddl-arch__divider-title">Decision Telemetry</span>
-          <p class="hddl-arch__divider-text">Bounded signals that inform calibration (not auto-remediation)</p>
+        <!-- Governance Layer -->
+        <section class="hddl-arch__layer hddl-arch__layer--governance">
+          <div class="hddl-arch__layer-header">
+            <span class="hddl-arch__layer-badge">Governance</span>
+            <h3 class="hddl-arch__layer-title">Decision Authority Layer</h3>
+          </div>
+
+          <div class="hddl-arch__component-grid">
+            <!-- Stewardship Component -->
+            <div class="hddl-arch__component hddl-arch__component--primary">
+              <div class="hddl-arch__component-header">
+                <span class="hddl-arch__component-icon">👥</span>
+                <h4 class="hddl-arch__component-title">Stewardship</h4>
+              </div>
+              <div class="hddl-arch__component-parts">
+                <div class="hddl-arch__part">
+                  <span class="hddl-arch__part-name">Domain Stewards</span>
+                  <span class="hddl-arch__part-role">Define & calibrate envelopes</span>
+                </div>
+                <div class="hddl-arch__part">
+                  <span class="hddl-arch__part-name">DSG</span>
+                  <span class="hddl-arch__part-role">Cross-domain arbitration</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Envelope Component -->
+            <div class="hddl-arch__component hddl-arch__component--primary">
+              <div class="hddl-arch__component-header">
+                <span class="hddl-arch__component-icon">📦</span>
+                <h4 class="hddl-arch__component-title">Decision Envelopes</h4>
+              </div>
+              <div class="hddl-arch__component-parts">
+                <div class="hddl-arch__part">
+                  <span class="hddl-arch__part-name">Bounds</span>
+                  <span class="hddl-arch__part-role">Versioned constraints</span>
+                </div>
+                <div class="hddl-arch__part">
+                  <span class="hddl-arch__part-name">Rules</span>
+                  <span class="hddl-arch__part-role">Escalation logic</span>
+                </div>
+                <div class="hddl-arch__part">
+                  <span class="hddl-arch__part-name">Artifacts</span>
+                  <span class="hddl-arch__part-role">Decision context</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Workspace Component -->
+            <div class="hddl-arch__component hddl-arch__component--secondary">
+              <div class="hddl-arch__component-header">
+                <span class="hddl-arch__component-icon">🔧</span>
+                <h4 class="hddl-arch__component-title">Decision Workspace</h4>
+              </div>
+              <p class="hddl-arch__component-desc">Inspection, revision, and audit surface</p>
+            </div>
+
+            <!-- Memory Component -->
+            <div class="hddl-arch__component hddl-arch__component--secondary">
+              <div class="hddl-arch__component-header">
+                <span class="hddl-arch__component-icon">🧠</span>
+                <h4 class="hddl-arch__component-title">Decision Memory</h4>
+              </div>
+              <p class="hddl-arch__component-desc">Precedent discovery (non-authoritative)</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Telemetry Flow -->
+        <div class="hddl-arch__flow-connector">
+          <div class="hddl-arch__flow-line"></div>
+          <div class="hddl-arch__flow-label">
+            <span class="hddl-arch__flow-icon">📊</span>
+            <span class="hddl-arch__flow-title">Decision Telemetry</span>
+            <span class="hddl-arch__flow-desc">Signals for calibration (not auto-remediation)</span>
+          </div>
+          <div class="hddl-arch__flow-line"></div>
         </div>
 
-        <p class="hddl-arch__note">Key idea: the envelope is the enforceable boundary; execution happens inside it.</p>
+        <!-- Execution Layer -->
+        <section class="hddl-arch__layer hddl-arch__layer--execution">
+          <div class="hddl-arch__layer-header">
+            <span class="hddl-arch__layer-badge">Execution</span>
+            <h3 class="hddl-arch__layer-title">Bounded Operations</h3>
+          </div>
+
+          <div class="hddl-arch__component-grid">
+            <!-- Human Operators Component -->
+            <div class="hddl-arch__component hddl-arch__component--executor">
+              <div class="hddl-arch__component-header">
+                <span class="hddl-arch__component-icon">🧑‍💼</span>
+                <h4 class="hddl-arch__component-title">Human Operators</h4>
+              </div>
+              <p class="hddl-arch__component-desc">Operate within envelope bounds</p>
+              <div class="hddl-arch__component-badge-list">
+                <span class="hddl-arch__badge">Judgment</span>
+                <span class="hddl-arch__badge">Context</span>
+              </div>
+            </div>
+
+            <!-- Agent Component -->
+            <div class="hddl-arch__component hddl-arch__component--executor">
+              <div class="hddl-arch__component-header">
+                <span class="hddl-arch__component-icon">🤖</span>
+                <h4 class="hddl-arch__component-title">Agents</h4>
+              </div>
+              <p class="hddl-arch__component-desc">Automated execution within bounds</p>
+              <div class="hddl-arch__component-badge-list">
+                <span class="hddl-arch__badge">Bounded</span>
+                <span class="hddl-arch__badge">Composable</span>
+              </div>
+            </div>
+
+            <!-- Tools Component -->
+            <div class="hddl-arch__component hddl-arch__component--capability">
+              <div class="hddl-arch__component-header">
+                <span class="hddl-arch__component-icon">⚙️</span>
+                <h4 class="hddl-arch__component-title">Tools & Models</h4>
+              </div>
+              <div class="hddl-arch__component-parts">
+                <div class="hddl-arch__part">
+                  <span class="hddl-arch__part-name">LLMs</span>
+                  <span class="hddl-arch__part-role">Language capability</span>
+                </div>
+                <div class="hddl-arch__part">
+                  <span class="hddl-arch__part-name">APIs</span>
+                  <span class="hddl-arch__part-role">Integration layer</span>
+                </div>
+                <div class="hddl-arch__part">
+                  <span class="hddl-arch__part-name">Services</span>
+                  <span class="hddl-arch__part-role">Business logic</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Key Principle -->
+        <div class="hddl-arch__principle">
+          <span class="hddl-arch__principle-icon">💡</span>
+          <p class="hddl-arch__principle-text">
+            <strong>Core Principle:</strong> The envelope is the enforceable boundary. 
+            Authority resides in human governance. Execution happens within those bounds.
+          </p>
+        </div>
       </div>
 
       <p class="hint">Tip: For best preview fidelity, view via MkDocs (`mkdocs serve`) rather than opening this file directly.</p>

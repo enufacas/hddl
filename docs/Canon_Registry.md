@@ -8,9 +8,9 @@ Any document not listed here is non-canonical.
 
 - **v9.0** — Canon-wide rename to **HDDL (Human-Derived Decision Layer)** and Decision-based system nouns.
   - Standardized: Decision Workspace, Decision Envelope, Decision Authority, Decision Telemetry, Decision Degradation, Decision Promotion
-  - Standardized: **JSG** as domain-scoped stewardship; **DSG** as cross-domain arbitration
+  - Standardized: **DSG** as the stewardship construct for cross-domain arbitration; domain stewards handle domain-scoped calibration
   - Embedded HDDL invariants in System Overview and Executive Reference
-  - Flagged remaining unqualified “judgment” phrasing for targeted editorial refinement
+  - Removed legacy JSG (Judgment Stewardship Group) terminology
 
 ## Foundations
 - Glossary.md
@@ -21,7 +21,6 @@ Any document not listed here is non-canonical.
 - foundations/Human_Derived_Decision_Layer_Foundational_Principles.md
 
 ## Stewardship & Roles
-- groups/Judgment_Stewardship_Group.md
 - groups/Decision_Stewardship_Group.md
 - roles/Engineering_Steward.md
 - roles/Domain_Engineer.md

@@ -41,7 +41,7 @@ Platform Steward, Security Steward, Customer Advocate Steward, HRS
 **Steward Execution**
 ```bash
 stewardctl data health \
-  --domains payments.recon,finance.close \
+  --domains leasing.ops,finance.close \
   --signals freshness,drift,join-integrity,schema-churn \
   --window 72h
 ```

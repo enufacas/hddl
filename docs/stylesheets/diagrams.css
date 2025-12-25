@@ -1,21 +1,483 @@
 /*
   HDDL HTML/CSS diagrams
+  - Modern component-based architecture visualization
   - Use Material theme variables where available
   - Avoid hard-coded brand colors; rely on existing theme primitives
 */
 
+/* Main Container */
 .hddl-arch {
   border: 1px solid var(--md-default-fg-color--lightest, rgba(0, 0, 0, 0.12));
-  border-radius: 12px;
-  padding: 16px;
-  background: var(--md-default-bg-color, #fff);
+  border-radius: 16px;
+  padding: 24px;
+  background: linear-gradient(to bottom, var(--md-default-bg-color, #fff), var(--md-code-bg-color, rgba(0, 0, 0, 0.015)));
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+/* Header */
+.hddl-arch__header {
+  margin-bottom: 24px;
+  text-align: center;
 }
 
 .hddl-arch__title {
   font-weight: 700;
-  margin: 0 0 12px 0;
+  font-size: 1.5em;
+  margin: 0 0 6px 0;
+  color: var(--md-default-fg-color, #0f172a);
 }
 
+.hddl-arch__subtitle {
+  margin: 0;
+  font-size: 0.95em;
+  opacity: 0.7;
+  font-weight: 400;
+}
+
+/* Layer Sections */
+.hddl-arch__layer {
+  margin-bottom: 24px;
+  border-radius: 12px;
+  padding: 20px;
+  background: var(--md-default-bg-color, #fff);
+  border: 2px solid var(--md-default-fg-color--lightest, rgba(0, 0, 0, 0.08));
+  transition: box-shadow 0.2s ease;
+}
+
+.hddl-arch__layer:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.hddl-arch__layer--governance {
+  border-left: 4px solid rgba(59, 130, 246, 0.6);
+}
+
+.hddl-arch__layer--execution {
+  border-left: 4px solid rgba(16, 185, 129, 0.6);
+  margin-bottom: 16px;
+}
+
+.hddl-arch__layer-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.hddl-arch__layer-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.75em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: var(--md-code-bg-color, rgba(0, 0, 0, 0.06));
+  opacity: 0.8;
+}
+
+.hddl-arch__layer-title {
+  font-weight: 700;
+  font-size: 1.2em;
+  margin: 0;
+}
+
+/* Component Grid */
+.hddl-arch__component-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+}
+
+@media (max-width: 768px) {
+  .hddl-arch__component-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Component Cards */
+.hddl-arch__component {
+  border: 1px solid var(--md-default-fg-color--lightest, rgba(0, 0, 0, 0.12));
+  border-radius: 10px;
+  padding: 16px;
+  background: var(--md-default-bg-color, #fff);
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.hddl-arch__component:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
+.hddl-arch__component--primary {
+  border-left: 3px solid rgba(59, 130, 246, 0.5);
+}
+
+.hddl-arch__component--secondary {
+  border-left: 3px solid rgba(139, 92, 246, 0.5);
+}
+
+.hddl-arch__component--executor {
+  border-left: 3px solid rgba(16, 185, 129, 0.5);
+}
+
+.hddl-arch__component--capability {
+  border-left: 3px solid rgba(251, 146, 60, 0.5);
+}
+
+.hddl-arch__component-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.hddl-arch__component-icon {
+  font-size: 1.4em;
+  line-height: 1;
+}
+
+.hddl-arch__component-title {
+  font-weight: 650;
+  font-size: 1em;
+  margin: 0;
+  flex: 1;
+}
+
+.hddl-arch__component-desc {
+  margin: 0 0 10px 0;
+  font-size: 0.88em;
+  opacity: 0.8;
+  line-height: 1.4;
+}
+
+/* Component Parts (sub-items) */
+.hddl-arch__component-parts {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hddl-arch__part {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  background: var(--md-code-bg-color, rgba(0, 0, 0, 0.03));
+  border-radius: 6px;
+  font-size: 0.88em;
+  transition: background 0.15s ease;
+}
+
+.hddl-arch__part:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.hddl-arch__part-name {
+  font-weight: 600;
+}
+
+.hddl-arch__part-role {
+  opacity: 0.7;
+  font-size: 0.95em;
+}
+
+/* Badge List */
+.hddl-arch__component-badge-list {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.hddl-arch__badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 0.78em;
+  font-weight: 600;
+  background: var(--md-code-bg-color, rgba(0, 0, 0, 0.06));
+  opacity: 0.85;
+}
+
+/* Flow Connector */
+.hddl-arch__flow-connector {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 24px 0;
+  padding: 16px 0;
+}
+
+.hddl-arch__flow-line {
+  flex: 1;
+  height: 2px;
+  background: linear-gradient(to right, transparent, rgba(0, 0, 0, 0.1), transparent);
+}
+
+.hddl-arch__flow-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: var(--md-code-bg-color, rgba(0, 0, 0, 0.04));
+  border-radius: 20px;
+  border: 1px dashed var(--md-default-fg-color--lightest, rgba(0, 0, 0, 0.15));
+}
+
+.hddl-arch__flow-icon {
+  font-size: 1.2em;
+}
+
+.hddl-arch__flow-title {
+  font-weight: 700;
+  font-size: 0.95em;
+}
+
+.hddl-arch__flow-desc {
+  font-size: 0.85em;
+  opacity: 0.75;
+  margin-left: 4px;
+}
+
+@media (max-width: 768px) {
+  .hddl-arch__flow-connector {
+    flex-direction: column;
+  }
+  
+  .hddl-arch__flow-line {
+    width: 2px;
+    height: 20px;
+    flex: none;
+    background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.1), transparent);
+  }
+  
+  .hddl-arch__flow-label {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+/* ------------------------------------------------------------
+   HDDL Visual Index (offline hub page)
+   - Standalone HTML page (does not inherit MkDocs layout)
+   - Uses Material theme variables when present, with safe fallbacks
+------------------------------------------------------------- */
+
+.hddl-vi {
+  color: var(--md-default-fg-color, #0f172a);
+  background: var(--md-default-bg-color, #ffffff);
+}
+
+.hddl-vi__page {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 28px 16px 56px;
+}
+
+.hddl-vi__header {
+  margin-bottom: 14px;
+}
+
+.hddl-vi__title {
+  margin: 0 0 6px 0;
+  font-size: 1.55rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.hddl-vi__subtitle {
+  margin: 0;
+  font-size: 0.95rem;
+  opacity: 0.75;
+}
+
+.hddl-vi__divider {
+  height: 1px;
+  background: var(--md-default-fg-color--lightest, rgba(0, 0, 0, 0.12));
+  margin: 18px 0;
+}
+
+.hddl-vi__panel {
+  border: 1px solid var(--md-default-fg-color--lightest, rgba(0, 0, 0, 0.12));
+  border-radius: 16px;
+  background: linear-gradient(
+    to bottom,
+    var(--md-default-bg-color, #ffffff),
+    var(--md-code-bg-color, rgba(0, 0, 0, 0.015))
+  );
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+  padding: 16px;
+}
+
+.hddl-vi__hero {
+  border: 1px solid var(--md-default-fg-color--lightest, rgba(0, 0, 0, 0.12));
+  border-radius: 14px;
+  background: var(--md-default-bg-color, #ffffff);
+  overflow: hidden;
+}
+
+.hddl-vi__hero-inner {
+  padding: 12px;
+}
+
+.hddl-vi__graph {
+  height: 380px;
+  border-radius: 12px;
+  background: var(--md-code-bg-color, rgba(0, 0, 0, 0.03));
+  border: 1px solid var(--md-default-fg-color--lightest, rgba(0, 0, 0, 0.10));
+}
+
+.hddl-vi__hero-hint {
+  margin: 10px 0 0 0;
+  font-size: 0.9rem;
+  opacity: 0.75;
+}
+
+.hddl-vi__sections {
+  margin-top: 14px;
+}
+
+.hddl-vi__section {
+  margin-top: 14px;
+}
+
+.hddl-vi__section:first-child {
+  margin-top: 0;
+}
+
+.hddl-vi__section-hdr {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.hddl-vi__section-title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 850;
+  letter-spacing: 0.2px;
+}
+
+.hddl-vi__section-meta {
+  margin: 0;
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
+.hddl-vi__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.hddl-vi__card {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  border: 1px solid var(--md-default-fg-color--lightest, rgba(0, 0, 0, 0.12));
+  border-radius: 14px;
+  padding: 14px;
+  background: var(--md-default-bg-color, #ffffff);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.hddl-vi__card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.08);
+  border-color: rgba(0, 0, 0, 0.22);
+}
+
+.hddl-vi__card-kicker {
+  margin: 0 0 8px 0;
+  font-size: 0.7rem;
+  font-weight: 850;
+  letter-spacing: 0.65px;
+  text-transform: uppercase;
+  opacity: 0.62;
+}
+
+.hddl-vi__card-title {
+  margin: 0 0 6px 0;
+  font-size: 1.02rem;
+  font-weight: 780;
+}
+
+.hddl-vi__card-desc {
+  margin: 0;
+  font-size: 0.92rem;
+  opacity: 0.8;
+  line-height: 1.45;
+}
+
+.hddl-vi__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 10px 0 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hddl-vi__tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--md-default-fg-color--lightest, rgba(0, 0, 0, 0.12));
+  background: var(--md-code-bg-color, rgba(0, 0, 0, 0.04));
+  font-size: 0.72rem;
+  font-weight: 760;
+  opacity: 0.86;
+  white-space: nowrap;
+}
+
+.hddl-vi__hint {
+  margin-top: 14px;
+  font-size: 0.92rem;
+  opacity: 0.75;
+}
+
+@media (max-width: 900px) {
+  .hddl-vi__graph {
+    height: 520px;
+  }
+}
+
+/* Principle Box */
+.hddl-arch__principle {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  background: var(--md-code-bg-color, rgba(0, 0, 0, 0.03));
+  border-radius: 10px;
+  border-left: 4px solid rgba(234, 179, 8, 0.6);
+}
+
+.hddl-arch__principle-icon {
+  font-size: 1.5em;
+  line-height: 1;
+  margin-top: 2px;
+}
+
+.hddl-arch__principle-text {
+  margin: 0;
+  font-size: 0.92em;
+  line-height: 1.5;
+  flex: 1;
+}
+
+.hddl-arch__principle-text strong {
+  font-weight: 700;
+}
+
+/* Legacy styles - kept for backward compatibility */
 .hddl-arch__grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

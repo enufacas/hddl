@@ -336,3 +336,68 @@ It is:
 
 - Standard envelope schemas for interoperability
 
+---
+
+## 13. Architecture Views (4+1) and AI-Native Complementary Views
+
+This repository contains multiple diagrams and UI-mock visuals. The classic **4+1 views** (Kruchten) are a useful organizing frame, but HDDL benefits from a few **AI-native complementary views** because “authority”, “telemetry boundaries”, and “stewardship” are first-class.
+
+### 13.1 Mapping HDDL visuals to 4+1
+
+**Logical view (what it is):** conceptual building blocks, responsibilities, and boundaries.
+- Fits HDDL diagrams that show governance/execution/telemetry components and how they compose.
+- In this repo, the architecture visual (governance layer → telemetry connector → execution layer) is primarily a logical view.
+
+**Process view (how it behaves at runtime):** interactions over time, lifecycles, and feedback loops.
+- Fits HDDL diagrams that show envelope promotion → execution → telemetry → inspection → revision.
+- In this repo, simulation flow/timeline visuals and the stewardship escalation flow are primarily process views.
+
+**Development view (how it’s built):** code/service/module ownership, APIs, schemas, versioning, integration contracts.
+- Fits schema maps and “artifact shapes” (envelope schema, wide-event schema, artifact store interfaces).
+- In this repo, the DTS “wide event schema map” mock is a partial development view (information model + integration seams).
+
+**Physical view (where it runs):** deployment topology, trust zones, data planes, retention boundaries, enforcement points.
+- HDDL often needs an explicit physical view because DTS constraints are enforced *in infrastructure* (collection, redaction, retention, access).
+- This repo does not currently emphasize a physical deployment diagram; it is a recommended addition once the target runtime is known.
+
+**+1: Scenarios (why it matters):** concrete stories that validate the architecture end-to-end.
+- HDDL narratives and simulation walkthroughs are the “+1” view: they connect authority, telemetry boundaries, outcomes, and revision.
+
+### 13.2 Suggested AI-native complementary views (beyond 4+1)
+
+These are not “extra decoration”; they make the socio-technical system legible in an AI+human operating model.
+
+**Authority view (HDDL-first):**
+- Center the envelope as the unit of authority.
+- Show: envelope versions, owners, escalation paths, and what capabilities are bounded/forbidden.
+
+**Telemetry boundary view (DTS-first):**
+- Show: what events exist, what is prohibited, retention windows, aggregation rules, and who can query what.
+- Emphasize enforcement points (collection → transformation/redaction → storage → access).
+
+**Stewardship / change-control view (governance-first):**
+- Show: which actors can revise envelopes, what triggers DSG, what artifacts are produced, and the operating cadence.
+
+**Assumptions ↔ signals mismatch view (drift-first):**
+- Treat “incident without system failure” as a first-class diagnostic: reality diverges from assumptions.
+- Connect signals and outcomes back to specific envelopes and revisions.
+
+### 13.3 Additional AI-native view set (recommended)
+
+If you want a second “AI-native views” set that complements Authority/Telemetry/Stewardship/Drift, these are high-signal in AI+human systems:
+
+**Tooling & actuation view (tool-first):**
+- Show: what tools exist, what they can mutate, required approvals, and envelope-bounded tool permissions.
+- Makes “agents are infrastructure” legible (capabilities are exercised through tools).
+
+**Memory & precedent view (recall-first):**
+- Show: what is stored as authoritative artifact vs derived memory, how precedent is retrieved, and how memory is constrained by DTS.
+
+**Evaluation & change safety view (assurance-first):**
+- Show: what evaluations/guardrails must pass to promote a new envelope/version, and what regressions block promotion.
+- Treat evaluation as a first-class governance artifact, not a dev-only concern.
+
+**Human-impact view (people-first):**
+- Show: where humans are in-loop by design (escalations, overrides, dispute resolution), and where the system is explicitly prohibited from inference/measurement.
+- Pairs naturally with DTS boundary enforcement and “don’t measure the people.”
+
