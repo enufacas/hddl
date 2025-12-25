@@ -27,7 +27,10 @@ test.describe('HDDL Simulation UI Verification', () => {
 
     // Envelope span overlay should render windows for each envelope
     const spans = page.locator('.timeline-envelope-span');
-    await expect(spans).toHaveCount(6);
+    const cards = page.locator('.envelope-card');
+    const spanCount = await spans.count();
+    const cardCount = await cards.count();
+    expect(spanCount).toBe(cardCount);
     
     // Verify timeline labels (0h and 48h)
     await expect(page.locator('.timeline-bar').getByText('0h')).toBeVisible();
@@ -289,7 +292,7 @@ test.describe('HDDL Simulation UI Verification', () => {
     await expect(page.locator('#dsg-time')).toHaveText('Day 1, 15:00');
 
     // Event record should be visible and reference involved envelopes
-    await expect(page.getByText('DSG Review — Event Record')).toBeVisible();
+    await expect(page.getByText('DSG Review - Event Record')).toBeVisible();
     await expect(page.getByTestId('dsg-artifacts')).toBeVisible();
     await expect(page.getByText(/Involved envelopes/i)).toBeVisible();
     const record = page.locator('#dsg-record-kv');

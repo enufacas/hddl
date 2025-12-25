@@ -99,11 +99,11 @@ function createSidebar() {
   personaDropdown.style.cssText = 'width: 100%; padding: 4px 8px; background: var(--vscode-input-background); color: var(--vscode-editor-foreground); border: 1px solid var(--vscode-input-border); border-radius: 2px; font-size: 12px; cursor: pointer;';
   
   const personas = [
-    { value: 'domain-engineer', label: '🔧 Domain Engineer' },
-    { value: 'hr-steward', label: '👥 HR Steward' },
-    { value: 'customer-steward', label: '🤝 Customer Steward' },
-    { value: 'executive', label: '📊 Executive' },
-    { value: 'data-steward', label: '💾 Data Steward' }
+    { value: 'domain-engineer', label: 'Domain Engineer' },
+    { value: 'hr-steward', label: 'HR Steward' },
+    { value: 'customer-steward', label: 'Customer Steward' },
+    { value: 'executive', label: 'Executive' },
+    { value: 'data-steward', label: 'Data Steward' }
   ];
   
   personas.forEach(persona => {
@@ -240,8 +240,8 @@ function renderStewardFleets(panelEl, scenario, timeHour) {
           const envelopeIds = Array.isArray(agent?.envelopeIds) ? agent.envelopeIds : []
           const isActive = envelopeIds.some(id => activeEnvelopeIds.has(id))
           const title = envelopeIds.length
-            ? `${name} — envelopes: ${envelopeIds.join(', ')}${agent?.role ? ` — ${agent.role}` : ''}`
-            : `${name}${agent?.role ? ` — ${agent.role}` : ''}`
+            ? `${name} - envelopes: ${envelopeIds.join(', ')}${agent?.role ? ` - ${agent.role}` : ''}`
+            : `${name}${agent?.role ? ` - ${agent.role}` : ''}`
 
           return `
             <span
@@ -553,7 +553,7 @@ function computeTelemetry(scenario, timeHour) {
 
   const lastCalibrationLabel = lastSession
     ? formatAgoHours(timeHour - lastSession.hour)
-    : '—'
+    : '-'
 
   return {
     activeDecisions,
@@ -795,7 +795,7 @@ function createBottomPanel() {
 
     if (event?.type === 'envelope_promoted') {
       return {
-        envelopes: { text: `[${ts}] ACTIVE${envelope} — ${event.detail || event.label || ''}`.trim(), kind: 'info' },
+        envelopes: { text: `[${ts}] ACTIVE${envelope} - ${event.detail || event.label || ''}`.trim(), kind: 'info' },
         steward: null,
         dts: null,
       }
@@ -807,7 +807,7 @@ function createBottomPanel() {
       return {
         envelopes: null,
         steward: null,
-        dts: { text: `[${ts}] ${sev}${envelope}${key} — ${detail}`.trim(), kind: sev === 'WARNING' ? 'warning' : 'info' },
+        dts: { text: `[${ts}] ${sev}${envelope}${key} - ${detail}`.trim(), kind: sev === 'WARNING' ? 'warning' : 'info' },
       }
     }
     if (event?.type === 'escalation') {
@@ -815,13 +815,13 @@ function createBottomPanel() {
       const detail = event.detail || event.label || ''
       return {
         envelopes: null,
-        steward: { text: `[${ts}] ESCALATION${envelope}${actor} — ${detail}`.trim(), kind: event.severity === 'warning' ? 'warning' : 'info' },
+        steward: { text: `[${ts}] ESCALATION${envelope}${actor} - ${detail}`.trim(), kind: event.severity === 'warning' ? 'warning' : 'info' },
         dts: null,
       }
     }
     if (event?.type === 'dsg_session') {
       const session = event.sessionId ? ` ${event.sessionId}` : ''
-      const title = event.title ? ` — ${event.title}` : ''
+      const title = event.title ? ` - ${event.title}` : ''
       return {
         envelopes: { text: `[${ts}] DSG REVIEW${session}${envelope}${title}`.trim(), kind: 'info' },
         steward: { text: `[${ts}] DSG REVIEW${session}${envelope}${title}`.trim(), kind: 'info' },
@@ -832,8 +832,8 @@ function createBottomPanel() {
       const actor = event.actorRole ? ` by ${event.actorRole}` : ''
       const detail = event.detail || event.label || ''
       return {
-        envelopes: { text: `[${ts}] REVISION${envelope}${actor} — ${detail}`.trim(), kind: 'info' },
-        steward: { text: `[${ts}] REVISION${envelope}${actor} — ${detail}`.trim(), kind: 'info' },
+        envelopes: { text: `[${ts}] REVISION${envelope}${actor} - ${detail}`.trim(), kind: 'info' },
+        steward: { text: `[${ts}] REVISION${envelope}${actor} - ${detail}`.trim(), kind: 'info' },
         dts: null,
       }
     }
@@ -906,10 +906,10 @@ function createBottomPanel() {
   // Default visibility state
   setActiveTab('cli')
 
-  writeLine('cli', 'HDDL CLI — type "help" to see commands.', 'muted')
-  writeLine('envelopes', 'Envelope console — tracks envelope activations and revisions.', 'muted')
-  writeLine('steward', 'Steward activity — escalations, DSG reviews, and steward actions.', 'muted')
-  writeLine('dts', 'DTS stream — bounded signals and outcome telemetry.', 'muted')
+  writeLine('cli', 'HDDL CLI - type "help" to see commands.', 'muted')
+  writeLine('envelopes', 'Envelope console - tracks envelope activations and revisions.', 'muted')
+  writeLine('steward', 'Steward activity - escalations, DSG reviews, and steward actions.', 'muted')
+  writeLine('dts', 'DTS stream - bounded signals and outcome telemetry.', 'muted')
 
   if (inputEl) {
     inputEl.addEventListener('keydown', (e) => {

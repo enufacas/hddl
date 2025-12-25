@@ -28,7 +28,7 @@ export function renderDSGEvent(container) {
 
         <div class="dsg-main">
           <div class="dsg-section" id="dsg-record">
-            <h3>DSG Review — Event Record</h3>
+            <h3>DSG Review - Event Record</h3>
             <div class="case-card" id="dsg-record-kv"></div>
           </div>
 
@@ -88,8 +88,8 @@ function renderView({ container, scenario, timeHour }) {
     if (stewardsEl) stewardsEl.innerHTML = ''
     if (recordEl) recordEl.innerHTML = '<p class="muted">No DSG record at selected time.</p>'
     if (artifactsEl) artifactsEl.innerHTML = '<p class="muted">No artifacts.</p>'
-    if (impactEl) impactEl.innerHTML = '<p class="muted">—</p>'
-    if (resolutionEl) resolutionEl.innerHTML = '<p class="muted">—</p>'
+    if (impactEl) impactEl.innerHTML = '<p class="muted">-</p>'
+    if (resolutionEl) resolutionEl.innerHTML = '<p class="muted">-</p>'
     return
   }
 
@@ -125,13 +125,13 @@ function renderView({ container, scenario, timeHour }) {
   const involvedNames = involvedEnvelopeIds
     .map(id => {
       const env = id ? getEnvelopeAtTime(scenario, id, timeHour) : null
-      return env ? `${env.envelopeId} — ${env.name}` : id
+      return env ? `${env.envelopeId} - ${env.name}` : id
     })
 
   if (recordEl) {
     recordEl.innerHTML = `
       <div class="event__row"><span class="k">Trigger</span><span class="v">${escapeHtml(session.trigger || session.detail || 'Cross-domain boundary collision')}</span></div>
-      <div class="event__row"><span class="k">Involved envelopes</span><span class="v">${escapeHtml(involvedNames.join(' · ') || '—')}</span></div>
+      <div class="event__row"><span class="k">Involved envelopes</span><span class="v">${escapeHtml(involvedNames.join(' / ') || '-')}</span></div>
       <div class="event__row"><span class="k">Decision</span><span class="v">${escapeHtml('Clarify authority + constrain capability')}</span></div>
     `
   }
@@ -140,14 +140,14 @@ function renderView({ container, scenario, timeHour }) {
     const impact = Array.isArray(session.impactSummary) ? session.impactSummary : []
     impactEl.innerHTML = impact.length
       ? `<ul style="margin: 0; padding-left: 18px;">${impact.map(x => `<li>${escapeHtml(x)}</li>`).join('')}</ul>`
-      : '<p class="muted">—</p>'
+      : '<p class="muted">-</p>'
   }
 
   if (resolutionEl) {
     const policy = Array.isArray(session.resolutionPolicy) ? session.resolutionPolicy : []
     resolutionEl.innerHTML = policy.length
       ? `<ul style="margin: 0; padding-left: 18px;">${policy.map(x => `<li>${escapeHtml(x)}</li>`).join('')}</ul>`
-      : '<p class="muted">—</p>'
+      : '<p class="muted">-</p>'
   }
 
   if (artifactsEl) {
@@ -161,7 +161,7 @@ function renderView({ container, scenario, timeHour }) {
 
     const revisionLines = revisions.map(r => {
       const when = formatSimTime(r.hour)
-      return `<li>Envelope: <span style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;">${escapeHtml(r.envelopeId)}</span> · ${escapeHtml(when)} (${escapeHtml(r.actorRole || 'Steward')})</li>`
+      return `<li>Envelope: <span style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;">${escapeHtml(r.envelopeId)}</span> / ${escapeHtml(when)} (${escapeHtml(r.actorRole || 'Steward')})</li>`
     })
 
     artifactsEl.innerHTML = `

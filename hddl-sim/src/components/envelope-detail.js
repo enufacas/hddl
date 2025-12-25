@@ -47,7 +47,7 @@ export function createEnvelopeDetailModal(envelopeId) {
       actual: typeof s.value === 'number' ? `${Math.round(s.value * 100)}%` : (s.detail || ''),
       status: s.severity === 'warning' || s.severity === 'error' ? 'warning' : 'success'
     }))
-    : [{ metric: 'Signal feed', expected: '—', actual: 'No signals near selected time', status: 'success' }]
+    : [{ metric: 'Signal feed', expected: '-', actual: 'No signals near selected time', status: 'success' }]
   
   modalContent.innerHTML = `
     <div style="padding: 24px;">
@@ -60,7 +60,7 @@ export function createEnvelopeDetailModal(envelopeId) {
             <div style="display: flex; align-items: center; gap: 12px; font-size: 13px;">
               <span class="codicon codicon-person"></span>
               <span>${envelope?.ownerRole || 'Steward'}</span>
-              <span>•</span>
+              <span>-</span>
               <span class="codicon codicon-${status === 'active' ? 'pass-filled' : status === 'pending' ? 'clock' : 'circle-slash'}" style="color: var(--status-${status === 'active' ? 'success' : 'warning'});"></span>
               <span>${status}</span>
             </div>
@@ -73,7 +73,7 @@ export function createEnvelopeDetailModal(envelopeId) {
       
       <p style="color: var(--vscode-statusBar-foreground); margin-bottom: 12px;">${envelope?.domain ? `Domain: ${envelope.domain}` : ''}</p>
       <p style="color: var(--vscode-statusBar-foreground); margin-bottom: 32px;">
-        Window: ${created}${revised ? ` • Revised: ${revised}` : ''}
+        Window: ${created}${revised ? ` - Revised: ${revised}` : ''}
       </p>
       
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">

@@ -3,7 +3,7 @@ import * as d3 from 'd3'
 export function renderAuthority(container) {
   container.innerHTML = `
     <div class="page-container">
-      <h1>🏛️ Decision Authority Hierarchy</h1>
+      <h1>Decision Authority Hierarchy</h1>
       <p class="subtitle">Interactive visualization of stewardship authority levels</p>
       <div id="authority-viz" class="viz-container"></div>
       <div id="authority-details" class="details-panel"></div>

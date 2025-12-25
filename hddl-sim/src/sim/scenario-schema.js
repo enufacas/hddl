@@ -138,8 +138,8 @@ export function normalizeScenario(rawScenario) {
       return {
         envelopeId: envelopeId || '',
         name: asString(env.name) ?? 'Untitled envelope',
-        domain: asString(env.domain) ?? '—',
-        ownerRole: asString(env.ownerRole) ?? '—',
+        domain: asString(env.domain) ?? '-',
+        ownerRole: asString(env.ownerRole) ?? '-',
         createdHour: asNumber(env.createdHour) ?? 0,
         endHour: asNumber(env.endHour) ?? durationHours,
         accent: asString(env.accent) ?? 'var(--status-muted)',

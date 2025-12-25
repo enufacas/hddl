@@ -217,7 +217,7 @@ export function render(container) {
         <span class="codicon codicon-${icon}" style="font-size: 24px; color: ${color}; flex-shrink: 0; margin-top: 4px;"></span>
         <div style="flex: 1;">
           <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 4px;">
-            <div style="font-weight: 600;">${title}${evt.envelopeId ? ` • ${evt.envelopeId}` : ''}</div>
+            <div style="font-weight: 600;">${title}${evt.envelopeId ? ` - ${evt.envelopeId}` : ''}</div>
             <div style="font-size: 11px; color: var(--vscode-statusBar-foreground); font-family: monospace;">${formatSimTime(evt.hour)}</div>
           </div>
           <div style="font-size: 12px; color: var(--vscode-statusBar-foreground); margin-bottom: 4px;">

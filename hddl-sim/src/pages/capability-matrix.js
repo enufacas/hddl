@@ -84,7 +84,7 @@ function renderFleets(container, scenario, timeHour) {
             <div class="fleet-env" data-envelope-id="${escapeAttr(env.envelopeId)}" style="--env-accent: ${escapeAttr(env.accent || 'var(--status-muted)')};">
               <div class="fleet-env__id">${escapeHtml(env.envelopeId)}</div>
               <div class="fleet-env__name">${escapeHtml(env.name)}</div>
-              <div class="fleet-env__meta">${escapeHtml(env.domain || '—')} • ${escapeHtml(env.ownerRole || '—')}</div>
+              <div class="fleet-env__meta">${escapeHtml(env.domain || '-')} - ${escapeHtml(env.ownerRole || '-')}</div>
             </div>
           `
         })
@@ -138,8 +138,8 @@ function renderFleetCard(fleet, { envelopes, activeEnvelopeIds, activeAgents, to
       const envIds = Array.isArray(agent?.envelopeIds) ? agent.envelopeIds : []
       const isActive = envIds.some(id => activeEnvelopeIds.has(id))
 
-      const envList = envIds.length ? `envelopes: ${envIds.join(', ')}` : 'envelopes: —'
-      const tooltip = `${name}${role ? ` — ${role}` : ''} — ${envList}`
+      const envList = envIds.length ? `envelopes: ${envIds.join(', ')}` : 'envelopes: -'
+      const tooltip = `${name}${role ? ` - ${role}` : ''} - ${envList}`
       const initials = getAgentInitials(name)
 
       return `

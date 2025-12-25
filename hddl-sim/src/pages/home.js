@@ -61,7 +61,7 @@ export function renderHome(container) {
             <span>${env.ownerRole}</span>
           </div>
           <div style="font-size: 12px; color: var(--vscode-statusBar-foreground); margin-bottom: 12px;">${statusLabel}</div>
-          <div style="font-size: 12px; color: var(--vscode-statusBar-foreground); margin-bottom: 12px;">Window: ${formatSimTime(env.createdHour)} → ${formatSimTime(env.endHour)}</div>
+          <div style="font-size: 12px; color: var(--vscode-statusBar-foreground); margin-bottom: 12px;">Window: ${formatSimTime(env.createdHour)} -> ${formatSimTime(env.endHour)}</div>
           <div style="display: flex; gap: 8px; font-size: 11px; flex-wrap: wrap;">
             <span style="background: var(--status-info); opacity: 0.2; padding: 2px 6px; border-radius: 3px;">${(effective.constraints ?? []).length} constraints</span>
             <span style="background: var(--status-muted); opacity: 0.2; padding: 2px 6px; border-radius: 3px;">${env.domain}</span>

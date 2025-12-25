@@ -181,7 +181,7 @@ export function addRandomEnvelope() {
     actorRole: ownerRole,
     severity: 'info',
     label: 'Envelope created',
-    detail: `Envelope opened for ${domain} with steward authority window ${start}→${end}.`,
+    detail: `Envelope opened for ${domain} with steward authority window ${start}->${end}.`,
   }
 
   const signalHour = Math.min(end, Math.round((start + 1 + Math.random() * Math.max(1, end - start - 1)) * 10) / 10)

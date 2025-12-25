@@ -135,7 +135,7 @@ function renderEnvelopeSpans() {
     span.style.left = `${(start / duration) * 100}%`
     span.style.width = `${Math.max(0.5, ((end - start) / duration) * 100)}%`
     span.style.background = env.accent || 'var(--vscode-focusBorder)'
-    span.title = `${env.envelopeId}: ${formatSimTime(start)} → ${formatSimTime(end)}`
+    span.title = `${env.envelopeId}: ${formatSimTime(start)} -> ${formatSimTime(end)}`
     envelopeSpans.appendChild(span)
   })
 }
@@ -156,7 +156,7 @@ function renderEventMarkers() {
     marker.style.left = `${(clamped / duration) * 100}%`
     marker.dataset.type = ev?.type || ''
     marker.dataset.severity = ev?.severity || ''
-    marker.title = `${ev?.type || 'event'} @ ${formatSimTime(clamped)}${ev?.label ? ` — ${ev.label}` : ''}`
+    marker.title = `${ev?.type || 'event'} @ ${formatSimTime(clamped)}${ev?.label ? ` - ${ev.label}` : ''}`
 
     marker.addEventListener('click', (e) => {
       // Jump scrubber to the event time without triggering the container click handler

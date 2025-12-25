@@ -4,7 +4,7 @@ import { formatSimTime, getEventsNearTime, getScenario, getTimeHour, onScenarioC
 export function renderDecisionTelemetry(container) {
   container.innerHTML = `
     <div class="page-container">
-      <h1>📈 Signals & Outcomes</h1>
+      <h1>Signals & Outcomes</h1>
       <p class="subtitle">Observed signals evaluated against envelope assumptions</p>
 
       <div style="display:flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin: 12px 0 16px; padding: 12px; border: 1px solid var(--vscode-sideBar-border); border-radius: 6px; background: var(--vscode-editorWidget-background);">
@@ -378,7 +378,7 @@ function createVolumeChart(scenario, t, theme) {
     .attr('fill', theme.fontColor)
     .style('font-size', '12px')
     .style('font-weight', '600')
-    .text(`Events (±6h around ${formatSimTime(t)})`)
+    .text(`Events (+/- 6h around ${formatSimTime(t)})`)
 }
 
 function createActivityChart(scenario, t, theme) {

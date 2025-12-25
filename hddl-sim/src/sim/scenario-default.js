@@ -53,7 +53,7 @@ export function createDefaultScenario() {
         agents: [
           { agentId: 'AG-ENG-01', name: 'ConstraintCompiler', envelopeIds: ['ENV-003', 'ENV-006'], role: 'envelope compile + diffs' },
           { agentId: 'AG-ENG-02', name: 'AuditJoiner', envelopeIds: ['ENV-003'], role: 'decision_id / envelope join keys' },
-          { agentId: 'AG-ENG-03', name: 'DriftLens', envelopeIds: ['ENV-003'], role: 'assumptions↔signals mismatch mapping' },
+          { agentId: 'AG-ENG-03', name: 'DriftLens', envelopeIds: ['ENV-003'], role: 'assumptions<->signals mismatch mapping' },
           { agentId: 'AG-ENG-04', name: 'EscalationRouter', envelopeIds: ['ENV-003','ENV-006'], role: 'routing on boundary touch' },
           { agentId: 'AG-ENG-05', name: 'RevisionDiff', envelopeIds: ['ENV-003','ENV-006'], role: 'lineage diff generation' },
           { agentId: 'AG-ENG-06', name: 'RunbookLinker', envelopeIds: ['ENV-003','ENV-006'], role: 'attach bounded runbooks' },
@@ -241,7 +241,7 @@ export function createDefaultScenario() {
         envelopeId: 'ENV-003',
         severity: 'info',
         label: 'DSG Review triggered',
-        detail: 'Cross-domain boundary collision: enterprise pricing ↔ marketing offers',
+        detail: 'Cross-domain boundary collision: enterprise pricing <-> marketing offers',
         title: 'Enterprise Pricing Calibration',
         facilitatorRole: 'Sales Steward',
         trigger: 'Envelope boundaries intersect across domains',
@@ -254,8 +254,8 @@ export function createDefaultScenario() {
         ],
         resolutionPolicy: [
           'Authority: outbound offers remain under Marketing Offers (ENV-006)',
-          'Pricing: tighten max discount for enterprise; require review on drift ≥ 10%',
-          'Telemetry: add boundary-interaction signals for price→offer pathways',
+          'Pricing: tighten max discount for enterprise; require review on drift >= 10%',
+          'Telemetry: add boundary-interaction signals for price->offer pathways',
         ],
         artifactOutput: [
           { type: 'DSG', label: 'DSG Event Record', detail: 'Decision authority clarified; precedent recorded' },
@@ -316,7 +316,7 @@ export function createDefaultScenario() {
         authorRole: 'Data Steward',
         authorName: 'Kevin',
         kind: 'evidence',
-        text: 'Data shows high close rates in the $2.6M–$3.0M band. Drift is concentrated in enterprise segments.'
+        text: 'Data shows high close rates in the $2.6M-$3.0M band. Drift is concentrated in enterprise segments.'
       },
       {
         hour: 38.6,
@@ -327,7 +327,7 @@ export function createDefaultScenario() {
         authorRole: 'Sales Steward',
         authorName: 'Glen',
         kind: 'proposal',
-        text: 'Proposal: tighten max discount to 10% and require DSG review when drift ≥ 10% for enterprise deals.'
+        text: 'Proposal: tighten max discount to 10% and require DSG review when drift >= 10% for enterprise deals.'
       },
       {
         hour: 39,
