@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>HDDL Visual Index (Architecture Views)</title>
+
+    <link rel="stylesheet" href="stylesheets/diagrams.css" />
+    <link rel="stylesheet" href="https://unpkg.com/vis-network@9.1.9/styles/vis-network.min.css" />
+    <style>
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial;
+        line-height: 1.5;
+      }
+    </style>
+  </head>
+
+  <body class="hddl-vi">
+    <div class="hddl-vi__page">
+      <header class="hddl-vi__header">
+        <h1 class="hddl-vi__title">HDDL Visual Index</h1>
+        <p class="hddl-vi__subtitle">Offline-first navigation hub for the HDDL visuals, grouped by 4+1 views plus AI-native views.</p>
+      </header>
+
+      <div class="hddl-vi__divider" role="separator" aria-hidden="true"></div>
+
+      <div class="hddl-vi__panel">
+        <div class="hddl-vi__hero" aria-label="4+1 architecture views hub-and-spoke map">
+          <div class="hddl-vi__hero-inner">
+            <div class="hddl-vi__graph" id="hddlGraph" aria-label="Architecture views graph"></div>
+            <p class="hddl-vi__hero-hint">Click a node to jump to its section. Empty views are shown but disabled.</p>
+          </div>
+        </div>
+
+        <div class="hddl-vi__sections" id="sections"></div>
+
+        <p class="hddl-vi__hint">Local use: open <code>docs/visuals.html</code> directly in your browser and click around.</p>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/vis-network@9.1.9/standalone/umd/vis-network.min.js"></script>
+    <script>
+      const visuals = [
+        {
+          title: 'Architecture',
+          href: 'architecture.html',
+          desc: 'Composable system components + boundaries (governance → execution → telemetry)',
+          kicker: 'System',
+          tags: ['4+1: Logical', 'HDDL: Components'],
+          views: ['Logical'],
+        },
+        {
+          title: 'Stewardship Flow',
+          href: 'stewardship.html',
+          desc: 'Escalation/resolution loop (Domain Stewards ↔ DSG) + shared practices',
+          kicker: 'Governance',
+          tags: ['4+1: Process', 'HDDL: Stewardship'],
+          views: ['Process', 'AI-Native'],
+        },
+        {
+          title: 'Simulation Visuals',
+          href: 'simulation.html',
+          desc: 'Authority replay flow + envelope timeline (+ a schema slice)',
+          kicker: 'Demo / Simulation',
+          tags: ['4+1: Scenarios', '4+1: Process'],
+          views: ['Scenarios', 'Process'],
+        },
+        {
+          title: 'Authority Panel (Mock)',
+          href: 'simulation_authority.html',
+          desc: 'Active envelopes, constraints, escalation, and lineage diffs',
+          kicker: 'Demo / Simulation',
+          tags: ['AI: Authority View'],
+          views: ['AI-Native'],
+        },
+        {
+          title: 'Capability Matrix (Mock)',
+          href: 'simulation_capability_matrix.html',
+          desc: 'Allowed vs forbidden vs escalate, derived from envelopes',
+          kicker: 'Demo / Simulation',
+          tags: ['AI: Authority View'],
+          views: ['AI-Native'],
+        },
+        {
+          title: 'Signals ↔ Assumptions (Mock)',
+          href: 'simulation_signals_assumptions.html',
+          desc: 'DTS signals compared to declared envelope assumptions',
+          kicker: 'Demo / Simulation',
+          tags: ['AI: Drift View'],
+          views: ['AI-Native'],
+        },
+        {
+          title: 'DSG Review Event (Mock)',
+          href: 'simulation_dsg_event.html',
+          desc: 'Cross-domain arbitration as an artifact-producing event',
+          kicker: 'Demo / Simulation',
+          tags: ['AI: Stewardship View'],
+          views: ['AI-Native'],
+        },
+      ];
+
+      const viewOrder = ['Logical', 'Development', 'Process', 'Physical', 'Scenarios', 'AI-Native'];
+
+      const viewLabels = {
+        Logical: 'Logical view',
+        Development: 'Development view',
+        Process: 'Process view',
+        Physical: 'Physical view',
+        Scenarios: 'Scenarios (+1)',
+        'AI-Native': 'AI-native views',
+      };
+
+      const viewAnchors = {
+        Logical: 'view-logical',
+        Development: 'view-development',
+        Process: 'view-process',
+        Physical: 'view-physical',
+        Scenarios: 'view-scenarios',
+        'AI-Native': 'view-ai-native',
+      };
+
+      function buildCounts() {
+        const counts = {
+          Logical: 0,
+          Development: 0,
+          Process: 0,
+          Physical: 0,
+          Scenarios: 0,
+          'AI-Native': 0,
+        };
+
+        for (const item of visuals) {
+          const views = Array.isArray(item.views) && item.views.length ? item.views : [];
+          for (const v of views) {
+            if (counts[v] !== undefined) counts[v] += 1;
+          }
+        }
+
+        return counts;
+      }
+
+      function escapeHtml(value) {
+        return String(value)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
+      }
+
+      function createCard(item) {
+        const a = document.createElement('a');
+        a.className = 'hddl-vi__card';
+        a.href = item.href;
+        a.innerHTML = `
+          <p class="hddl-vi__card-kicker">${escapeHtml(item.kicker || '')}</p>
+          <p class="hddl-vi__card-title">${escapeHtml(item.title)}</p>
+          <p class="hddl-vi__card-desc">${escapeHtml(item.desc || '')}</p>
+          ${Array.isArray(item.tags) && item.tags.length
+            ? `<ul class="hddl-vi__tags">${item.tags
+                .map((t) => `<li class="hddl-vi__tag">${escapeHtml(t)}</li>`)
+                .join('')}</ul>`
+            : ''}
+        `;
+        return a;
+      }
+
+      function scrollToAnchor(anchorId) {
+        const el = document.getElementById(anchorId);
+        if (!el) return;
+        el.scrollIntoView();
+      }
+
+      function renderGraph(counts) {
+        const container = document.getElementById('hddlGraph');
+        if (!container || !window.vis || !window.vis.Network || !window.vis.DataSet) return;
+
+        const disabledColor = { background: 'rgba(0,0,0,0.03)', border: 'rgba(0,0,0,0.14)' };
+        const enabledColor = { background: 'rgba(255,255,255,0.98)', border: 'rgba(0,0,0,0.18)' };
+
+        const hubId = 'HDDL';
+        const nodeOrder = ['Logical', 'Development', 'Process', 'Physical', 'Scenarios', 'AI-Native'];
+
+        const nodes = new window.vis.DataSet([
+          {
+            id: hubId,
+            label: 'HDDL\nVisuals',
+            shape: 'ellipse',
+            widthConstraint: { maximum: 220 },
+            color: enabledColor,
+            borderWidth: 2,
+            font: { size: 18, face: 'system-ui', color: 'rgba(0,0,0,0.84)', bold: { color: 'rgba(0,0,0,0.84)', size: 18, face: 'system-ui' } },
+            fixed: { x: true, y: true },
+          },
+        ]);
+
+        for (const v of nodeOrder) {
+          const hasAny = (counts[v] || 0) > 0;
+          const color = hasAny ? enabledColor : disabledColor;
+          const fontColor = hasAny ? 'rgba(0,0,0,0.80)' : 'rgba(0,0,0,0.45)';
+
+          nodes.add({
+            id: v,
+            label: `${v}\n${counts[v] || 0} visual(s)`,
+            shape: 'box',
+            margin: 14,
+            color,
+            font: { size: 15, face: 'system-ui', color: fontColor },
+            borderWidth: 1,
+            fixed: { x: true, y: true },
+          });
+        }
+
+        const edges = new window.vis.DataSet(
+          nodeOrder.map((v) => {
+            const hasAny = (counts[v] || 0) > 0;
+            return {
+              from: hubId,
+              to: v,
+              color: { color: hasAny ? 'rgba(0,0,0,0.26)' : 'rgba(0,0,0,0.12)' },
+              dashes: !hasAny,
+              width: 1.3,
+              smooth: { type: 'cubicBezier', roundness: 0.25 },
+            };
+          })
+        );
+
+        const network = new window.vis.Network(
+          container,
+          { nodes, edges },
+          {
+            autoResize: true,
+            physics: false,
+            layout: { improvedLayout: false },
+            interaction: {
+              hover: true,
+              dragNodes: false,
+              dragView: true,
+              zoomView: true,
+            },
+            nodes: {
+              shadow: {
+                enabled: true,
+                color: 'rgba(0,0,0,0.12)',
+                size: 10,
+                x: 0,
+                y: 2,
+              },
+            },
+          }
+        );
+
+        function applyLayout() {
+          const rect = container.getBoundingClientRect();
+          const rx = Math.max(240, rect.width * 0.28);
+          const ry = Math.max(140, rect.height * 0.22);
+
+          nodes.update([
+            { id: hubId, x: 0, y: 0 },
+            { id: 'Logical', x: -rx, y: -ry },
+            { id: 'Development', x: rx, y: -ry },
+            { id: 'Process', x: -rx, y: ry },
+            { id: 'Physical', x: rx, y: ry },
+            { id: 'AI-Native', x: rx * 1.1, y: 0 },
+            { id: 'Scenarios', x: 0, y: ry * 1.25 },
+          ]);
+
+          network.fit({ animation: false, padding: 40 });
+        }
+
+        applyLayout();
+        window.addEventListener('resize', () => applyLayout());
+
+        network.on('click', (params) => {
+          if (!params.nodes || !params.nodes.length) return;
+          const nodeId = params.nodes[0];
+          if (nodeId === hubId) {
+            scrollToAnchor(viewAnchors.Scenarios);
+            return;
+          }
+
+          const hasAny = (counts[nodeId] || 0) > 0;
+          if (!hasAny) return;
+
+          const anchorId = viewAnchors[nodeId];
+          if (anchorId) scrollToAnchor(anchorId);
+        });
+      }
+
+      function renderSections() {
+        const container = document.getElementById('sections');
+        if (!container) return;
+
+        const grouped = new Map();
+        const counts = buildCounts();
+
+        for (const item of visuals) {
+          const views = Array.isArray(item.views) && item.views.length ? item.views : ['Other'];
+          for (const v of views) {
+            if (!grouped.has(v)) grouped.set(v, []);
+            grouped.get(v).push(item);
+          }
+        }
+
+        renderGraph(counts);
+
+        for (const v of viewOrder) {
+          if (!grouped.has(v)) grouped.set(v, []);
+
+          const section = document.createElement('section');
+          section.className = 'hddl-vi__section';
+
+          const anchorId = viewAnchors[v] || `view-${String(v).toLowerCase()}`;
+          section.id = anchorId;
+
+          const hdr = document.createElement('div');
+          hdr.className = 'hddl-vi__section-hdr';
+          hdr.innerHTML = `
+            <h2 class="hddl-vi__section-title">${escapeHtml(viewLabels[v] || v)}</h2>
+            <p class="hddl-vi__section-meta">${grouped.get(v).length} visual(s)</p>
+          `;
+
+          const grid = document.createElement('div');
+          grid.className = 'hddl-vi__grid';
+          for (const item of grouped.get(v)) {
+            grid.appendChild(createCard(item));
+          }
+
+          section.appendChild(hdr);
+          section.appendChild(grid);
+          container.appendChild(section);
+        }
+      }
+
+      renderSections();
+    </script>
+  </body>
+</html>
