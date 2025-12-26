@@ -1,7 +1,7 @@
 export function createDefaultScenario() {
   return {
     id: 'scenario-default-001',
-    title: 'HDDL Default Replay',
+    title: 'Thursday, Two Years Later — HDDL Replay',
     durationHours: 48,
     fleets: [
       {
@@ -21,6 +21,115 @@ export function createDefaultScenario() {
           { agentId: 'AG-HR-01', name: 'BiasCheck', envelopeIds: ['ENV-002'], role: 'protected-class guardrails' },
           { agentId: 'AG-HR-02', name: 'TransparencyPacket', envelopeIds: ['ENV-002'], role: 'candidate packet compilation' },
           { agentId: 'AG-HR-03', name: 'InterviewScheduler', envelopeIds: ['ENV-002'], role: 'coordination (no surveillance)' },
+
+        // Day 1 evening: second dense phase (signals → boundary → DSG → revisions)
+        {
+          type: 'signal',
+          hour: 41.2,
+          envelopeId: 'ENV-006',
+          metric: 'offer_drift',
+          value: 0.08,
+          severity: 'info',
+          label: 'Offer take-rate stable',
+          detail: 'Offer telemetry remains inside expected variance; agents continue executing within bounds.'
+        },
+        {
+          type: 'signal',
+          hour: 42.1,
+          envelopeId: 'ENV-006',
+          metric: 'offer_drift',
+          value: 0.13,
+          severity: 'warning',
+          label: 'Offer drift rising',
+          detail: 'Offer drift is trending upward; review assumptions before expanding targeting.'
+        },
+        {
+          type: 'signal',
+          hour: 42.6,
+          envelopeId: 'ENV-003',
+          metric: 'pricing_drift',
+          value: 0.11,
+          severity: 'warning',
+          label: 'Pricing drift reappears (regional)',
+          detail: 'Regional pricing drift crosses 10% again; suggests the earlier revision is insufficient for this segment.'
+        },
+        {
+          type: 'escalation',
+          hour: 42.85,
+          envelopeId: 'ENV-003',
+          actorRole: 'Sales Steward',
+          severity: 'warning',
+          label: 'Escalate pricing drift',
+          detail: 'Drift threshold crossed; request DSG arbitration before the next batch execution window.'
+        },
+        {
+          type: 'boundary_interaction',
+          hour: 43.0,
+          envelopeId: 'ENV-006',
+          actorRole: 'Sales Steward',
+          boundary_kind: 'escalated',
+          severity: 'warning',
+          label: 'Enterprise bundle request hits boundary',
+          detail: 'A high-impact enterprise bundle request exceeds the current offer constraints; requires steward review.'
+        },
+        {
+          type: 'dsg_session',
+          hour: 43.1,
+          sessionId: 'DSG-002',
+          envelopeId: 'ENV-006',
+          involvedEnvelopeIds: ['ENV-003', 'ENV-006'],
+          facilitatorRole: 'Executive',
+          label: 'DSG: pricing × offers collision',
+          detail: 'Cross-domain review for late-day collision between pricing adjustments and enterprise offer targeting.'
+        },
+        {
+          type: 'dsg_message',
+          hour: 43.12,
+          sessionId: 'DSG-002',
+          envelopeId: 'ENV-006',
+          authorRole: 'Data Steward',
+          kind: 'concern',
+          label: 'Segment proxy risk',
+          detail: 'Warning: offer targeting appears to use segment proxies not approved in the current envelope assumptions.'
+        },
+        {
+          type: 'revision',
+          hour: 43.4,
+          envelopeId: 'ENV-006',
+          actorRole: 'Sales Steward',
+          revision_id: 'REV-OFFERS-003',
+          version: 3,
+          label: 'Tighten enterprise bundle bounds',
+          detail: 'Revision tightens the offer bounds for enterprise bundles and adds explicit constraints for high-impact segments.'
+        },
+        {
+          type: 'revision',
+          hour: 43.6,
+          envelopeId: 'ENV-003',
+          actorRole: 'Domain Engineer',
+          revision_id: 'REV-PRICING-004',
+          version: 4,
+          label: 'Clarify pricing execution bounds',
+          detail: 'Revision clarifies acceptable regional adjustments and explicitly blocks propagation until steward review is complete.'
+        },
+        {
+          type: 'signal',
+          hour: 43.75,
+          envelopeId: 'ENV-006',
+          metric: 'assumption_mismatch',
+          value: 0.2,
+          severity: 'warning',
+          label: 'Telemetry references an unapproved assumption',
+          detail: 'A signal references a targeting assumption that is not currently listed in the envelope bounds; triggers steward review.'
+        },
+        {
+          type: 'annotation',
+          hour: 43.9,
+          envelopeId: 'ENV-006',
+          authorRole: 'Executive',
+          label: 'Decision memory (recall-only)',
+          detail: 'Precedent: treat segment proxy usage as a hard boundary; require DSG signoff before reintroducing it.'
+        },
           { agentId: 'AG-HR-04', name: 'RubricNormalizer', envelopeIds: ['ENV-002'], role: 'rubric alignment + consistency' },
           { agentId: 'AG-HR-05', name: 'AccommodationFlagger', envelopeIds: ['ENV-002'], role: 'escalate accommodation needs' },
           { agentId: 'AG-HR-06', name: 'DTSBoundaryCheck', envelopeIds: ['ENV-002'], role: 'telemetry boundary enforcement' },
@@ -91,6 +200,8 @@ export function createDefaultScenario() {
         createdHour: 2,
         endHour: 12,
         accent: 'var(--status-info)',
+        envelope_version: 1,
+        revision_id: null,
         assumptions: [
           'Customers prefer response times under 2 minutes.',
           'Escalations correlate with sentiment divergence.',
@@ -106,6 +217,8 @@ export function createDefaultScenario() {
         createdHour: 10,
         endHour: 24,
         accent: 'var(--status-success)',
+        envelope_version: 1,
+        revision_id: null,
         assumptions: [
           'Protected classes must not be inferred.',
           'Humans make final hiring decisions.',
@@ -121,6 +234,8 @@ export function createDefaultScenario() {
         createdHour: 18,
         endHour: 23,
         accent: 'var(--status-warning)',
+        envelope_version: 1,
+        revision_id: null,
         assumptions: [
           'High-risk transactions require human verification.',
           'False positives must remain below a defined threshold.'
@@ -135,6 +250,8 @@ export function createDefaultScenario() {
         createdHour: 26,
         endHour: 32,
         accent: 'var(--vscode-button-background)',
+        envelope_version: 1,
+        revision_id: null,
         assumptions: [
           'Demand forecasts are reliable within a 7-day horizon.',
           'Backorders should be minimized when cost impact is bounded.'
@@ -149,6 +266,8 @@ export function createDefaultScenario() {
         createdHour: 30,
         endHour: 44,
         accent: 'var(--status-error)',
+        envelope_version: 1,
+        revision_id: null,
         assumptions: [
           'Historical price bands remain a valid anchor.',
           'Strategic deals can tolerate wider variance with steward review.'
@@ -163,6 +282,8 @@ export function createDefaultScenario() {
         createdHour: 40,
         endHour: 46,
         accent: 'var(--status-muted)',
+        envelope_version: 1,
+        revision_id: null,
         assumptions: [
           'Offers must remain consistent with brand and compliance constraints.',
           'High-value customer segments require additional scrutiny.'
@@ -177,6 +298,17 @@ export function createDefaultScenario() {
         envelopeId: 'ENV-001',
         label: 'Envelope promoted',
         detail: 'Customer Service Responses active'
+      },
+      {
+        id: 'DEC-CS-001',
+        hour: 4,
+        type: 'decision',
+        envelopeId: 'ENV-001',
+        agentId: 'AG-CS-01',
+        severity: 'info',
+        status: 'allowed',
+        label: 'Decision executed',
+        detail: 'Drafted response within authority; no escalation required'
       },
       {
         hour: 10,
@@ -207,6 +339,30 @@ export function createDefaultScenario() {
         detail: 'Pricing Adjustments active'
       },
       {
+        id: 'DEC-PRICING-001',
+        hour: 33.8,
+        type: 'decision',
+        envelopeId: 'ENV-003',
+        agentId: 'AG-SALES-03',
+        actorRole: 'Sales Steward',
+        severity: 'info',
+        status: 'allowed',
+        label: 'Decision executed',
+        detail: 'Price-band recommendation stayed within max discount constraint'
+      },
+      {
+        id: 'DEC-PRICING-002',
+        hour: 34.9,
+        type: 'decision',
+        envelopeId: 'ENV-003',
+        agentId: 'AG-SALES-01',
+        actorRole: 'Sales Steward',
+        severity: 'warning',
+        status: 'blocked',
+        label: 'Decision blocked',
+        detail: 'Proposed enterprise discount exceeded envelope authority; routed to steward'
+      },
+      {
         hour: 40,
         type: 'envelope_promoted',
         envelopeId: 'ENV-006',
@@ -225,14 +381,40 @@ export function createDefaultScenario() {
         assumptionRefs: ['Historical price bands remain a valid anchor.']
       },
       {
+        hour: 34.5,
+        type: 'signal',
+        envelopeId: 'ENV-003',
+        signalKey: 'pricing_drift',
+        value: 0.17,
+        severity: 'warning',
+        label: 'Signal references emerging constraint',
+        detail: 'Signal references an assumption that is not yet part of the envelope (mismatch demonstration)',
+        assumptionRefs: [
+          'Historical price bands remain a valid anchor.',
+          'Enterprise deals require DSG calibration when drift signals occur.'
+        ]
+      },
+      {
         hour: 35,
-        type: 'escalation',
+        type: 'boundary_interaction',
         envelopeId: 'ENV-003',
         actorRole: 'Sales Steward',
         severity: 'warning',
-        label: 'Escalation requested',
-        detail: 'Request human review for enterprise deals until constraints are revised',
+        boundary_kind: 'escalated',
+        label: 'Boundary interaction escalated',
+        detail: 'Model proposed an enterprise discount outside authority; steward escalation required',
         reason: 'pricing_drift_warning'
+      },
+      {
+        hour: 36.2,
+        type: 'boundary_interaction',
+        envelopeId: 'ENV-003',
+        actorRole: 'Domain Engineer',
+        severity: 'info',
+        boundary_kind: 'deferred',
+        label: 'Boundary interaction deferred',
+        detail: 'Recommendation deferred pending cross-domain calibration artifact',
+        reason: 'cross_domain_collision'
       },
       {
         hour: 38,
@@ -333,6 +515,8 @@ export function createDefaultScenario() {
         hour: 39,
         type: 'revision',
         envelopeId: 'ENV-003',
+        revision_id: 'REV-ENV-003-001',
+        envelope_version: 2,
         actorRole: 'Domain Engineer',
         severity: 'info',
         label: 'Envelope revised',
@@ -349,6 +533,8 @@ export function createDefaultScenario() {
         hour: 39.2,
         type: 'revision',
         envelopeId: 'ENV-006',
+        revision_id: 'REV-ENV-006-001',
+        envelope_version: 2,
         actorRole: 'Sales Steward',
         severity: 'info',
         label: 'Envelope revised',
@@ -360,6 +546,16 @@ export function createDefaultScenario() {
           'Enterprise bundles require explicit cross-domain ownership.',
         ],
         nextConstraints: ['No protected-class targeting', 'Max discount: 12%', 'DSG review required for enterprise bundles', 'Owner lock: outbound offers remain under Marketing envelope']
+      },
+      {
+        hour: 39.35,
+        type: 'annotation',
+        envelopeId: 'ENV-003',
+        decision_id: 'DEC-DSG-001',
+        actorRole: 'Sales Steward',
+        severity: 'info',
+        label: 'Decision memory (recall-only)',
+        detail: 'Record precedent: enterprise pricing recommendations must not drive outbound offers without explicit envelope ownership.'
       }
     ]
   }

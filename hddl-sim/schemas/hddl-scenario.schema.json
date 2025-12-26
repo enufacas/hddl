@@ -1,0 +1,135 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/hddl/schemas/hddl-scenario.schema.json",
+  "title": "HDDL Scenario (Replay Wire Format)",
+  "type": "object",
+  "$comment": "Portable scenario replay input format. This schema is intended to be UI-agnostic and versioned. Unknown properties are permitted for forward compatibility; consumers MUST ignore unknown fields unless the spec version declares otherwise.",
+  "required": ["schemaVersion", "id", "title", "durationHours", "envelopes", "fleets", "events"],
+  "additionalProperties": true,
+  "properties": {
+    "schemaVersion": { "type": "integer", "minimum": 1 },
+    "id": { "type": "string", "minLength": 1 },
+    "title": { "type": "string", "minLength": 1 },
+    "durationHours": { "type": "number", "minimum": 0 },
+    "envelopes": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/envelope" }
+    },
+    "fleets": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/fleet" }
+    },
+    "events": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/event" }
+    }
+  },
+  "$defs": {
+    "envelope": {
+      "type": "object",
+      "required": ["envelopeId", "name", "ownerRole", "createdHour", "endHour"],
+      "additionalProperties": true,
+      "properties": {
+        "envelopeId": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "domain": { "type": "string" },
+        "ownerRole": { "type": "string", "minLength": 1 },
+        "createdHour": { "type": "number" },
+        "endHour": { "type": "number" },
+        "accent": { "type": "string" },
+        "envelope_version": { "type": ["number", "integer"], "minimum": 1 },
+        "revision_id": { "type": ["string", "null"] },
+        "assumptions": { "type": "array", "items": { "type": "string" } },
+        "constraints": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "fleet": {
+      "type": "object",
+      "required": ["stewardRole", "agents"],
+      "additionalProperties": true,
+      "properties": {
+        "stewardRole": { "type": "string", "minLength": 1 },
+        "agents": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/agent" }
+        }
+      }
+    },
+    "agent": {
+      "type": "object",
+      "required": ["agentId", "name", "envelopeIds"],
+      "additionalProperties": true,
+      "properties": {
+        "agentId": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "role": { "type": "string" },
+        "envelopeIds": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "event": {
+      "type": "object",
+      "required": ["type", "hour"],
+      "additionalProperties": true,
+      "properties": {
+        "eventId": { "type": "string" },
+        "type": {
+          "type": "string",
+          "enum": [
+            "envelope_promoted",
+            "signal",
+            "decision",
+            "revision",
+            "boundary_interaction",
+            "escalation",
+            "dsg_session",
+            "dsg_message",
+            "annotation"
+          ]
+        },
+        "hour": { "type": "number" },
+        "envelopeId": { "type": "string" },
+
+        "severity": { "type": "string" },
+        "label": { "type": "string" },
+        "detail": { "type": "string" },
+
+        "actorRole": { "type": "string" },
+        "actorName": { "type": "string" },
+        "reason": { "type": "string" },
+
+        "signalKey": { "type": "string" },
+        "value": { "type": "number" },
+        "assumptionRefs": { "type": "array", "items": { "type": "string" } },
+
+        "agentId": { "type": "string" },
+        "status": { "type": "string" },
+
+        "revision_id": { "type": "string" },
+        "envelope_version": { "type": ["number", "integer"], "minimum": 1 },
+        "nextAssumptions": { "type": "array", "items": { "type": "string" } },
+        "nextConstraints": { "type": "array", "items": { "type": "string" } },
+        "resolvesEventId": { "type": "string" },
+
+        "boundary_kind": { "type": "string" },
+        "boundary_refs": { "type": "array", "items": { "type": "string" } },
+
+        "decision_id": { "type": "string" },
+
+        "sessionId": { "type": "string" },
+        "title": { "type": "string" },
+        "facilitatorRole": { "type": "string" },
+        "trigger": { "type": "string" },
+        "scope": { "type": "string" },
+        "involvedEnvelopeIds": { "type": "array", "items": { "type": "string" } },
+        "impactSummary": { "type": "array", "items": { "type": "string" } },
+        "resolutionPolicy": { "type": "array", "items": { "type": "string" } },
+        "artifactOutput": { "type": "array", "items": { "type": "object" } },
+
+        "authorRole": { "type": "string" },
+        "authorName": { "type": "string" },
+        "kind": { "type": "string" },
+        "text": { "type": "string" }
+      }
+    }
+  }
+}

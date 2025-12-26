@@ -102,7 +102,7 @@ html {
     grid-column: 1 / -1;
     display: flex;
     align-items: center;
-    z-index: 0;
+    z-index: 60;
     position: relative;
 }
 
@@ -118,6 +118,7 @@ html {
     display: flex;
     align-items: center;
     gap: 6px;
+    position: relative;
 }
 
 .timeline-actions__status {
@@ -129,6 +130,74 @@ html {
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 240px;
+}
+
+.timeline-actions__status .timeline-status-link {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.timeline-actions__status .timeline-status-link:focus {
+    outline: 1px solid var(--vscode-focusBorder);
+    outline-offset: 2px;
+}
+
+.timeline-legend-button {
+    padding: 4px 6px;
+    min-width: unset;
+}
+
+.timeline-legend {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.timeline-legend-panel {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    z-index: 80;
+    min-width: 240px;
+    max-width: 360px;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid var(--vscode-sideBar-border);
+    background: var(--vscode-editorWidget-background);
+    color: var(--vscode-editor-foreground);
+    font-size: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.22);
+}
+
+.timeline-actions-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    z-index: 80;
+    padding: 6px;
+    border-radius: 6px;
+    border: 1px solid var(--vscode-sideBar-border);
+    background: var(--vscode-editorWidget-background);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 200px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.22);
+}
+
+.timeline-actions-menu[hidden] {
+    display: none;
+}
+
+.timeline-actions-menu .timeline-action-button {
+    width: 100%;
+    justify-content: flex-start;
+}
+
+.timeline-actions-menu .timeline-action-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
 .timeline-actions__status[data-kind="error"] {
@@ -165,7 +234,38 @@ html {
 .timeline-event-markers {
     position: absolute;
     inset: 2px 2px 2px 2px;
+    z-index: 2;
+}
+
+/* Global timeline: assumption mismatch markers overlay */
+.timeline-mismatch-markers {
+    position: absolute;
+    inset: 2px 2px 2px 2px;
     z-index: 1;
+    pointer-events: auto;
+}
+
+.timeline-mismatch-marker {
+    position: absolute;
+    bottom: 2px;
+    width: 8px;
+    height: 8px;
+    transform: translateX(-3px) rotate(45deg);
+    background: var(--status-warning);
+    opacity: 0.9;
+    border-radius: 1px;
+    pointer-events: auto;
+    cursor: pointer;
+    outline: none;
+}
+
+.timeline-mismatch-marker:focus {
+    outline: 1px solid var(--vscode-focusBorder);
+    outline-offset: 2px;
+}
+
+.timeline-mismatch-marker[data-severity="error"] {
+    background: var(--status-error);
 }
 
 .timeline-event-marker {
@@ -181,18 +281,57 @@ html {
     cursor: pointer;
 }
 
-.timeline-event-marker[data-type="signal"][data-severity="warning"] {
-    background: var(--status-warning);
+/* Event-type denotation: distinct palette from steward colors
+   Uses EVENT_COLORS from steward-colors.js for consistency */
+.timeline-event-marker[data-type="signal"] {
+    background: #7eb8da;  /* Light steel blue */
+    width: 2px;
+    opacity: 0.85;
 }
 
-.timeline-event-marker[data-type="escalation"],
-.timeline-event-marker[data-type="dsg_session"] {
-    background: var(--status-warning);
+.timeline-event-marker[data-type="revision"] {
+    background: #98d4a0;  /* Mint green */
+    width: 3px;
+    transform: translateX(-1.5px);
+    opacity: 0.9;
+}
+
+.timeline-event-marker[data-type="boundary_interaction"],
+.timeline-event-marker[data-type="dsg_session"],
+.timeline-event-marker[data-type="dsg_message"] {
+    background: #f0b866;  /* Amber */
+    width: 3px;
+    transform: translateX(-1.5px);
+    opacity: 0.9;
+}
+
+.timeline-event-marker[data-type="decision"] {
+    background: #a8a8a8;  /* Neutral gray */
+    width: 2px;
+    opacity: 0.55;
+}
+
+.timeline-event-marker[data-type="decision"][data-severity="warning"],
+.timeline-event-marker[data-type="decision"][data-severity="error"] {
+    background: #e8846c;  /* Salmon - blocked */
+    opacity: 0.85;
+}
+
+.timeline-event-marker[data-type="envelope_promoted"] {
+    background: #c4a7e7;  /* Lavender */
+    width: 3px;
+    transform: translateX(-1.5px);
+    opacity: 0.75;
+}
+
+.timeline-event-marker[data-type="signal"][data-severity="warning"] {
+    background: #e8846c;  /* Salmon */
 }
 
 .timeline-event-marker[data-type="annotation"] {
     background: var(--status-muted);
     opacity: 0.65;
+    width: 2px;
 }
 
 .timeline-envelope-span {
@@ -1447,6 +1586,15 @@ html {
     grid-template-rows: 1fr var(--panel-height);
 }
 
+/* Default-collapsed panels (persisted via body classes) */
+body.aux-hidden {
+    --auxiliarybar-width: 0px;
+}
+
+body.panel-hidden {
+    --panel-height: 0px;
+}
+
 .part {
     position: relative;
     flex-shrink: 0;
@@ -1476,6 +1624,52 @@ html {
     grid-row: 1 / span 2;
 }
 
+body.aux-hidden .part.auxiliarybar {
+    display: none;
+}
+
+/* Discoverability handle for collapsed auxiliary bar */
+.aux-peek {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 16px;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: var(--vscode-sideBar-background);
+    border-left: 1px solid var(--vscode-sideBar-border);
+    color: var(--vscode-statusBar-foreground);
+    cursor: pointer;
+    user-select: none;
+    z-index: 2;
+}
+
+body.aux-hidden .aux-peek {
+    display: flex;
+}
+
+.aux-peek:hover {
+    background: var(--vscode-list-hoverBackground);
+    color: var(--vscode-editor-foreground);
+}
+
+.aux-peek:focus {
+    outline: 1px solid var(--vscode-focusBorder);
+    outline-offset: -1px;
+}
+
+.aux-peek__label {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    font-size: 10px;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+}
+
 /* Bottom panel (Terminal) stays under editor only (not under auxiliary) */
 .part.panel {
     grid-column: 3 / 4;
@@ -1486,6 +1680,10 @@ html {
     flex-direction: column;
     overflow: hidden;
     min-height: 0;
+}
+
+body.panel-hidden .part.panel {
+    display: none;
 }
 
 /* If the auxiliary bar is closed, let the panel expand to the right edge. */
@@ -1555,6 +1753,16 @@ body.aux-hidden .part.panel {
     background: var(--vscode-editor-background);
     min-height: 0;
     overflow: hidden;
+}
+
+.glossary-term {
+    color: var(--vscode-textLink-foreground);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.glossary-term:hover {
+    color: var(--vscode-textLink-activeForeground);
 }
 
 .terminal-output {
@@ -1637,6 +1845,11 @@ body.aux-hidden .part.panel {
     bottom: var(--panel-height);
     top: auto;
     width: auto;
+}
+
+body.panel-hidden .monaco-sash#panel-resize {
+    display: block;
+    bottom: 0;
 }
 
 body.aux-hidden .monaco-sash#panel-resize {

@@ -1,14 +1,16 @@
-import { createDefaultScenario } from './scenario-default'
+import { createDefaultScenario } from './scenario-default-simplified'
 import { normalizeScenario } from './scenario-schema'
 
 const listeners = {
   time: new Set(),
   scenario: new Set(),
+  filter: new Set(),
 }
 
 const state = {
   scenario: normalizeScenario(createDefaultScenario()).scenario,
   timeHour: 25,
+  stewardFilter: 'all',
 }
 
 export function getScenario() {
@@ -53,4 +55,19 @@ export function onScenarioChange(cb) {
 export function onTimeChange(cb) {
   listeners.time.add(cb)
   return () => listeners.time.delete(cb)
+}
+
+export function getStewardFilter() {
+  return state.stewardFilter
+}
+
+export function setStewardFilter(filter) {
+  if (state.stewardFilter === filter) return
+  state.stewardFilter = filter
+  for (const cb of listeners.filter) cb(state.stewardFilter)
+}
+
+export function onFilterChange(cb) {
+  listeners.filter.add(cb)
+  return () => listeners.filter.delete(cb)
 }

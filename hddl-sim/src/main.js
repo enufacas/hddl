@@ -1,11 +1,19 @@
 import './style-workspace.css'
-import { initRouter } from './router'
+import { initRouter, navigateTo } from './router'
 import { createWorkspace } from './components/workspace'
-import { formatSimTime, getScenario, getTimeHour, onScenarioChange, onTimeChange, setTimeHour } from './sim/sim-state'
-import { addRandomEnvelope, addRandomEvents, importEventsFromFile, resetScenarioToDefault } from './sim/scenario-actions'
+import { formatSimTime, getEnvelopeAtTime, getScenario, getTimeHour, onScenarioChange, onTimeChange, setTimeHour, getStewardFilter, onFilterChange } from './sim/sim-state'
+import { getStewardColor } from './sim/steward-colors'
+import { addRandomEnvelope, addRandomEvents, addStewardFleet, resetScenarioToDefault, tryExpandAuthority } from './sim/scenario-actions'
+import { getStoryModeEnabled, onStoryModeChange, setStoryModeEnabled } from './story-mode'
+import { initReviewHarness, isReviewModeEnabled, setReviewModeEnabled } from './review-harness'
+import { isInteractiveMode, setInteractiveMode } from './sim/interactive-store'
 
 // Initialize app
 const app = document.querySelector('#app')
+
+// Always start at the beginning of the timeline on initial load.
+// (Tests and onboarding expect a deterministic starting point.)
+setTimeHour(0)
 
 // Create titlebar with proper icons
 const titlebar = document.createElement('div')
@@ -29,6 +37,26 @@ refreshBtn.style.cssText = 'cursor: pointer; padding: 4px;'
 refreshBtn.addEventListener('click', () => location.reload())
 titleRight.appendChild(refreshBtn)
 
+const reviewBtn = document.createElement('a')
+reviewBtn.className = 'codicon codicon-comment-discussion'
+reviewBtn.setAttribute('role', 'button')
+reviewBtn.setAttribute('aria-label', 'Toggle UX Review Mode')
+reviewBtn.title = 'Toggle UX Review Mode'
+reviewBtn.style.cssText = 'cursor: pointer; padding: 4px;'
+
+function syncReviewBtn() {
+  const on = isReviewModeEnabled()
+  reviewBtn.style.opacity = on ? '1' : '0.65'
+}
+
+reviewBtn.addEventListener('click', () => {
+  const next = setReviewModeEnabled(!isReviewModeEnabled())
+  syncReviewBtn()
+  setTimelineStatus(next ? 'UX Review Mode on.' : 'UX Review Mode off.')
+})
+
+titleRight.appendChild(reviewBtn)
+
 titlebar.appendChild(titleLeft)
 titlebar.appendChild(titleRight)
 
@@ -50,9 +78,25 @@ playBtn.setAttribute('aria-label', 'Play simulation')
 let isPlaying = false
 let currentTime = getTimeHour()
 let playTimer = null
+
+// Loop toggle (default on)
+const loopContainer = document.createElement('label')
+loopContainer.style.cssText = 'display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--vscode-statusBar-foreground); cursor: pointer;'
+const loopCheckbox = document.createElement('input')
+loopCheckbox.type = 'checkbox'
+loopCheckbox.id = 'timeline-loop'
+loopCheckbox.checked = true
+loopCheckbox.style.cssText = 'cursor: pointer;'
+const loopLabel = document.createElement('span')
+loopLabel.textContent = 'Loop'
+loopContainer.appendChild(loopCheckbox)
+loopContainer.appendChild(loopLabel)
+
 playBtn.addEventListener('click', () => {
   isPlaying = !isPlaying
   playBtn.innerHTML = isPlaying ? '<span class="codicon codicon-debug-pause"></span>' : '<span class="codicon codicon-play"></span>'
+
+  window.dispatchEvent(new CustomEvent('hddl:playback', { detail: { playing: isPlaying } }))
 
   if (!isPlaying) {
     if (playTimer) {
@@ -71,8 +115,16 @@ playBtn.addEventListener('click', () => {
     const scenario = getScenario()
     const duration = scenario?.durationHours ?? 48
     const speed = Number(speedSelector.value || 1)
-    const next = getTimeHour() + (1 * speed)
+    // Use fractional hour steps so short-lived authority moments (e.g. boundary→revision)
+    // are observable during autoplay.
+    const baseStepHours = 0.25
+    const next = getTimeHour() + (baseStepHours * speed)
     if (next >= duration) {
+      // Check if loop is enabled
+      if (loopCheckbox.checked) {
+        setTimeHour(0) // Reset to beginning
+        return
+      }
       setTimeHour(duration)
       isPlaying = false
       playBtn.innerHTML = '<span class="codicon codicon-play"></span>'
@@ -83,8 +135,20 @@ playBtn.addEventListener('click', () => {
       return
     }
     setTimeHour(next)
-  }, 450)
+  }, 650)
 })
+
+// Auto-start playback on load (including hot reload for fast iteration)
+// Only skip in test environments
+const isTestEnv = window.navigator.webdriver || window.Playwright
+if (!isTestEnv) {
+  // Defer to ensure DOM is ready
+  setTimeout(() => {
+    if (!isPlaying) {
+      playBtn.click()
+    }
+  }, 300)
+}
 
 const timeDisplay = document.createElement('div')
 timeDisplay.id = 'timeline-time'
@@ -94,14 +158,82 @@ timeDisplay.textContent = formatSimTime(currentTime)
 const speedSelector = document.createElement('select')
 speedSelector.className = 'monaco-select'
 speedSelector.style.cssText = 'background: var(--vscode-input-background); border: 1px solid var(--vscode-input-border); color: var(--vscode-input-foreground); padding: 2px 4px; font-size: 12px;'
-speedSelector.innerHTML = '<option value="1">1x</option><option value="2">2x</option><option value="4">4x</option><option value="8">8x</option>'
+speedSelector.innerHTML = '<option value="1">1x</option><option value="2">2x</option><option value="3">3x</option><option value="4">4x</option>'
+speedSelector.value = '2'
+
+// Story Mode toggle (persisted)
+const storyWrap = document.createElement('label')
+storyWrap.style.cssText = 'display:flex; align-items:center; gap: 6px; font-size: 12px; color: var(--vscode-statusBar-foreground); user-select: none;'
+storyWrap.title = 'Enable to unlock guided walkthroughs and teaching demos'
+
+const storyToggle = document.createElement('input')
+storyToggle.type = 'checkbox'
+storyToggle.id = 'timeline-story-mode'
+storyToggle.checked = getStoryModeEnabled()
+storyToggle.style.cssText = 'accent-color: var(--status-info);'
+
+const storyLabel = document.createElement('span')
+storyLabel.textContent = 'Story Mode'
+
+const storyHelpIcon = document.createElement('span')
+storyHelpIcon.className = 'codicon codicon-question'
+storyHelpIcon.style.cssText = 'opacity: 0.7; cursor: help;'
+storyHelpIcon.title = 'Story Mode adds guided teaching moments: narrative beats at key times and interactive demos that explain HDDL concepts.'
+
+storyWrap.appendChild(storyToggle)
+storyWrap.appendChild(storyLabel)
+storyWrap.appendChild(storyHelpIcon)
+
+storyToggle.addEventListener('change', () => {
+  const enabled = setStoryModeEnabled(storyToggle.checked)
+  setTimelineStatus(enabled ? 'Story Mode on.' : 'Story Mode off.')
+  syncTryExpandVisibility()
+})
+
+// Interactive Mode toggle (experimental Phase 2)
+const interactiveWrap = document.createElement('label')
+interactiveWrap.style.cssText = 'display:flex; align-items:center; gap: 6px; font-size: 12px; color: var(--vscode-statusBar-foreground); user-select: none; margin-left: 8px; padding-left: 8px; border-left: 1px solid var(--vscode-sideBar-border);'
+interactiveWrap.title = 'Switch to action-driven scenario (experimental Phase 2)'
+
+const interactiveToggle = document.createElement('input')
+interactiveToggle.type = 'checkbox'
+interactiveToggle.id = 'timeline-interactive-mode'
+interactiveToggle.checked = isInteractiveMode()
+interactiveToggle.style.cssText = 'accent-color: var(--status-warning);'
+
+const interactiveLabel = document.createElement('span')
+interactiveLabel.textContent = 'Interactive'
+interactiveLabel.style.opacity = '0.8'
+
+interactiveWrap.appendChild(interactiveToggle)
+interactiveWrap.appendChild(interactiveLabel)
+
+interactiveToggle.addEventListener('change', () => {
+  const enabled = interactiveToggle.checked
+  setInteractiveMode(enabled)
+  
+  // Pause playback when switching modes
+  if (enabled && isPlaying) {
+    playBtn.click()
+  }
+  
+  // Show mode indicator
+  const message = enabled 
+    ? 'Interactive mode (experimental): actions drive progression' 
+    : 'Replay mode: time-based playback'
+  setTimelineStatus(message)
+})
 
 timelineControls.appendChild(playBtn)
 timelineControls.appendChild(timeDisplay)
 timelineControls.appendChild(speedSelector)
+timelineControls.appendChild(loopContainer)
+timelineControls.appendChild(storyWrap)
+timelineControls.appendChild(interactiveWrap)
 
 const scrubberContainer = document.createElement('div')
 scrubberContainer.id = 'timeline-scrubber'
+scrubberContainer.title = 'Timeline: Colored spans indicate active envelope windows. Click or drag to scrub.'
 scrubberContainer.style.cssText = 'flex: 1; height: 24px; background: var(--vscode-input-background); border: 1px solid var(--vscode-input-border); border-radius: 3px; position: relative; cursor: pointer;'
 
 const envelopeSpans = document.createElement('div')
@@ -112,14 +244,27 @@ const eventMarkers = document.createElement('div')
 eventMarkers.className = 'timeline-event-markers'
 eventMarkers.setAttribute('aria-hidden', 'true')
 
+const mismatchMarkers = document.createElement('div')
+mismatchMarkers.className = 'timeline-mismatch-markers'
+
+
+const storyBeatMarkers = document.createElement('div')
+storyBeatMarkers.className = 'timeline-story-beat-markers'
+
+
+const initialScenario = getScenario()
+const initialDuration = initialScenario?.durationHours ?? 48
+
 const scrubberFill = document.createElement('div')
-scrubberFill.style.cssText = `width: ${(currentTime / 48) * 100}%; height: 100%; background: var(--status-info); opacity: 0.3; pointer-events: none;`
+scrubberFill.style.cssText = `width: ${(currentTime / initialDuration) * 100}%; height: 100%; background: var(--status-info); opacity: 0.3; pointer-events: none; position: relative; z-index: 0;`
 
 const scrubberHandle = document.createElement('div')
-scrubberHandle.style.cssText = `position: absolute; left: ${(currentTime / 48) * 100}%; top: -2px; width: 3px; height: 28px; background: var(--status-info); cursor: ew-resize;`
+scrubberHandle.style.cssText = `position: absolute; left: ${(currentTime / initialDuration) * 100}%; top: -2px; width: 3px; height: 28px; background: var(--status-info); cursor: ew-resize; z-index: 6;`
 
 scrubberContainer.appendChild(envelopeSpans)
 scrubberContainer.appendChild(eventMarkers)
+scrubberContainer.appendChild(mismatchMarkers)
+scrubberContainer.appendChild(storyBeatMarkers)
 scrubberContainer.appendChild(scrubberFill)
 scrubberContainer.appendChild(scrubberHandle)
 
@@ -127,15 +272,25 @@ function renderEnvelopeSpans() {
   const scenario = getScenario()
   const duration = scenario?.durationHours ?? 48
   envelopeSpans.innerHTML = ''
-  ;(scenario?.envelopes ?? []).forEach((env) => {
+  
+  // Filter envelopes based on steward filter
+  const stewardFilter = getStewardFilter()
+  const envelopes = scenario?.envelopes ?? []
+  const filteredEnvelopes = stewardFilter === 'all'
+    ? envelopes
+    : envelopes.filter(env => env.ownerRole === stewardFilter)
+  
+  filteredEnvelopes.forEach((env) => {
     const start = Math.max(0, Math.min(duration, env.createdHour ?? 0))
     const end = Math.max(0, Math.min(duration, env.endHour ?? duration))
     const span = document.createElement('div')
     span.className = 'timeline-envelope-span'
     span.style.left = `${(start / duration) * 100}%`
     span.style.width = `${Math.max(0.5, ((end - start) / duration) * 100)}%`
-    span.style.background = env.accent || 'var(--vscode-focusBorder)'
-    span.title = `${env.envelopeId}: ${formatSimTime(start)} -> ${formatSimTime(end)}`
+    // Use shared steward color for consistency with map and panels
+    const stewardColor = getStewardColor(env.ownerRole)
+    span.style.background = stewardColor
+    span.title = `${env.envelopeId} (${env.ownerRole}): ${formatSimTime(start)} -> ${formatSimTime(end)}`
     envelopeSpans.appendChild(span)
   })
 }
@@ -145,8 +300,22 @@ function renderEventMarkers() {
   const duration = scenario?.durationHours ?? 48
   eventMarkers.innerHTML = ''
 
+  // Filter events based on steward filter
+  const stewardFilter = getStewardFilter()
+  const envelopes = scenario?.envelopes ?? []
+  const filteredEnvelopeIds = new Set(
+    stewardFilter === 'all'
+      ? envelopes.map(e => e.envelopeId)
+      : envelopes.filter(e => e.ownerRole === stewardFilter).map(e => e.envelopeId)
+  )
+
   const events = Array.isArray(scenario?.events) ? scenario.events : []
-  events.forEach((ev) => {
+  const filteredEvents = events.filter(ev => {
+    const envId = ev?.envelopeId || ev?.envelope_id
+    return !envId || filteredEnvelopeIds.has(envId)
+  })
+  
+  filteredEvents.forEach((ev) => {
     const hour = typeof ev?.hour === 'number' ? ev.hour : null
     if (hour === null) return
     const clamped = Math.max(0, Math.min(duration, hour))
@@ -169,6 +338,118 @@ function renderEventMarkers() {
   })
 }
 
+function renderMismatchMarkers() {
+  const scenario = getScenario()
+  const duration = scenario?.durationHours ?? 48
+  mismatchMarkers.innerHTML = ''
+
+  // Filter based on steward filter
+  const stewardFilter = getStewardFilter()
+  const allEnvelopes = scenario?.envelopes ?? []
+  const filteredEnvelopes = stewardFilter === 'all'
+    ? allEnvelopes
+    : allEnvelopes.filter(e => e.ownerRole === stewardFilter)
+  const filteredEnvelopeIds = new Set(filteredEnvelopes.map(e => e.envelopeId))
+
+  const envelopesIndex = new Map(allEnvelopes.map(e => [e.envelopeId, e]))
+  const events = Array.isArray(scenario?.events) ? scenario.events : []
+
+  events
+    .filter(ev => ev && ev.type === 'signal')
+    .filter(ev => {
+      const envId = ev?.envelopeId
+      return envId && filteredEnvelopeIds.has(envId)
+    })
+    .forEach((ev) => {
+      const hour = typeof ev?.hour === 'number' ? ev.hour : null
+      const envelopeId = ev?.envelopeId
+      const refs = Array.isArray(ev?.assumptionRefs) ? ev.assumptionRefs : []
+      if (hour === null || !envelopeId || !refs.length) return
+
+      const clamped = Math.max(0, Math.min(duration, hour))
+      const base = envelopesIndex.get(envelopeId)
+      if (base && (clamped < Number(base.createdHour ?? 0) || clamped >= Number(base.endHour ?? duration))) return
+      const effective = base ? (getEnvelopeAtTime(scenario, envelopeId, clamped) || base) : null
+      const assumptions = new Set((effective?.assumptions ?? []).map(a => String(a)))
+
+      const missing = refs.filter(r => !assumptions.has(String(r)))
+      if (!missing.length) return
+
+      const marker = document.createElement('div')
+      marker.className = 'timeline-mismatch-marker'
+      marker.style.left = `${(clamped / duration) * 100}%`
+      marker.dataset.severity = ev?.severity || 'warning'
+      marker.title = `Assumption mismatch @ ${formatSimTime(clamped)} (${envelopeId}) - missing: ${missing.join(' | ')}`
+
+      // Make mismatch markers discoverable: hover/focus shows title; click jumps to the signal time.
+      marker.tabIndex = 0
+      marker.setAttribute('role', 'button')
+      marker.setAttribute('aria-label', `Assumption mismatch at ${formatSimTime(clamped)} for ${envelopeId}. Jump to time.`)
+
+      marker.addEventListener('click', (e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        setTimeHour(clamped)
+      })
+
+      marker.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          e.stopPropagation()
+          setTimeHour(clamped)
+        }
+      })
+
+      mismatchMarkers.appendChild(marker)
+    })
+}
+
+function renderStoryBeatMarkers() {
+  const scenario = getScenario()
+  const duration = scenario?.durationHours ?? 48
+  storyBeatMarkers.innerHTML = ''
+
+  if (!getStoryModeEnabled()) return
+
+  const beats = [
+    { hour: 0, label: 'T+0', title: 'T+0 — Authority exists' },
+    { hour: 24, label: 'T+24h', title: 'T+24h — Signal strained assumptions' },
+    { hour: 36, label: 'T+36h', title: 'T+36h — DSG produced a revision artifact' },
+  ].filter(b => duration >= b.hour)
+
+  beats.forEach((b) => {
+    const clamped = Math.max(0, Math.min(duration, b.hour))
+    const marker = document.createElement('div')
+    marker.className = 'timeline-story-beat-marker'
+    marker.style.cssText = `position:absolute; top: 0; bottom: 0; width: 2px; left: ${(clamped / duration) * 100}%; background: var(--status-info); opacity: 0.8;`
+    marker.title = `${b.title} (jump)`
+    marker.tabIndex = 0
+    marker.setAttribute('role', 'button')
+    marker.setAttribute('aria-label', `Jump to ${b.title} at ${formatSimTime(clamped)}`)
+
+    const pill = document.createElement('div')
+    pill.style.cssText = 'position:absolute; top: -20px; left: 50%; transform: translateX(-50%); padding: 1px 6px; border-radius: 999px; font-size: 11px; background: var(--status-info); color: var(--vscode-editor-background); opacity: 0.9; white-space: nowrap; pointer-events: none;'
+    pill.textContent = b.label
+    marker.appendChild(pill)
+
+    marker.addEventListener('click', (e) => {
+      e.preventDefault()
+      e.stopPropagation()
+      setTimeHour(clamped)
+    })
+
+    marker.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault()
+        e.stopPropagation()
+        setTimeHour(clamped)
+      }
+    })
+
+    storyBeatMarkers.appendChild(marker)
+  })
+}
+
 function syncTimelineUI(nextHour) {
   const scenario = getScenario()
   const duration = scenario?.durationHours ?? 48
@@ -177,6 +458,12 @@ function syncTimelineUI(nextHour) {
   scrubberFill.style.width = `${percent}%`
   timeDisplay.textContent = formatSimTime(nextHour)
 }
+
+// Initial overlays
+renderEnvelopeSpans()
+renderEventMarkers()
+renderMismatchMarkers()
+renderStoryBeatMarkers()
 
 // Scrubber drag functionality
 let isDragging = false
@@ -208,6 +495,25 @@ scrubberContainer.addEventListener('click', (e) => {
   setTimeHour(currentTime)
 })
 
+// Keep overlays updated when scenario changes.
+onScenarioChange(() => {
+  renderEnvelopeSpans()
+  renderEventMarkers()
+  renderMismatchMarkers()
+  renderStoryBeatMarkers()
+})
+
+onStoryModeChange(() => {
+  renderStoryBeatMarkers()
+})
+
+// Re-render timeline when filter changes
+onFilterChange(() => {
+  renderEnvelopeSpans()
+  renderEventMarkers()
+  renderMismatchMarkers()
+})
+
 const timelineLabel = document.createElement('div')
 timelineLabel.style.cssText = 'font-size: 11px; color: var(--vscode-statusBar-foreground);'
 timelineLabel.textContent = '0h'
@@ -223,31 +529,80 @@ timelineActions.className = 'timeline-actions'
 timelineActions.setAttribute('data-testid', 'timeline-actions')
 timelineActions.innerHTML = `
   <div class="timeline-actions__buttons">
-    <button class="monaco-button monaco-text-button timeline-action-button" data-action="import" aria-label="Import events" title="Import events (additive)">
-      <span class="codicon codicon-file-add"></span>
-      <span class="timeline-action-label">Import</span>
+    <button class="monaco-button timeline-action-button" data-action="try-expand-primary" aria-label="Demo: Try expand authority" title="Demo: try to expand authority (will be refused)">
+      <span class="codicon codicon-law"></span>
+      <span class="timeline-action-label">Demo: Try expand authority</span>
     </button>
-    <button class="monaco-button monaco-text-button timeline-action-button" data-action="random-events" aria-label="Add random events" title="Add random events (10)">
-      <span class="codicon codicon-sparkle"></span>
-      <span class="timeline-action-label">+10</span>
+    <button class="monaco-button monaco-text-button timeline-action-button" data-action="toggle-actions-menu" aria-label="Actions" aria-expanded="false" title="Simulation actions">
+      <span class="codicon codicon-ellipsis"></span>
+      <span class="timeline-action-label">Actions</span>
     </button>
-    <button class="monaco-button monaco-text-button timeline-action-button" data-action="random-envelope" aria-label="Add random envelope" title="Add random envelope">
-      <span class="codicon codicon-new-file"></span>
-      <span class="timeline-action-label">Envelope</span>
-    </button>
-    <button class="monaco-button timeline-action-button" data-action="reset" aria-label="Clear & reset" title="Clear & reset">
-      <span class="codicon codicon-clear-all"></span>
-      <span class="timeline-action-label">Reset</span>
-    </button>
+    <div class="timeline-actions-menu" id="timeline-actions-menu" role="menu" aria-label="Simulation actions">
+      <button class="monaco-button monaco-text-button timeline-action-button" data-action="random-events" aria-label="Add random events" title="Add random events (10)">
+        <span class="codicon codicon-sparkle"></span>
+        <span class="timeline-action-label">+10</span>
+      </button>
+      <button class="monaco-button monaco-text-button timeline-action-button" data-action="add-steward" aria-label="Add steward" title="Add a steward (up to 5 total)">
+        <span class="codicon codicon-account"></span>
+        <span class="timeline-action-label">Steward</span>
+      </button>
+      <button class="monaco-button monaco-text-button timeline-action-button" data-action="random-envelope" aria-label="Add random envelope" title="Add random envelope">
+        <span class="codicon codicon-new-file"></span>
+        <span class="timeline-action-label">Envelope</span>
+      </button>
+      <button class="monaco-button monaco-text-button timeline-action-button" data-action="reset" aria-label="Clear & reset" title="Clear & reset">
+        <span class="codicon codicon-clear-all"></span>
+        <span class="timeline-action-label">Reset</span>
+      </button>
+    </div>
   </div>
   <div class="timeline-actions__status" id="timeline-actions-status" aria-live="polite"></div>
 `
 
+const actionsMenu = timelineActions.querySelector('#timeline-actions-menu')
+const actionsMenuToggle = timelineActions.querySelector('button[data-action="toggle-actions-menu"]')
+
+function closeActionsMenu() {
+  if (!actionsMenu || !actionsMenuToggle) return
+  actionsMenu.hidden = true
+  actionsMenuToggle.setAttribute('aria-expanded', 'false')
+}
+
+function toggleActionsMenu() {
+  if (!actionsMenu || !actionsMenuToggle) return
+  const open = !actionsMenu.hidden
+  if (open) {
+    closeActionsMenu()
+    return
+  }
+  actionsMenu.hidden = false
+  actionsMenuToggle.setAttribute('aria-expanded', 'true')
+}
+
+// Ensure the menu is closed on initial render.
+closeActionsMenu()
+
+document.addEventListener('click', (e) => {
+  if (!actionsMenu || actionsMenu.hidden) return
+  if (!timelineActions.contains(e.target)) closeActionsMenu()
+})
+
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return
+  if (!actionsMenu || actionsMenu.hidden) return
+  closeActionsMenu()
+})
+
 let statusTimer = null
-function setTimelineStatus(message, { kind = 'info' } = {}) {
+function setTimelineStatus(message, { kind = 'info', html = false } = {}) {
   const el = document.getElementById('timeline-actions-status')
   if (!el) return
-  el.textContent = String(message || '')
+
+  if (html) {
+    el.innerHTML = String(message || '')
+  } else {
+    el.textContent = String(message || '')
+  }
   el.dataset.kind = kind
 
   if (statusTimer) {
@@ -263,6 +618,15 @@ function setTimelineStatus(message, { kind = 'info' } = {}) {
     current.dataset.kind = ''
   }, 3500)
 }
+
+// Allow simple in-status navigation affordances.
+timelineActions.addEventListener('click', (e) => {
+  const link = e.target.closest('a[data-route]')
+  if (!link) return
+  e.preventDefault()
+  const route = link.getAttribute('data-route')
+  if (route) navigateTo(route)
+})
 
 window.addEventListener('hddl:status', (e) => {
   const msg = e?.detail?.message
@@ -282,12 +646,32 @@ function syncTimelineActionsVisibility(pathname) {
   timelineActions.style.display = show ? 'flex' : 'none'
 }
 
+function syncTryExpandVisibility() {
+  const on = getStoryModeEnabled()
+  const primaryBtn = timelineActions.querySelector('button[data-action="try-expand-primary"]')
+  if (primaryBtn) {
+    primaryBtn.style.display = on ? '' : 'none'
+    primaryBtn.setAttribute('aria-label', on ? 'Demo: Try expand authority' : 'Demo: Try expand authority')
+    primaryBtn.title = on
+      ? 'Demo: try to expand authority (will be refused)'
+      : 'Enable Story Mode to run this demo'
+  }
+}
+
 syncTimelineActionsVisibility(window.location.pathname)
+syncTryExpandVisibility()
 window.addEventListener('hddl:navigate', (e) => {
   syncTimelineActionsVisibility(e?.detail?.path || window.location.pathname)
+  syncTryExpandVisibility()
 })
 window.addEventListener('popstate', () => {
   syncTimelineActionsVisibility(window.location.pathname)
+  syncTryExpandVisibility()
+})
+
+onStoryModeChange(() => {
+  // Keep action visibility in sync with Story Mode.
+  syncTryExpandVisibility()
 })
 
 timelineActions.addEventListener('click', async (e) => {
@@ -297,37 +681,20 @@ timelineActions.addEventListener('click', async (e) => {
   const action = btn.dataset.action
   if (!action) return
 
+  if (action === 'toggle-actions-menu') {
+    e.preventDefault()
+    e.stopPropagation()
+    toggleActionsMenu()
+    return
+  }
+
   const beforeEvents = (getScenario()?.events ?? []).length
   const beforeEnvelopes = (getScenario()?.envelopes ?? []).length
 
   try {
-    if (action === 'import') {
-      const input = document.createElement('input')
-      input.type = 'file'
-      input.accept = 'application/json'
-      input.onchange = async () => {
-        const file = input.files?.[0]
-        if (!file) return
-        try {
-          const report = await importEventsFromFile(file)
-          if (report?.errors?.length) {
-            setTimelineStatus(`Schema error: ${report.errors[0]}`, { kind: 'error' })
-            return
-          }
-
-          const afterEvents = (getScenario()?.events ?? []).length
-          const added = Math.max(0, afterEvents - beforeEvents)
-          setTimelineStatus(`Added ${added} event${added === 1 ? '' : 's'}.`)
-        } catch (err) {
-          setTimelineStatus('Invalid JSON.', { kind: 'error' })
-          console.error(err)
-        }
-      }
-      input.click()
-      return
-    }
-
     if (action === 'random-events') {
+      closeActionsMenu()
+      window.dispatchEvent(new CustomEvent('hddl:log-heavy'))
       const report = addRandomEvents(10)
       if (report?.errors?.length) {
         setTimelineStatus(`Schema error: ${report.errors[0]}`, { kind: 'error' })
@@ -339,7 +706,21 @@ timelineActions.addEventListener('click', async (e) => {
       return
     }
 
+    if (action === 'add-steward') {
+      closeActionsMenu()
+      window.dispatchEvent(new CustomEvent('hddl:log-heavy'))
+      const report = addStewardFleet()
+      if (report?.errors?.length) {
+        setTimelineStatus(report.errors[0], { kind: 'warning' })
+        return
+      }
+      setTimelineStatus('Added steward fleet.')
+      return
+    }
+
     if (action === 'random-envelope') {
+      closeActionsMenu()
+      window.dispatchEvent(new CustomEvent('hddl:log-heavy'))
       const report = addRandomEnvelope()
       if (report?.errors?.length) {
         setTimelineStatus(`Schema error: ${report.errors[0]}`, { kind: 'error' })
@@ -353,7 +734,21 @@ timelineActions.addEventListener('click', async (e) => {
       return
     }
 
+    if (action === 'try-expand' || action === 'try-expand-primary') {
+      closeActionsMenu()
+      window.dispatchEvent(new CustomEvent('hddl:log-heavy'))
+      const report = tryExpandAuthority()
+      if (report?.errors?.length) {
+        setTimelineStatus(`Schema error: ${report.errors[0]}`, { kind: 'error' })
+        return
+      }
+      setTimelineStatus('Authority expansion refused (see <a class="timeline-status-link" href="#" data-route="/decision-telemetry">Evidence</a>).', { kind: 'warning', html: true })
+      return
+    }
+
     if (action === 'reset') {
+      closeActionsMenu()
+      window.dispatchEvent(new CustomEvent('hddl:log-heavy'))
       resetScenarioToDefault()
       setTimelineStatus('Reset to default scenario.')
       return
@@ -447,6 +842,10 @@ app.appendChild(titlebar)
 app.appendChild(timelineBar)
 app.appendChild(workbench)
 app.appendChild(statusbar)
+
+// UX review harness (optional)
+initReviewHarness()
+syncReviewBtn()
 
 // Initialize router (pages will render into #editor-area)
 initRouter()

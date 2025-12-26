@@ -1,5 +1,7 @@
 // Envelope Detail Modal
-import { formatSimTime, getEnvelopeAtTime, getEnvelopeHistory, getEventsNearTime, getScenario, getTimeHour } from '../sim/sim-state'
+import { formatSimTime, getBoundaryInteractionCounts, getEnvelopeAtTime, getEnvelopeHistory, getEventsNearTime, getRevisionDiffAtTime, getScenario, getTimeHour } from '../sim/sim-state'
+import { initGlossaryInline } from './glossary'
+import { navigateTo } from '../router'
 
 export function createEnvelopeDetailModal(envelopeId) {
   const modal = document.createElement('div');
@@ -17,6 +19,20 @@ export function createEnvelopeDetailModal(envelopeId) {
   const status = envelope ? (t < envelope.createdHour ? 'pending' : (t >= envelope.endHour ? 'ended' : 'active')) : 'active'
   const created = envelope ? formatSimTime(envelope.createdHour ?? 0) : formatSimTime(0)
   const revised = envelope?.revisedHour != null ? formatSimTime(envelope.revisedHour) : null
+  const version = envelope?.envelope_version ?? 1
+  const revisionId = envelope?.revision_id || '-'
+
+  const boundary = envelope ? getBoundaryInteractionCounts(scenario, t, 24) : null
+  const boundaryBucket = envelope ? boundary?.byEnvelope?.get?.(envelope.envelopeId) : null
+  const boundaryEscalated = boundaryBucket?.escalated ?? 0
+  const boundaryOverridden = boundaryBucket?.overridden ?? 0
+  const boundaryDeferred = boundaryBucket?.deferred ?? 0
+
+  const diff = envelope ? getRevisionDiffAtTime(scenario, envelope.envelopeId, t) : null
+  const diffAssumptionsAdded = diff?.assumptions?.added ?? []
+  const diffAssumptionsRemoved = diff?.assumptions?.removed ?? []
+  const diffConstraintsAdded = diff?.constraints?.added ?? []
+  const diffConstraintsRemoved = diff?.constraints?.removed ?? []
 
   const history = envelope ? getEnvelopeHistory(scenario, envelope.envelopeId) : []
   const historyRows = history.map((e) => {
@@ -75,12 +91,42 @@ export function createEnvelopeDetailModal(envelopeId) {
       <p style="color: var(--vscode-statusBar-foreground); margin-bottom: 32px;">
         Window: ${created}${revised ? ` - Revised: ${revised}` : ''}
       </p>
+
+      <div style="margin: 0 0 12px; font-size: 12px; color: var(--vscode-statusBar-foreground);">
+        Terms:
+        <a class="glossary-term" href="#" data-glossary-term="Decision Envelope">Decision Envelope</a>,
+        <a class="glossary-term" href="#" data-glossary-term="Assumption">Assumption</a>,
+        <a class="glossary-term" href="#" data-glossary-term="Constraint">Constraint</a>,
+        <a class="glossary-term" href="#" data-glossary-term="Boundary Interaction">Boundary Interaction</a>,
+        <a class="glossary-term" href="#" data-glossary-term="Revision">Revision</a>
+      </div>
+
+      <div id="glossary-inline" style="display:none; background: var(--vscode-sideBar-background); border: 1px solid var(--vscode-sideBar-border); padding: 12px; border-radius: 6px; margin-bottom: 12px;"></div>
+
+      <div style="display:flex; gap: 18px; flex-wrap: wrap; margin-bottom: 18px; padding: 10px 12px; border: 1px solid var(--vscode-sideBar-border); border-radius: 6px; background: var(--vscode-editorWidget-background);">
+        <div style="display:flex; flex-direction: column; gap: 2px;">
+          <div style="font-size: 10px; color: var(--vscode-statusBar-foreground); letter-spacing: 0.6px;">CURRENT VERSION</div>
+          <div style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;">v${version}</div>
+        </div>
+        <div style="display:flex; flex-direction: column; gap: 2px;">
+          <div style="font-size: 10px; color: var(--vscode-statusBar-foreground); letter-spacing: 0.6px;">LAST REVISION</div>
+          <div style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;">${revisionId}</div>
+        </div>
+        <div style="display:flex; flex-direction: column; gap: 6px; min-width: 220px;">
+          <div style="font-size: 10px; color: var(--vscode-statusBar-foreground); letter-spacing: 0.6px;">BOUNDARY (LAST 24H)</div>
+          <div style="display:flex; gap: 8px; flex-wrap: wrap; font-size: 11px;">
+            <span style="background: var(--status-warning); opacity: 0.18; padding: 2px 6px; border-radius: 3px;">Escalated: ${boundaryEscalated}</span>
+            <span style="background: var(--status-error); opacity: 0.18; padding: 2px 6px; border-radius: 3px;">Overridden: ${boundaryOverridden}</span>
+            <span style="background: var(--status-info); opacity: 0.18; padding: 2px 6px; border-radius: 3px;">Deferred: ${boundaryDeferred}</span>
+          </div>
+        </div>
+      </div>
       
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
         <div>
           <h3 style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
             <span class="codicon codicon-checklist"></span>
-            Assumptions
+            <a class="glossary-term" href="#" data-glossary-term="Assumption">Assumptions</a>
           </h3>
           <div style="background: var(--vscode-sideBar-background); border: 1px solid var(--vscode-sideBar-border); padding: 16px; border-radius: 6px;">
             ${(envelope?.assumptions ?? []).map(a => `
@@ -95,7 +141,7 @@ export function createEnvelopeDetailModal(envelopeId) {
         <div>
           <h3 style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
             <span class="codicon codicon-law"></span>
-            Constraints
+            <a class="glossary-term" href="#" data-glossary-term="Constraint">Constraints</a>
           </h3>
           <div style="background: var(--vscode-sideBar-background); border: 1px solid var(--vscode-sideBar-border); padding: 16px; border-radius: 6px;">
             ${(envelope?.constraints ?? []).map(c => `
@@ -129,7 +175,7 @@ export function createEnvelopeDetailModal(envelopeId) {
       
       <h3 style="display: flex; align-items: center; gap: 8px; margin: 24px 0 12px 0;">
         <span class="codicon codicon-history"></span>
-        Revision History
+        <a class="glossary-term" href="#" data-glossary-term="Revision">Revision History</a>
       </h3>
       <div style="background: var(--vscode-sideBar-background); border: 1px solid var(--vscode-sideBar-border); padding: 16px; border-radius: 6px;">
         ${(historyRows.length ? historyRows : [{ time: created, author: envelope?.ownerRole || 'Steward', action: 'Created envelope', detail: 'Initial parameters set' }]).map(r => `
@@ -145,11 +191,43 @@ export function createEnvelopeDetailModal(envelopeId) {
           </div>
         `).join('')}
       </div>
+
+      <h3 style="display: flex; align-items: center; gap: 8px; margin: 24px 0 12px 0;">
+        <span class="codicon codicon-diff"></span>
+        <a class="glossary-term" href="#" data-glossary-term="Revision">Revision Diff (summary)</a>
+      </h3>
+      <div style="background: var(--vscode-sideBar-background); border: 1px solid var(--vscode-sideBar-border); padding: 16px; border-radius: 6px;">
+        <div style="display:flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--vscode-statusBar-foreground); margin-bottom: 10px;">
+          <span>Assumptions: +${diffAssumptionsAdded.length} / -${diffAssumptionsRemoved.length}</span>
+          <span>Constraints: +${diffConstraintsAdded.length} / -${diffConstraintsRemoved.length}</span>
+        </div>
+        ${(diffAssumptionsAdded.length || diffAssumptionsRemoved.length || diffConstraintsAdded.length || diffConstraintsRemoved.length)
+          ? `
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+              <div>
+                <div style="font-size: 11px; color: var(--vscode-statusBar-foreground); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;"><a class="glossary-term" href="#" data-glossary-term="Assumption">Assumptions</a></div>
+                ${[...diffAssumptionsAdded.slice(0, 3).map(x => `<div style="font-size: 12px; margin-bottom: 6px;"><span class="codicon codicon-add" style="color: var(--status-success);"></span> ${x}</div>`),
+                    ...diffAssumptionsRemoved.slice(0, 3).map(x => `<div style="font-size: 12px; margin-bottom: 6px;"><span class="codicon codicon-remove" style="color: var(--status-error);"></span> ${x}</div>`)].join('')}
+              </div>
+              <div>
+                <div style="font-size: 11px; color: var(--vscode-statusBar-foreground); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;"><a class="glossary-term" href="#" data-glossary-term="Constraint">Constraints</a></div>
+                ${[...diffConstraintsAdded.slice(0, 3).map(x => `<div style="font-size: 12px; margin-bottom: 6px;"><span class="codicon codicon-add" style="color: var(--status-success);"></span> ${x}</div>`),
+                    ...diffConstraintsRemoved.slice(0, 3).map(x => `<div style="font-size: 12px; margin-bottom: 6px;"><span class="codicon codicon-remove" style="color: var(--status-error);"></span> ${x}</div>`)].join('')}
+              </div>
+            </div>
+          `
+          : '<div style="color: var(--vscode-statusBar-foreground); font-size: 12px;">No revision diffs observed at the selected time.</div>'}
+      </div>
       
     </div>
   `;
   
   modal.appendChild(modalContent);
+
+  initGlossaryInline(modalContent, {
+    panelSelector: '#glossary-inline',
+    openDocs: () => navigateTo('/docs'),
+  })
   
   // Close handlers
   const closeBtn = modalContent.querySelector('#close-modal');

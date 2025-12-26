@@ -8,15 +8,22 @@ export {
   onTimeChange,
   setScenario,
   setTimeHour,
+  getStewardFilter,
+  setStewardFilter,
+  onFilterChange,
 } from './store'
 
 export {
   formatSimTime,
   getActiveDSGSession,
+  getBoundaryInteractionCounts,
+  getDecisionMemoryEntries,
   getDSGMessages,
   getEnvelopeAtTime,
+  getEnvelopeLineage,
   getEnvelopeHistory,
   getEnvelopeStatus,
   getEventsNearTime,
+  getRevisionDiffAtTime,
   getStewardActivity,
 } from './selectors'

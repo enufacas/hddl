@@ -23,6 +23,18 @@ Authority is expressed through envelopes and their revision history.
 A versioned, steward-owned boundary that defines what automation/agents/humans may do, under what constraints, and what must be escalated.
 See: foundations/HDDL_System_Overview.md and operations/Request_Lifecycle_Walkthrough.md
 
+## Assumption
+A stated condition a Decision Envelope relies on to remain valid (e.g., data freshness, policy stability, operational capacity).
+When signals indicate an assumption no longer fits reality, stewardship revises the envelope explicitly.
+
+## Constraint
+An explicit rule inside a Decision Envelope that limits what actions may be taken (e.g., prohibited actions, required approvals, escalation triggers).
+Constraints are enforceable boundaries; changing them requires an explicit revision.
+
+## Revision
+An authoritative change to a Decision Envelope (assumptions and/or constraints) produced by stewardship.
+Revisions create envelope version lineage and make authority changes inspectable over time.
+
 ## Envelope Version
 A specific revision of a Decision Envelope.
 Envelope versions create lineage (what changed, when, and why) and enable inspection over time.

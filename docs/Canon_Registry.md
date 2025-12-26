@@ -20,6 +20,14 @@ Any document not listed here is non-canonical.
 - foundations/Decision_Memory_and_AI_Native_Operations.md
 - foundations/Human_Derived_Decision_Layer_Foundational_Principles.md
 
+## Portable Spec (Wire Format + Schemas)
+- spec/Authority_Order.md
+- spec/Scenario_Replay_Wire_Format.md
+- spec/Scenario_Interaction_Format.md
+- spec/Drift_Gap_Analysis.md
+- spec/Implementers_Guide.md
+- spec/Interactive_Scenario_Implementation.md
+
 ## Stewardship & Roles
 - groups/Decision_Stewardship_Group.md
 - roles/Engineering_Steward.md

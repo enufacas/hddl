@@ -1,5 +1,5 @@
-import { getScenario, setScenario } from './sim-state'
-import { createDefaultScenario } from './scenario-default'
+import { getScenario, getTimeHour, setScenario } from './sim-state'
+import { createDefaultScenario } from './scenario-default-simplified'
 
 function mergeUniqueEnvelopes(baseEnvelopes, extraEnvelopes) {
   const byId = new Map()
@@ -99,7 +99,7 @@ export function addRandomEvents(count = 10) {
   if (!envelopes.length) return { ok: false, errors: ['No envelopes available.'], warnings: [] }
 
   const events = []
-  const types = ['signal', 'signal', 'revision', 'dsg_session', 'escalation']
+  const types = ['signal', 'signal', 'revision', 'dsg_session', 'boundary_interaction']
   const actors = ['Customer Steward', 'HR Steward', 'Domain Engineer', 'Data Steward', 'Sales Steward']
 
   for (let i = 0; i < count; i++) {
@@ -110,6 +110,15 @@ export function addRandomEvents(count = 10) {
     const actorRole = actors[Math.floor(Math.random() * actors.length)]
     const sessionId = type === 'dsg_session' ? `DSG-RND-${Date.now()}-${i}` : undefined
 
+    const boundaryKinds = ['escalated', 'deferred', 'overridden']
+    const boundary_kind = type === 'boundary_interaction'
+      ? boundaryKinds[Math.floor(Math.random() * boundaryKinds.length)]
+      : undefined
+
+    const revision_id = type === 'revision'
+      ? `REV-RND-${env.envelopeId}-${String(Date.now()).slice(-6)}-${i}`
+      : undefined
+
     events.push({
       eventId,
       hour,
@@ -119,8 +128,21 @@ export function addRandomEvents(count = 10) {
       severity: type === 'signal' ? (Math.random() > 0.7 ? 'warning' : 'info') : 'info',
       value: type === 'signal' ? Math.round((Math.random() * 0.25) * 100) / 100 : undefined,
       signalKey: type === 'signal' ? (Math.random() > 0.5 ? 'assumption_drift' : 'outcome_shift') : undefined,
-      label: type === 'revision' ? 'Envelope revised' : type === 'dsg_session' ? 'DSG Review triggered' : type === 'escalation' ? 'Escalation requested' : 'Signal observed',
-      detail: type === 'signal' ? 'Observed signal near assumptions boundary' : type === 'escalation' ? 'Escalation triggered due to boundary touch' : 'Scenario event',
+      revision_id,
+      envelope_version: type === 'revision' ? undefined : undefined,
+      boundary_kind,
+      label: type === 'revision'
+        ? 'Envelope revised'
+        : type === 'dsg_session'
+          ? 'DSG Review triggered'
+          : type === 'boundary_interaction'
+            ? `Boundary interaction ${boundary_kind}`
+            : 'Signal observed',
+      detail: type === 'signal'
+        ? 'Observed signal near assumptions boundary'
+        : type === 'boundary_interaction'
+          ? 'Envelope boundary touched during execution; action recorded.'
+          : 'Scenario event',
       nextAssumptions: type === 'revision' ? (env.assumptions ?? []).concat(['Revision applied from steward calibration.']) : undefined,
       nextConstraints: type === 'revision' ? (env.constraints ?? []).slice(0, Math.max(1, (env.constraints ?? []).length - 1)) : undefined,
       sessionId,
@@ -163,6 +185,8 @@ export function addRandomEnvelope() {
     createdHour: start,
     endHour: end,
     accent,
+    envelope_version: 1,
+    revision_id: null,
     assumptions: [
       `${domain} baseline assumptions hold within approved bounds.`,
       'Signals will be reviewed by the owning steward within 24h.',
@@ -223,32 +247,160 @@ export function addRandomEnvelope() {
   return applyAdditivePatch({ envelopes: [envelope], events: [promoteEvent, signalEvent, ...(dsgEvent ? [dsgEvent] : [])] })
 }
 
-export async function importEventsFromFile(file) {
-  const text = await file.text()
-  const parsed = JSON.parse(text)
+export function tryExpandAuthority() {
+  const scenario = getScenario()
+  const t = getTimeHour()
 
-  const isEventArray = Array.isArray(parsed)
-  const isSingleEvent = !isEventArray && parsed && typeof parsed === 'object' && typeof parsed.type === 'string' && typeof parsed.hour === 'number'
-  const hasEvents = !isEventArray && !isSingleEvent && parsed && Array.isArray(parsed.events)
+  const envelopes = Array.isArray(scenario?.envelopes) ? scenario.envelopes : []
+  const target = envelopes.find(e => typeof e?.createdHour === 'number' && typeof e?.endHour === 'number' && e.createdHour <= t && t <= e.endHour)
+    || envelopes[0]
 
-  if (!isEventArray && !isSingleEvent && !hasEvents) {
-    return {
-      ok: false,
-      errors: ['Invalid event bundle. Expected an event object, an array of events, or an object with an `events` array.'],
-      warnings: [],
-    }
+  if (!target?.envelopeId) {
+    return { ok: false, errors: ['No envelopes available.'], warnings: [] }
   }
 
-  const patch = isEventArray
-    ? { events: parsed }
-    : isSingleEvent
-      ? { events: [parsed] }
-      : {
-        envelopes: Array.isArray(parsed.envelopes) ? parsed.envelopes : [],
-        fleets: Array.isArray(parsed.fleets) ? parsed.fleets : [],
-        events: parsed.events,
-        durationHours: typeof parsed.durationHours === 'number' ? parsed.durationHours : null,
-      }
+  const hour = typeof t === 'number' ? t : 0
+  const nowKey = String(Date.now()).slice(-7)
+  const eventIdBase = `authority_expand_attempt:${String(hour).replace('.', '_')}:${target.envelopeId}:${nowKey}`
 
-  return applyAdditivePatch(patch)
+  return applyAdditivePatch({
+    events: [
+      {
+        eventId: `${eventIdBase}:boundary`,
+        hour,
+        type: 'boundary_interaction',
+        envelopeId: target.envelopeId,
+        actorRole: 'System',
+        severity: 'warning',
+        boundary_kind: 'escalated',
+        boundary_refs: ['authority_expansion'],
+        label: 'Authority expansion refused',
+        detail: 'Model proposed an out-of-envelope action. The envelope prohibited it and escalation was created.',
+        reason: 'Authority cannot expand silently; it changes only through explicit revision artifacts.'
+      },
+      {
+        eventId: `${eventIdBase}:annotation`,
+        hour,
+        type: 'annotation',
+        envelopeId: target.envelopeId,
+        severity: 'info',
+        label: 'Why this was refused',
+        detail: 'HDDL keeps authority explicit: proposals outside the envelope are refused and routed to stewardship. To expand authority, produce a revision artifact (e.g., via DSG) and increment envelope lineage.'
+      }
+    ]
+  })
+}
+
+export function addStewardFleet() {
+  const scenario = getScenario()
+  const currentFleets = Array.isArray(scenario?.fleets) ? scenario.fleets : []
+
+  const CANON_STEWARDS = [
+    'Customer Steward',
+    'HR Steward',
+    'Sales Steward',
+    'Engineering Steward',
+    'Data Steward',
+    'Resiliency Steward',
+    'Business Domain Steward',
+    'Engineering/Platform Steward',
+  ]
+
+  const CANON_AGENT_TEMPLATES = {
+    'Customer Steward': [
+      { name: 'ReplyAssist', role: 'response drafting' },
+      { name: 'RefundGuard', role: 'refund boundary checks' },
+      { name: 'EscalationRouter', role: 'boundary routing + packet' },
+    ],
+    'HR Steward': [
+      { name: 'BiasCheck', role: 'protected-class guardrails' },
+      { name: 'TransparencyPacket', role: 'candidate packet compilation' },
+      { name: 'InterviewScheduler', role: 'coordination (no surveillance)' },
+    ],
+    'Sales Steward': [
+      { name: 'PipelineTriage', role: 'lead routing within bounds' },
+      { name: 'DiscountGuard', role: 'pricing/discount boundary checks' },
+      { name: 'RenewalAssist', role: 'renewal packet compilation' },
+    ],
+    'Engineering Steward': [
+      { name: 'DeployGate', role: 'release boundary enforcement' },
+      { name: 'SLOSentinel', role: 'latency/error regression detection' },
+      { name: 'ChangeSummary', role: 'human-readable change packet' },
+    ],
+    'Engineering/Platform Steward': [
+      { name: 'IntegrationGate', role: 'platform integration envelope checks' },
+      { name: 'PolicyProbe', role: 'runtime policy validation' },
+      { name: 'RollbackPlanner', role: 'bounded rollback recommendations' },
+    ],
+    'Data Steward': [
+      { name: 'SchemaGuard', role: 'schema contract enforcement' },
+      { name: 'LineageTracer', role: 'lineage + provenance packet' },
+      { name: 'PIIRedactor', role: 'PII boundary checks' },
+    ],
+    'Resiliency Steward': [
+      { name: 'DriftMonitor', role: 'decision degradation detection' },
+      { name: 'IncidentRouter', role: 'escalation routing + packet' },
+      { name: 'RecoveryCoach', role: 'bounded recovery runbooks' },
+    ],
+    'Business Domain Steward': [
+      { name: 'OutcomeAnalyst', role: 'outcome telemetry interpretation' },
+      { name: 'TradeoffRecorder', role: 'decision memory capture' },
+      { name: 'KPIBoundaryCheck', role: 'KPI boundary enforcement' },
+    ],
+  }
+
+  const STEWARD_ABBR = {
+    'Customer Steward': 'CS',
+    'HR Steward': 'HR',
+    'Sales Steward': 'SALES',
+    'Engineering Steward': 'ENG',
+    'Engineering/Platform Steward': 'PLAT',
+    'Data Steward': 'DATA',
+    'Resiliency Steward': 'RES',
+    'Business Domain Steward': 'BDS',
+  }
+
+  // Cap at 5 total steward fleets to keep the UI readable.
+  if (currentFleets.length >= 5) {
+    return { ok: false, errors: ['Maximum of 5 stewards reached.'], warnings: [] }
+  }
+
+  const usedRoles = new Set(currentFleets.map(f => f?.stewardRole).filter(Boolean))
+  const stewardRole = CANON_STEWARDS.find(r => !usedRoles.has(r))
+  if (!stewardRole) {
+    return { ok: false, errors: ['No canonical stewards remaining to add.'], warnings: [] }
+  }
+
+  const abbr = STEWARD_ABBR[stewardRole] || String(stewardRole).replace(/[^A-Za-z]/g, '').slice(0, 6).toUpperCase()
+  const agentTemplates = CANON_AGENT_TEMPLATES[stewardRole] || [
+    { name: 'ExecutionAssist', role: 'execution agent' },
+    { name: 'BoundaryGuard', role: 'boundary checks' },
+  ]
+
+  const agentIdsInUse = new Set(
+    currentFleets
+      .flatMap(f => (Array.isArray(f?.agents) ? f.agents : []))
+      .map(a => a?.agentId)
+      .filter(Boolean)
+  )
+
+  const agents = agentTemplates.map((tpl, idx) => {
+    const base = `AG-${abbr}-${String(idx + 1).padStart(2, '0')}`
+    let agentId = base
+    let bump = 1
+    while (agentIdsInUse.has(agentId)) {
+      bump += 1
+      agentId = `${base}v${bump}`
+    }
+    return {
+      agentId,
+      name: tpl.name,
+      role: tpl.role,
+      envelopeIds: [],
+    }
+  })
+
+  return applyAdditivePatch({
+    fleets: [{ stewardRole, agents }],
+  })
 }

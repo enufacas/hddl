@@ -7,12 +7,23 @@ import {
   onTimeChange,
   getActiveDSGSession,
 } from '../sim/sim-state'
+import { initGlossaryInline } from '../components/glossary'
+import { navigateTo } from '../router'
 
 export function renderDSGEvent(container) {
   container.innerHTML = `
     <div class="page-container" data-testid="dsg-page">
       <h1>DSG Review</h1>
       <p class="subtitle">Cross-domain arbitration rendered as durable artifacts at the selected timeline time</p>
+
+      <div style="margin: 10px 0 12px; font-size: 12px; color: var(--vscode-statusBar-foreground);">
+        Terms:
+        <a class="glossary-term" href="#" data-glossary-term="DSG (Decision Stewardship Group)">DSG</a>,
+        <a class="glossary-term" href="#" data-glossary-term="Decision Envelope">Decision Envelope</a>,
+        <a class="glossary-term" href="#" data-glossary-term="Revision">Revision</a>
+      </div>
+
+      <div id="glossary-inline" style="display:none; background: var(--vscode-sideBar-background); border: 1px solid var(--vscode-sideBar-border); padding: 12px; border-radius: 6px; margin-bottom: 12px;"></div>
 
       <div class="dsg-container">
         <div class="dsg-header">
@@ -57,6 +68,11 @@ export function renderDSGEvent(container) {
       </div>
     </div>
   `
+
+  initGlossaryInline(container, {
+    panelSelector: '#glossary-inline',
+    openDocs: () => navigateTo('/docs'),
+  })
 
   const rerender = () => {
     const scenario = getScenario()
@@ -161,7 +177,9 @@ function renderView({ container, scenario, timeHour }) {
 
     const revisionLines = revisions.map(r => {
       const when = formatSimTime(r.hour)
-      return `<li>Envelope: <span style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;">${escapeHtml(r.envelopeId)}</span> / ${escapeHtml(when)} (${escapeHtml(r.actorRole || 'Steward')})</li>`
+      const revId = r.revision_id || r.eventId || '-'
+      const ver = r.envelope_version != null ? `v${r.envelope_version}` : ''
+      return `<li>Envelope: <span style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;">${escapeHtml(r.envelopeId)}</span> / ${escapeHtml(when)} (${escapeHtml(r.actorRole || 'Steward')}) ${escapeHtml(ver)} • rev: ${escapeHtml(revId)}</li>`
     })
 
     artifactsEl.innerHTML = `

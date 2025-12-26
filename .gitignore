@@ -3,7 +3,7 @@ hddl-sim/dist/
 hddl-sim/node_modules/
 hddl-sim/.vite/
 
-# MkDocs build output (legacy - removed)
+# Legacy build output
 site/
 
 # Node.js
@@ -13,7 +13,7 @@ yarn-debug.log*
 yarn-error.log*
 package-lock.json
 
-# Python virtual environments (legacy - removed)
+# Python virtual environments
 .venv/
 .venv*/
 venv/

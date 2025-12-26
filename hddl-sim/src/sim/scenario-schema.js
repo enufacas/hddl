@@ -1,9 +1,11 @@
-export const SCHEMA_VERSION = 1
+export const SCHEMA_VERSION = 2
 
 const VALID_EVENT_TYPES = new Set([
   'envelope_promoted',
   'signal',
+  'decision',
   'revision',
+  'boundary_interaction',
   'escalation',
   'dsg_session',
   'dsg_message',
@@ -21,6 +23,11 @@ function asString(value) {
 
 function asNumber(value) {
   return typeof value === 'number' && Number.isFinite(value) ? value : null
+}
+
+function asNullableString(value) {
+  const s = asString(value)
+  return s === null ? null : s
 }
 
 function asStringArray(value) {
@@ -66,6 +73,9 @@ export function validateScenario(rawScenario) {
     if (!asString(env.name)) errors.push(`Envelope[${idx}].name must be a string.`)
     if (asNumber(env.createdHour) === null) errors.push(`Envelope[${idx}].createdHour must be a number.`)
     if (asNumber(env.endHour) === null) errors.push(`Envelope[${idx}].endHour must be a number.`)
+
+    const version = asNumber(env.envelope_version ?? env.envelopeVersion)
+    if (version !== null && version < 1) warnings.push(`Envelope[${idx}].envelope_version should be >= 1.`)
   })
 
   const events = Array.isArray(rawScenario.events) ? rawScenario.events : []
@@ -90,8 +100,22 @@ export function validateScenario(rawScenario) {
       if (!asString(event.signalKey)) warnings.push(`Signal[${idx}] missing signalKey.`)
       if (!asString(event.severity)) warnings.push(`Signal[${idx}] missing severity.`)
     }
+    if (type === 'decision') {
+      if (!asString(event.envelopeId)) errors.push(`Decision[${idx}] missing envelopeId.`)
+      if (!asString(event.agentId)) warnings.push(`Decision[${idx}] missing agentId.`)
+    }
     if (type === 'revision') {
       if (!asString(event.envelopeId)) errors.push(`Revision[${idx}] missing envelopeId.`)
+      if (!asString(event.revision_id ?? event.revisionId)) warnings.push(`Revision[${idx}] missing revision_id.`)
+
+      const resolves = asString(event.resolvesEventId ?? event.resolves_eventId ?? event.resolvesEventID ?? event.resolves)
+      if ((event.resolvesEventId ?? event.resolves_eventId ?? event.resolvesEventID ?? event.resolves) != null && !resolves) {
+        warnings.push(`Revision[${idx}] has non-string resolvesEventId.`)
+      }
+    }
+    if (type === 'boundary_interaction') {
+      if (!asString(event.envelopeId)) errors.push(`Boundary interaction[${idx}] missing envelopeId.`)
+      if (!asString(event.boundary_kind ?? event.boundaryKind)) warnings.push(`Boundary interaction[${idx}] missing boundary_kind.`)
     }
     if (type === 'dsg_session') {
       if (!asString(event.sessionId)) errors.push(`DSG session[${idx}] missing sessionId.`)
@@ -143,6 +167,8 @@ export function normalizeScenario(rawScenario) {
         createdHour: asNumber(env.createdHour) ?? 0,
         endHour: asNumber(env.endHour) ?? durationHours,
         accent: asString(env.accent) ?? 'var(--status-muted)',
+        envelope_version: asNumber(env.envelope_version ?? env.envelopeVersion) ?? 1,
+        revision_id: asNullableString(env.revision_id ?? env.revisionId),
         assumptions: asStringArray(env.assumptions),
         constraints: asStringArray(env.constraints),
       }
@@ -190,9 +216,26 @@ export function normalizeScenario(rawScenario) {
         value: asNumber(event.value) ?? undefined,
         assumptionRefs: asStringArray(event.assumptionRefs),
 
+        // Decisions (agent execution inside envelope bounds)
+        agentId: asString(event.agentId) ?? undefined,
+        status: asString(event.status) ?? undefined,
+
         // Revisions
+        revision_id: asString(event.revision_id ?? event.revisionId) ?? undefined,
+        envelope_version: asNumber(event.envelope_version ?? event.envelopeVersion) ?? undefined,
         nextAssumptions: asStringArray(event.nextAssumptions),
         nextConstraints: asStringArray(event.nextConstraints),
+
+        // Causality / linkage
+        // Used to explicitly indicate that a revision resolves a prior boundary interaction.
+        resolvesEventId: asString(event.resolvesEventId ?? event.resolves_eventId ?? event.resolvesEventID ?? event.resolves) ?? undefined,
+
+        // Boundary interactions
+        boundary_kind: asString(event.boundary_kind ?? event.boundaryKind) ?? undefined,
+        boundary_refs: asStringArray(event.boundary_refs ?? event.boundaryRefs),
+
+        // Decision memory (recall-only join key)
+        decision_id: asString(event.decision_id ?? event.decisionId) ?? undefined,
 
         // DSG
         sessionId: asString(event.sessionId) ?? undefined,

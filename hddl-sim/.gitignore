@@ -16,6 +16,9 @@ dist-ssr
 test-results
 playwright-report
 
+# UX review harness artifacts
+review/artifacts
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

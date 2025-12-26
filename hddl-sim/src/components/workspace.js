@@ -1,28 +1,72 @@
 // Workspace layout component
 import { navigateTo } from '../router';
-import { formatSimTime, getEnvelopeStatus, getScenario, getTimeHour, onScenarioChange, onTimeChange } from '../sim/sim-state'
+import { formatSimTime, getBoundaryInteractionCounts, getEnvelopeStatus, getScenario, getTimeHour, onScenarioChange, onTimeChange, getStewardFilter, onFilterChange, getEnvelopeAtTime, getRevisionDiffAtTime } from '../sim/sim-state'
+import { initGlossaryInline } from './glossary'
+import { getStewardColor, toSemver } from '../sim/steward-colors'
 
-// Activity bar icons (using codicon names) - Simulation focused
+const STORAGE_KEY = 'hddl:layout'
+
+function loadLayoutState() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}')
+    return parsed && typeof parsed === 'object' ? parsed : {}
+  } catch {
+    return {}
+  }
+}
+
+function saveLayoutState(next) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
+  } catch {
+    // ignore
+  }
+}
+
+function setCssVar(name, value) {
+  document.documentElement.style.setProperty(name, value)
+}
+
+function setAuxCollapsed(collapsed) {
+  document.body.classList.toggle('aux-hidden', Boolean(collapsed))
+  const state = loadLayoutState()
+  saveLayoutState({ ...state, auxCollapsed: Boolean(collapsed) })
+}
+
+function setBottomCollapsed(collapsed) {
+  document.body.classList.toggle('panel-hidden', Boolean(collapsed))
+  const state = loadLayoutState()
+  saveLayoutState({ ...state, bottomCollapsed: Boolean(collapsed) })
+}
+
+// Activity bar icons (primary lenses)
 const activityBarItems = [
-  { id: 'envelopes', icon: 'shield', label: 'Decision Envelopes', route: '/' },
-  { id: 'signals', icon: 'pulse', label: 'Signals & Outcomes', route: '/decision-telemetry' },
-  { id: 'stewardship', icon: 'person', label: 'Steward Actions', route: '/stewardship' }
-];
+  { id: 'envelopes', icon: 'shield', label: 'Envelopes', route: '/' },
+  { id: 'evidence', icon: 'pulse', label: 'Evidence', route: '/decision-telemetry' },
+  { id: 'revision', icon: 'git-pull-request', label: 'Revision', route: '/stewardship' },
+]
 
-// Sidebar navigation items (using codicon names) - Simulation concepts
 const navItems = [
-  { id: 'envelopes', label: 'Decision Envelopes', icon: 'shield', route: '/', section: 'simulation' },
-  { id: 'signals', label: 'Signals & Outcomes', icon: 'pulse', route: '/decision-telemetry', section: 'simulation' },
-  { id: 'capability', label: 'Steward Agent Fleets', icon: 'organization', route: '/steward-fleets', section: 'simulation' },
-  { id: 'dsg-event', label: 'DSG Review', icon: 'comment-discussion', route: '/dsg-event', section: 'events' },
-  { id: 'stewardship', label: 'Steward Actions', icon: 'person', route: '/stewardship', section: 'events' }
-];
+  // Primary
+  { id: 'envelopes', label: 'Envelopes', icon: 'shield', route: '/', section: 'primary' },
+  { id: 'evidence', label: 'Evidence', icon: 'pulse', route: '/decision-telemetry', section: 'primary' },
+  { id: 'revision', label: 'Revision', icon: 'git-pull-request', route: '/stewardship', section: 'primary' },
 
-// Sidebar sections configuration
+  // Secondary
+  { id: 'fleets', label: 'Fleets', icon: 'organization', route: '/steward-fleets', section: 'secondary' },
+  { id: 'dsg-artifact', label: 'DSG Artifact', icon: 'file-binary', route: '/dsg-event', section: 'secondary' },
+  { id: 'interactive', label: 'Interactive', icon: 'debug-start', route: '/interactive', section: 'secondary', experimental: true },
+
+  // Reference
+  { id: 'docs', label: 'Docs', icon: 'book', route: '/docs', section: 'reference' },
+  { id: 'authority', label: 'Authority Map', icon: 'map', route: '/authority', section: 'reference' },
+]
+
 const sidebarSections = [
-  { id: 'simulation', title: 'Simulation View', icon: 'eye', collapsed: false },
-  { id: 'events', title: 'Key Events', icon: 'calendar', collapsed: false }
-];
+  { id: 'primary', title: 'Primary', icon: 'eye', collapsed: false },
+  { id: 'secondary', title: 'Secondary', icon: 'layers', collapsed: false },
+  { id: 'reference', title: 'Reference', icon: 'book', collapsed: true },
+]
 
 // Create activity bar
 function createActivityBar() {
@@ -86,40 +130,6 @@ function createSidebar() {
   header.className = 'composite title';
   header.style.cssText = 'padding: 8px 12px;';
   
-  // Persona selector
-  const personaSelector = document.createElement('div');
-  personaSelector.style.cssText = 'margin-bottom: 8px;';
-  
-  const personaLabel = document.createElement('div');
-  personaLabel.textContent = 'VIEW AS';
-  personaLabel.style.cssText = 'font-size: 9px; color: var(--vscode-statusBar-foreground); margin-bottom: 4px; letter-spacing: 0.5px;';
-  
-  const personaDropdown = document.createElement('select');
-  personaDropdown.id = 'persona-selector';
-  personaDropdown.style.cssText = 'width: 100%; padding: 4px 8px; background: var(--vscode-input-background); color: var(--vscode-editor-foreground); border: 1px solid var(--vscode-input-border); border-radius: 2px; font-size: 12px; cursor: pointer;';
-  
-  const personas = [
-    { value: 'domain-engineer', label: 'Domain Engineer' },
-    { value: 'hr-steward', label: 'HR Steward' },
-    { value: 'customer-steward', label: 'Customer Steward' },
-    { value: 'executive', label: 'Executive' },
-    { value: 'data-steward', label: 'Data Steward' }
-  ];
-  
-  personas.forEach(persona => {
-    const option = document.createElement('option');
-    option.value = persona.value;
-    option.textContent = persona.label;
-    personaDropdown.appendChild(option);
-  });
-  
-  personaDropdown.addEventListener('change', (e) => {
-    updatePersonaView(e.target.value);
-  });
-  
-  personaSelector.appendChild(personaLabel);
-  personaSelector.appendChild(personaDropdown);
-  
   // Title and actions
   const titleContainer = document.createElement('div');
   titleContainer.style.cssText = 'display: flex; align-items: center; justify-content: space-between; width: 100%;';
@@ -137,7 +147,6 @@ function createSidebar() {
   titleContainer.appendChild(title);
   titleContainer.appendChild(actionButton);
   
-  header.appendChild(personaSelector);
   header.appendChild(titleContainer);
   
   const content = document.createElement('div');
@@ -163,9 +172,9 @@ function createSidebar() {
     });
   });
 
-  // Steward fleets panel (time-driven)
-  const fleetsPanel = createStewardFleetsPanel()
-  listContainer.appendChild(fleetsPanel)
+  // Envelope details collapsible section
+  const envelopeSection = createCollapsibleEnvelopeSection()
+  listContainer.appendChild(envelopeSection)
   
   scrollableElement.appendChild(listContainer);
   content.appendChild(scrollableElement);
@@ -173,19 +182,182 @@ function createSidebar() {
   sidebar.appendChild(header);
   sidebar.appendChild(content);
 
-  // Keep fleets panel in sync with scenario/time
-  const rerenderFleets = () => {
+  // Keep envelope section in sync with scenario/time/filter
+  const rerenderEnvelope = () => {
     if (!sidebar.isConnected) return
     const scenario = getScenario()
     const timeHour = getTimeHour()
-    renderStewardFleets(fleetsPanel, scenario, timeHour)
+    const stewardFilter = getStewardFilter()
+    renderEnvelopeDetails(envelopeSection, scenario, timeHour, stewardFilter)
   }
 
-  rerenderFleets()
-  onTimeChange(rerenderFleets)
-  onScenarioChange(rerenderFleets)
+  rerenderEnvelope()
+  onTimeChange(rerenderEnvelope)
+  onScenarioChange(rerenderEnvelope)
+  onFilterChange(rerenderEnvelope)
   
   return sidebar;
+}
+
+function createCollapsibleEnvelopeSection() {
+  const root = document.createElement('div')
+  root.className = 'sidebar-envelope-section'
+  root.id = 'active-envelope-section'
+  root.style.cssText = 'margin: 12px 0; padding: 0 12px; border-radius: 6px; transition: background-color 0.3s ease;'
+  
+  // Section header (collapsible)
+  const header = document.createElement('div')
+  header.style.cssText = 'display: flex; align-items: center; gap: 6px; cursor: pointer; padding: 8px 0; border-bottom: 1px solid var(--vscode-sideBar-border);'
+  
+  const chevron = document.createElement('span')
+  chevron.className = `codicon codicon-chevron-${telemetrySectionState['Active Envelope'] ? 'down' : 'right'}`
+  chevron.style.cssText = 'font-size: 12px;'
+  
+  const icon = document.createElement('span')
+  icon.className = 'codicon codicon-shield'
+  icon.style.cssText = 'font-size: 14px;'
+  
+  const title = document.createElement('h3')
+  title.textContent = 'Active Envelope'
+  title.style.cssText = 'font-size: 11px; font-weight: 600; text-transform: uppercase; margin: 0; letter-spacing: 0.5px; flex: 1;'
+  
+  const meta = document.createElement('span')
+  meta.className = 'sidebar-envelope__meta'
+  meta.id = 'envelope-meta'
+  meta.style.cssText = 'font-size: 11px; color: var(--vscode-statusBar-foreground);'
+  
+  header.appendChild(chevron)
+  header.appendChild(icon)
+  header.appendChild(title)
+  header.appendChild(meta)
+  
+  // Section content (collapsible)
+  const content = document.createElement('div')
+  content.className = 'sidebar-envelope__body'
+  content.setAttribute('data-testid', 'envelope-details')
+  content.style.cssText = telemetrySectionState['Active Envelope'] ? 'display: block; padding-top: 8px;' : 'display: none;'
+  
+  // Toggle collapse on header click
+  header.addEventListener('click', () => {
+    telemetrySectionState['Active Envelope'] = !telemetrySectionState['Active Envelope']
+    const isCollapsed = !telemetrySectionState['Active Envelope']
+    chevron.className = `codicon codicon-chevron-${isCollapsed ? 'right' : 'down'}`
+    content.style.display = isCollapsed ? 'none' : 'block'
+  })
+  
+  root.appendChild(header)
+  root.appendChild(content)
+  return root
+}
+
+function renderEnvelopeDetails(panelEl, scenario, timeHour, stewardFilter) {
+  const body = panelEl.querySelector('.sidebar-envelope__body')
+  const meta = panelEl.querySelector('#envelope-meta')
+  if (!body) return
+
+  const envelopes = scenario?.envelopes ?? []
+  const filteredEnvelopes = stewardFilter === 'all'
+    ? envelopes
+    : envelopes.filter(env => env.ownerRole === stewardFilter)
+  
+  const activeEnvelopes = filteredEnvelopes.filter(e => getEnvelopeStatus(e, timeHour) === 'active')
+  
+  if (meta) meta.textContent = activeEnvelopes.length ? `${activeEnvelopes.length}` : '0'
+
+  if (!activeEnvelopes.length) {
+    body.innerHTML = `<div class="sidebar-envelope__empty">No active envelopes at current time.</div>`
+    // Clear background tint when no active envelope
+    const sectionEl = body.closest('.sidebar-envelope-section')
+    if (sectionEl) {
+      sectionEl.style.backgroundColor = ''
+      sectionEl.style.borderLeft = ''
+    }
+    return
+  }
+
+  // Clear section-level tint (we'll tint each envelope card individually)
+  const sectionEl = body.closest('.sidebar-envelope-section')
+  if (sectionEl) {
+    sectionEl.style.backgroundColor = ''
+    sectionEl.style.borderLeft = ''
+  }
+
+  // Render all active envelopes with their steward colors
+  body.innerHTML = activeEnvelopes.map(envelope => {
+    const effective = getEnvelopeAtTime(scenario, envelope.envelopeId, timeHour) || envelope
+    const currentVersion = effective?.envelope_version ?? 1
+    const baseVersion = envelope?.envelope_version ?? 1
+    const semver = toSemver(currentVersion)
+    const isVersionBumped = currentVersion > baseVersion
+    const boundary = getBoundaryInteractionCounts(scenario, timeHour, 24)
+    const boundaryBucket = boundary?.byEnvelope?.get?.(envelope.envelopeId)
+    const boundaryEscalated = boundaryBucket?.escalated ?? 0
+    const boundaryOverridden = boundaryBucket?.overridden ?? 0
+    const boundaryDeferred = boundaryBucket?.deferred ?? 0
+
+    const diff = getRevisionDiffAtTime(scenario, envelope.envelopeId, timeHour)
+    const hasChanges = diff && ((diff.assumptions?.added?.length ?? 0) > 0 || (diff.assumptions?.removed?.length ?? 0) > 0 || (diff.constraints?.added?.length ?? 0) > 0 || (diff.constraints?.removed?.length ?? 0) > 0)
+
+    const stewardColor = getStewardColor(envelope.ownerRole)
+    
+    // Version badge with bump indicator
+    const versionBadge = isVersionBumped
+      ? `<span style="background: var(--status-warning); color: var(--vscode-editor-background); padding: 3px 8px; border-radius: 3px; font-weight: 600;">↑ v${semver}</span>`
+      : `<span style="background: var(--vscode-badge-background); padding: 3px 8px; border-radius: 3px;">v${semver}</span>`
+
+    return `
+      <div class="envelope-detail-compact" style="margin-bottom: 16px; padding: 12px; border-radius: 6px; background: color-mix(in srgb, ${stewardColor} 10%, var(--vscode-sideBar-background)); border-left: 3px solid ${stewardColor};">
+        <div class="envelope-header" style="margin-bottom: 12px;">
+          <div style="font-family: monospace; font-size: 11px; color: var(--vscode-statusBar-foreground);">${envelope.envelopeId}</div>
+          <div style="font-size: 14px; font-weight: 600; margin: 4px 0;">${envelope.name}</div>
+          <div style="font-size: 11px; color: var(--vscode-statusBar-foreground); display: flex; align-items: center; gap: 6px;">
+            <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: ${stewardColor};"></span>
+            <span>${envelope.ownerRole}</span>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 12px; padding: 8px; background: var(--vscode-input-background); border-radius: 4px; font-size: 11px;">
+          <div style="color: var(--vscode-statusBar-foreground); margin-bottom: 4px;">Domain: ${envelope.domain || '-'}</div>
+          <div style="color: var(--vscode-statusBar-foreground);">Window: ${formatSimTime(envelope.createdHour ?? 0)} → ${formatSimTime(envelope.endHour ?? 48)}</div>
+        </div>
+
+        <div style="margin-bottom: 12px;">
+          <div style="font-size: 11px; font-weight: 600; color: var(--vscode-statusBar-foreground); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Version Info</div>
+          <div style="display: flex; gap: 8px; font-size: 11px;">
+            ${versionBadge}
+            ${hasChanges ? '<span style="background: var(--status-warning); opacity: 0.2; padding: 3px 8px; border-radius: 3px;">Revised</span>' : ''}
+          </div>
+        </div>
+
+        ${(boundaryEscalated + boundaryOverridden + boundaryDeferred) > 0 ? `
+          <div style="margin-bottom: 12px;">
+            <div style="font-size: 11px; font-weight: 600; color: var(--vscode-statusBar-foreground); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Boundary (24h)</div>
+            <div style="display: flex; flex-wrap: wrap; gap: 6px; font-size: 10px;">
+              ${boundaryEscalated ? `<span style="background: var(--status-warning); opacity: 0.2; padding: 3px 6px; border-radius: 3px;">Esc: ${boundaryEscalated}</span>` : ''}
+              ${boundaryOverridden ? `<span style="background: var(--status-error); opacity: 0.2; padding: 3px 6px; border-radius: 3px;">Ovr: ${boundaryOverridden}</span>` : ''}
+              ${boundaryDeferred ? `<span style="background: var(--status-info); opacity: 0.2; padding: 3px 6px; border-radius: 3px;">Def: ${boundaryDeferred}</span>` : ''}
+            </div>
+          </div>
+        ` : ''}
+
+        <div style="margin-bottom: 8px;">
+          <div style="font-size: 11px; font-weight: 600; color: var(--vscode-statusBar-foreground); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Assumptions</div>
+          <div style="font-size: 11px; line-height: 1.4;">
+            ${(effective.assumptions ?? []).slice(0, 3).map(a => `<div style="margin-bottom: 4px; padding-left: 8px; border-left: 2px solid #00bcd4;">${escapeHtml(String(a))}</div>`).join('') || '<div style="color: var(--vscode-statusBar-foreground);">No assumptions</div>'}
+            ${(effective.assumptions ?? []).length > 3 ? `<div style="color: var(--vscode-statusBar-foreground); font-size: 10px; margin-top: 4px;">+${(effective.assumptions ?? []).length - 3} more</div>` : ''}
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size: 11px; font-weight: 600; color: var(--vscode-statusBar-foreground); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Constraints</div>
+          <div style="font-size: 11px; line-height: 1.4;">
+            ${(effective.constraints ?? []).slice(0, 3).map(c => `<div style="margin-bottom: 4px; padding-left: 8px; border-left: 2px solid #ff6b6b;">${escapeHtml(String(c))}</div>`).join('') || '<div style="color: var(--vscode-statusBar-foreground);">No constraints</div>'}
+            ${(effective.constraints ?? []).length > 3 ? `<div style="color: var(--vscode-statusBar-foreground); font-size: 10px; margin-top: 4px;">+${(effective.constraints ?? []).length - 3} more</div>` : ''}
+          </div>
+        </div>
+      </div>
+    `
+  }).join('')
 }
 
 function createStewardFleetsPanel() {
@@ -294,7 +466,7 @@ function updatePersonaView(persona) {
       'executive': 'RISK EXPOSURE',
       'data-steward': 'TELEMETRY BOUNDARIES'
     };
-    auxTitle.textContent = personaTitles[persona] || 'DECISION INSIGHTS';
+    auxTitle.textContent = personaTitles[persona] || 'EVIDENCE (BOUNDED)';
   }
   
   // Store selected persona for page rendering
@@ -360,6 +532,13 @@ function createListRow(item) {
   const label = document.createElement('span');
   label.textContent = item.label;
   
+  // Mark experimental items
+  if (item.experimental) {
+    label.style.opacity = '0.75';
+    label.style.color = 'var(--vscode-statusBar-foreground)';
+    row.title = 'Experimental: Phase 2 feature';
+  }
+  
   row.appendChild(icon);
   row.appendChild(label);
   
@@ -376,9 +555,6 @@ function createAuxiliaryBar() {
   auxiliarybar.className = 'part auxiliarybar';
   auxiliarybar.id = 'auxiliarybar';
   auxiliarybar.setAttribute('role', 'complementary');
-
-  // Ensure layout starts in the "aux visible" state.
-  document.body.classList.remove('aux-hidden')
   
   const header = document.createElement('div');
   header.className = 'composite title';
@@ -387,7 +563,7 @@ function createAuxiliaryBar() {
   titleContainer.style.cssText = 'display: flex; align-items: center; justify-content: space-between; width: 100%;';
   
   const title = document.createElement('h3');
-  title.textContent = 'DECISION INSIGHTS';
+  title.textContent = 'EVIDENCE (BOUNDED)';
   title.style.cssText = 'font-size: 11px; font-weight: 600; margin: 0;';
   
   const toggleButton = document.createElement('a');
@@ -396,8 +572,7 @@ function createAuxiliaryBar() {
   toggleButton.setAttribute('aria-label', 'Close Panel');
   toggleButton.style.cssText = 'cursor: pointer; padding: 4px;';
   toggleButton.addEventListener('click', () => {
-    auxiliarybar.style.display = 'none';
-    document.body.classList.add('aux-hidden')
+    setAuxCollapsed(true)
   });
   
   titleContainer.appendChild(title);
@@ -424,6 +599,10 @@ function createAuxiliaryBar() {
     if (!content.isConnected) return
     rerender()
   })
+  onFilterChange(() => {
+    if (!content.isConnected) return
+    rerender()
+  })
   
   auxiliarybar.appendChild(header);
   auxiliarybar.appendChild(content);
@@ -433,15 +612,468 @@ function createAuxiliaryBar() {
 
 // Update telemetry display with collapsible sections
 const telemetrySectionState = {
-  'Live Metrics': false,
-  'Decision Quality': false,
-  'Stewardship': false,
+  'Active Envelope': true,
+  'Live Metrics': true,
+  'Decision Quality': true,
+  'Stewardship': true,
+  'Boundary Interactions': true,
+  'Steward Fleets': false, // Collapsed by default
+}
+
+const telemetryNarrativeState = {
+  lastTimeHour: null,
+  lastUpdatedAtMs: 0,
+}
+
+function displayEnvelopeId(envelopeId) {
+  return String(envelopeId || '').replace(/^ENV-/, 'DE-')
+}
+
+function isNarratableEventType(type) {
+  return [
+    'envelope_promoted',
+    'signal',
+    'boundary_interaction',
+    'escalation',
+    'revision',
+    'dsg_session',
+    'dsg_message',
+    'annotation',
+    'decision',
+  ].includes(String(type || ''))
+}
+
+function buildNarrativeEventKey(e, index) {
+  const t = String(e?.type || 'event')
+  const h = typeof e?.hour === 'number' ? String(e.hour).replace('.', '_') : 'na'
+  const env = String(e?.envelopeId || e?.envelope_id || e?.sessionId || 'na')
+  return `${t}:${h}:${env}:${index}`
+}
+
+function narrativePrimaryObjectType(e) {
+  const type = String(e?.type || '')
+  if (type === 'decision') return 'decision'
+  if (type === 'revision') return 'revision'
+  if (type === 'boundary_interaction' || type === 'escalation') return 'exception'
+  if (type === 'dsg_session' || type === 'dsg_message') return 'dsg'
+  if (type === 'signal') return 'signal'
+  if (type === 'annotation') return 'memory'
+  // annotations are evidence on an envelope
+  return 'envelope'
+}
+
+function narrativeObjectColor(objectType) {
+  // Use distinct event colors (different from steward palette)
+  // Matches EVENT_COLORS in steward-colors.js
+  if (objectType === 'decision') return '#a8a8a8'    // Neutral gray
+  if (objectType === 'revision') return '#98d4a0'   // Mint green
+  if (objectType === 'exception') return '#e8846c'  // Salmon - blocked/warning
+  if (objectType === 'signal') return '#7eb8da'     // Light steel blue
+  if (objectType === 'dsg') return '#f0b866'        // Amber - DSG/boundary
+  if (objectType === 'memory') return '#c4a7e7'     // Lavender - annotations
+  return 'var(--status-muted)'                      // envelope fallback
+}
+
+function formatNarrativeLine(e, envelopeIndex, eventById) {
+  const type = String(e?.type || 'event')
+  const envId = e?.envelopeId || e?.envelope_id
+  const env = envId ? envelopeIndex.get(envId) : null
+  const envLabel = envId ? displayEnvelopeId(envId) : null
+  const envName = env?.name || null
+  const envPhrase = envLabel && envName
+    ? `<strong>${envLabel}</strong> (${envName})`
+    : envLabel
+      ? `<strong>${envLabel}</strong>`
+      : '<strong>active authority</strong>'
+
+  if (type === 'envelope_promoted') {
+    return `Envelope promoted: ${envPhrase} is now an active <a class="glossary-term" href="#" data-glossary-term="Decision Envelope">Decision Envelope</a>.`
+  }
+
+  if (type === 'signal') {
+    const sev = e?.severity || 'info'
+    const label = e?.label || 'Telemetry signal'
+    const key = e?.signalKey ? String(e.signalKey) : null
+    const value = typeof e?.value === 'number' ? String(e.value) : null
+    const meta = (key || value) ? ` <span style="opacity:0.8">(${[key, value].filter(Boolean).join(' · ')})</span>` : ''
+    return `<a class="glossary-term" href="#" data-glossary-term="Decision Telemetry">Decision Telemetry</a> (${sev}) — <strong>Signal: ${label}</strong>${meta} in ${envPhrase}.`
+  }
+
+  if (type === 'boundary_interaction') {
+    const kind = e?.boundary_kind || e?.boundaryKind || e?.status || 'touched'
+    const actor = e?.actorRole || 'a Steward'
+    return `<a class="glossary-term" href="#" data-glossary-term="Boundary Interaction">Boundary Interaction</a> <strong>${kind}</strong> in ${envPhrase} → routed to <strong>${actor}</strong>.`
+  }
+
+  if (type === 'escalation') {
+    const actor = e?.actorRole || 'a Steward'
+    const label = e?.label || 'Escalation requested'
+    return `<strong>${actor}</strong> requested <a class="glossary-term" href="#" data-glossary-term="Boundary Interaction">escalation</a> in ${envPhrase}: <strong>${label}</strong>.`
+  }
+
+  if (type === 'revision') {
+    const actor = e?.actorRole || 'a Steward'
+    const resolvesId = e?.resolvesEventId
+    const resolved = resolvesId && eventById ? eventById.get(resolvesId) : null
+    const resolvedLabel = resolved?.label ? ` (<strong>${resolved.label}</strong>)` : ''
+    const resolvedSuffix = resolved
+      ? ` This <strong>addresses</strong> the earlier <a class="glossary-term" href="#" data-glossary-term="Boundary Interaction">Boundary Interaction</a> escalation${resolvedLabel}.`
+      : ''
+    return `<strong>${actor}</strong> issued a <a class="glossary-term" href="#" data-glossary-term="Revision">Revision</a> to ${envPhrase}, changing the bounds agents can execute within.${resolvedSuffix}`
+  }
+
+  if (type === 'dsg_session') {
+    return `<a class="glossary-term" href="#" data-glossary-term="DSG (Decision Stewardship Group)">DSG</a> session opened affecting ${envPhrase} (cross-domain arbitration).`
+  }
+
+  if (type === 'dsg_message') {
+    const author = e?.authorRole || 'DSG'
+    const kind = e?.kind ? ` (${String(e.kind)})` : ''
+    return `<a class="glossary-term" href="#" data-glossary-term="DSG (Decision Stewardship Group)">DSG</a> message from <strong>${author}</strong>${kind} affecting ${envPhrase}.`
+  }
+
+  if (type === 'annotation') {
+    return `Recorded precedent / <a class="glossary-term" href="#" data-glossary-term="Decision Memory">Decision Memory</a> note for ${envPhrase}.`
+  }
+
+  if (type === 'decision') {
+    const status = e?.status || 'executed'
+    const agent = e?.agentId ? `<strong>${e.agentId}</strong>` : 'An agent'
+    const label = e?.label ? String(e.label) : null
+    const labelPhrase = label ? ` <strong>Decision: ${label}</strong>.` : ''
+    if (status === 'blocked' || status === 'denied') {
+      const actor = e?.actorRole || 'a Steward'
+      return `${agent} attempted a decision in ${envPhrase} but it was <strong>blocked</strong>.${labelPhrase} Escalated to <strong>${actor}</strong>.`
+    }
+    return `${agent} executed a decision in ${envPhrase} within bounds.${labelPhrase} (status: <strong>${status}</strong>).`
+  }
+
+  return `Event <strong>${type}</strong> in ${envPhrase}.`
+}
+
+function buildTelemetryNarrative(scenario, timeHour) {
+  const nowMs = Date.now()
+  const lastTime = telemetryNarrativeState.lastTimeHour
+  const lastMs = telemetryNarrativeState.lastUpdatedAtMs || nowMs
+  telemetryNarrativeState.lastTimeHour = timeHour
+  telemetryNarrativeState.lastUpdatedAtMs = nowMs
+
+  const delta = typeof lastTime === 'number' ? (timeHour - lastTime) : 0
+  const dir = delta > 0 ? 'forward' : delta < 0 ? 'rewind' : 'steady'
+  const dtMs = Math.max(1, nowMs - lastMs)
+  const ratePerSec = Math.abs(delta) / (dtMs / 1000)
+
+  const modeLabel = dir === 'rewind'
+    ? (ratePerSec > 1.0 ? 'Rewinding fast' : 'Rewinding')
+    : dir === 'forward'
+      ? (ratePerSec > 1.0 ? 'Fast-forwarding' : 'Replaying')
+      : 'Paused'
+
+  const events = scenario?.events ?? []
+  const envelopes = scenario?.envelopes ?? []
+  const envelopeIndex = new Map(envelopes.map(e => [e.envelopeId, e]))
+  const eventById = new Map(events.map(e => [e?.eventId, e]).filter(([k]) => Boolean(k)))
+
+  // Filter envelopes based on steward filter
+  const stewardFilter = getStewardFilter()
+  const filteredEnvelopes = stewardFilter === 'all'
+    ? envelopes
+    : envelopes.filter(env => env.ownerRole === stewardFilter)
+  const filteredEnvelopeIds = new Set(filteredEnvelopes.map(e => e.envelopeId))
+
+  const windowStart = Math.max(0, timeHour - 48)
+  const recent = events
+    .map((e, idx) => ({ e, idx }))
+    .filter(({ e }) => e && typeof e.hour === 'number' && e.hour <= timeHour && e.hour >= windowStart)
+    .filter(({ e }) => isNarratableEventType(e.type))
+    // Filter to only events related to filtered envelopes
+    .filter(({ e }) => {
+      const envId = e.envelopeId || e.envelope_id
+      return !envId || filteredEnvelopeIds.has(envId)
+    })
+    // Newest first (teaching-friendly: what just happened is on top).
+    .sort((a, b) => (b.e.hour - a.e.hour))
+
+  const lines = recent.map(({ e, idx }) => {
+    const key = buildNarrativeEventKey(e, idx)
+    const time = formatSimTime(e.hour)
+    const text = formatNarrativeLine(e, envelopeIndex, eventById)
+    const objectType = narrativePrimaryObjectType(e)
+    const color = narrativeObjectColor(objectType)
+    // Get steward color from envelope's ownerRole
+    const envId = e.envelopeId || e.envelope_id
+    const env = envId ? envelopeIndex.get(envId) : null
+    const stewardColor = env?.ownerRole ? getStewardColor(env.ownerRole) : null
+    return { key, hour: e.hour, time, html: text, objectType, color, stewardColor }
+  })
+
+  const activeEnvelopes = filteredEnvelopes.filter(e => getEnvelopeStatus(e, timeHour) === 'active')
+  const activeCount = activeEnvelopes.length
+
+  const learnMore = `
+    <span style="color: var(--vscode-statusBar-foreground);">
+      Key terms:
+      <a class="glossary-term" href="#" data-glossary-term="Decision Envelope">Decision Envelope</a>,
+      <a class="glossary-term" href="#" data-glossary-term="Boundary Interaction">Boundary Interaction</a>,
+      <a class="glossary-term" href="#" data-glossary-term="Revision">Revision</a>,
+      <a class="glossary-term" href="#" data-glossary-term="DSG (Decision Stewardship Group)">DSG</a>,
+      <a class="glossary-term" href="#" data-glossary-term="Decision Telemetry">Decision Telemetry</a>
+    </span>
+  `.trim()
+
+  const statusLine = `
+    <div style="display:flex; align-items:center; justify-content: space-between; gap: 10px;">
+      <div style="display:flex; align-items:center; gap: 8px; min-width: 0;">
+        <span class="codicon codicon-history" style="color: var(--vscode-statusBar-foreground);"></span>
+        <span style="font-size: 12px; font-weight: 700;">${modeLabel}</span>
+        <span style="font-size: 11px; color: var(--vscode-statusBar-foreground);">at ${formatSimTime(timeHour)}</span>
+      </div>
+      <span style="font-size: 11px; color: var(--vscode-statusBar-foreground);">Active envelopes: ${activeCount}</span>
+    </div>
+  `.trim()
+
+  const body = `
+    <div style="margin-top: 10px; display:flex; flex-direction: column; gap: 8px; font-size: 12px; line-height: 1.35;">
+      ${lines.length ? lines.map(l => `
+        <div data-narrative-key="${l.key}" style="display:flex; gap: 10px; align-items: flex-start; padding: 6px 8px; border-radius: 4px; ${l.stewardColor ? `background: color-mix(in srgb, ${l.stewardColor} 8%, transparent); border-left: 3px solid ${l.stewardColor};` : 'border-left: 3px solid transparent;'}">
+          <div style="flex-shrink: 0; width: 10px; padding-top: 4px;">
+            <div title="${l.objectType}" style="width: 7px; height: 7px; border-radius: 99px; background: ${l.color}; opacity: 0.95;"></div>
+          </div>
+          <div style="flex-shrink: 0; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; font-size: 10px; color: var(--vscode-statusBar-foreground); padding-top: 2px;">${l.time}</div>
+          <div style="min-width: 0;">${l.html}</div>
+        </div>
+      `.trim()).join('') : `
+        <div style="font-size: 12px; color: var(--vscode-statusBar-foreground);">No events yet in this replay window. Agents execute inside active <a class="glossary-term" href="#" data-glossary-term="Decision Envelope">Decision Envelopes</a>.</div>
+      `.trim()}
+    </div>
+    <div style="margin-top: 12px; font-size: 11px;">
+      ${learnMore}
+    </div>
+  `.trim()
+
+  const accent = dir === 'rewind' ? 'var(--status-info)' : dir === 'forward' ? 'var(--status-success)' : 'var(--status-muted)'
+
+  return {
+    html: `${statusLine}${body}`,
+    accent,
+    dir,
+  }
 }
 
 function updateTelemetry(container, scenario, timeHour) {
-  container.innerHTML = '';
+  let narrativeEl = container.querySelector('#telemetry-narrative')
+  let glossaryPanel = container.querySelector('#glossary-inline-aux')
+  let sectionsWrap = container.querySelector('#telemetry-sections')
+
+  if (!narrativeEl || !glossaryPanel || !sectionsWrap) {
+    container.innerHTML = ''
+    container.style.display = 'flex'
+    container.style.flexDirection = 'column'
+    container.style.gap = '12px'
+    container.style.minHeight = '0'
+
+    narrativeEl = document.createElement('div')
+    narrativeEl.id = 'telemetry-narrative'
+    narrativeEl.style.cssText = `background: var(--vscode-editorWidget-background); border: 1px solid var(--vscode-sideBar-border); padding: 12px; border-radius: 8px; min-height: 280px; flex: 3 1 0; overflow: auto;`;
+    container.appendChild(narrativeEl)
+
+    glossaryPanel = document.createElement('div')
+    glossaryPanel.id = 'glossary-inline-aux'
+    glossaryPanel.style.cssText = 'display:none; background: var(--vscode-sideBar-background); border: 1px solid var(--vscode-sideBar-border); padding: 12px; border-radius: 6px;'
+    container.appendChild(glossaryPanel)
+
+    sectionsWrap = document.createElement('div')
+    sectionsWrap.id = 'telemetry-sections'
+    sectionsWrap.style.minHeight = '0'
+    sectionsWrap.style.flex = '1 1 0'
+    sectionsWrap.style.overflow = 'auto'
+    container.appendChild(sectionsWrap)
+  }
+
+  const narrative = buildTelemetryNarrative(scenario, timeHour)
+
+  const shouldStickToTop = () => {
+    const slackPx = 28
+    return (narrativeEl.scrollTop || 0) <= slackPx
+  }
+
+  const stick = shouldStickToTop()
+  narrativeEl.style.borderLeft = `3px solid ${narrative.accent}`
+  narrativeEl.innerHTML = `
+    <div style="font-size: 11px; font-weight: 800; letter-spacing: 0.6px; text-transform: uppercase; color: var(--vscode-statusBar-foreground);">Narrative</div>
+    ${narrative.html}
+  `.trim()
+  if (stick) {
+    narrativeEl.scrollTop = 0
+  }
+
+  sectionsWrap.innerHTML = ''
 
   const computed = computeTelemetry(scenario, timeHour)
+
+  const envelopeIndex = new Map((scenario?.envelopes ?? []).map(e => [e.envelopeId, e]))
+
+  const renderBoundaryBadges = (contentEl) => {
+    const totals = computed?.boundary?.totals || { escalated: 0, overridden: 0, deferred: 0 }
+    const byEnvelope = computed?.boundary?.byEnvelope
+
+    const terms = document.createElement('div')
+    terms.style.cssText = 'margin: 2px 0 10px; font-size: 12px; color: var(--vscode-statusBar-foreground);'
+    terms.innerHTML = `
+      Terms:
+      <a class="glossary-term" href="#" data-glossary-term="Boundary Interaction">Boundary Interaction</a>,
+      <a class="glossary-term" href="#" data-glossary-term="Decision Envelope">Decision Envelope</a>
+    `.trim()
+    contentEl.appendChild(terms)
+
+    const header = document.createElement('div')
+    header.style.cssText = 'display:flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;'
+
+    const mkChip = (label, value, bgVar) => {
+      const chip = document.createElement('span')
+      chip.textContent = `${label}: ${value}`
+      chip.style.cssText = `background: ${bgVar}; opacity: 0.18; padding: 2px 6px; border-radius: 3px; font-size: 11px;`
+      return chip
+    }
+
+    header.appendChild(mkChip('Escalated', totals.escalated ?? 0, 'var(--status-warning)'))
+    header.appendChild(mkChip('Overridden', totals.overridden ?? 0, 'var(--status-error)'))
+    header.appendChild(mkChip('Deferred', totals.deferred ?? 0, 'var(--status-info)'))
+    contentEl.appendChild(header)
+
+    const list = document.createElement('div')
+    list.style.cssText = 'display:flex; flex-direction: column; gap: 8px;'
+
+    const rows = []
+    if (byEnvelope && typeof byEnvelope.forEach === 'function') {
+      byEnvelope.forEach((bucket, envId) => {
+        const total = bucket?.total ?? ((bucket?.escalated ?? 0) + (bucket?.overridden ?? 0) + (bucket?.deferred ?? 0))
+        rows.push({ envId, bucket, total })
+      })
+    }
+
+    rows
+      .filter(r => (r.total ?? 0) > 0)
+      .sort((a, b) => (b.total ?? 0) - (a.total ?? 0))
+      .forEach(({ envId, bucket }) => {
+        const env = envelopeIndex.get(envId)
+        const label = env ? `${env.envelopeId}: ${env.name}` : String(envId)
+
+        const row = document.createElement('div')
+        row.style.cssText = 'display:flex; align-items: center; justify-content: space-between; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--vscode-sideBar-border);'
+
+        const left = document.createElement('div')
+        left.style.cssText = 'display:flex; flex-direction: column; gap: 2px; min-width: 0;'
+
+        const title = document.createElement('div')
+        title.textContent = label
+        title.style.cssText = 'font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;'
+
+        const sub = document.createElement('div')
+        sub.textContent = 'Boundary interactions (last 24h)'
+        sub.style.cssText = 'font-size: 11px; color: var(--vscode-statusBar-foreground);'
+
+        left.appendChild(title)
+        left.appendChild(sub)
+
+        const badges = document.createElement('div')
+        badges.style.cssText = 'display:flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end;'
+
+        const addBadge = (text, count, bgVar) => {
+          const n = count ?? 0
+          if (!n) return
+          const b = document.createElement('span')
+          b.textContent = `${text} ${n}`
+          b.style.cssText = `background: ${bgVar}; opacity: 0.18; padding: 2px 6px; border-radius: 3px; font-size: 11px; font-weight: 600;`
+          badges.appendChild(b)
+        }
+
+        addBadge('Escalated', bucket?.escalated, 'var(--status-warning)')
+        addBadge('Overridden', bucket?.overridden, 'var(--status-error)')
+        addBadge('Deferred', bucket?.deferred, 'var(--status-info)')
+
+        row.appendChild(left)
+        row.appendChild(badges)
+        list.appendChild(row)
+      })
+
+    if (!list.childElementCount) {
+      const empty = document.createElement('div')
+      empty.textContent = 'No boundary interactions in the last 24h.'
+      empty.style.cssText = 'font-size: 12px; color: var(--vscode-statusBar-foreground); padding: 4px 0;'
+      contentEl.appendChild(empty)
+    } else {
+      contentEl.appendChild(list)
+    }
+  }
+
+  const renderStewardFleetsTelemetry = (contentEl) => {
+    const fleets = Array.isArray(scenario?.fleets) ? scenario.fleets : []
+    const envelopes = scenario?.envelopes ?? []
+    
+    const activeEnvelopeIds = new Set(
+      envelopes
+        .filter(e => getEnvelopeStatus(e, timeHour) === 'active')
+        .map(e => e.envelopeId)
+    )
+
+    const fleetsByRole = new Map()
+    fleets.forEach(fleet => {
+      if (!fleetsByRole.has(fleet.stewardRole)) {
+        fleetsByRole.set(fleet.stewardRole, [])
+      }
+      fleetsByRole.get(fleet.stewardRole).push(fleet)
+    })
+
+    const terms = document.createElement('div')
+    terms.style.cssText = 'margin: 2px 0 10px; font-size: 12px; color: var(--vscode-statusBar-foreground);'
+    terms.innerHTML = `
+      Terms:
+      <a class="glossary-term" href="#" data-glossary-term="Agent Fleet">Agent Fleet</a>,
+      <a class="glossary-term" href="#" data-glossary-term="Steward">Steward</a>
+    `.trim()
+    contentEl.appendChild(terms)
+
+    fleetsByRole.forEach((roleFleets, role) => {
+      const roleGroup = document.createElement('div')
+      roleGroup.style.cssText = 'margin-bottom: 12px;'
+
+      const roleHeader = document.createElement('div')
+      roleHeader.style.cssText = 'font-size: 11px; font-weight: 600; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--vscode-statusBar-foreground);'
+      roleHeader.textContent = role
+      roleGroup.appendChild(roleHeader)
+
+      roleFleets.forEach(fleet => {
+        const fleetEl = document.createElement('div')
+        fleetEl.style.cssText = 'padding: 6px 0; border-bottom: 1px solid var(--vscode-sideBar-border);'
+
+        const activeAgents = (fleet.agents ?? []).filter(a =>
+          Array.isArray(a?.envelopeIds) && a.envelopeIds.some(id => activeEnvelopeIds.has(id))
+        )
+
+        const fleetName = document.createElement('div')
+        fleetName.style.cssText = 'font-size: 12px; margin-bottom: 2px;'
+        fleetName.textContent = fleet.fleetId
+        fleetEl.appendChild(fleetName)
+
+        const fleetMeta = document.createElement('div')
+        fleetMeta.style.cssText = 'font-size: 11px; color: var(--vscode-statusBar-foreground);'
+        fleetMeta.textContent = `Active: ${activeAgents.length} / Total: ${(fleet.agents ?? []).length}`
+        fleetEl.appendChild(fleetMeta)
+
+        roleGroup.appendChild(fleetEl)
+      })
+
+      contentEl.appendChild(roleGroup)
+    })
+
+    if (!fleets.length) {
+      const empty = document.createElement('div')
+      empty.textContent = 'No fleets configured.'
+      empty.style.cssText = 'font-size: 12px; color: var(--vscode-statusBar-foreground); padding: 4px 0;'
+      contentEl.appendChild(empty)
+    }
+  }
   
   const sections = [
     {
@@ -451,8 +1083,15 @@ function updateTelemetry(container, scenario, timeHour) {
       metrics: [
         { label: 'Active Decisions', value: String(computed.activeDecisions), icon: 'circle-filled', status: computed.activeDecisions > 0 ? 'success' : 'muted' },
         { label: 'Envelope Health', value: `${computed.envelopeHealthPct}%`, icon: 'pass-filled', status: computed.envelopeHealthPct >= 80 ? 'success' : computed.envelopeHealthPct >= 60 ? 'warning' : 'error' },
-        { label: 'Drift Alerts', value: String(computed.driftAlerts), icon: 'warning', status: computed.driftAlerts > 0 ? 'warning' : 'muted' }
+        { labelHtml: '<a class="glossary-term" href="#" data-glossary-term="Boundary Interaction">Boundary Touches</a>', value: String(computed.boundaryTouches), icon: 'law', status: computed.boundaryTouches > 0 ? 'warning' : 'muted' },
+        { labelHtml: '<a class="glossary-term" href="#" data-glossary-term="Decision Drift">Drift Alerts</a>', value: String(computed.driftAlerts), icon: 'warning', status: computed.driftAlerts > 0 ? 'warning' : 'muted' }
       ]
+    },
+    {
+      title: 'Boundary Interactions',
+      icon: 'law',
+      collapsed: telemetrySectionState['Boundary Interactions'],
+      renderContent: renderBoundaryBadges,
     },
     {
       title: 'Decision Quality',
@@ -472,19 +1111,34 @@ function updateTelemetry(container, scenario, timeHour) {
         { label: 'Active Stewards', value: String(computed.activeStewards), icon: 'person', status: computed.activeStewards > 0 ? 'info' : 'muted' },
         { label: 'Last Calibration', value: computed.lastCalibrationLabel, icon: 'history', status: 'muted' }
       ]
+    },
+    {
+      title: 'Steward Fleets',
+      icon: 'organization',
+      collapsed: telemetrySectionState['Steward Fleets'],
+      renderContent: renderStewardFleetsTelemetry
     }
   ];
   
   sections.forEach(section => {
     const sectionEl = createTelemetrySection(section);
-    container.appendChild(sectionEl);
+    sectionsWrap.appendChild(sectionEl);
   });
+
+  // Bind glossary links across all telemetry sections (container rerenders often).
+  initGlossaryInline(container, {
+    panelSelector: '#glossary-inline-aux',
+    openDocs: () => navigateTo('/docs'),
+  })
 }
 
 function computeTelemetry(scenario, timeHour) {
   const envelopes = scenario?.envelopes ?? []
   const events = scenario?.events ?? []
   const activeEnvelopes = envelopes.filter(e => getEnvelopeStatus(e, timeHour) === 'active')
+
+  const boundary = getBoundaryInteractionCounts(scenario, timeHour, 24)
+  const boundaryTouches = (boundary?.totals?.escalated ?? 0) + (boundary?.totals?.overridden ?? 0) + (boundary?.totals?.deferred ?? 0)
 
   const recentSignals12 = events
     .filter(e => e && e.type === 'signal' && typeof e.hour === 'number')
@@ -559,6 +1213,8 @@ function computeTelemetry(scenario, timeHour) {
     activeDecisions,
     envelopeHealthPct,
     driftAlerts,
+    boundaryTouches,
+    boundary,
     avgConfidencePct,
     reviewPending,
     breachCount,
@@ -607,36 +1263,44 @@ function createTelemetrySection(section) {
   const content = document.createElement('div');
   content.className = 'telemetry-section-content';
   content.style.cssText = section.collapsed ? 'display: none;' : 'display: block; padding-top: 8px;';
-  
-  section.metrics.forEach(metric => {
-    const metricEl = document.createElement('div');
-    metricEl.className = 'telemetry-metric';
-    metricEl.style.cssText = 'display: flex; align-items: center; justify-content: space-between; padding: 6px 0;';
-    
-    const labelContainer = document.createElement('div');
-    labelContainer.style.cssText = 'display: flex; align-items: center; gap: 6px;';
-    
-    const statusIcon = document.createElement('span');
-    statusIcon.className = `codicon codicon-${metric.icon}`;
-    statusIcon.style.cssText = `font-size: 14px; color: var(--status-${metric.status}, var(--vscode-statusBar-foreground));`;
-    
-    const label = document.createElement('span');
-    label.className = 'metric-label';
-    label.textContent = metric.label;
-    label.style.cssText = 'font-size: 12px;';
-    
-    labelContainer.appendChild(statusIcon);
-    labelContainer.appendChild(label);
-    
-    const value = document.createElement('span');
-    value.className = `metric-value ${metric.status}`;
-    value.textContent = metric.value;
-    value.style.cssText = 'font-size: 13px; font-weight: 600;';
-    
-    metricEl.appendChild(labelContainer);
-    metricEl.appendChild(value);
-    content.appendChild(metricEl);
-  });
+
+  if (typeof section.renderContent === 'function') {
+    section.renderContent(content)
+  } else {
+    ;(section.metrics || []).forEach(metric => {
+      const metricEl = document.createElement('div');
+      metricEl.className = 'telemetry-metric';
+      metricEl.style.cssText = 'display: flex; align-items: center; justify-content: space-between; padding: 6px 0;';
+      
+      const labelContainer = document.createElement('div');
+      labelContainer.style.cssText = 'display: flex; align-items: center; gap: 6px;';
+      
+      const statusIcon = document.createElement('span');
+      statusIcon.className = `codicon codicon-${metric.icon}`;
+      statusIcon.style.cssText = `font-size: 14px; color: var(--status-${metric.status}, var(--vscode-statusBar-foreground));`;
+      
+      const label = document.createElement('span');
+      label.className = 'metric-label';
+      if (metric.labelHtml) {
+        label.innerHTML = metric.labelHtml;
+      } else {
+        label.textContent = metric.label;
+      }
+      label.style.cssText = 'font-size: 12px;';
+      
+      labelContainer.appendChild(statusIcon);
+      labelContainer.appendChild(label);
+      
+      const value = document.createElement('span');
+      value.className = `metric-value ${metric.status}`;
+      value.textContent = metric.value;
+      value.style.cssText = 'font-size: 13px; font-weight: 600;';
+      
+      metricEl.appendChild(labelContainer);
+      metricEl.appendChild(value);
+      content.appendChild(metricEl);
+    });
+  }
   
   // Toggle handler
   header.addEventListener('click', () => {
@@ -654,6 +1318,17 @@ function createTelemetrySection(section) {
 
 // Create complete workspace with resizable panels
 export function createWorkspace() {
+  const persisted = loadLayoutState()
+
+  // Restore sizes first.
+  if (typeof persisted.sidebarWidth === 'number') setCssVar('--sidebar-width', `${persisted.sidebarWidth}px`)
+  if (typeof persisted.auxWidth === 'number') setCssVar('--auxiliarybar-width', `${persisted.auxWidth}px`)
+  if (typeof persisted.panelHeight === 'number') setCssVar('--panel-height', `${persisted.panelHeight}px`)
+
+  // Default-collapsed per spec.
+  setAuxCollapsed(persisted.auxCollapsed !== undefined ? persisted.auxCollapsed : false)
+  setBottomCollapsed(persisted.bottomCollapsed !== undefined ? persisted.bottomCollapsed : true)
+
   const workbench = document.createElement('div');
   workbench.className = 'split-view-container workbench';
   
@@ -667,6 +1342,26 @@ export function createWorkspace() {
   editorArea.className = 'part editor editor-area';
   editorArea.id = 'editor-area';
   editorArea.setAttribute('role', 'main');
+
+  // Discoverability handle for collapsed aux (Evidence) panel.
+  const auxPeek = document.createElement('div')
+  auxPeek.className = 'aux-peek'
+  auxPeek.setAttribute('role', 'button')
+  auxPeek.setAttribute('tabindex', '0')
+  auxPeek.setAttribute('aria-label', 'Open Evidence panel')
+  auxPeek.innerHTML = `
+    <span class="codicon codicon-chevron-left" aria-hidden="true"></span>
+    <span class="aux-peek__label">EVIDENCE</span>
+  `.trim()
+  const openAux = () => setAuxCollapsed(false)
+  auxPeek.addEventListener('click', openAux)
+  auxPeek.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      openAux()
+    }
+  })
+  editorArea.appendChild(auxPeek)
   
   // Resize handle between editor and auxiliary bar
   const sash2 = createSash('vertical', 'auxiliary-resize');
@@ -686,6 +1381,24 @@ export function createWorkspace() {
   workbench.appendChild(auxiliarybar);
   workbench.appendChild(sash3);
   workbench.appendChild(bottomPanel);
+
+  // Route-aware auto-open: Aux opens on Evidence + DSG routes.
+  window.addEventListener('hddl:navigate', (e) => {
+    const path = e?.detail?.path || window.location.pathname || '/'
+    if (path === '/' || path === '/decision-telemetry' || path === '/dsg-event') {
+      setAuxCollapsed(false)
+    }
+  })
+
+  // Auto-open bottom panel during playback.
+  window.addEventListener('hddl:playback', (e) => {
+    if (e?.detail?.playing) setBottomCollapsed(false)
+  })
+
+  // Auto-open bottom panel during log-heavy flows (import/generation).
+  window.addEventListener('hddl:log-heavy', () => {
+    setBottomCollapsed(false)
+  })
   
   return workbench;
 }
@@ -723,6 +1436,9 @@ function createBottomPanel() {
           .join('')}
       </div>
       <div class="panel-actions">
+        <button class="panel-action" type="button" aria-label="Close panel" title="Close" data-action="close-panel">
+          <span class="codicon codicon-close" aria-hidden="true"></span>
+        </button>
         <button class="panel-action" type="button" aria-label="Clear panel" title="Clear">
           <span class="codicon codicon-clear-all" aria-hidden="true"></span>
         </button>
@@ -749,7 +1465,8 @@ function createBottomPanel() {
   const inputEl = panel.querySelector('#terminal-input')
   const inputRowEl = panel.querySelector('#terminal-input-row')
   const promptEl = panel.querySelector('#terminal-prompt')
-  const clearBtn = panel.querySelector('.panel-action')
+  const closeBtn = panel.querySelector('[data-action="close-panel"]')
+  const clearBtn = panel.querySelector('.panel-action:not([data-action="close-panel"])')
 
   let activeTab = 'cli'
 
@@ -810,6 +1527,17 @@ function createBottomPanel() {
         dts: { text: `[${ts}] ${sev}${envelope}${key} - ${detail}`.trim(), kind: sev === 'WARNING' ? 'warning' : 'info' },
       }
     }
+    if (event?.type === 'boundary_interaction') {
+      const kind = String(event?.boundary_kind || 'boundary').toUpperCase()
+      const actor = event.actorRole ? ` by ${event.actorRole}` : ''
+      const detail = event.detail || event.label || ''
+      const line = `[${ts}] ${kind}${envelope}${actor} - ${detail}`.trim()
+      return {
+        envelopes: { text: line, kind: event.severity === 'warning' ? 'warning' : 'info' },
+        steward: { text: line, kind: event.severity === 'warning' ? 'warning' : 'info' },
+        dts: null,
+      }
+    }
     if (event?.type === 'escalation') {
       const actor = event.actorRole ? ` by ${event.actorRole}` : ''
       const detail = event.detail || event.label || ''
@@ -847,7 +1575,7 @@ function createBottomPanel() {
     if (!Array.isArray(events) || !events.length) return
 
     // Keep this focused and envelope-relevant.
-    const allowed = new Set(['envelope_promoted', 'signal', 'escalation', 'dsg_session', 'revision'])
+    const allowed = new Set(['envelope_promoted', 'signal', 'boundary_interaction', 'escalation', 'dsg_session', 'revision'])
     const slice = events
       .filter(e => e && allowed.has(e.type) && typeof e.hour === 'number')
       .filter(e => e.hour > fromTime && e.hour <= toTime)
@@ -924,6 +1652,12 @@ function createBottomPanel() {
     clearBtn.addEventListener('click', () => {
       const out = getOutputEl(activeTab)
       if (out) out.innerHTML = ''
+    })
+  }
+
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => {
+      setBottomCollapsed(true)
     })
   }
 
@@ -1022,14 +1756,23 @@ function createSash(orientation, id) {
         
         // Update CSS variable for consistent layout
         document.documentElement.style.setProperty('--sidebar-width', `${newWidth}px`);
+
+        const state = loadLayoutState()
+        saveLayoutState({ ...state, sidebarWidth: newWidth })
       } else if (id === 'auxiliary-resize') {
+        // Dragging the aux sash is an implicit intent to open it.
+        setAuxCollapsed(false)
         const auxiliary = document.querySelector('.auxiliarybar');
+        if (!auxiliary) return
         const currentWidth = parseInt(getComputedStyle(auxiliary).width);
         const newWidth = Math.max(200, Math.min(600, currentWidth - delta));
         auxiliary.style.width = `${newWidth}px`;
         
         // Update CSS variable for consistent layout
         document.documentElement.style.setProperty('--auxiliarybar-width', `${newWidth}px`);
+
+        const state = loadLayoutState()
+        saveLayoutState({ ...state, auxWidth: newWidth, auxCollapsed: false })
       }
       startX = e.clientX;
       
@@ -1046,12 +1789,17 @@ function createSash(orientation, id) {
     } else if (orientation === 'horizontal') {
       const delta = e.clientY - startY
       if (id === 'panel-resize') {
+        // Dragging the panel sash is an implicit intent to open it.
+        setBottomCollapsed(false)
         const root = document.documentElement
         const currentRaw = getComputedStyle(root).getPropertyValue('--panel-height').trim()
         const current = Number.parseInt(currentRaw || '240', 10)
         // Dragging up should increase panel height; dragging down should decrease it.
         const next = Math.max(120, Math.min(520, current - delta))
         root.style.setProperty('--panel-height', `${next}px`)
+
+        const state = loadLayoutState()
+        saveLayoutState({ ...state, panelHeight: next, bottomCollapsed: false })
       }
       startY = e.clientY
     }

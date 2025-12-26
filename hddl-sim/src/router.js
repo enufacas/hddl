@@ -6,6 +6,7 @@ import { renderDSGEvent } from './pages/dsg-event'
 import { renderDocs } from './pages/docs'
 import { render as renderTimeline } from './pages/timeline'
 import { render as renderStewardship } from './pages/stewardship'
+import { render as renderInteractive } from './pages/interactive'
 import { updateActiveNav } from './components/workspace'
 
 const routes = {
@@ -15,8 +16,10 @@ const routes = {
   '/decision-telemetry': renderDecisionTelemetry,
   '/dsg-event': renderDSGEvent,
   '/docs': renderDocs,
-  '/timeline': renderTimeline,
+  // Timeline is controlled by the global scrubber; keep route for deep-links but redirect to home.
+  '/timeline': renderHome,
   '/stewardship': renderStewardship,
+  '/interactive': renderInteractive,
 }
 
 export function initRouter() {

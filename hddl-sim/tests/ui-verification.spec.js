@@ -2,6 +2,15 @@ import { test, expect } from '@playwright/test';
 
 test.describe('HDDL Simulation UI Verification', () => {
   test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => {
+      try {
+        if (!localStorage.getItem('hddl:layout')) {
+          localStorage.setItem('hddl:layout', JSON.stringify({ auxCollapsed: true, bottomCollapsed: true }))
+        }
+      } catch {
+        // ignore
+      }
+    })
     await page.goto('/');
     await page.waitForLoadState('networkidle');
     
@@ -35,21 +44,66 @@ test.describe('HDDL Simulation UI Verification', () => {
     // Verify timeline labels (0h and 48h)
     await expect(page.locator('.timeline-bar').getByText('0h')).toBeVisible();
     await expect(page.locator('.timeline-bar').getByText('48h')).toBeVisible();
+
+    // Spec 5: assumption mismatch markers should exist in the default scenario
+    const mismatchMarkers = page.locator('.timeline-mismatch-marker');
+    await expect(mismatchMarkers.first()).toBeVisible();
   });
 
   test('should display Decision Envelopes as main heading', async ({ page }) => {
     const heading = page.locator('h1:has-text("Decision Envelopes")');
     await expect(heading).toBeVisible();
     
-    const subtitle = page.locator('text=Active envelopes ready for simulation replay');
+    const subtitle = page.locator('text=What authority exists right now?');
     await expect(subtitle).toBeVisible();
   });
 
-  test('should display all six envelope cards', async ({ page }) => {
+  test('map agent names should not overlap', async ({ page }) => {
+    const svg = page.locator('#hddl-map-container svg');
+    await expect(svg).toBeVisible();
+
+    const agentNames = svg.locator('text.agent-name');
+    await expect(agentNames.first()).toBeVisible();
+
+    const count = await agentNames.count();
+    expect(count).toBeGreaterThan(1);
+
+    const boxes = [];
+    for (let i = 0; i < count; i++) {
+      const box = await agentNames.nth(i).boundingBox();
+      if (box) boxes.push(box);
+    }
+
+    let hasOverlap = false;
+    for (let i = 0; i < boxes.length; i++) {
+      for (let j = i + 1; j < boxes.length; j++) {
+        const a = boxes[i];
+        const b = boxes[j];
+
+        const xOverlap = Math.min(a.x + a.width, b.x + b.width) - Math.max(a.x, b.x);
+        const yOverlap = Math.min(a.y + a.height, b.y + b.height) - Math.max(a.y, b.y);
+
+        if (xOverlap > 2 && yOverlap > 2) {
+          hasOverlap = true;
+          break;
+        }
+      }
+      if (hasOverlap) break;
+    }
+
+    await page.screenshot({ path: 'test-results/screenshots/02a-map-agent-names.png', fullPage: true });
+    expect(hasOverlap).toBeFalsy();
+  });
+
+  test('should display envelope cards', async ({ page }) => {
     // Screenshot envelopes
     await page.screenshot({ path: 'test-results/screenshots/03-envelope-cards.png', fullPage: true });
+
+    const cards = page.locator('.envelope-card');
+    await expect(cards.first()).toBeVisible();
+    expect(await cards.count()).toBeGreaterThan(0);
     
-    // Check for ENV-001
+    // Spot-check a couple known default envelopes (avoid hard-coded totals)
     const env001 = page.locator('.envelope-card[data-envelope="ENV-001"]');
     await expect(env001).toBeVisible();
     await expect(env001.getByText('Customer Service Responses')).toBeVisible();
@@ -60,75 +114,61 @@ test.describe('HDDL Simulation UI Verification', () => {
     await expect(env002).toBeVisible();
     await expect(env002.getByText('Hiring Recommendations')).toBeVisible();
     await expect(env002.getByText('HR Steward')).toBeVisible();
-    
-    // Check for ENV-003
-    const env003 = page.locator('.envelope-card[data-envelope="ENV-003"]');
-    await expect(env003).toBeVisible();
-    await expect(env003.getByText('Pricing Adjustments')).toBeVisible();
-    await expect(env003.getByText('Domain Engineer')).toBeVisible();
-
-    // Check for ENV-004
-    const env004 = page.locator('.envelope-card[data-envelope="ENV-004"]');
-    await expect(env004).toBeVisible();
-    await expect(env004.getByText('Fraud Triage')).toBeVisible();
-    await expect(env004.getByText('Resiliency Steward')).toBeVisible();
-
-    // Check for ENV-005
-    const env005 = page.locator('.envelope-card[data-envelope="ENV-005"]');
-    await expect(env005).toBeVisible();
-    await expect(env005.getByText('Inventory Rebalance')).toBeVisible();
-    await expect(env005.getByText('Business Domain Steward')).toBeVisible();
-
-    // Check for ENV-006
-    const env006 = page.locator('.envelope-card[data-envelope="ENV-006"]');
-    await expect(env006).toBeVisible();
-    await expect(env006.getByText('Marketing Offers')).toBeVisible();
-    await expect(env006.getByText('Sales Steward')).toBeVisible();
   });
 
-  test('should display persona selector with Domain Engineer', async ({ page }) => {
-    const personaSelector = page.locator('select').filter({ hasText: /Domain Engineer/ });
-    await expect(personaSelector).toBeVisible();
+  test('should display steward filter on envelopes page', async ({ page }) => {
+    const stewardFilter = page.locator('#steward-filter');
+    await expect(stewardFilter).toBeVisible();
     
-    // Verify it has multiple options
-    const options = await personaSelector.locator('option').count();
+    // Verify it has multiple options including "All Envelopes"
+    const options = await stewardFilter.locator('option').count();
     expect(options).toBeGreaterThan(1);
+    
+    // Verify default value is "all"
+    await expect(stewardFilter).toHaveValue('all');
   });
 
   test('should display sidebar navigation items', async ({ page }) => {
-    // Check Simulation View section
     const sidebar = page.locator('.sidebar');
-    await expect(sidebar.getByText('Simulation View')).toBeVisible();
-    await expect(sidebar.getByText('Decision Envelopes').first()).toBeVisible();
-    
-    // Timeline is a global scrubber bar (not a left-nav page)
-    await expect(sidebar.getByText('Timeline Scrubber')).toHaveCount(0);
-    await expect(sidebar.getByText('Authority View')).toHaveCount(0);
-    await expect(sidebar.getByText('Signals & Outcomes')).toBeVisible();
-    await expect(sidebar.getByText('Steward Agent Fleets')).toBeVisible();
-    
-    // Check Key Events section
-    await expect(sidebar.getByText('Key Events')).toBeVisible();
-    await expect(sidebar.getByText('DSG Review')).toBeVisible();
-    await expect(sidebar.getByText('Steward Actions')).toBeVisible();
+    await expect(sidebar).toBeVisible();
 
-    // Steward Fleets panel
-    await expect(sidebar.getByText('Steward Fleets')).toBeVisible();
+    // New IA sections
+    await expect(sidebar.getByText('Primary')).toBeVisible();
+    await expect(sidebar.getByText('Secondary')).toBeVisible();
+
+    // Primary lenses
+    await expect(sidebar.getByText('Envelopes').first()).toBeVisible();
+    await expect(sidebar.getByText('Evidence').first()).toBeVisible();
+    await expect(sidebar.getByText('Revision').first()).toBeVisible();
+
+    // Secondary lenses
+    await expect(sidebar.getByText('Fleets').first()).toBeVisible();
+    await expect(sidebar.getByText('DSG Artifact').first()).toBeVisible();
+
+    // Timeline is a global scrubber bar (not a left-nav page)
+    await expect(sidebar.getByText('Timeline').first()).toHaveCount(0);
   });
 
   test('should display auxiliary bar with decision insights', async ({ page }) => {
     const auxBar = page.locator('#auxiliarybar');
+
+    // Default is now visible (open by default).
     await expect(auxBar).toBeVisible();
+    await expect(auxBar.getByText('EVIDENCE (BOUNDED)')).toBeVisible();
     
-    // Check for Decision Insights sections
-    await expect(auxBar.getByText('LIVE METRICS')).toBeVisible();
-    await expect(auxBar.getByText('DECISION QUALITY')).toBeVisible();
-    await expect(auxBar.getByText('STEWARDSHIP')).toBeVisible();
+    // Section headers are present
+    await expect(auxBar.getByText('Live Metrics')).toBeVisible();
+    await expect(auxBar.getByText('Decision Quality')).toBeVisible();
+    await expect(auxBar.getByText('Stewardship')).toBeVisible();
+
+    // Expand Live Metrics to assert metric rows
+    await auxBar.getByText('Live Metrics').click();
     
     // Check for metric labels (values are time-driven)
-    await expect(auxBar.getByText('ACTIVE DECISIONS')).toBeVisible();
-    await expect(auxBar.getByText('ENVELOPE HEALTH')).toBeVisible();
-    await expect(auxBar.getByText('DRIFT ALERTS')).toBeVisible();
+    await expect(auxBar.getByText('Active Decisions')).toBeVisible();
+    await expect(auxBar.getByText('Envelope Health')).toBeVisible();
+    await expect(auxBar.getByText('Boundary Touches')).toBeVisible();
+    await expect(auxBar.getByText('Drift Alerts')).toBeVisible();
 
     // Sanity check: each of these metrics has a non-empty value
     await expect(auxBar.locator('.telemetry-metric', { hasText: 'Active Decisions' }).locator('.metric-value')).toHaveText(/\d+/);
@@ -137,8 +177,21 @@ test.describe('HDDL Simulation UI Verification', () => {
   });
 
   test('auxiliary panel metrics should update when timeline changes', async ({ page }) => {
+    // Ensure aux is open for this test (persisted state + reload)
+    await page.evaluate(() => {
+      const current = (() => {
+        try { return JSON.parse(localStorage.getItem('hddl:layout') || '{}') } catch { return {} }
+      })()
+      localStorage.setItem('hddl:layout', JSON.stringify({ ...current, auxCollapsed: false }))
+    })
+    await page.reload()
+    await page.waitForLoadState('networkidle');
+
     const auxBar = page.locator('#auxiliarybar');
     await expect(auxBar).toBeVisible();
+
+    // Expand Live Metrics so values are visible
+    await auxBar.getByText('Live Metrics').click();
 
     const activeDecisionsValue = auxBar.locator('.telemetry-metric', { hasText: 'Active Decisions' }).locator('.metric-value');
 
@@ -149,24 +202,32 @@ test.describe('HDDL Simulation UI Verification', () => {
     const x11 = Math.max(2, Math.min(box.width - 2, box.width * (11 / 48)));
     await scrubber.click({ position: { x: x11, y: box.height / 2 } });
     await expect(page.locator('#timeline-time')).toHaveText('Day 0, 11:00');
-    await expect(activeDecisionsValue).toHaveText('2');
+    const activeAt11 = await page.locator('.envelope-card:has-text("Active at selected time")').count();
+    await expect(activeDecisionsValue).toHaveText(new RegExp(`^${activeAt11}$`));
 
-    // Set time where no envelopes are active (25h)
+    // Set time where only ENV-002 remains active (25h)
     const box2 = await scrubber.boundingBox();
     expect(box2).toBeTruthy();
     const x25 = Math.max(2, Math.min(box2.width - 2, box2.width * (25 / 48)));
     await scrubber.click({ position: { x: x25, y: box2.height / 2 } });
     await expect(page.locator('#timeline-time')).toHaveText('Day 1, 01:00');
-    await expect(activeDecisionsValue).toHaveText('0');
+    const activeAt25 = await page.locator('.envelope-card:has-text("Active at selected time")').count();
+    await expect(activeDecisionsValue).toHaveText(new RegExp(`^${activeAt25}$`));
   });
 
   test('should display Load Simulation Scenario buttons', async ({ page }) => {
     const actions = page.getByTestId('timeline-actions');
     await expect(actions).toBeVisible();
-    await expect(actions.getByRole('button', { name: /Import events/i })).toBeVisible();
+
+    // The primary "Actions" button is always visible.
+    await expect(actions.getByRole('button', { name: /^Actions$/i })).toBeVisible();
+
+    // Open menu and verify available actions. (Import is intentionally removed.)
+    await actions.getByRole('button', { name: /^Actions$/i }).click();
     await expect(actions.getByRole('button', { name: /Add random events/i })).toBeVisible();
     await expect(actions.getByRole('button', { name: /Add random envelope/i })).toBeVisible();
     await expect(actions.getByRole('button', { name: /Clear & reset/i })).toBeVisible();
+    await expect(actions.getByRole('button', { name: /Add steward/i })).toBeVisible();
   });
 
   test('should open envelope detail modal when clicking envelope card', async ({ page }) => {
@@ -193,7 +254,7 @@ test.describe('HDDL Simulation UI Verification', () => {
     // Verify modal content
     const modal = page.locator('.envelope-detail-modal');
     await expect(modal).toBeVisible();
-    await expect(modal.getByText('ENV-001')).toBeVisible();
+    await expect(modal.getByText(/^ENV-001$/)).toBeVisible();
     await expect(modal.getByRole('heading', { name: 'Customer Service Responses' })).toBeVisible();
     
     // Check for sections in modal - use heading role to be specific
@@ -223,10 +284,10 @@ test.describe('HDDL Simulation UI Verification', () => {
 
     await expect(page.locator('#timeline-time')).toHaveText('Day 1, 10:00');
 
-    // ENV-003 should become active after 30h
-    const env003 = page.locator('.envelope-card[data-envelope="ENV-003"]');
-    await expect(env003).toBeVisible();
-    await expect(env003.getByText('Active at selected time')).toBeVisible();
+    // ENV-002 remains active at this time
+    const env002 = page.locator('.envelope-card[data-envelope="ENV-002"]');
+    await expect(env002).toBeVisible();
+    await expect(env002.getByText('Active at selected time')).toBeVisible();
 
     // Play button should still toggle
     const playButton = page.locator('#timeline-play');
@@ -253,10 +314,9 @@ test.describe('HDDL Simulation UI Verification', () => {
       })
     ]);
 
-    await expect(page.locator('#signals-time')).toHaveText('Day 1, 10:00');
-    await expect(page.getByText('ENV-003: Pricing Adjustments')).toBeVisible();
-    await expect(page.getByText('Signal divergence detected')).toBeVisible();
-    await expect(page.getByText('Assumption Link')).toBeVisible();
+    // Decision telemetry now shows query-based event log
+    await expect(page.locator('#event-stream')).toBeVisible();
+    await expect(page.locator('.event-card').first()).toBeVisible();
 
     await page.screenshot({ path: 'test-results/screenshots/11-signals-feed-cycle-a.png', fullPage: true });
   });
@@ -296,8 +356,8 @@ test.describe('HDDL Simulation UI Verification', () => {
     await expect(page.getByTestId('dsg-artifacts')).toBeVisible();
     await expect(page.getByText(/Involved envelopes/i)).toBeVisible();
     const record = page.locator('#dsg-record-kv');
-    await expect(record.getByText(/ENV-003/)).toBeVisible();
-    await expect(record.getByText(/ENV-006/)).toBeVisible();
+    await expect(record.getByText(/ENV-001/)).toBeVisible();
+    await expect(record.getByText(/ENV-002/)).toBeVisible();
 
     await page.screenshot({ path: 'test-results/screenshots/12-dsg-replay-cycle-a.png', fullPage: true });
   });
@@ -360,22 +420,25 @@ test.describe('HDDL Simulation UI Verification', () => {
     const box = await scrubber.boundingBox();
     expect(box).toBeTruthy();
 
-    // 11h: two envelopes active (ENV-001 and ENV-002)
+    // 11h: validate active envelope count matches the rendered list
     const x11 = Math.max(2, Math.min(box.width - 2, box.width * (11 / 48)));
     await scrubber.click({ position: { x: x11, y: box.height / 2 } });
     await expect(page.locator('#timeline-time')).toHaveText('Day 0, 11:00');
-    await expect(page.getByTestId('fleets-active-count')).toHaveText('2');
+    const activeCardsAt11 = await page.locator('.fleet-env').count();
+    await expect(page.getByTestId('fleets-active-count')).toHaveText(String(activeCardsAt11));
     const anyActiveAgent = page.locator('[data-testid="fleet-agent-icon"].active');
     await expect(anyActiveAgent.first()).toBeVisible();
 
-    // 25h: no envelopes active
+    // 25h: validate active envelope count matches the rendered list
     const box2 = await scrubber.boundingBox();
     expect(box2).toBeTruthy();
     const x25 = Math.max(2, Math.min(box2.width - 2, box2.width * (25 / 48)));
     await scrubber.click({ position: { x: x25, y: box2.height / 2 } });
     await expect(page.locator('#timeline-time')).toHaveText('Day 1, 01:00');
-    await expect(page.getByTestId('fleets-active-count')).toHaveText('0');
-    await expect(page.locator('[data-testid="fleet-agent-icon"].active')).toHaveCount(0);
+    const activeCardsAt25 = await page.locator('.fleet-env').count();
+    await expect(page.getByTestId('fleets-active-count')).toHaveText(String(activeCardsAt25));
+    const anyActiveAgentAt25 = page.locator('[data-testid="fleet-agent-icon"].active');
+    await expect(anyActiveAgentAt25.first()).toBeVisible();
   });
 
   test('should have status bar with live clock', async ({ page }) => {

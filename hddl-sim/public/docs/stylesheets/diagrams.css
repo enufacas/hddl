@@ -263,7 +263,7 @@
 
 /* ------------------------------------------------------------
    HDDL Visual Index (offline hub page)
-   - Standalone HTML page (does not inherit MkDocs layout)
+  - Standalone HTML page (does not inherit site layout)
    - Uses Material theme variables when present, with safe fallbacks
 ------------------------------------------------------------- */
 

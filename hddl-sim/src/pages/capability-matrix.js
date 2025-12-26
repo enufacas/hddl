@@ -15,7 +15,7 @@ export function renderCapabilityMatrix(container) {
       <div class="fleet-page__top">
         <div class="fleet-page__top-left">
           <h1>Steward Agent Fleets</h1>
-          <p class="subtitle">Which agents are operating under which envelopes at the selected timeline time</p>
+          <p class="subtitle">Capability is subordinate to authority: fleets operate only under envelopes (never as authority).</p>
         </div>
 
         <div class="fleet-page__top-right">
@@ -55,6 +55,20 @@ export function renderCapabilityMatrix(container) {
   })
 }
 
+function getProhibitedConstraints(constraints) {
+  const items = Array.isArray(constraints) ? constraints : []
+  return items.filter(c => {
+    const s = String(c || '')
+    return s.startsWith('No ') || s.includes('Not permitted') || s.startsWith('Human-only') || s.includes('Human-only')
+  })
+}
+
+function getAllowedConstraints(constraints) {
+  const items = Array.isArray(constraints) ? constraints : []
+  const prohibited = new Set(getProhibitedConstraints(items))
+  return items.filter(x => !prohibited.has(x))
+}
+
 function renderFleets(container, scenario, timeHour) {
   const timeEl = container.querySelector('#fleets-time')
   const countEl = container.querySelector('#fleets-active-count')
@@ -80,11 +94,20 @@ function renderFleets(container, scenario, timeHour) {
     } else {
       activeEl.innerHTML = activeEnvelopes
         .map(env => {
+          const version = env?.envelope_version ?? 1
+          const rev = env?.revision_id || '-'
+          const prohibited = getProhibitedConstraints(env?.constraints).slice(0, 2)
+          const allowed = getAllowedConstraints(env?.constraints).slice(0, 2)
           return `
             <div class="fleet-env" data-envelope-id="${escapeAttr(env.envelopeId)}" style="--env-accent: ${escapeAttr(env.accent || 'var(--status-muted)')};">
               <div class="fleet-env__id">${escapeHtml(env.envelopeId)}</div>
               <div class="fleet-env__name">${escapeHtml(env.name)}</div>
               <div class="fleet-env__meta">${escapeHtml(env.domain || '-')} - ${escapeHtml(env.ownerRole || '-')}</div>
+              <div class="fleet-env__meta" style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;">v${escapeHtml(version)} • rev: ${escapeHtml(rev)}</div>
+              <div style="display:flex; gap: 6px; flex-wrap: wrap; margin-top: 8px;">
+                ${allowed.map(a => `<span style="border: 1px solid var(--vscode-sideBar-border); background: var(--vscode-editor-background); border-radius: 999px; padding: 2px 8px; font-size: 11px; color: var(--vscode-statusBar-foreground);" title="${escapeAttr(a)}">Allowed</span>`).join('')}
+                ${prohibited.map(p => `<span style="border: 1px solid var(--vscode-sideBar-border); background: var(--vscode-editor-background); border-radius: 999px; padding: 2px 8px; font-size: 11px; color: var(--vscode-statusBar-foreground);" title="${escapeAttr(p)}">Prohibited</span>`).join('')}
+              </div>
             </div>
           `
         })
