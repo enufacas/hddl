@@ -349,7 +349,7 @@ export function createHDDLMap(container, options = {}) {
 
     const topMargin = 52
     const bottomMargin = 28
-    const usableHeight = Math.max(160, height - topMargin - bottomMargin)
+    const usableHeight = Math.max(160, mapHeight - topMargin - bottomMargin)  // Use mapHeight, not total height
     const rowCount = Math.max(1, activeEnvelopes.length)
     const rowHeight = usableHeight / rowCount
     const envelopeR = Math.max(22, Math.min(40, (rowHeight - 18) / 2))
