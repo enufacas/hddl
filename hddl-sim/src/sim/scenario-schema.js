@@ -125,6 +125,31 @@ export function validateScenario(rawScenario) {
     if (type === 'dsg_message') {
       if (!asString(event.sessionId)) errors.push(`DSG message[${idx}] missing sessionId.`)
     }
+    // ═══════════════════════════════════════════════════════════════════════════
+    // EMBEDDING SPEC: Event-driven embedding creation rules
+    // ═══════════════════════════════════════════════════════════════════════════
+    // Embeddings are NOT random - they are created when specific events occur.
+    // This ensures decision memory is built logically from meaningful operations.
+    //
+    // Required embedding triggers:
+    //   - decision (especially blocked/escalated): precedent patterns
+    //   - boundary_interaction: escalation patterns for future detection
+    //   - revision: policy changes with rationale
+    //   - signal (significant): baselines and anomalies for drift detection
+    //   - dsg_session: governance decisions as session_artifact
+    //
+    // Embedding rules:
+    //   - embeddingType MUST match the sourceEventId event type
+    //   - sourceEventId MUST reference an existing event
+    //   - hour should be shortly after the source event (embedding captures it)
+    //   - semanticContext describes the retrievable pattern
+    // ═══════════════════════════════════════════════════════════════════════════
+    if (type === 'embedding') {
+      if (!asString(event.embeddingId)) warnings.push(`Embedding[${idx}] missing embeddingId.`)
+      if (!asString(event.embeddingType)) warnings.push(`Embedding[${idx}] missing embeddingType.`)
+      if (!asString(event.sourceEventId)) warnings.push(`Embedding[${idx}] missing sourceEventId.`)
+      if (!asString(event.semanticContext)) warnings.push(`Embedding[${idx}] missing semanticContext.`)
+    }
 
     const envId = asString(event.envelopeId)
     if (envId && envelopeIds.size && !envelopeIds.has(envId)) {
