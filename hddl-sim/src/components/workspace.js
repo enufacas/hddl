@@ -59,6 +59,7 @@ const navItems = [
 
   // Reference
   { id: 'docs', label: 'Docs', icon: 'book', route: '/docs', section: 'reference' },
+  { id: 'specification', label: 'Specification', icon: 'json', route: '/specification', section: 'reference' },
   { id: 'authority', label: 'Authority Order', icon: 'law', route: '/authority', section: 'reference', disabled: true },
 ]
 
