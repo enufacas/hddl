@@ -42,7 +42,7 @@ export function createHDDLMap(container, options = {}) {
   // Lifecycle loop cues (subtle background curves across system boundaries)
   // These are intentionally static: they communicate the conceptual flow.
   const cycleYTop = 118
-  const cycleYBottom = height - 56
+  const cycleYBottom = mapHeight - 56  // Use mapHeight, not total height
   const cycleYMid = (cycleYTop + cycleYBottom) / 2
   const cycleRy = Math.max(70, (cycleYBottom - cycleYTop) * 0.42)
 
