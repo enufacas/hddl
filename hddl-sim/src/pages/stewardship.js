@@ -84,7 +84,31 @@ export function render(container) {
 
   // Initialize and sync steward filter
   let currentFilter = getStewardFilter();
+  
+  // Populate filter options based on scenario
+  function populateStewardFilter() {
+    if (!stewardFilter) return
+    const scenario = getScenario()
+    const envelopes = scenario?.envelopes ?? []
+    const uniqueRoles = new Set(envelopes.map(e => e.ownerRole).filter(Boolean))
+    const sortedRoles = Array.from(uniqueRoles).sort()
+    
+    const currentValue = stewardFilter.value
+    stewardFilter.innerHTML = '<option value="all">All Envelopes</option>' +
+      sortedRoles.map(role => `<option value="${role}">${role}</option>`).join('')
+    
+    // Restore selection if it still exists
+    if (sortedRoles.includes(currentValue) || currentValue === 'all') {
+      stewardFilter.value = currentValue
+    } else {
+      stewardFilter.value = 'all'
+      currentFilter = 'all'
+      setStewardFilter('all')
+    }
+  }
+  
   if (stewardFilter) {
+    populateStewardFilter();
     stewardFilter.value = currentFilter;
     stewardFilter.addEventListener('change', (e) => {
       currentFilter = e.target.value;
@@ -523,6 +547,7 @@ export function render(container) {
 
   const unsubScenario = onScenarioChange(() => {
     if (!container.isConnected) { unsubScenario(); unsubTime(); unsubFilter(); return; }
+    populateStewardFilter();
     renderActions();
     renderDecisionMemory();
     renderRecentActivity();

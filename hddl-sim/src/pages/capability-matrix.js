@@ -6,6 +6,8 @@ import {
   getTimeHour,
   onScenarioChange,
   onTimeChange,
+  getStewardFilter,
+  setStewardFilter,
 } from '../sim/sim-state'
 
 // NOTE: kept export name for routing compatibility.
@@ -19,6 +21,12 @@ export function renderCapabilityMatrix(container) {
         </div>
 
         <div class="fleet-page__top-right">
+          <div style="min-width: 200px; margin-bottom: 12px;">
+            <div style="font-size: 9px; color: var(--vscode-statusBar-foreground); margin-bottom: 4px; letter-spacing: 0.5px; text-transform: uppercase;">View As</div>
+            <select id="steward-filter" style="width: 100%; padding: 6px 10px; background: var(--vscode-input-background); color: var(--vscode-editor-foreground); border: 1px solid var(--vscode-input-border); border-radius: 2px; font-size: 12px; cursor: pointer;">
+              <option value="all">All Envelopes</option>
+            </select>
+          </div>
           <div class="fleet-page__summary">
             <div class="fleet-page__summary-item">
               <div class="fleet-page__k">Selected time</div>
@@ -38,10 +46,45 @@ export function renderCapabilityMatrix(container) {
     </div>
   `
 
+  const stewardFilter = container.querySelector('#steward-filter')
+  let currentFilter = getStewardFilter()
+  
+  // Populate filter options based on scenario
+  function populateStewardFilter() {
+    if (!stewardFilter) return
+    const scenario = getScenario()
+    const envelopes = scenario?.envelopes ?? []
+    const uniqueRoles = new Set(envelopes.map(e => e.ownerRole).filter(Boolean))
+    const sortedRoles = Array.from(uniqueRoles).sort()
+    
+    const currentValue = stewardFilter.value
+    stewardFilter.innerHTML = '<option value="all">All Envelopes</option>' +
+      sortedRoles.map(role => `<option value="${role}">${role}</option>`).join('')
+    
+    // Restore selection if it still exists
+    if (sortedRoles.includes(currentValue) || currentValue === 'all') {
+      stewardFilter.value = currentValue
+    } else {
+      stewardFilter.value = 'all'
+      currentFilter = 'all'
+      setStewardFilter('all')
+    }
+  }
+  
+  if (stewardFilter) {
+    populateStewardFilter()
+    stewardFilter.value = currentFilter
+    stewardFilter.addEventListener('change', (e) => {
+      currentFilter = e.target.value
+      setStewardFilter(currentFilter)
+      draw()
+    })
+  }
+
   const draw = () => {
     const scenario = getScenario()
     const timeHour = getTimeHour()
-    renderFleets(container, scenario, timeHour)
+    renderFleets(container, scenario, timeHour, currentFilter)
   }
 
   draw()
@@ -51,6 +94,7 @@ export function renderCapabilityMatrix(container) {
   })
   onScenarioChange(() => {
     if (!container.isConnected) return
+    populateStewardFilter()
     draw()
   })
 }
@@ -69,7 +113,7 @@ function getAllowedConstraints(constraints) {
   return items.filter(x => !prohibited.has(x))
 }
 
-function renderFleets(container, scenario, timeHour) {
+function renderFleets(container, scenario, timeHour, stewardFilter = 'all') {
   const timeEl = container.querySelector('#fleets-time')
   const countEl = container.querySelector('#fleets-active-count')
   const activeEl = container.querySelector('#fleets-active-envelopes')
@@ -81,7 +125,11 @@ function renderFleets(container, scenario, timeHour) {
   const envelopes = scenario?.envelopes ?? []
   const fleets = Array.isArray(scenario?.fleets) ? scenario.fleets : []
 
-  const activeEnvelopes = envelopes
+  const filteredEnvelopes = stewardFilter === 'all'
+    ? envelopes
+    : envelopes.filter(e => e.ownerRole === stewardFilter)
+
+  const activeEnvelopes = filteredEnvelopes
     .filter(e => getEnvelopeStatus(e, timeHour) === 'active')
     .map(e => getEnvelopeAtTime(scenario, e.envelopeId, timeHour) || e)
 

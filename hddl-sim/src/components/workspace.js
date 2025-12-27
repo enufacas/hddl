@@ -1327,7 +1327,8 @@ export function createWorkspace() {
 
   // Default-collapsed per spec.
   setAuxCollapsed(persisted.auxCollapsed !== undefined ? persisted.auxCollapsed : false)
-  setBottomCollapsed(persisted.bottomCollapsed !== undefined ? persisted.bottomCollapsed : true)
+  // Always start with bottom panel collapsed (ignore persisted state).
+  setBottomCollapsed(true)
 
   const workbench = document.createElement('div');
   workbench.className = 'split-view-container workbench';
@@ -1390,12 +1391,8 @@ export function createWorkspace() {
     }
   })
 
-  // Auto-open bottom panel during playback.
-  window.addEventListener('hddl:playback', (e) => {
-    if (e?.detail?.playing) setBottomCollapsed(false)
-  })
-
   // Auto-open bottom panel during log-heavy flows (import/generation).
+  // NOTE: No longer auto-open on playback — keep collapsed by default for cleaner view.
   window.addEventListener('hddl:log-heavy', () => {
     setBottomCollapsed(false)
   })

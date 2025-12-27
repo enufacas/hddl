@@ -481,32 +481,85 @@ body {
   }
 }
 
-/* Docs Page Styles */
+/* Enhanced Documentation Page Styles */
+.docs-hero {
+  text-align: center;
+  margin-bottom: 3rem;
+  padding: 2rem;
+  background: linear-gradient(135deg, rgba(25, 118, 210, 0.1), rgba(56, 142, 60, 0.1));
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+.docs-hero h1 {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-subtitle {
+  font-size: 1.2rem;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+}
+
+.hero-description {
+  max-width: 700px;
+  margin: 0 auto;
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--text);
+}
+
+/* Documentation Grid */
 .docs-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  grid-template-columns: 1fr;
   gap: 2rem;
   margin: 2rem 0;
   text-align: left;
 }
 
+/* Documentation Sections */
 .docs-section {
+  margin-bottom: 2.5rem;
   background-color: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 1.5rem;
+  border-radius: 12px;
+  padding: 2rem;
+  text-align: left;
 }
 
-.docs-section h2 {
-  margin-top: 0;
-  margin-bottom: 1rem;
-  color: var(--primary-color);
-  font-size: 1.3rem;
+.section-header {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--border);
 }
 
-.docs-links {
+.section-header h2 {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+}
+
+.section-icon {
+  font-size: 1.5rem;
+}
+
+.section-desc {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  margin: 0;
+}
+
+/* Enhanced Document Links */
+.docs-links {
+  display: grid;
   gap: 0.75rem;
 }
 
@@ -514,33 +567,334 @@ body {
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding: 1rem;
+  padding: 1rem 1.25rem;
   background-color: var(--background);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 8px;
   text-decoration: none;
   color: var(--text);
-  transition: all 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.doc-link::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 4px;
+  background: linear-gradient(180deg, var(--primary-color), var(--secondary-color));
+  transform: scaleY(0);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .doc-link:hover {
-  border-color: var(--primary-color);
-  background-color: var(--surface);
   transform: translateX(4px);
+  border-color: var(--primary-color);
+  background-color: rgba(25, 118, 210, 0.05);
+  box-shadow: 0 4px 12px rgba(25, 118, 210, 0.15);
 }
 
-.doc-icon {
-  font-size: 1.8rem;
+.doc-link:hover::before {
+  transform: scaleY(1);
+}
+
+.doc-link .doc-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+  transition: transform 0.3s;
+}
+
+.doc-link:hover .doc-icon {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.doc-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.doc-link .doc-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  color: var(--text);
+}
+
+.doc-link .doc-desc {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.doc-arrow {
+  font-size: 1.5rem;
+  color: var(--text-secondary);
+  opacity: 0;
+  transition: all 0.3s;
   flex-shrink: 0;
 }
 
-.doc-title {
-  font-weight: 600;
-  font-size: 1rem;
-  margin-bottom: 0.25rem;
+.doc-link:hover .doc-arrow {
+  opacity: 1;
+  transform: translateX(4px);
 }
 
-.doc-desc {
-  font-size: 0.85rem;
+/* Info Banner */
+.info-banner {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-top: 3rem;
+}
+
+.info-card {
+  display: flex;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, var(--surface), var(--background));
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  text-align: left;
+}
+
+.info-icon {
+  font-size: 2.5rem;
+  flex-shrink: 0;
+}
+
+.info-card h3 {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+  color: var(--primary-color);
+}
+
+.info-card p {
+  font-size: 0.95rem;
   color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Markdown Viewer Modal */
+.markdown-viewer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.markdown-viewer.visible {
+  opacity: 1;
+}
+
+.markdown-viewer.closing {
+  opacity: 0;
+}
+
+.markdown-viewer-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(4px);
+}
+
+.markdown-viewer-content {
+  position: relative;
+  width: 90%;
+  max-width: 900px;
+  max-height: 85vh;
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  transform: scale(0.95);
+  transition: transform 0.3s;
+}
+
+.markdown-viewer.visible .markdown-viewer-content {
+  transform: scale(1);
+}
+
+.markdown-viewer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2rem;
+  border-bottom: 2px solid var(--border);
+  flex-shrink: 0;
+}
+
+.markdown-viewer-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: var(--primary-color);
+}
+
+.markdown-viewer-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--text);
+  cursor: pointer;
+  padding: 0.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.markdown-viewer-close:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--accent-color);
+}
+
+.markdown-viewer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 2rem;
+  line-height: 1.8;
+}
+
+.markdown-viewer-body h1 {
+  font-size: 2rem;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: var(--primary-color);
+  border-bottom: 2px solid var(--border);
+  padding-bottom: 0.5rem;
+}
+
+.markdown-viewer-body h2 {
+  font-size: 1.6rem;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  color: var(--text);
+}
+
+.markdown-viewer-body h3 {
+  font-size: 1.3rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  color: var(--text);
+}
+
+.markdown-viewer-body p {
+  margin-bottom: 1rem;
+  color: var(--text);
+}
+
+.markdown-viewer-body code {
+  background-color: var(--background);
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.9em;
+  color: var(--accent-color);
+}
+
+.markdown-viewer-body pre {
+  background-color: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1rem;
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+
+.markdown-viewer-body pre code {
+  background: none;
+  padding: 0;
+  color: var(--text);
+}
+
+.markdown-viewer-body ul {
+  margin-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.markdown-viewer-body li {
+  margin-bottom: 0.5rem;
+  color: var(--text);
+}
+
+.markdown-viewer-body a {
+  color: var(--primary-color);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s;
+}
+
+.markdown-viewer-body a:hover {
+  border-bottom-color: var(--primary-color);
+}
+
+.markdown-viewer-body strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.markdown-viewer-body em {
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.loading-spinner {
+  text-align: center;
+  padding: 3rem;
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .docs-hero h1 {
+    font-size: 2rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1rem;
+  }
+  
+  .docs-section {
+    padding: 1.5rem;
+  }
+  
+  .doc-link {
+    padding: 0.875rem 1rem;
+  }
+  
+  .doc-link .doc-icon {
+    font-size: 1.5rem;
+  }
+  
+  .markdown-viewer-content {
+    width: 95%;
+    max-height: 90vh;
+  }
+  
+  .markdown-viewer-header {
+    padding: 1rem 1.5rem;
+  }
+  
+  .markdown-viewer-body {
+    padding: 1.5rem;
+  }
 }
