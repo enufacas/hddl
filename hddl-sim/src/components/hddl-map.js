@@ -1848,7 +1848,7 @@ export function createHDDLMap(container, options = {}) {
   // Perspective grid lines
   const gridLayer = embeddingStoreLayer.append('g')
     .attr('class', 'perspective-grid')
-    .attr('opacity', 0.25)
+    .attr('opacity', 0.18)
 
   // Vertical lines converging to vanishing points
   for (let i = 0; i <= 10; i++) {
@@ -1860,7 +1860,7 @@ export function createHDDLMap(container, options = {}) {
       .attr('y1', floorTop)
       .attr('x2', frontX)
       .attr('y2', floorBottom)
-      .attr('stroke', 'rgba(100, 150, 255, 0.4)')
+      .attr('stroke', 'rgba(80, 100, 140, 0.12)')
       .attr('stroke-width', 0.5)
   }
 
@@ -1876,7 +1876,7 @@ export function createHDDLMap(container, options = {}) {
       .attr('y1', y)
       .attr('x2', rightX)
       .attr('y2', y)
-      .attr('stroke', 'rgba(100, 150, 255, 0.4)')
+      .attr('stroke', 'rgba(80, 100, 140, 0.12)')
       .attr('stroke-width', 0.5)
   }
 
