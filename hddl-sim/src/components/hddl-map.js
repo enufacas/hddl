@@ -1760,30 +1760,26 @@ export function createHDDLMap(container, options = {}) {
     .attr('class', 'embedding-store')
     .attr('transform', `translate(0, ${mapHeight})`)
 
-  // 3D box background with perspective
+  // 3D box background with TRUE perspective (back narrow, front wide)
   const box3D = embeddingStoreLayer.append('g')
     .attr('class', 'embedding-box-3d')
 
-  const floorTop = embeddingStoreHeight * 0.3
-  const floorBottom = embeddingStoreHeight - 10
-  const floorDepthRange = floorBottom - floorTop
+  // Perspective dimensions - back is NARROW, front is WIDE
+  const backY = embeddingStoreHeight * 0.25      // Top edge (back of floor)
+  const frontY = embeddingStoreHeight - 8         // Bottom edge (front of floor)
+  const floorDepthRange = frontY - backY
+  
+  // Back edge (narrow) - centered
+  const backLeft = width * 0.25
+  const backRight = width * 0.75
+  
+  // Front edge (wide) - spans more
+  const frontLeft = width * 0.08
+  const frontRight = width * 0.92
 
   // Gradients for 3D depth
   const boxDefs = svg.append('defs')
   
-  const backWallGradient = boxDefs.append('linearGradient')
-    .attr('id', 'embedding-back-wall')
-    .attr('x1', '0%')
-    .attr('y1', '0%')
-    .attr('x2', '0%')
-    .attr('y2', '100%')
-  backWallGradient.append('stop')
-    .attr('offset', '0%')
-    .attr('stop-color', 'rgba(3, 5, 10, 0.98)')
-  backWallGradient.append('stop')
-    .attr('offset', '100%')
-    .attr('stop-color', 'rgba(1, 2, 5, 1)')
-
   const floorGradient = boxDefs.append('linearGradient')
     .attr('id', 'embedding-floor')
     .attr('x1', '0%')
@@ -1792,97 +1788,218 @@ export function createHDDLMap(container, options = {}) {
     .attr('y2', '100%')
   floorGradient.append('stop')
     .attr('offset', '0%')
-    .attr('stop-color', 'rgba(3, 5, 10, 0.95)')
+    .attr('stop-color', 'rgba(8, 12, 20, 0.95)')
   floorGradient.append('stop')
     .attr('offset', '100%')
-    .attr('stop-color', 'rgba(8, 10, 18, 0.98)')
+    .attr('stop-color', 'rgba(15, 20, 30, 0.98)')
 
-  // Back wall (trapezoid for perspective)
+  // Main floor polygon (trapezoid with perspective)
   box3D.append('polygon')
     .attr('points', `
-      ${width * 0.05},${floorTop}
-      ${width * 0.95},${floorTop}
-      ${width * 0.85},${floorBottom}
-      ${width * 0.15},${floorBottom}
-    `)
-    .attr('fill', 'url(#embedding-back-wall)')
-    .attr('stroke', 'rgba(100, 110, 130, 0.18)')
-    .attr('stroke-width', 1)
-
-  // Floor (trapezoid receding into distance)
-  box3D.append('polygon')
-    .attr('points', `
-      ${width * 0.15},${floorTop}
-      ${width * 0.85},${floorTop}
-      ${width * 0.85},${floorBottom}
-      ${width * 0.15},${floorBottom}
+      ${backLeft},${backY}
+      ${backRight},${backY}
+      ${frontRight},${frontY}
+      ${frontLeft},${frontY}
     `)
     .attr('fill', 'url(#embedding-floor)')
-    .attr('stroke', 'rgba(100, 110, 130, 0.15)')
-    .attr('stroke-width', 1)
+    .attr('stroke', 'rgba(100, 120, 150, 0.4)')
+    .attr('stroke-width', 1.5)
 
-  // Left wall
-  box3D.append('polygon')
-    .attr('points', `
-      ${width * 0.05},${floorTop}
-      ${width * 0.15},${floorTop}
-      ${width * 0.15},${floorBottom}
-      ${width * 0.05},${floorBottom}
-    `)
-    .attr('fill', 'rgba(2, 3, 6, 0.95)')
-    .attr('stroke', 'rgba(100, 110, 130, 0.16)')
-    .attr('stroke-width', 1)
-
-  // Right wall
-  box3D.append('polygon')
-    .attr('points', `
-      ${width * 0.85},${floorTop}
-      ${width * 0.95},${floorTop}
-      ${width * 0.95},${floorBottom}
-      ${width * 0.85},${floorBottom}
-    `)
-    .attr('fill', 'rgba(2, 3, 6, 0.95)')
-    .attr('stroke', 'rgba(100, 110, 130, 0.16)')
-    .attr('stroke-width', 1)
-
-  // Perspective grid lines (very subtle light grey)
+  // Perspective grid with proper convergence
   const gridLayer = embeddingStoreLayer.append('g')
     .attr('class', 'perspective-grid')
-    .attr('opacity', 0.12)
 
-  // Vertical depth lines - from front to back corners (4 corner perspective lines)
-  const corners = [
-    { backX: width * 0.05, frontX: width * 0.15 },  // Left
-    { backX: width * 0.35, frontX: width * 0.4 },    // Left-center
-    { backX: width * 0.65, frontX: width * 0.6 },    // Right-center
-    { backX: width * 0.95, frontX: width * 0.85 }    // Right
-  ]
-  
-  corners.forEach(corner => {
+  // Helper: interpolate X position at a given depth (0=back, 1=front)
+  function getXAtDepth(normalizedX, depth) {
+    // normalizedX: 0=left edge, 1=right edge
+    // depth: 0=back, 1=front
+    const leftAtDepth = backLeft + depth * (frontLeft - backLeft)
+    const rightAtDepth = backRight + depth * (frontRight - backRight)
+    return leftAtDepth + normalizedX * (rightAtDepth - leftAtDepth)
+  }
+
+  // Gradient for vertical lines (atmospheric perspective - fade toward back)
+  const vertLineGradient = boxDefs.append('linearGradient')
+    .attr('id', 'vert-line-fade')
+    .attr('x1', '0%')
+    .attr('y1', '0%')
+    .attr('x2', '0%')
+    .attr('y2', '100%')
+  vertLineGradient.append('stop')
+    .attr('offset', '0%')
+    .attr('stop-color', 'rgba(100, 140, 180, 0.15)')  // Faded at back
+  vertLineGradient.append('stop')
+    .attr('offset', '100%')
+    .attr('stop-color', 'rgba(100, 140, 180, 0.5)')   // Brighter at front
+
+  // Vertical lines (converging from front to back) - 8 lines
+  for (let i = 0; i <= 7; i++) {
+    const normalizedX = i / 7
+    const x1 = getXAtDepth(normalizedX, 0) // back
+    const x2 = getXAtDepth(normalizedX, 1) // front
     gridLayer.append('line')
-      .attr('x1', corner.backX)
-      .attr('y1', floorTop)
-      .attr('x2', corner.frontX)
-      .attr('y2', floorBottom)
-      .attr('stroke', 'rgba(140, 150, 170, 0.25)')
-      .attr('stroke-width', 0.5)
-  })
+      .attr('x1', x1)
+      .attr('y1', backY)
+      .attr('x2', x2)
+      .attr('y2', frontY)
+      .attr('stroke', 'url(#vert-line-fade)')
+      .attr('stroke-width', 1)
+  }
 
-  // Horizontal depth lines (perspective-aware)
+  // Horizontal lines (with perspective compression and opacity fade)
   for (let i = 0; i <= 6; i++) {
-    const t = i / 6
-    const y = floorTop + t * floorDepthRange
-    const perspectiveScale = 0.7 + t * 0.3
-    const leftX = width * 0.05 + (1 - perspectiveScale) * (width * 0.1)
-    const rightX = width * 0.95 - (1 - perspectiveScale) * (width * 0.1)
+    // Use non-linear spacing - lines compress toward the back
+    const t = Math.pow(i / 6, 0.7) // Power < 1 compresses lines toward back
+    const y = backY + t * floorDepthRange
+    const leftX = getXAtDepth(0, t)
+    const rightX = getXAtDepth(1, t)
+    // Atmospheric perspective: lines fade toward back
+    const lineOpacity = 0.15 + t * 0.35  // 0.15 at back, 0.5 at front
     gridLayer.append('line')
       .attr('x1', leftX)
       .attr('y1', y)
       .attr('x2', rightX)
       .attr('y2', y)
-      .attr('stroke', 'rgba(140, 150, 170, 0.2)')
-      .attr('stroke-width', 0.5)
+      .attr('stroke', `rgba(100, 140, 180, ${lineOpacity})`)
+      .attr('stroke-width', 1)
   }
+
+  // Front edge glow (subtle illumination at the front of the floor)
+  const frontGlowGradient = boxDefs.append('linearGradient')
+    .attr('id', 'front-glow')
+    .attr('x1', '0%')
+    .attr('y1', '100%')
+    .attr('x2', '0%')
+    .attr('y2', '0%')
+  frontGlowGradient.append('stop')
+    .attr('offset', '0%')
+    .attr('stop-color', 'rgba(75, 150, 255, 0.15)')
+  frontGlowGradient.append('stop')
+    .attr('offset', '100%')
+    .attr('stop-color', 'rgba(75, 150, 255, 0)')
+
+  box3D.append('rect')
+    .attr('x', frontLeft)
+    .attr('y', frontY - 25)
+    .attr('width', frontRight - frontLeft)
+    .attr('height', 30)
+    .attr('fill', 'url(#front-glow)')
+    .attr('pointer-events', 'none')
+
+  // Front wall (transparent rectangle for 3D box illusion)
+  const frontWallHeight = floorDepthRange * 0.7  // Taller front wall
+  const frontWallGradient = boxDefs.append('linearGradient')
+    .attr('id', 'front-wall-fade')
+    .attr('x1', '0%')
+    .attr('y1', '100%')
+    .attr('x2', '0%')
+    .attr('y2', '0%')
+  frontWallGradient.append('stop')
+    .attr('offset', '0%')
+    .attr('stop-color', 'rgba(80, 140, 200, 0.25)')  // More visible at bottom
+  frontWallGradient.append('stop')
+    .attr('offset', '50%')
+    .attr('stop-color', 'rgba(80, 140, 200, 0.08)')  // Fade through middle
+  frontWallGradient.append('stop')
+    .attr('offset', '100%')
+    .attr('stop-color', 'rgba(80, 140, 200, 0)')     // Transparent at top
+
+  // Front wall rectangle
+  box3D.append('rect')
+    .attr('x', frontLeft)
+    .attr('y', frontY - frontWallHeight)
+    .attr('width', frontRight - frontLeft)
+    .attr('height', frontWallHeight + 5)
+    .attr('fill', 'url(#front-wall-fade)')
+    .attr('pointer-events', 'none')
+
+  // Front wall edge line (bottom of the "glass")
+  box3D.append('line')
+    .attr('x1', frontLeft)
+    .attr('y1', frontY)
+    .attr('x2', frontRight)
+    .attr('y2', frontY)
+    .attr('stroke', 'rgba(100, 160, 220, 0.5)')
+    .attr('stroke-width', 2)
+
+  // Left wall edge (vertical from front corner going up)
+  box3D.append('line')
+    .attr('x1', frontLeft)
+    .attr('y1', frontY)
+    .attr('x2', frontLeft)
+    .attr('y2', frontY - frontWallHeight)
+    .attr('stroke', 'rgba(100, 160, 220, 0.3)')
+    .attr('stroke-width', 1)
+
+  // Right wall edge (vertical from front corner going up)
+  box3D.append('line')
+    .attr('x1', frontRight)
+    .attr('y1', frontY)
+    .attr('x2', frontRight)
+    .attr('y2', frontY - frontWallHeight)
+    .attr('stroke', 'rgba(100, 160, 220, 0.3)')
+    .attr('stroke-width', 1)
+
+  // Subtle scanlines overlay for tech aesthetic
+  const scanlinePattern = boxDefs.append('pattern')
+    .attr('id', 'scanlines')
+    .attr('patternUnits', 'userSpaceOnUse')
+    .attr('width', 4)
+    .attr('height', 4)
+  scanlinePattern.append('line')
+    .attr('x1', 0)
+    .attr('y1', 0)
+    .attr('x2', 4)
+    .attr('y2', 0)
+    .attr('stroke', 'rgba(255, 255, 255, 0.02)')
+    .attr('stroke-width', 1)
+
+  box3D.append('polygon')
+    .attr('points', `
+      ${backLeft},${backY}
+      ${backRight},${backY}
+      ${frontRight},${frontY}
+      ${frontLeft},${frontY}
+    `)
+    .attr('fill', 'url(#scanlines)')
+    .attr('pointer-events', 'none')
+
+  // Axis labels for canonical vector space semantics
+  const axisLabelGroup = embeddingStoreLayer.append('g')
+    .attr('class', 'axis-labels')
+  
+  // Depth axis label (back = archived, front = recent)
+  axisLabelGroup.append('text')
+    .attr('x', frontLeft - 5)
+    .attr('y', (backY + frontY) / 2)
+    .attr('text-anchor', 'end')
+    .attr('fill', 'rgba(100, 140, 180, 0.5)')
+    .attr('font-size', '9px')
+    .attr('font-style', 'italic')
+    .attr('transform', `rotate(-90, ${frontLeft - 5}, ${(backY + frontY) / 2})`)
+    .text('← archived ─ recent →')
+
+  // Back label (older patterns)
+  axisLabelGroup.append('text')
+    .attr('x', (backLeft + backRight) / 2)
+    .attr('y', backY - 4)
+    .attr('text-anchor', 'middle')
+    .attr('fill', 'rgba(100, 140, 180, 0.35)')
+    .attr('font-size', '8px')
+    .text('foundational patterns')
+
+  // Front label (hot patterns)
+  axisLabelGroup.append('text')
+    .attr('x', (frontLeft + frontRight) / 2)
+    .attr('y', frontY + 12)
+    .attr('text-anchor', 'middle')
+    .attr('fill', 'rgba(100, 140, 180, 0.5)')
+    .attr('font-size', '8px')
+    .text('active retrieval zone')
+
+  // Store bounds for chip positioning
+  const floorTop = backY
+  const floorBottom = frontY
 
   // Header text
   const headerGroup = embeddingStoreLayer.append('g')
@@ -1936,14 +2053,15 @@ export function createHDDLMap(container, options = {}) {
     .style('backdrop-filter', 'blur(8px)')
     .style('max-width', '320px')
 
-  // Define 3D box bounds for embedding positioning
+  // Define 3D box bounds for embedding positioning (uses perspective variables from above)
   const box3DBounds = {
-    floorTop: embeddingStoreHeight * 0.3,
-    floorBottom: embeddingStoreHeight - 10,
-    floorLeft: width * 0.15,
-    floorRight: width * 0.85,
-    wallLeft: width * 0.05,
-    wallRight: width * 0.95
+    backY,
+    frontY,
+    backLeft,
+    backRight,
+    frontLeft,
+    frontRight,
+    getXAtDepth  // Include the perspective helper function
   }
 
   let embeddingElements = []
@@ -1970,59 +2088,78 @@ export function createHDDLMap(container, options = {}) {
     
     const embeddingColor = stewardColors[event.actorRole] || '#4B96FF'
 
-    // Clustering logic: position based on embeddingType (depth) and actorRole (horizontal)
-    const typeDepthMap = {
-      'decision': 0.2,
-      'boundary_interaction': 0.4,
-      'revision': 0.5,
-      'signal': 0.7,
-      'session_artifact': 0.85
+    // ═══════════════════════════════════════════════════════════════════════════
+    // CANONICAL VECTOR SPACE CLUSTERING
+    // ═══════════════════════════════════════════════════════════════════════════
+    // In a real vector embedding database, position represents semantic similarity.
+    // For HDDL, we model this with meaningful axes:
+    //
+    // X-AXIS (horizontal): Domain clustering by envelope
+    //   - Embeddings from the same envelope cluster together
+    //   - Cross-domain patterns (boundary_interaction) span multiple regions
+    //
+    // Y-AXIS (depth/perspective): Recency & retrieval likelihood
+    //   - Back = older patterns (archived, less frequently retrieved)
+    //   - Front = recent patterns (hot, actively used for similarity matching)
+    //
+    // SEMANTIC CLUSTERING: Items with similar semanticContext text cluster together
+    //   - Simple heuristic: hash the semanticContext to create consistent position offsets
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    // Get scenario for envelope-based positioning
+    const scenario = getScenario()
+    const envelopeIds = [...new Set(scenario.envelopes.map(e => e.envelopeId))]
+    const envelopeIndex = envelopeIds.indexOf(event.envelopeId)
+    const envelopeCount = Math.max(envelopeIds.length, 1)
+    
+    // X-axis: Domain clustering by envelope (with padding from edges)
+    const envelopeBaseX = envelopeIndex >= 0 
+      ? 0.15 + (envelopeIndex / Math.max(envelopeCount - 1, 1)) * 0.7
+      : 0.5
+    
+    // Semantic clustering: hash semanticContext to get consistent sub-position
+    const semanticHash = (event.semanticContext || event.label || '').split('').reduce(
+      (acc, char, i) => acc + char.charCodeAt(0) * (i + 1), 0
+    )
+    const semanticOffsetX = ((semanticHash % 100) / 100 - 0.5) * 0.12
+    const semanticOffsetY = (((semanticHash * 7) % 100) / 100 - 0.5) * 0.15
+    
+    // Y-axis (depth): Recency-based positioning
+    // Older embeddings at back (depth=0), newer at front (depth=1)
+    const scenarioDuration = scenario.durationHours || 24
+    const normalizedTime = Math.min(1, event.hour / scenarioDuration)
+    
+    // Embedding type affects depth band (decisions are more "foundational" = deeper)
+    const typeDepthBias = {
+      'decision': -0.15,           // Decisions are foundational patterns - pushed back
+      'revision': -0.05,           // Revisions are policy updates - slightly back
+      'boundary_interaction': 0,   // Boundary interactions are neutral
+      'signal': 0.1,               // Signals are operational - pushed forward
+      'session_artifact': 0.15     // Session artifacts are recent context - front
     }
     
-    const stewardPositionMap = {
-      'Customer Steward': 0.15,
-      'Customer Success Steward': 0.15,
-      'HR Steward': 0.35,
-      'Human Resources Steward': 0.35,
-      'Sales Steward': 0.5,
-      'Data Steward': 0.65,
-      'Performance Steward': 0.65,
-      'Operations Steward': 0.8,
-      'Infrastructure Steward': 0.8
-    }
-
-    // Base position from type and steward
-    const baseDepthT = typeDepthMap[event.embeddingType] || 0.5
-    const baseStewardPos = stewardPositionMap[event.actorRole] || 0.5
-
-    // Add random variation for natural clustering
-    const depthVariation = (Math.random() - 0.5) * 0.12
-    const horizontalVariation = (Math.random() - 0.5) * 0.1
+    const baseDepthT = normalizedTime * 0.7 + 0.15  // 0.15 to 0.85 range
+    const typeBias = typeDepthBias[event.embeddingType] || 0
     
-    const depthT = Math.max(0, Math.min(1, baseDepthT + depthVariation))
-    const stewardOffset = Math.max(0, Math.min(1, baseStewardPos + horizontalVariation))
+    // Final positions with semantic clustering
+    const depthT = Math.max(0.05, Math.min(0.95, baseDepthT + typeBias + semanticOffsetY))
+    const stewardOffset = Math.max(0.08, Math.min(0.92, envelopeBaseX + semanticOffsetX))
 
-    // Perspective-aware positioning
-    const perspectiveScale = 0.7 + depthT * 0.3
-    const backLeftX = box3DBounds.wallLeft
-    const backRightX = box3DBounds.wallRight
-    const frontLeftX = box3DBounds.floorLeft
-    const frontRightX = box3DBounds.floorRight
-    
-    const leftAtDepth = backLeftX + depthT * (frontLeftX - backLeftX)
-    const rightAtDepth = backRightX + depthT * (frontRightX - backRightX)
-    const widthAtDepth = rightAtDepth - leftAtDepth
-    
-    const targetX = leftAtDepth + stewardOffset * widthAtDepth
-    const targetY = box3DBounds.floorTop + depthT * floorDepthRange
+    // Perspective-aware positioning using the helper function
+    const targetX = box3DBounds.getXAtDepth(stewardOffset, depthT)
+    const targetY = box3DBounds.backY + depthT * floorDepthRange
     const depthZ = depthT * 100
     
-    // Scale based on perspective (smaller = further away)
-    const depthScale = 0.5 + perspectiveScale * 0.5  // 0.5 to 1.0
+    // Scale based on perspective (smaller at back, larger at front)
+    // depthT: 0=back (small), 1=front (large)
+    const perspectiveScale = 0.45 + depthT * 0.55  // 0.45 to 1.0 (more dramatic)
+    
+    // Opacity fade for atmospheric depth (dimmer at back)
+    const depthOpacity = 0.5 + depthT * 0.5  // 0.5 at back, 1.0 at front
     
     // Rotation follows perspective: chips at back should appear to tilt away
-    const perspectiveTilt = -20 * (1 - depthT)  // -20° at back, 0° at front
-    const randomWobble = (Math.random() - 0.5) * 15
+    const perspectiveTilt = -12 * (1 - depthT)  // -12° at back, 0° at front
+    const randomWobble = (Math.random() - 0.5) * 8
     const rotateAngle = perspectiveTilt + randomWobble
 
     // Create chip group with detailed 3D design
@@ -2092,44 +2229,48 @@ export function createHDDLMap(container, options = {}) {
         .style('top', (mouseEvent.pageY - 10) + 'px')
     })
     .on('mouseleave', function() {
-      d3.select(this).transition().duration(200).attr('opacity', 0.75 + depthZ / 400)
+      d3.select(this).transition().duration(200).attr('opacity', depthOpacity)
       tooltip.style('display', 'none')
     })
 
-    // 3D chip design (microchip/memory card style)
-    const chipSize = 14
+    // 3D chip design - isometric cube style with prominent depth
+    const chipSize = 16
+    const depth3D = 5  // Depth offset for 3D effect
     
-    // Back face (darkest - creates depth)
-    chipGroup.append('rect')
-      .attr('x', -chipSize / 2 + 1)
-      .attr('y', -chipSize / 2 - 2)
-      .attr('width', chipSize)
-      .attr('height', chipSize)
-      .attr('rx', 2)
-      .attr('fill', 'rgba(0, 0, 0, 0.6)')
-      .attr('stroke', 'none')
-
-    // Top face (angled for 3D effect)
-    chipGroup.append('polygon')
-      .attr('points', `
-        ${-chipSize / 2},${-chipSize / 2 - 2}
-        ${chipSize / 2},${-chipSize / 2 - 2}
-        ${chipSize / 2 + 2},${-chipSize / 2}
-        ${-chipSize / 2 + 2},${-chipSize / 2}
-      `)
+    // Shadow underneath for grounding
+    chipGroup.append('ellipse')
+      .attr('cx', 2)
+      .attr('cy', chipSize / 2 + 2)
+      .attr('rx', chipSize / 2)
+      .attr('ry', 3)
       .attr('fill', 'rgba(0, 0, 0, 0.4)')
-      .attr('stroke', 'none')
-
-    // Right face (angled for 3D effect)
+      .attr('filter', 'blur(2px)')
+    
+    // Top face (lighter - catches "light")
     chipGroup.append('polygon')
       .attr('points', `
-        ${chipSize / 2},${-chipSize / 2 - 2}
-        ${chipSize / 2 + 2},${-chipSize / 2}
-        ${chipSize / 2 + 2},${chipSize / 2}
-        ${chipSize / 2},${chipSize / 2 - 2}
+        ${-chipSize / 2},${-chipSize / 2 - depth3D}
+        ${chipSize / 2},${-chipSize / 2 - depth3D}
+        ${chipSize / 2 + depth3D},${-chipSize / 2 - depth3D + 2}
+        ${-chipSize / 2 + depth3D},${-chipSize / 2 - depth3D + 2}
       `)
-      .attr('fill', 'rgba(0, 0, 0, 0.5)')
-      .attr('stroke', 'none')
+      .attr('fill', `color-mix(in srgb, ${embeddingColor} 70%, white)`)
+      .attr('stroke', embeddingColor)
+      .attr('stroke-width', 0.5)
+      .attr('opacity', 0.9)
+
+    // Right face (medium - side lighting)
+    chipGroup.append('polygon')
+      .attr('points', `
+        ${chipSize / 2},${-chipSize / 2 - depth3D}
+        ${chipSize / 2 + depth3D},${-chipSize / 2 - depth3D + 2}
+        ${chipSize / 2 + depth3D},${chipSize / 2 - depth3D + 2}
+        ${chipSize / 2},${chipSize / 2}
+      `)
+      .attr('fill', `color-mix(in srgb, ${embeddingColor} 50%, black)`)
+      .attr('stroke', embeddingColor)
+      .attr('stroke-width', 0.5)
+      .attr('opacity', 0.85)
 
     // Main front face with gradient
     const chipGradient = boxDefs.append('radialGradient')
@@ -2137,11 +2278,11 @@ export function createHDDLMap(container, options = {}) {
     chipGradient.append('stop')
       .attr('offset', '0%')
       .attr('stop-color', embeddingColor)
-      .attr('stop-opacity', 0.9)
+      .attr('stop-opacity', 1)
     chipGradient.append('stop')
       .attr('offset', '100%')
-      .attr('stop-color', embeddingColor)
-      .attr('stop-opacity', 0.6)
+      .attr('stop-color', `color-mix(in srgb, ${embeddingColor} 70%, black)`)
+      .attr('stop-opacity', 0.95)
 
     chipGroup.append('rect')
       .attr('x', -chipSize / 2)
@@ -2152,11 +2293,11 @@ export function createHDDLMap(container, options = {}) {
       .attr('fill', `url(#chip-gradient-${event.eventId})`)
       .attr('stroke', embeddingColor)
       .attr('stroke-width', 1.5)
-      .attr('filter', `drop-shadow(0 0 4px ${embeddingColor})`)
+      .attr('filter', `drop-shadow(0 0 6px ${embeddingColor})`)
 
     // Circuit pattern on chip
     const circuitGroup = chipGroup.append('g')
-      .attr('opacity', 0.6)
+      .attr('opacity', 0.5)
     
     // Horizontal traces
     circuitGroup.append('line')
@@ -2207,12 +2348,12 @@ export function createHDDLMap(container, options = {}) {
       .attr('fill', 'rgba(255,255,255,0.9)')
       .text('</>')
 
-    // Animate to target with rotation and scale
+    // Animate to target with rotation, scale, and depth-based opacity
     chipGroup.transition()
       .duration(2500)
       .ease(d3.easeCubicOut)
-      .attr('transform', `translate(${targetX}, ${targetY}) scale(${depthScale}) rotate(${rotateAngle})`)
-      .attr('opacity', 0.75 + depthZ / 400)
+      .attr('transform', `translate(${targetX}, ${targetY}) scale(${perspectiveScale}) rotate(${rotateAngle})`)
+      .attr('opacity', depthOpacity)
 
     embeddingElements.push({ element: chipGroup, event, timestamp: Date.now() })
     embeddingCount++
