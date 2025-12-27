@@ -126,23 +126,34 @@ export function validateScenario(rawScenario) {
       if (!asString(event.sessionId)) errors.push(`DSG message[${idx}] missing sessionId.`)
     }
     // ═══════════════════════════════════════════════════════════════════════════
-    // EMBEDDING SPEC: Event-driven embedding creation rules
+    // EMBEDDING SPEC: Aggressive memory storage for AI-native operations
     // ═══════════════════════════════════════════════════════════════════════════
-    // Embeddings are NOT random - they are created when specific events occur.
-    // This ensures decision memory is built logically from meaningful operations.
+    // Embeddings are NOT random - they capture agent actions, inputs, and outcomes.
+    // HDDL systems store memories of every meaningful operation for similarity retrieval.
     //
-    // Required embedding triggers:
-    //   - decision (especially blocked/escalated): precedent patterns
-    //   - boundary_interaction: escalation patterns for future detection
-    //   - revision: policy changes with rationale
-    //   - signal (significant): baselines and anomalies for drift detection
-    //   - dsg_session: governance decisions as session_artifact
+    // AGGRESSIVE embedding triggers (embed liberally):
+    //   - decision: ALL decisions create embeddings (approved, blocked, escalated)
+    //     → Captures input context + output decision for pattern matching
+    //   - boundary_interaction: ALL boundary touches (violations, escalations, reviews)
+    //     → Stores edge cases and exception handling patterns
+    //   - revision: ALL policy changes with rationale and impact
+    //     → Policy evolution memory for governance continuity
+    //   - signal: Significant signals (baselines, anomalies, drift, thresholds)
+    //     → Monitoring patterns and operational health indicators
+    //   - dsg_session: ALL governance sessions with decisions and calibrations
+    //     → Cross-domain precedents and stewardship judgment patterns
+    //
+    // Agent action memory principle:
+    //   - Every agent action that produces a decision is embedded
+    //   - Input state + reasoning + outcome captured in semanticContext
+    //   - Creates retrievable memory for future similar scenarios
     //
     // Embedding rules:
     //   - embeddingType MUST match the sourceEventId event type
     //   - sourceEventId MUST reference an existing event
     //   - hour should be shortly after the source event (embedding captures it)
-    //   - semanticContext describes the retrievable pattern
+    //   - semanticContext describes input conditions, reasoning, and outcome
+    //   - semanticVector [x,y] positions in policy↔operational, routine↔exceptional space
     // ═══════════════════════════════════════════════════════════════════════════
     if (type === 'embedding') {
       if (!asString(event.embeddingId)) warnings.push(`Embedding[${idx}] missing embeddingId.`)
