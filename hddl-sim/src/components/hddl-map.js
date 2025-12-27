@@ -1768,54 +1768,6 @@ export function createHDDLMap(container, options = {}) {
   const floorBottom = embeddingStoreHeight - 10
   const floorDepthRange = floorBottom - floorTop
 
-  // Back wall (trapezoid for perspective)
-  box3D.append('polygon')
-    .attr('points', `
-      ${width * 0.05},${floorTop}
-      ${width * 0.95},${floorTop}
-      ${width * 0.85},${floorBottom}
-      ${width * 0.15},${floorBottom}
-    `)
-    .attr('fill', 'url(#embedding-back-wall)')
-    .attr('stroke', 'rgba(100, 150, 255, 0.35)')
-    .attr('stroke-width', 1)
-
-  // Floor (trapezoid receding into distance)
-  box3D.append('polygon')
-    .attr('points', `
-      ${width * 0.15},${floorTop}
-      ${width * 0.85},${floorTop}
-      ${width * 0.85},${floorBottom}
-      ${width * 0.15},${floorBottom}
-    `)
-    .attr('fill', 'url(#embedding-floor)')
-    .attr('stroke', 'rgba(100, 150, 255, 0.25)')
-    .attr('stroke-width', 1)
-
-  // Left wall
-  box3D.append('polygon')
-    .attr('points', `
-      ${width * 0.05},${floorTop}
-      ${width * 0.15},${floorTop}
-      ${width * 0.15},${floorBottom}
-      ${width * 0.05},${floorBottom}
-    `)
-    .attr('fill', 'rgba(4, 6, 12, 0.92)')
-    .attr('stroke', 'rgba(100, 150, 255, 0.3)')
-    .attr('stroke-width', 1)
-
-  // Right wall
-  box3D.append('polygon')
-    .attr('points', `
-      ${width * 0.85},${floorTop}
-      ${width * 0.95},${floorTop}
-      ${width * 0.95},${floorBottom}
-      ${width * 0.85},${floorBottom}
-    `)
-    .attr('fill', 'rgba(4, 6, 12, 0.92)')
-    .attr('stroke', 'rgba(100, 150, 255, 0.3)')
-    .attr('stroke-width', 1)
-
   // Gradients for 3D depth
   const boxDefs = svg.append('defs')
   
@@ -1827,10 +1779,10 @@ export function createHDDLMap(container, options = {}) {
     .attr('y2', '100%')
   backWallGradient.append('stop')
     .attr('offset', '0%')
-    .attr('stop-color', 'rgba(5, 8, 15, 0.98)')
+    .attr('stop-color', 'rgba(3, 5, 10, 0.98)')
   backWallGradient.append('stop')
     .attr('offset', '100%')
-    .attr('stop-color', 'rgba(2, 4, 10, 1)')
+    .attr('stop-color', 'rgba(1, 2, 5, 1)')
 
   const floorGradient = boxDefs.append('linearGradient')
     .attr('id', 'embedding-floor')
@@ -1840,33 +1792,85 @@ export function createHDDLMap(container, options = {}) {
     .attr('y2', '100%')
   floorGradient.append('stop')
     .attr('offset', '0%')
-    .attr('stop-color', 'rgba(5, 8, 15, 0.95)')
+    .attr('stop-color', 'rgba(3, 5, 10, 0.95)')
   floorGradient.append('stop')
     .attr('offset', '100%')
-    .attr('stop-color', 'rgba(10, 14, 22, 0.98)')
+    .attr('stop-color', 'rgba(8, 10, 18, 0.98)')
 
-  // Perspective grid lines
+  // Back wall (trapezoid for perspective)
+  box3D.append('polygon')
+    .attr('points', `
+      ${width * 0.05},${floorTop}
+      ${width * 0.95},${floorTop}
+      ${width * 0.85},${floorBottom}
+      ${width * 0.15},${floorBottom}
+    `)
+    .attr('fill', 'url(#embedding-back-wall)')
+    .attr('stroke', 'rgba(100, 110, 130, 0.18)')
+    .attr('stroke-width', 1)
+
+  // Floor (trapezoid receding into distance)
+  box3D.append('polygon')
+    .attr('points', `
+      ${width * 0.15},${floorTop}
+      ${width * 0.85},${floorTop}
+      ${width * 0.85},${floorBottom}
+      ${width * 0.15},${floorBottom}
+    `)
+    .attr('fill', 'url(#embedding-floor)')
+    .attr('stroke', 'rgba(100, 110, 130, 0.15)')
+    .attr('stroke-width', 1)
+
+  // Left wall
+  box3D.append('polygon')
+    .attr('points', `
+      ${width * 0.05},${floorTop}
+      ${width * 0.15},${floorTop}
+      ${width * 0.15},${floorBottom}
+      ${width * 0.05},${floorBottom}
+    `)
+    .attr('fill', 'rgba(2, 3, 6, 0.95)')
+    .attr('stroke', 'rgba(100, 110, 130, 0.16)')
+    .attr('stroke-width', 1)
+
+  // Right wall
+  box3D.append('polygon')
+    .attr('points', `
+      ${width * 0.85},${floorTop}
+      ${width * 0.95},${floorTop}
+      ${width * 0.95},${floorBottom}
+      ${width * 0.85},${floorBottom}
+    `)
+    .attr('fill', 'rgba(2, 3, 6, 0.95)')
+    .attr('stroke', 'rgba(100, 110, 130, 0.16)')
+    .attr('stroke-width', 1)
+
+  // Perspective grid lines (very subtle light grey)
   const gridLayer = embeddingStoreLayer.append('g')
     .attr('class', 'perspective-grid')
-    .attr('opacity', 0.18)
+    .attr('opacity', 0.12)
 
-  // Vertical lines converging to vanishing points
-  for (let i = 0; i <= 10; i++) {
-    const t = i / 10
-    const backX = width * 0.05 + t * (width * 0.9)
-    const frontX = width * 0.15 + t * (width * 0.7)
+  // Vertical depth lines - from front to back corners (4 corner perspective lines)
+  const corners = [
+    { backX: width * 0.05, frontX: width * 0.15 },  // Left
+    { backX: width * 0.35, frontX: width * 0.4 },    // Left-center
+    { backX: width * 0.65, frontX: width * 0.6 },    // Right-center
+    { backX: width * 0.95, frontX: width * 0.85 }    // Right
+  ]
+  
+  corners.forEach(corner => {
     gridLayer.append('line')
-      .attr('x1', backX)
+      .attr('x1', corner.backX)
       .attr('y1', floorTop)
-      .attr('x2', frontX)
+      .attr('x2', corner.frontX)
       .attr('y2', floorBottom)
-      .attr('stroke', 'rgba(80, 100, 140, 0.12)')
+      .attr('stroke', 'rgba(140, 150, 170, 0.25)')
       .attr('stroke-width', 0.5)
-  }
+  })
 
-  // Horizontal depth lines
-  for (let i = 0; i <= 8; i++) {
-    const t = i / 8
+  // Horizontal depth lines (perspective-aware)
+  for (let i = 0; i <= 6; i++) {
+    const t = i / 6
     const y = floorTop + t * floorDepthRange
     const perspectiveScale = 0.7 + t * 0.3
     const leftX = width * 0.05 + (1 - perspectiveScale) * (width * 0.1)
@@ -1876,7 +1880,7 @@ export function createHDDLMap(container, options = {}) {
       .attr('y1', y)
       .attr('x2', rightX)
       .attr('y2', y)
-      .attr('stroke', 'rgba(80, 100, 140, 0.12)')
+      .attr('stroke', 'rgba(140, 150, 170, 0.2)')
       .attr('stroke-width', 0.5)
   }
 
