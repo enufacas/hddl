@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/hddl/schemas/hddl-interaction.schema.json",
+  "title": "HDDL Scenario Interaction (Action Log)",
+  "$comment": "UI-agnostic action log format for interactive scenarios. Actions are intended to deterministically emit canonical events compatible with the replay wire format.",
+  "type": "object",
+  "required": ["schemaVersion", "scenarioId", "actions"],
+  "additionalProperties": true,
+  "properties": {
+    "schemaVersion": { "type": "integer", "minimum": 1 },
+    "scenarioId": { "type": "string", "minLength": 1 },
+    "seed": { "type": ["string", "number", "null"] },
+    "actions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/action" }
+    }
+  },
+  "$defs": {
+    "action": {
+      "type": "object",
+      "required": ["actionType"],
+      "additionalProperties": true,
+      "properties": {
+        "actionId": { "type": "string" },
+        "actionType": {
+          "type": "string",
+          "enum": [
+            "emit_signal",
+            "attempt_decision",
+            "record_boundary_interaction",
+            "apply_revision",
+            "open_dsg_session",
+            "post_dsg_message",
+            "annotate"
+          ]
+        },
+        "actorRole": { "type": "string" },
+        "actorName": { "type": "string" },
+        "envelopeId": { "type": "string" },
+        "agentId": { "type": "string" },
+        "atHour": { "type": "number" },
+        "payload": { "type": "object" }
+      }
+    }
+  }
+}

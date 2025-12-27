@@ -1,0 +1,2149 @@
+/* VS Code Workbench Styles - Based on Monaco Editor */
+
+/* ===== CSS CUSTOM PROPERTIES (VS Code Variables) ===== */
+:root {
+    /* VS Code Color Tokens */
+    --vscode-editor-background: #0d1117;
+    --vscode-editor-foreground: #e6edf3;
+    --vscode-sideBar-background: #010409;
+    --vscode-sideBar-foreground: #e6edf3;
+    --vscode-sideBar-border: #30363d;
+    --vscode-activityBar-background: #010409;
+    --vscode-activityBar-foreground: #7d8590;
+    --vscode-activityBar-inactiveForeground: #57606a;
+    --vscode-activityBar-border: #30363d;
+    --vscode-activityBar-activeBorder: #1f6feb;
+    --vscode-statusBar-background: #0d1117;
+    --vscode-statusBar-foreground: #7d8590;
+    --vscode-statusBar-border: #30363d;
+    --vscode-list-hoverBackground: #1c2128;
+    --vscode-list-activeSelectionBackground: #21262d;
+    --vscode-list-activeSelectionForeground: #e6edf3;
+    --vscode-list-inactiveSelectionBackground: #1c2128;
+    --vscode-list-focusOutline: #1f6feb;
+    --vscode-button-background: #1f6feb;
+    --vscode-button-foreground: #ffffff;
+    --vscode-button-hoverBackground: #1a5abb;
+    --vscode-focusBorder: #1f6feb;
+    --vscode-scrollbar-shadow: rgba(1, 4, 9, 0.8);
+    --vscode-scrollbarSlider-background: rgba(125, 133, 144, 0.3);
+    --vscode-scrollbarSlider-hoverBackground: rgba(125, 133, 144, 0.5);
+    --vscode-scrollbarSlider-activeBackground: rgba(125, 133, 144, 0.7);
+    --vscode-input-background: #0d1117;
+    --vscode-input-border: #30363d;
+    --vscode-inputValidation-infoBorder: #388bfd;
+    --vscode-editorWidget-background: #161b22;
+    --vscode-editorWidget-border: #30363d;
+    --vscode-widget-shadow: rgba(1, 4, 9, 0.5);
+    
+    /* Layout dimensions */
+    --activitybar-width: 48px;
+    --sidebar-width: 300px;
+    --auxiliarybar-width: 350px;
+    --titlebar-height: 35px;
+    --statusbar-height: 22px;
+    --panel-height: 240px;
+}
+
+/* ===== BASE STYLES ===== */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body,
+html {
+    margin: 0;
+    padding: 0;
+    font-size: 13px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    color: var(--vscode-editor-foreground);
+    background: var(--vscode-editor-background);
+    overflow: hidden;
+}
+
+/* ===== MONACO WORKBENCH CONTAINER ===== */
+.monaco-workbench,
+#app {
+    display: grid;
+    grid-template-rows: var(--titlebar-height) auto 1fr var(--statusbar-height);
+    grid-template-columns: 100%;
+    height: 100vh;
+    width: 100vw;
+    position: relative;
+    overflow: hidden;
+}
+
+/* ===== WORKBENCH GRID (Split View Container) ===== */
+.split-view-container,
+.monaco-grid-view,
+.workbench {
+    grid-row: 3;
+    display: grid;
+    grid-template-columns: var(--activitybar-width) var(--sidebar-width) 1fr var(--auxiliarybar-width);
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.split-view-view {
+    position: relative;
+    overflow: hidden;
+}
+
+/* ===== PART: TIMELINE BAR ===== */
+.timeline-bar {
+    grid-row: 2;
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    z-index: 60;
+    position: relative;
+}
+
+.timeline-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+
+.timeline-actions__buttons {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    position: relative;
+}
+
+.timeline-actions__status {
+    margin-left: 10px;
+    font-size: 11px;
+    color: var(--vscode-statusBar-foreground);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 240px;
+}
+
+.timeline-actions__status .timeline-status-link {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.timeline-actions__status .timeline-status-link:focus {
+    outline: 1px solid var(--vscode-focusBorder);
+    outline-offset: 2px;
+}
+
+.timeline-legend-button {
+    padding: 4px 6px;
+    min-width: unset;
+}
+
+.timeline-legend {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.timeline-legend-panel {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    z-index: 80;
+    min-width: 240px;
+    max-width: 360px;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid var(--vscode-sideBar-border);
+    background: var(--vscode-editorWidget-background);
+    color: var(--vscode-editor-foreground);
+    font-size: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.22);
+}
+
+.timeline-actions-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    z-index: 80;
+    padding: 6px;
+    border-radius: 6px;
+    border: 1px solid var(--vscode-sideBar-border);
+    background: var(--vscode-editorWidget-background);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 200px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.22);
+}
+
+.timeline-actions-menu[hidden] {
+    display: none;
+}
+
+.timeline-actions-menu .timeline-action-button {
+    width: 100%;
+    justify-content: flex-start;
+}
+
+.timeline-actions-menu .timeline-action-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.timeline-actions__status[data-kind="error"] {
+    color: var(--status-warning);
+}
+
+.timeline-action-button {
+    padding: 4px 8px;
+    font-size: 12px;
+    min-height: 26px;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.timeline-action-button .codicon {
+    font-size: 14px;
+}
+
+.timeline-action-label {
+    font-size: 12px;
+}
+
+/* Global timeline: envelope spans overlay */
+.timeline-envelope-spans {
+    position: absolute;
+    inset: 2px 2px 2px 2px;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Global timeline: event markers overlay */
+.timeline-event-markers {
+    position: absolute;
+    inset: 2px 2px 2px 2px;
+    z-index: 2;
+}
+
+/* Global timeline: assumption mismatch markers overlay */
+.timeline-mismatch-markers {
+    position: absolute;
+    inset: 2px 2px 2px 2px;
+    z-index: 1;
+    pointer-events: auto;
+}
+
+.timeline-mismatch-marker {
+    position: absolute;
+    bottom: 2px;
+    width: 8px;
+    height: 8px;
+    transform: translateX(-3px) rotate(45deg);
+    background: var(--status-warning);
+    opacity: 0.9;
+    border-radius: 1px;
+    pointer-events: auto;
+    cursor: pointer;
+    outline: none;
+}
+
+.timeline-mismatch-marker:focus {
+    outline: 1px solid var(--vscode-focusBorder);
+    outline-offset: 2px;
+}
+
+.timeline-mismatch-marker[data-severity="error"] {
+    background: var(--status-error);
+}
+
+.timeline-event-marker {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    transform: translateX(-1px);
+    background: var(--status-info);
+    opacity: 0.85;
+    border-radius: 1px;
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+/* Event-type denotation: distinct palette from steward colors
+   Uses EVENT_COLORS from steward-colors.js for consistency */
+.timeline-event-marker[data-type="signal"] {
+    background: #7eb8da;  /* Light steel blue */
+    width: 2px;
+    opacity: 0.85;
+}
+
+.timeline-event-marker[data-type="revision"] {
+    background: #98d4a0;  /* Mint green */
+    width: 3px;
+    transform: translateX(-1.5px);
+    opacity: 0.9;
+}
+
+.timeline-event-marker[data-type="boundary_interaction"],
+.timeline-event-marker[data-type="dsg_session"],
+.timeline-event-marker[data-type="dsg_message"] {
+    background: #f0b866;  /* Amber */
+    width: 3px;
+    transform: translateX(-1.5px);
+    opacity: 0.9;
+}
+
+.timeline-event-marker[data-type="decision"] {
+    background: #a8a8a8;  /* Neutral gray */
+    width: 2px;
+    opacity: 0.55;
+}
+
+.timeline-event-marker[data-type="decision"][data-severity="warning"],
+.timeline-event-marker[data-type="decision"][data-severity="error"] {
+    background: #e8846c;  /* Salmon - blocked */
+    opacity: 0.85;
+}
+
+.timeline-event-marker[data-type="envelope_promoted"] {
+    background: #c4a7e7;  /* Lavender */
+    width: 3px;
+    transform: translateX(-1.5px);
+    opacity: 0.75;
+}
+
+.timeline-event-marker[data-type="signal"][data-severity="warning"] {
+    background: #e8846c;  /* Salmon */
+}
+
+.timeline-event-marker[data-type="annotation"] {
+    background: var(--status-muted);
+    opacity: 0.65;
+    width: 2px;
+}
+
+.timeline-envelope-span {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    border-radius: 2px;
+    background: var(--vscode-focusBorder);
+    opacity: 0.28;
+}
+
+/* Envelope accent stripe (uses --envelope-accent supplied by scenario) */
+.envelope-card {
+    box-shadow: inset 3px 0 0 var(--envelope-accent, var(--status-muted));
+}
+
+/* Home: compact sticky actions bar (Add Events To Timeline) */
+.home-actions-bar {
+    position: sticky;
+    bottom: 0;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 10px;
+    margin-top: 8px;
+    background: var(--vscode-editor-background);
+    border: 1px solid var(--vscode-sideBar-border);
+    border-radius: 8px;
+}
+
+.home-actions-bar__title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--vscode-editor-foreground);
+    white-space: nowrap;
+}
+
+.home-actions-bar__buttons {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    flex-wrap: nowrap;
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 2px;
+}
+
+.home-actions-bar__buttons .monaco-button {
+    padding: 4px 10px;
+    font-size: 12px;
+    line-height: 1;
+    min-height: 26px;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.home-actions-bar__buttons .monaco-button .codicon {
+    font-size: 14px;
+}
+
+/* ===== PART: TITLEBAR ===== */
+.titlebar {
+    grid-row: 1;
+    background: var(--vscode-sideBar-background);
+    border-bottom: 1px solid var(--vscode-sideBar-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 16px;
+    color: var(--vscode-statusBar-foreground);
+    font-size: 12px;
+    font-weight: 400;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* ===== PART: ACTIVITYBAR ===== */
+.part.activitybar,
+.activitybar {
+    background: var(--vscode-activityBar-background);
+    border-right: 1px solid var(--vscode-activityBar-border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 0;
+    position: relative;
+    overflow: visible;
+}
+
+/* Monaco Action Bar */
+.monaco-action-bar {
+    width: 100%;
+}
+
+.monaco-action-bar .actions-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.action-item {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    padding: 0;
+}
+
+.action-item.activity-item,
+.activity-item {
+    color: var(--vscode-activityBar-inactiveForeground);
+    transition: color 0.1s ease;
+}
+
+.action-item.activity-item:hover,
+.activity-item:hover {
+    color: var(--vscode-activityBar-foreground);
+}
+
+.action-item.activity-item.active,
+.action-item.activity-item.checked,
+.activity-item.active {
+    color: var(--vscode-editor-foreground);
+}
+
+.action-item.activity-item.active::before,
+.action-item.activity-item.checked::before,
+.activity-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 12px;
+    bottom: 12px;
+    width: 2px;
+    background: var(--vscode-activityBar-activeBorder);
+}
+
+/* Codicon Icons */
+.codicon {
+    font-size: 24px;
+    line-height: 1;
+    display: inline-block;
+    font-family: codicon;
+    font-style: normal;
+    font-weight: normal;
+}
+
+/* ===== PART: SIDEBAR ===== */
+.part.sidebar,
+.sidebar {
+    background: var(--vscode-sideBar-background);
+    border-right: 1px solid var(--vscode-sideBar-border);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+
+.composite.title,
+.sidebar-header {
+    padding: 8px 16px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--vscode-statusBar-foreground);
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--vscode-sideBar-border);
+    background: var(--vscode-sideBar-background);
+    flex-shrink: 0;
+}
+
+.content,
+.sidebar-content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* Monaco List */
+.monaco-list {
+    position: relative;
+    height: 100%;
+    width: 100%;
+    white-space: nowrap;
+}
+
+.monaco-list .monaco-scrollable-element {
+    height: 100%;
+}
+
+/* ===== SIDEBAR: STEWARD FLEETS ===== */
+.sidebar-fleets {
+    margin: 10px 8px 12px;
+    padding-top: 10px;
+    border-top: 1px solid var(--vscode-sideBar-border);
+}
+
+.sidebar-fleets__hdr {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 2px 8px;
+    color: var(--vscode-statusBar-foreground);
+}
+
+.sidebar-fleets__title {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.sidebar-fleets__meta {
+    margin-left: auto;
+    font-size: 11px;
+    opacity: 0.85;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.sidebar-fleets__body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.sidebar-fleets__empty {
+    font-size: 12px;
+    color: var(--vscode-statusBar-foreground);
+    opacity: 0.9;
+}
+
+.fleet-group {
+    background: var(--vscode-sideBar-background);
+    border: 1px solid var(--vscode-sideBar-border);
+    border-radius: 8px;
+    padding: 10px;
+}
+
+.fleet-group.active {
+    border-color: var(--vscode-focusBorder);
+}
+
+.fleet-group__hdr {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    align-items: baseline;
+    margin-bottom: 8px;
+}
+
+.fleet-group__name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--vscode-editor-foreground);
+}
+
+.fleet-group__count {
+    font-size: 11px;
+    color: var(--vscode-statusBar-foreground);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.fleet-group__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.fleet-agent {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 2px 8px;
+    font-size: 11px;
+    border: 1px solid var(--vscode-sideBar-border);
+    background: var(--vscode-editor-background);
+    color: var(--vscode-statusBar-foreground);
+    line-height: 1.6;
+}
+
+.fleet-agent.active {
+    border-color: var(--status-info);
+    color: var(--vscode-editor-foreground);
+}
+
+.monaco-list-rows,
+.nav-list {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.monaco-list-row,
+.nav-item {
+    position: relative;
+    box-sizing: border-box;
+    overflow: hidden;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    padding: 4px 16px;
+    cursor: pointer;
+    color: var(--vscode-sideBar-foreground);
+    transition: background-color 0.1s ease;
+    height: 22px;
+    line-height: 22px;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.monaco-list:not(.drop-target):not(.dragging) .monaco-list-row:hover:not(.selected):not(.focused),
+.nav-item:hover {
+    background: var(--vscode-list-hoverBackground);
+}
+
+.monaco-list-row.focused,
+.monaco-list-row.selected,
+.nav-item.active {
+    background: var(--vscode-list-activeSelectionBackground);
+    color: var(--vscode-list-activeSelectionForeground);
+}
+
+.monaco-list:focus .monaco-list-row.focused {
+    outline: 1px solid var(--vscode-list-focusOutline);
+    outline-offset: -1px;
+}
+
+.nav-item-icon {
+    margin-right: 8px;
+    font-size: 16px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+}
+
+/* ===== PART: EDITOR ===== */
+.part.editor,
+.editor-area {
+    background: var(--vscode-editor-background);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+#editor-area,
+.editor-container {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    position: relative;
+}
+
+/* ===== PART: AUXILIARYBAR ===== */
+.part.auxiliarybar,
+.auxiliarybar {
+    background: var(--vscode-sideBar-background);
+    border-left: 1px solid var(--vscode-sideBar-border);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+
+.auxiliary-header {
+    padding: 8px 16px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--vscode-statusBar-foreground);
+    border-bottom: 1px solid var(--vscode-sideBar-border);
+    flex-shrink: 0;
+}
+
+.auxiliary-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+}
+
+/* Telemetry Panel */
+.telemetry-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.telemetry-metric {
+    background: var(--vscode-editor-background);
+    border: 1px solid var(--vscode-sideBar-border);
+    border-radius: 6px;
+    padding: 12px;
+}
+
+.metric-label {
+    font-size: 11px;
+    color: var(--vscode-statusBar-foreground);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.metric-value {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--vscode-editor-foreground);
+}
+
+.metric-trend {
+    font-size: 11px;
+    margin-top: 4px;
+}
+
+.trend-positive {
+    color: #3fb950;
+}
+
+.trend-negative {
+    color: #f85149;
+}
+
+/* ===== PART: STATUSBAR ===== */
+.part.statusbar,
+.statusbar {
+    grid-row: 4;
+    background: var(--vscode-statusBar-background);
+    border-top: 1px solid var(--vscode-statusBar-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 12px;
+    font-size: 12px;
+    color: var(--vscode-statusBar-foreground);
+    height: var(--statusbar-height);
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.items-container,
+.status-left,
+.status-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.statusbar-item,
+.status-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0 8px;
+    height: 100%;
+}
+
+.statusbar-item-label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* ===== MONACO SCROLLABLE ELEMENT ===== */
+.monaco-scrollable-element {
+    position: relative;
+    overflow: hidden;
+}
+
+.monaco-scrollable-element > .scrollbar {
+    position: absolute;
+    z-index: 10;
+    background: transparent;
+}
+
+.monaco-scrollable-element > .scrollbar.vertical {
+    width: 10px;
+    right: 0;
+    top: 0;
+}
+
+.monaco-scrollable-element > .scrollbar.horizontal {
+    height: 10px;
+    bottom: 0;
+    left: 0;
+}
+
+.monaco-scrollable-element > .invisible.scrollbar {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.monaco-scrollable-element > .visible.scrollbar {
+    opacity: 1;
+    transition: opacity 0.1s linear;
+    z-index: 11;
+}
+
+.monaco-scrollable-element > .invisible.fade {
+    transition: opacity 0.8s linear;
+}
+
+.monaco-scrollable-element > .scrollbar > .slider {
+    position: absolute;
+    background: var(--vscode-scrollbarSlider-background);
+    border-radius: 5px;
+}
+
+.monaco-scrollable-element > .scrollbar > .slider:hover {
+    background: var(--vscode-scrollbarSlider-hoverBackground);
+}
+
+.monaco-scrollable-element > .scrollbar > .slider.active {
+    background: var(--vscode-scrollbarSlider-activeBackground);
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--vscode-scrollbarSlider-background);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--vscode-scrollbarSlider-hoverBackground);
+}
+
+::-webkit-scrollbar-thumb:active {
+    background: var(--vscode-scrollbarSlider-activeBackground);
+}
+
+/* ===== PAGE CONTAINER ===== */
+.page-container {
+    padding: 24px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* Fleets page should use the full editor width (avoid centered narrow column) */
+.page-container[data-testid="fleets-page"] {
+    max-width: none;
+    margin: 0;
+}
+
+.page-container h1 {
+    font-size: 32px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--vscode-editor-foreground);
+}
+
+.page-container h2 {
+    font-size: 24px;
+    font-weight: 600;
+    margin: 24px 0 12px;
+    color: var(--vscode-editor-foreground);
+}
+
+.page-container p {
+    color: var(--vscode-statusBar-foreground);
+    margin-bottom: 16px;
+    line-height: 1.6;
+}
+
+/* ===== DOCS PAGE (In-app /docs) ===== */
+.page-container .docs-hero {
+    text-align: center;
+    margin-bottom: 24px;
+    padding: 18px 16px;
+    border-radius: 10px;
+    border: 1px solid var(--vscode-sideBar-border);
+    background: linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--status-info) 12%, var(--vscode-editorWidget-background)),
+        color-mix(in srgb, var(--status-success) 10%, var(--vscode-editorWidget-background))
+    );
+}
+
+.page-container .docs-hero h1 {
+    margin: 0 0 8px;
+}
+
+.page-container .hero-subtitle {
+    margin: 0 0 10px;
+    color: var(--vscode-statusBar-foreground);
+}
+
+.page-container .hero-description {
+    max-width: 760px;
+    margin: 0 auto;
+    color: var(--vscode-editor-foreground);
+    line-height: 1.7;
+}
+
+.page-container .docs-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 18px;
+    margin: 18px 0;
+}
+
+.page-container .docs-section {
+    background: var(--vscode-editorWidget-background);
+    border: 1px solid var(--vscode-sideBar-border);
+    border-radius: 10px;
+    padding: 16px;
+}
+
+.page-container .section-header {
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--vscode-sideBar-border);
+}
+
+.page-container .section-header h2 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 6px;
+}
+
+.page-container .section-desc {
+    margin: 0;
+    color: var(--vscode-statusBar-foreground);
+}
+
+.page-container .docs-links {
+    display: grid;
+    gap: 8px;
+}
+
+.page-container a.doc-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    background: var(--vscode-editor-background);
+    border: 1px solid var(--vscode-sideBar-border);
+    border-radius: 8px;
+    color: var(--vscode-editor-foreground);
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.page-container a.doc-link::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 3px;
+    background: linear-gradient(180deg, var(--status-info), var(--status-success));
+    transform: scaleY(0);
+    transform-origin: top;
+    transition: transform 0.15s ease;
+}
+
+.page-container a.doc-link:hover {
+    transform: translateX(2px);
+    border-color: var(--vscode-focusBorder);
+    background: color-mix(in srgb, var(--status-info) 10%, var(--vscode-editor-background));
+    box-shadow: 0 2px 8px rgba(0,0,0,0.22);
+}
+
+.page-container a.doc-link:hover::before {
+    transform: scaleY(1);
+}
+
+.page-container .doc-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.page-container .doc-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.page-container .doc-title {
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+
+.page-container .doc-desc {
+    font-size: 12px;
+    color: var(--vscode-statusBar-foreground);
+    line-height: 1.5;
+}
+
+.page-container .doc-arrow {
+    color: var(--vscode-statusBar-foreground);
+    opacity: 0;
+    transform: translateX(-2px);
+    transition: opacity 0.15s ease, transform 0.15s ease;
+    flex-shrink: 0;
+}
+
+.page-container a.doc-link:hover .doc-arrow {
+    opacity: 1;
+    transform: translateX(2px);
+}
+
+/* ===== DOCS: MARKDOWN VIEWER MODAL ===== */
+.markdown-viewer {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.markdown-viewer.visible {
+    opacity: 1;
+}
+
+.markdown-viewer.closing {
+    opacity: 0;
+}
+
+.markdown-viewer-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.70);
+}
+
+.markdown-viewer-content {
+    position: relative;
+    width: min(980px, 94vw);
+    max-height: 86vh;
+    background: var(--vscode-editorWidget-background);
+    border: 1px solid var(--vscode-sideBar-border);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 6px 22px rgba(0,0,0,0.35);
+    transform: scale(0.98);
+    transition: transform 0.2s ease;
+}
+
+.markdown-viewer.visible .markdown-viewer-content {
+    transform: scale(1);
+}
+
+.markdown-viewer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--vscode-sideBar-border);
+}
+
+.markdown-viewer-header h2 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--vscode-editor-foreground);
+}
+
+.markdown-viewer-close {
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    color: var(--vscode-editor-foreground);
+    cursor: pointer;
+    padding: 6px 8px;
+}
+
+.markdown-viewer-close:hover {
+    background: var(--vscode-list-hoverBackground);
+    border-color: var(--vscode-sideBar-border);
+}
+
+.markdown-viewer-body {
+    flex: 1;
+    overflow: auto;
+    padding: 14px;
+    line-height: 1.75;
+}
+
+.markdown-viewer-body h1 {
+    font-size: 18px;
+    margin: 0 0 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--vscode-sideBar-border);
+}
+
+.markdown-viewer-body h2 {
+    font-size: 16px;
+    margin: 18px 0 8px;
+}
+
+.markdown-viewer-body h3 {
+    font-size: 14px;
+    margin: 14px 0 6px;
+}
+
+.markdown-viewer-body p {
+    margin: 0 0 10px;
+    color: var(--vscode-editor-foreground);
+}
+
+.markdown-viewer-body code {
+    background: var(--vscode-input-background);
+    border: 1px solid var(--vscode-input-border);
+    padding: 0 4px;
+    border-radius: 4px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 12px;
+}
+
+.markdown-viewer-body pre {
+    background: var(--vscode-editor-background);
+    border: 1px solid var(--vscode-sideBar-border);
+    border-radius: 6px;
+    padding: 10px;
+    overflow: auto;
+    margin: 10px 0;
+}
+
+.markdown-viewer-body pre code {
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+
+.markdown-viewer-body ul {
+    margin: 0 0 10px 18px;
+}
+
+.markdown-viewer-body li {
+    margin-bottom: 6px;
+}
+
+.markdown-viewer-body a {
+    color: var(--status-info);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.loading-spinner {
+    text-align: center;
+    padding: 24px;
+    color: var(--vscode-statusBar-foreground);
+}
+
+/* ===== STEWARD AGENT FLEETS PAGE ===== */
+.fleet-page__top {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+.fleet-page__top-left {
+    flex: 1;
+    min-width: 320px;
+}
+
+.fleet-page__top-right {
+    flex: 1;
+    min-width: 420px;
+    max-width: 760px;
+}
+
+.fleet-page__summary {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin: 0 0 12px;
+    padding: 12px;
+    border: 1px solid var(--vscode-sideBar-border);
+    border-radius: 6px;
+    background: var(--vscode-editorWidget-background);
+}
+
+.fleet-page__summary-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 180px;
+}
+
+.fleet-page__k {
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--vscode-statusBar-foreground);
+}
+
+.fleet-page__v {
+    font-size: 13px;
+    font-weight: 600;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    color: var(--vscode-editor-foreground);
+}
+
+.fleet-page__active {
+    display: flex;
+    gap: 12px;
+    margin: 0 0 18px;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 4px;
+}
+
+.fleet-page__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+}
+
+.fleet-page__empty {
+    padding: 12px;
+    border: 1px solid var(--vscode-sideBar-border);
+    border-radius: 6px;
+    background: var(--vscode-editorWidget-background);
+    color: var(--vscode-statusBar-foreground);
+}
+
+.fleet-env {
+    border: 1px solid var(--vscode-sideBar-border);
+    border-radius: 10px;
+    padding: 10px;
+    background: var(--vscode-sideBar-background);
+    box-shadow: inset 3px 0 0 var(--env-accent, var(--status-muted));
+
+    /* Single-row strip behavior: shrink instead of wrapping. */
+    flex: 1 1 0;
+    min-width: 150px;
+    max-width: 420px;
+    overflow: hidden;
+}
+
+.fleet-env__id {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 11px;
+    color: var(--vscode-statusBar-foreground);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.fleet-env__name {
+    font-size: 13px;
+    font-weight: 700;
+    margin-top: 2px;
+    color: var(--vscode-editor-foreground);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.fleet-env__meta {
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--vscode-statusBar-foreground);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.fleet-card {
+    border: 1px solid var(--vscode-sideBar-border);
+    border-radius: 10px;
+    background: var(--vscode-sideBar-background);
+    overflow: hidden;
+}
+
+.fleet-card.is-inactive {
+    opacity: 0.55;
+    filter: saturate(0.65);
+}
+
+.fleet-card__hdr {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 10px;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--vscode-sideBar-border);
+    background: var(--vscode-editorWidget-background);
+}
+
+.fleet-card__title {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--vscode-editor-foreground);
+}
+
+.fleet-card__meta {
+    font-size: 11px;
+    color: var(--vscode-statusBar-foreground);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.fleet-card__body {
+    padding: 10px;
+}
+
+.fleet-agent-icons {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.fleet-agent-icon {
+    border: 1px solid var(--vscode-sideBar-border);
+    background: var(--vscode-editor-background);
+    border-radius: 8px;
+    padding: 6px 4px 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-height: 42px;
+    user-select: none;
+}
+
+.fleet-agent-icon.active {
+    border-color: var(--vscode-focusBorder);
+}
+
+.fleet-agent-icon__glyph {
+    width: 20px;
+    height: 20px;
+    border-radius: 999px;
+    border: 1px solid var(--vscode-sideBar-border);
+    background: var(--vscode-editorWidget-background);
+    color: var(--vscode-editor-foreground);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.fleet-agent-icon.active .fleet-agent-icon__glyph {
+    border-color: var(--vscode-focusBorder);
+}
+
+.fleet-agent-icon__label {
+    font-size: 10px;
+    line-height: 1.1;
+    color: var(--vscode-statusBar-foreground);
+    text-align: center;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ===== VISUALIZATIONS ===== */
+.viz-container {
+    position: relative;
+    overflow: auto;
+    border: 1px solid var(--vscode-sideBar-border);
+    border-radius: 6px;
+    background: var(--vscode-editorWidget-background);
+    padding: 12px;
+}
+
+.matrix-tooltip {
+    position: absolute;
+    display: none;
+    pointer-events: none;
+    z-index: 10;
+    max-width: 260px;
+    background: var(--vscode-editorWidget-background);
+    border: 1px solid var(--vscode-editorWidget-border);
+    border-radius: 6px;
+    padding: 10px 12px;
+    color: var(--vscode-editor-foreground);
+}
+
+/* ===== DSG EVENT ===== */
+.dsg-container {
+    background: var(--vscode-editorWidget-background);
+    border: 1px solid var(--vscode-editorWidget-border);
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.dsg-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding-bottom: 12px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--vscode-sideBar-border);
+}
+
+.dsg-header h3 {
+    margin: 0 0 4px 0;
+    font-size: 14px;
+}
+
+.dsg-header p {
+    margin: 0;
+    font-size: 12px;
+    color: var(--vscode-statusBar-foreground);
+}
+
+.dsg-timer {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    color: var(--vscode-statusBar-foreground);
+    white-space: nowrap;
+}
+
+.dsg-main {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 16px;
+}
+
+.dsg-discussion,
+.dsg-section {
+    background: var(--vscode-sideBar-background);
+    border: 1px solid var(--vscode-sideBar-border);
+    border-radius: 8px;
+    padding: 12px;
+}
+
+.dsg-discussion h3,
+.dsg-section h3 {
+    margin: 0 0 10px 0;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.discussion-feed {
+    height: 260px;
+    overflow: auto;
+    border: 1px solid var(--vscode-sideBar-border);
+    border-radius: 6px;
+    background: var(--vscode-editor-background);
+    padding: 10px;
+}
+
+.message {
+    padding: 8px 10px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    background: var(--vscode-sideBar-background);
+}
+
+.message-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 4px;
+    color: var(--vscode-statusBar-foreground);
+    font-size: 11px;
+}
+
+.message-author {
+    color: var(--vscode-editor-foreground);
+    font-weight: 600;
+}
+
+.message-text {
+    font-size: 12px;
+    color: var(--vscode-editor-foreground);
+}
+
+.discussion-input {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.discussion-input input {
+    flex: 1;
+    background: var(--vscode-input-background);
+    color: var(--vscode-editor-foreground);
+    border: 1px solid var(--vscode-input-border);
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-size: 12px;
+}
+
+.discussion-input input:focus {
+    outline: 1px solid var(--vscode-focusBorder);
+    outline-offset: 0;
+}
+
+.discussion-input button,
+.dsg-actions .action-btn,
+.adjust-btn {
+    background: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
+    border: 1px solid transparent;
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.discussion-input button:hover,
+.dsg-actions .action-btn:hover,
+.adjust-btn:hover {
+    background: var(--vscode-button-hoverBackground);
+}
+
+.dsg-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.case-card {
+    font-size: 12px;
+    color: var(--vscode-statusBar-foreground);
+}
+
+.case-card h4 {
+    margin: 0 0 8px 0;
+    color: var(--vscode-editor-foreground);
+}
+
+.case-card strong {
+    color: var(--vscode-editor-foreground);
+    font-weight: 600;
+}
+
+.steward-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.steward-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px;
+    border: 1px solid var(--vscode-sideBar-border);
+    border-radius: 6px;
+    background: var(--vscode-editor-background);
+}
+
+.steward-avatar {
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: #fff;
+}
+
+.steward-role {
+    font-size: 11px;
+    color: var(--vscode-statusBar-foreground);
+}
+
+.steward-status {
+    margin-left: auto;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    border: 1px solid var(--vscode-sideBar-border);
+    color: var(--vscode-statusBar-foreground);
+    text-transform: capitalize;
+}
+
+.steward-status.active {
+    color: var(--status-success);
+    border-color: var(--status-success);
+}
+
+.dsg-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-top: 14px;
+}
+
+@media (max-width: 1100px) {
+    .dsg-main {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ===== CARDS ===== */
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+.card {
+    background: var(--vscode-sideBar-background);
+    border: 1px solid var(--vscode-sideBar-border);
+    border-radius: 6px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.1s ease;
+}
+
+.card:hover {
+    background: var(--vscode-list-hoverBackground);
+    border-color: var(--vscode-focusBorder);
+    transform: translateY(-2px);
+}
+
+.card h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--vscode-editor-foreground);
+}
+
+.card p {
+    font-size: 13px;
+    color: var(--vscode-statusBar-foreground);
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* ===== BUTTONS (Monaco Button) ===== */
+.monaco-button,
+.monaco-text-button,
+.btn {
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 14px;
+    border-radius: 2px;
+    border: 1px solid transparent;
+    background: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
+    font-size: 13px;
+    font-family: inherit;
+    line-height: 18px;
+    cursor: pointer;
+    transition: background-color 0.1s ease;
+    text-align: center;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.monaco-button:hover,
+.monaco-text-button:hover,
+.btn:hover {
+    background: var(--vscode-button-hoverBackground);
+    text-decoration: none;
+}
+
+.monaco-button:focus,
+.monaco-text-button:focus,
+.btn:focus {
+    outline: 1px solid var(--vscode-focusBorder);
+    outline-offset: 2px;
+}
+
+.monaco-button .codicon,
+.monaco-text-button .codicon {
+    margin: 0 4px;
+    color: inherit;
+}
+
+/* ===== MONACO SASH (Resizable Dividers) ===== */
+.monaco-sash {
+    position: absolute;
+    z-index: 35;
+    touch-action: none;
+}
+
+.monaco-sash.vertical {
+    cursor: ew-resize;
+    top: 0;
+    width: 4px;
+    height: 100%;
+}
+
+.monaco-sash.horizontal {
+    cursor: ns-resize;
+    left: 0;
+    width: 100%;
+    height: 4px;
+}
+
+.monaco-sash:before {
+    content: '';
+    pointer-events: none;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+}
+
+.monaco-enable-motion .monaco-sash:before {
+    transition: background-color 0.1s ease-out;
+}
+
+.monaco-sash.hover:before,
+.monaco-sash.active:before {
+    background: var(--vscode-focusBorder);
+}
+
+.monaco-sash.vertical:before {
+    width: 4px;
+    left: calc(50% - 2px);
+}
+
+.monaco-sash.horizontal:before {
+    height: 4px;
+    top: calc(50% - 2px);
+}
+
+/* ===== UTILITY CLASSES ===== */
+.hidden {
+    display: none !important;
+}
+
+.invisible {
+    visibility: hidden !important;
+}
+
+.disabled {
+    opacity: 0.4;
+    cursor: default !important;
+    pointer-events: none;
+}
+
+/* ===== STATUS COLORS ===== */
+:root {
+    --status-success: #3fb950;
+    --status-error: #f85149;
+    --status-warning: #d29922;
+    --status-info: #58a6ff;
+    --status-muted: #7d8590;
+}
+
+.success,
+.metric-value.success {
+    color: var(--status-success) !important;
+}
+
+.error,
+.metric-value.error {
+    color: var(--status-error) !important;
+}
+
+.warning,
+.metric-value.warning {
+    color: var(--status-warning) !important;
+}
+
+.info,
+.metric-value.info {
+    color: var(--status-info) !important;
+}
+
+.muted,
+.metric-value.muted {
+    color: var(--status-muted) !important;
+}
+
+/* ===== SECTION HEADERS ===== */
+.section-header {
+    background: var(--vscode-sideBar-background);
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.section-header:hover {
+    background: var(--vscode-list-hoverBackground);
+}
+
+/* ===== TELEMETRY ENHANCEMENTS ===== */
+.telemetry-section {
+    border-bottom: 1px solid var(--vscode-sideBar-border);
+}
+
+.telemetry-section:last-child {
+    border-bottom: none;
+}
+
+.telemetry-metric {
+    transition: background-color 0.1s ease;
+}
+
+.telemetry-metric:hover {
+    background: var(--vscode-list-hoverBackground);
+    border-radius: 3px;
+}
+
+/* ===== WORKBENCH GRID ADJUSTMENTS ===== */
+.workbench.split-view-container {
+    display: grid;
+    position: relative;
+    grid-template-columns: var(--activitybar-width) var(--sidebar-width) 1fr var(--auxiliarybar-width);
+    grid-template-rows: 1fr var(--panel-height);
+}
+
+/* Default-collapsed panels (persisted via body classes) */
+body.aux-hidden {
+    --auxiliarybar-width: 0px;
+}
+
+body.panel-hidden {
+    --panel-height: 0px;
+}
+
+.part {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.part.activitybar {
+    width: var(--activitybar-width);
+    grid-column: 1;
+    grid-row: 1 / span 2;
+}
+
+.part.sidebar {
+    width: var(--sidebar-width);
+    grid-column: 2;
+    grid-row: 1 / span 2;
+}
+
+.part.editor {
+    grid-column: 3;
+    grid-row: 1;
+    min-width: 0;
+}
+
+.part.auxiliarybar {
+    width: var(--auxiliarybar-width);
+    grid-column: 4;
+    grid-row: 1 / span 2;
+}
+
+body.aux-hidden .part.auxiliarybar {
+    display: none;
+}
+
+/* Discoverability handle for collapsed auxiliary bar */
+.aux-peek {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 16px;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: var(--vscode-sideBar-background);
+    border-left: 1px solid var(--vscode-sideBar-border);
+    color: var(--vscode-statusBar-foreground);
+    cursor: pointer;
+    user-select: none;
+    z-index: 2;
+}
+
+body.aux-hidden .aux-peek {
+    display: flex;
+}
+
+.aux-peek:hover {
+    background: var(--vscode-list-hoverBackground);
+    color: var(--vscode-editor-foreground);
+}
+
+.aux-peek:focus {
+    outline: 1px solid var(--vscode-focusBorder);
+    outline-offset: -1px;
+}
+
+.aux-peek__label {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    font-size: 10px;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+}
+
+/* Bottom panel (Terminal) stays under editor only (not under auxiliary) */
+.part.panel {
+    grid-column: 3 / 4;
+    grid-row: 2;
+    border-top: 1px solid var(--vscode-sideBar-border);
+    background: var(--vscode-sideBar-background);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-height: 0;
+}
+
+body.panel-hidden .part.panel {
+    display: none;
+}
+
+/* If the auxiliary bar is closed, let the panel expand to the right edge. */
+body.aux-hidden .part.panel {
+    grid-column: 3 / 5;
+}
+
+.panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--vscode-sideBar-border);
+    background: var(--vscode-editorWidget-background);
+}
+
+.panel-tabs {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    overflow: hidden;
+}
+
+.panel-tab {
+    appearance: none;
+    border: none;
+    background: transparent;
+    color: var(--vscode-statusBar-foreground);
+    font-size: 11px;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    padding: 6px 2px 5px;
+    cursor: default;
+    border-bottom: 1px solid transparent;
+}
+
+.panel-tab.active {
+    color: var(--vscode-editor-foreground);
+    border-bottom-color: var(--vscode-focusBorder);
+}
+
+.panel-actions {
+    display: flex;
+    align-items: center;
+}
+
+.panel-action {
+    appearance: none;
+    border: none;
+    background: transparent;
+    color: var(--vscode-statusBar-foreground);
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 4px;
+}
+
+.panel-action:hover {
+    background: var(--vscode-list-hoverBackground);
+    color: var(--vscode-editor-foreground);
+}
+
+.panel-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: var(--vscode-editor-background);
+    min-height: 0;
+    overflow: hidden;
+}
+
+.glossary-term {
+    color: var(--vscode-textLink-foreground);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.glossary-term:hover {
+    color: var(--vscode-textLink-activeForeground);
+}
+
+.terminal-output {
+    flex: 1;
+    overflow: auto;
+    padding: 10px 12px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 12px;
+    color: var(--vscode-editor-foreground);
+    min-height: 0;
+}
+
+.terminal-line {
+    white-space: pre-wrap;
+    line-height: 1.45;
+    margin-bottom: 2px;
+}
+
+.terminal-line--muted {
+    color: var(--vscode-statusBar-foreground);
+}
+
+.terminal-line--warning {
+    color: var(--status-warning);
+}
+
+.terminal-line--info {
+    color: var(--vscode-editor-foreground);
+}
+
+.terminal-line--cmd {
+    color: var(--vscode-editor-foreground);
+}
+
+.terminal-input-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-top: 1px solid var(--vscode-sideBar-border);
+    background: var(--vscode-editorWidget-background);
+}
+
+.terminal-prompt {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 12px;
+    color: var(--vscode-statusBar-foreground);
+    white-space: nowrap;
+}
+
+.terminal-input {
+    flex: 1;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 12px;
+    color: var(--vscode-editor-foreground);
+    background: transparent;
+    border: none;
+    outline: none;
+}
+
+/* ===== SASH POSITIONING ===== */
+.monaco-sash.vertical {
+    position: absolute;
+    top: 0;
+    height: 100%;
+}
+
+.monaco-sash#sidebar-resize {
+    left: calc(var(--activitybar-width) + var(--sidebar-width));
+}
+
+.monaco-sash#auxiliary-resize {
+    right: var(--auxiliarybar-width);
+}
+
+/* Horizontal sash to resize bottom panel (stops at auxiliary bar) */
+.monaco-sash#panel-resize {
+    left: calc(var(--activitybar-width) + var(--sidebar-width));
+    right: var(--auxiliarybar-width);
+    bottom: var(--panel-height);
+    top: auto;
+    width: auto;
+}
+
+body.panel-hidden .monaco-sash#panel-resize {
+    display: block;
+    bottom: 0;
+}
+
+body.aux-hidden .monaco-sash#panel-resize {
+    right: 0;
+}
+
+/* ===== MONACO WORKBENCH FORCED COLOR ADJUST ===== */
+.monaco-workbench {
+    forced-color-adjust: none;
+}

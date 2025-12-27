@@ -1,0 +1,860 @@
+{
+  "schemaVersion": 2,
+  "id": "scenario-vertical-hydroponics-001",
+  "title": "Vertical Hydroponics Farm — Sustainable Urban Agriculture",
+  "durationHours": 240,
+  "envelopes": [
+    {
+      "envelopeId": "ENV-VH-001",
+      "name": "Crop Growth Optimization",
+      "domain": "Production Management",
+      "ownerRole": "Growth Steward",
+      "createdHour": 0,
+      "endHour": 240,
+      "accent": "var(--vscode-charts-green)",
+      "envelope_version": 2,
+      "revision_id": "REV-VH-001-B",
+      "assumptions": [
+        "Growth models trained on 18 months of crop cycle data across lettuce, herbs, and microgreens.",
+        "Yield predictions account for variety genetics, growth stage, and environmental conditions.",
+        "Harvest timing optimizes both nutritional value and market demand."
+      ],
+      "constraints": [
+        "Never harvest below 95% optimal maturity without quality override",
+        "Growth cycles must maintain 30% buffer capacity for demand spikes",
+        "Crop rotation schedules respect nutrient recovery periods"
+      ]
+    },
+    {
+      "envelopeId": "ENV-VH-002",
+      "name": "Environmental Control Systems",
+      "domain": "Climate Management",
+      "ownerRole": "Environment Steward",
+      "createdHour": 0,
+      "endHour": 240,
+      "accent": "var(--vscode-charts-blue)",
+      "envelope_version": 3,
+      "revision_id": "REV-VH-002-C",
+      "assumptions": [
+        "Climate models maintain temperature (65-75°F), humidity (60-70%), CO2 (800-1200 ppm), and lighting (12-18 hr photoperiod).",
+        "LED spectrum optimization balances energy efficiency with photosynthesis.",
+        "HVAC systems respond to external weather and internal load changes."
+      ],
+      "constraints": [
+        "Temperature variance cannot exceed ±3°F without alert escalation",
+        "Humidity spikes above 75% trigger mold prevention protocols",
+        "CO2 levels below 600 ppm require immediate ventilation adjustment"
+      ]
+    },
+    {
+      "envelopeId": "ENV-VH-003",
+      "name": "Water & Nutrient Management",
+      "domain": "Resource Optimization",
+      "ownerRole": "Nutrition Steward",
+      "createdHour": 0,
+      "endHour": 240,
+      "accent": "var(--vscode-charts-orange)",
+      "envelope_version": 2,
+      "revision_id": "REV-VH-003-B",
+      "assumptions": [
+        "Nutrient solution models balance N-P-K ratios, pH (5.5-6.5), and EC (1.2-2.4 mS/cm) by crop type.",
+        "Water recirculation achieves 95% reuse efficiency with minimal waste.",
+        "Automated dosing systems adjust based on sensor feedback and plant uptake."
+      ],
+      "constraints": [
+        "pH drift beyond 5.0-7.0 range requires immediate correction",
+        "EC imbalance >0.3 mS/cm from target triggers nutrient adjustment",
+        "Water contamination detected must halt irrigation and initiate purge"
+      ]
+    },
+    {
+      "envelopeId": "ENV-VH-004",
+      "name": "Harvest & Quality Assurance",
+      "domain": "Product Quality",
+      "ownerRole": "Harvest Steward",
+      "createdHour": 12,
+      "endHour": 228,
+      "accent": "var(--vscode-charts-purple)",
+      "envelope_version": 1,
+      "revision_id": null,
+      "assumptions": [
+        "Quality models assess visual appearance, nutrient density, shelf life, and pathogen risk.",
+        "Harvest windows optimize freshness for 24-48 hour delivery cycles.",
+        "Post-harvest handling maintains cold chain integrity."
+      ],
+      "constraints": [
+        "Never ship produce testing positive for E. coli or Salmonella",
+        "Shelf life projections must guarantee 7+ days post-delivery",
+        "Visual defects exceeding 5% trigger batch quality review"
+      ]
+    },
+    {
+      "envelopeId": "ENV-VH-005",
+      "name": "Energy & Sustainability",
+      "domain": "Resource Efficiency",
+      "ownerRole": "Energy Steward",
+      "createdHour": 0,
+      "endHour": 240,
+      "accent": "var(--vscode-charts-yellow)",
+      "envelope_version": 1,
+      "revision_id": null,
+      "assumptions": [
+        "Energy models optimize HVAC, lighting, and pumps for cost and carbon footprint.",
+        "Solar panels and battery storage offset 40% of grid consumption.",
+        "Demand response programs shift loads to off-peak hours."
+      ],
+      "constraints": [
+        "Peak energy usage cannot exceed 85% of contracted capacity",
+        "Carbon intensity targets: <0.3 kg CO2e per kg produce",
+        "Renewable energy percentage must stay above 35%"
+      ]
+    },
+    {
+      "envelopeId": "ENV-VH-006",
+      "name": "Food Safety & Compliance",
+      "domain": "Regulatory Adherence",
+      "ownerRole": "Compliance Steward",
+      "createdHour": 24,
+      "endHour": 240,
+      "accent": "var(--vscode-charts-red)",
+      "envelope_version": 1,
+      "revision_id": null,
+      "assumptions": [
+        "Compliance models track USDA GAP, FSMA, and organic certification requirements.",
+        "Traceability systems log every batch from seed to sale.",
+        "Audit readiness maintained with continuous monitoring and documentation."
+      ],
+      "constraints": [
+        "Any food safety violation requires immediate corrective action and reporting",
+        "Traceability gaps exceeding 30 minutes trigger investigation",
+        "Certification expiration within 60 days requires renewal initiation"
+      ]
+    }
+  ],
+  "fleets": [
+    {
+      "stewardRole": "Growth Steward",
+      "agents": [
+        {
+          "agentId": "AG-GROW-01",
+          "name": "YieldPredictor",
+          "role": "crop yield forecasting and harvest scheduling",
+          "envelopeIds": ["ENV-VH-001"]
+        },
+        {
+          "agentId": "AG-GROW-02",
+          "name": "CropHealthMonitor",
+          "role": "disease and pest detection",
+          "envelopeIds": ["ENV-VH-001"]
+        },
+        {
+          "agentId": "AG-GROW-03",
+          "name": "RotationOptimizer",
+          "role": "crop rotation and variety planning",
+          "envelopeIds": ["ENV-VH-001"]
+        }
+      ]
+    },
+    {
+      "stewardRole": "Environment Steward",
+      "agents": [
+        {
+          "agentId": "AG-ENV-01",
+          "name": "ClimateController",
+          "role": "temperature, humidity, and CO2 regulation",
+          "envelopeIds": ["ENV-VH-002"]
+        },
+        {
+          "agentId": "AG-ENV-02",
+          "name": "LightingOptimizer",
+          "role": "LED spectrum and photoperiod management",
+          "envelopeIds": ["ENV-VH-002"]
+        },
+        {
+          "agentId": "AG-ENV-03",
+          "name": "AirflowBalancer",
+          "role": "ventilation and air circulation control",
+          "envelopeIds": ["ENV-VH-002"]
+        }
+      ]
+    },
+    {
+      "stewardRole": "Nutrition Steward",
+      "agents": [
+        {
+          "agentId": "AG-NUT-01",
+          "name": "NutrientBalancer",
+          "role": "NPK ratio and micronutrient optimization",
+          "envelopeIds": ["ENV-VH-003"]
+        },
+        {
+          "agentId": "AG-NUT-02",
+          "name": "pHController",
+          "role": "water pH monitoring and adjustment",
+          "envelopeIds": ["ENV-VH-003"]
+        },
+        {
+          "agentId": "AG-NUT-03",
+          "name": "WaterRecycler",
+          "role": "water reuse and contamination detection",
+          "envelopeIds": ["ENV-VH-003"]
+        }
+      ]
+    },
+    {
+      "stewardRole": "Harvest Steward",
+      "agents": [
+        {
+          "agentId": "AG-HARV-01",
+          "name": "MaturityAssessor",
+          "role": "harvest readiness and timing recommendations",
+          "envelopeIds": ["ENV-VH-004"]
+        },
+        {
+          "agentId": "AG-HARV-02",
+          "name": "QualityInspector",
+          "role": "visual defect and nutrient density analysis",
+          "envelopeIds": ["ENV-VH-004"]
+        },
+        {
+          "agentId": "AG-HARV-03",
+          "name": "PathogenDetector",
+          "role": "food safety pathogen screening",
+          "envelopeIds": ["ENV-VH-004"]
+        }
+      ]
+    },
+    {
+      "stewardRole": "Energy Steward",
+      "agents": [
+        {
+          "agentId": "AG-ENERGY-01",
+          "name": "LoadOptimizer",
+          "role": "energy consumption scheduling and demand response",
+          "envelopeIds": ["ENV-VH-005"]
+        },
+        {
+          "agentId": "AG-ENERGY-02",
+          "name": "SolarForecaster",
+          "role": "renewable energy generation prediction",
+          "envelopeIds": ["ENV-VH-005"]
+        },
+        {
+          "agentId": "AG-ENERGY-03",
+          "name": "CarbonTracker",
+          "role": "carbon footprint monitoring and reporting",
+          "envelopeIds": ["ENV-VH-005"]
+        }
+      ]
+    },
+    {
+      "stewardRole": "Compliance Steward",
+      "agents": [
+        {
+          "agentId": "AG-COMP-01",
+          "name": "TraceabilityLogger",
+          "role": "batch tracking and chain-of-custody documentation",
+          "envelopeIds": ["ENV-VH-006"]
+        },
+        {
+          "agentId": "AG-COMP-02",
+          "name": "CertificationMonitor",
+          "role": "regulatory compliance and audit readiness",
+          "envelopeIds": ["ENV-VH-006"]
+        },
+        {
+          "agentId": "AG-COMP-03",
+          "name": "SafetyReporter",
+          "role": "food safety incident reporting and corrective actions",
+          "envelopeIds": ["ENV-VH-006"]
+        }
+      ]
+    }
+  ],
+  "events": [
+    {
+      "eventId": "envelope_promoted:0:ENV-VH-001:0",
+      "hour": 0,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-VH-001",
+      "severity": "info",
+      "label": "Envelope promoted",
+      "detail": "Crop growth envelope (REV-VH-001-B) activated with updated yield models for spring growing season.",
+      "actorRole": "Growth Steward",
+      "actorName": "Dr. Sarah Chen"
+    },
+    {
+      "eventId": "envelope_promoted:0:ENV-VH-002:1",
+      "hour": 0,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-VH-002",
+      "severity": "info",
+      "label": "Envelope promoted",
+      "detail": "Environmental control envelope (REV-VH-002-C) activated with refined HVAC algorithms for energy efficiency.",
+      "actorRole": "Environment Steward",
+      "actorName": "Marcus Johnson"
+    },
+    {
+      "eventId": "decision:4_2:ENV-VH-001:2",
+      "hour": 4.2,
+      "type": "decision",
+      "envelopeId": "ENV-VH-001",
+      "severity": "info",
+      "label": "Harvest schedule optimized",
+      "detail": "YieldPredictor scheduled lettuce harvest for zones 3-7 at hour 96. Projected yield: 2,400 lbs. Maturity: 97%. Optimal market window aligned.",
+      "actorRole": "Growth Steward",
+      "actorName": "YieldPredictor"
+    },
+    {
+      "eventId": "decision:8_5:ENV-VH-002:3",
+      "hour": 8.5,
+      "type": "decision",
+      "envelopeId": "ENV-VH-002",
+      "severity": "info",
+      "label": "LED spectrum adjusted",
+      "detail": "LightingOptimizer shifted blue spectrum +15% for leafy greens in zones 1-4. Photosynthesis efficiency projected +8%. Energy cost neutral.",
+      "actorRole": "Environment Steward",
+      "actorName": "LightingOptimizer"
+    },
+    {
+      "eventId": "envelope_promoted:12:ENV-VH-004:4",
+      "hour": 12,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-VH-004",
+      "severity": "info",
+      "label": "Envelope promoted",
+      "detail": "Harvest and quality assurance envelope activated for spring harvest cycle.",
+      "actorRole": "Harvest Steward",
+      "actorName": "Emily Rodriguez"
+    },
+    {
+      "eventId": "boundary_interaction:18_7:ENV-VH-002:5",
+      "hour": 18.7,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-VH-002",
+      "severity": "warning",
+      "label": "Temperature variance exceeded",
+      "detail": "ClimateController detected zone 5 temperature: 79.2°F (target: 72°F, threshold: 75°F). HVAC compressor lag suspected. Escalating to manual override.",
+      "actorRole": "Environment Steward",
+      "actorName": "ClimateController",
+      "boundaryType": "temperature_threshold"
+    },
+    {
+      "eventId": "decision:19_3:ENV-VH-002:6",
+      "hour": 19.3,
+      "type": "decision",
+      "envelopeId": "ENV-VH-002",
+      "severity": "allowed",
+      "label": "Emergency cooling activated",
+      "detail": "Environment Steward approved backup chiller activation for zone 5. Temperature stabilized at 72.5°F within 40 minutes. Primary HVAC scheduled for maintenance.",
+      "actorRole": "Environment Steward",
+      "actorName": "Marcus Johnson"
+    },
+    {
+      "eventId": "envelope_promoted:24:ENV-VH-006:7",
+      "hour": 24,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-VH-006",
+      "severity": "info",
+      "label": "Envelope promoted",
+      "detail": "Food safety and compliance envelope activated for quarterly audit preparation.",
+      "actorRole": "Compliance Steward",
+      "actorName": "David Park"
+    },
+    {
+      "eventId": "decision:36_4:ENV-VH-003:8",
+      "hour": 36.4,
+      "type": "decision",
+      "envelopeId": "ENV-VH-003",
+      "severity": "info",
+      "label": "Nutrient solution adjusted",
+      "detail": "NutrientBalancer increased potassium +12% for basil zones. EC adjusted to 2.1 mS/cm. pH stable at 6.2. Predicted growth acceleration: 4 days to harvest.",
+      "actorRole": "Nutrition Steward",
+      "actorName": "NutrientBalancer"
+    },
+    {
+      "eventId": "boundary_interaction:48_8:ENV-VH-003:9",
+      "hour": 48.8,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-VH-003",
+      "severity": "critical",
+      "label": "pH drift detected",
+      "detail": "pHController flagged zone 8 water pH: 4.7 (target: 6.0, critical: <5.0). Root damage risk imminent. Irrigation halted. Buffer dosing initiated.",
+      "actorRole": "Nutrition Steward",
+      "actorName": "pHController",
+      "boundaryType": "ph_critical"
+    },
+    {
+      "eventId": "decision:49_5:ENV-VH-003:10",
+      "hour": 49.5,
+      "type": "decision",
+      "envelopeId": "ENV-VH-003",
+      "severity": "denied",
+      "label": "Reservoir purge required",
+      "detail": "Nutrition Steward ordered zone 8 reservoir drain and refill. pH restored to 6.1 after 2 hours. Root inspection scheduled. 80 plants quarantined.",
+      "actorRole": "Nutrition Steward",
+      "actorName": "Ana Martinez"
+    },
+    {
+      "eventId": "decision:72_1:ENV-VH-001:11",
+      "hour": 72.1,
+      "type": "decision",
+      "envelopeId": "ENV-VH-001",
+      "severity": "info",
+      "label": "Pest treatment recommended",
+      "detail": "CropHealthMonitor detected aphid presence in zone 2 (12 plants affected). Recommends beneficial insect release (ladybugs). Organic certification compliant.",
+      "actorRole": "Growth Steward",
+      "actorName": "CropHealthMonitor"
+    },
+    {
+      "eventId": "decision:96_3:ENV-VH-004:12",
+      "hour": 96.3,
+      "type": "decision",
+      "envelopeId": "ENV-VH-004",
+      "severity": "info",
+      "label": "Harvest initiated",
+      "detail": "MaturityAssessor confirmed lettuce zones 3-7 ready: 98% maturity, nutrient density optimal. Harvest crew dispatched. Projected pack time: 6 hours.",
+      "actorRole": "Harvest Steward",
+      "actorName": "MaturityAssessor"
+    },
+    {
+      "eventId": "boundary_interaction:102_4:ENV-VH-004:13",
+      "hour": 102.4,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-VH-004",
+      "severity": "warning",
+      "label": "Visual defects flagged",
+      "detail": "QualityInspector detected 7.2% tip burn in zone 6 lettuce (threshold: 5%). Suspected calcium deficiency. Recommends nutrient adjustment for next cycle.",
+      "actorRole": "Harvest Steward",
+      "actorName": "QualityInspector",
+      "boundaryType": "quality_threshold"
+    },
+    {
+      "eventId": "revision:108:ENV-VH-003:14",
+      "hour": 108,
+      "type": "revision",
+      "envelopeId": "ENV-VH-003",
+      "severity": "info",
+      "label": "Calcium supplementation added",
+      "detail": "Nutrition Steward revised nutrient protocol: +20% calcium for lettuce varieties. Target EC: 1.8 mS/cm. Prevents tip burn observed in recent harvest.",
+      "actorRole": "Nutrition Steward",
+      "actorName": "Ana Martinez",
+      "revisionType": "nutrient_protocol",
+      "reason": "Field data shows calcium deficiency correlation with tip burn in lettuce crops."
+    },
+    {
+      "eventId": "decision:120_5:ENV-VH-005:15",
+      "hour": 120.5,
+      "type": "decision",
+      "envelopeId": "ENV-VH-005",
+      "severity": "info",
+      "label": "Demand response activated",
+      "detail": "LoadOptimizer shifted HVAC and pumps to off-peak schedule (10pm-6am). Energy cost reduction: 18%. Solar + battery covering 62% of daytime load.",
+      "actorRole": "Energy Steward",
+      "actorName": "LoadOptimizer"
+    },
+    {
+      "eventId": "boundary_interaction:144_2:ENV-VH-005:16",
+      "hour": 144.2,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-VH-005",
+      "severity": "warning",
+      "label": "Carbon intensity exceeded",
+      "detail": "CarbonTracker reported weekly carbon footprint: 0.34 kg CO2e/kg produce (target: <0.30). Grid electricity 72% during cloudy week. Recommends battery expansion.",
+      "actorRole": "Energy Steward",
+      "actorName": "CarbonTracker",
+      "boundaryType": "carbon_target"
+    },
+    {
+      "eventId": "dsg_session:168:ENV-VH-001:17",
+      "hour": 168,
+      "type": "dsg_session",
+      "envelopeId": "ENV-VH-001",
+      "severity": "info",
+      "label": "DSG: Weekly yield review",
+      "detail": "Growth Stewardship Group reviewed 7-day cycle. Yield accuracy: 96%. Identified microgreens underperforming by 8%. Root cause: lighting spectrum mismatch.",
+      "actorRole": "Growth Steward",
+      "actorName": "Dr. Sarah Chen",
+      "sessionId": "DSG-GROWTH-W1"
+    },
+    {
+      "eventId": "revision:172:ENV-VH-002:18",
+      "hour": 172,
+      "type": "revision",
+      "envelopeId": "ENV-VH-002",
+      "severity": "info",
+      "label": "Microgreens lighting updated",
+      "detail": "Environment Steward adjusted LED spectrum for microgreens: +25% red, +10% far-red. Photoperiod extended to 16 hours. Projected growth rate +12%.",
+      "actorRole": "Environment Steward",
+      "actorName": "Marcus Johnson",
+      "revisionType": "lighting_protocol",
+      "reason": "DSG findings show microgreens require higher red spectrum for optimal growth."
+    },
+    {
+      "eventId": "signal:192:ENV-VH-006:19",
+      "hour": 192,
+      "type": "signal",
+      "envelopeId": "ENV-VH-006",
+      "severity": "info",
+      "label": "Audit readiness confirmed",
+      "detail": "TraceabilityLogger reports 100% batch documentation for 8-day period. Zero traceability gaps. Food safety protocols: compliant. Organic certification: active.",
+      "actorRole": "Compliance Steward",
+      "actorName": "TraceabilityLogger",
+      "signalKey": "audit_readiness",
+      "value": 1.0
+    },
+    {
+      "eventId": "decision:216_3:ENV-VH-004:20",
+      "hour": 216.3,
+      "type": "decision",
+      "envelopeId": "ENV-VH-004",
+      "severity": "info",
+      "label": "Shelf life validation passed",
+      "detail": "QualityInspector confirmed harvest batch H-1247: 9.2 days projected shelf life. Nutrient retention: 94% at day 7. Cold chain maintained. Approved for distribution.",
+      "actorRole": "Harvest Steward",
+      "actorName": "QualityInspector"
+    },
+    {
+      "eventId": "boundary_interaction:228_6:ENV-VH-006:21",
+      "hour": 228.6,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-VH-006",
+      "severity": "warning",
+      "label": "Certification renewal due",
+      "detail": "CertificationMonitor flagged USDA Organic certification expires in 45 days. Requires renewal documentation and inspector visit scheduling.",
+      "actorRole": "Compliance Steward",
+      "actorName": "CertificationMonitor",
+      "boundaryType": "certification_expiring"
+    },
+    {
+      "eventId": "decision:230_1:ENV-VH-006:22",
+      "hour": 230.1,
+      "type": "decision",
+      "envelopeId": "ENV-VH-006",
+      "severity": "allowed",
+      "label": "Renewal process initiated",
+      "detail": "Compliance Steward submitted renewal application to USDA. Inspector visit scheduled for day 35. All documentation current. Zero non-conformances expected.",
+      "actorRole": "Compliance Steward",
+      "actorName": "David Park"
+    },
+    {
+      "eventId": "signal:240:ENV-VH-001:23",
+      "hour": 240,
+      "type": "signal",
+      "envelopeId": "ENV-VH-001",
+      "severity": "info",
+      "label": "10-day production summary",
+      "detail": "Total yield: 6,800 lbs across 4 varieties. Waste: 3.2% (target: <5%). Average maturity: 97%. Market fulfillment: 100%. Revenue: $34,200.",
+      "actorRole": "Growth Steward",
+      "actorName": "YieldPredictor",
+      "signalKey": "production_summary",
+      "value": 6800
+    },
+    {
+      "eventId": "embedding:5:ENV-VH-001:24",
+      "hour": 5,
+      "type": "embedding",
+      "envelopeId": "ENV-VH-001",
+      "severity": "info",
+      "label": "Harvest scheduling embedded",
+      "detail": "Yield prediction and harvest timing pattern stored for lettuce production cycles.",
+      "actorRole": "Growth Steward",
+      "actorName": "YieldPredictor",
+      "embeddingId": "EMB-VH-001",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:4_2:ENV-VH-001:2",
+      "semanticContext": "lettuce harvest scheduled at 97% maturity with 2400 pound yield projection",
+      "semanticVector": [0.72, 0.35]
+    },
+    {
+      "eventId": "embedding:9:ENV-VH-002:25",
+      "hour": 9,
+      "type": "embedding",
+      "envelopeId": "ENV-VH-002",
+      "severity": "info",
+      "label": "LED spectrum optimization embedded",
+      "detail": "Lighting spectrum adjustment pattern stored for leafy green photosynthesis.",
+      "actorRole": "Environment Steward",
+      "actorName": "LightingOptimizer",
+      "embeddingId": "EMB-VH-002",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:8_5:ENV-VH-002:3",
+      "semanticContext": "blue spectrum increased 15% for leafy greens improving photosynthesis efficiency",
+      "semanticVector": [0.68, 0.38]
+    },
+    {
+      "eventId": "embedding:19:ENV-VH-002:26",
+      "hour": 19,
+      "type": "embedding",
+      "envelopeId": "ENV-VH-002",
+      "severity": "info",
+      "label": "Temperature boundary embedded",
+      "detail": "HVAC threshold violation and emergency cooling pattern stored.",
+      "actorRole": "Environment Steward",
+      "actorName": "ClimateController",
+      "embeddingId": "EMB-VH-003",
+      "embeddingType": "boundary_interaction",
+      "vectorDimensions": 768,
+      "sourceEventId": "boundary_interaction:18_7:ENV-VH-002:5",
+      "semanticContext": "temperature variance exceeded requiring emergency cooling system activation",
+      "semanticVector": [0.88, 0.82]
+    },
+    {
+      "eventId": "embedding:19_8:ENV-VH-002:27",
+      "hour": 19.8,
+      "type": "embedding",
+      "envelopeId": "ENV-VH-002",
+      "severity": "info",
+      "label": "Emergency cooling embedded",
+      "detail": "Backup system activation and temperature recovery pattern stored.",
+      "actorRole": "Environment Steward",
+      "actorName": "Marcus Johnson",
+      "embeddingId": "EMB-VH-004",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:19_3:ENV-VH-002:6",
+      "semanticContext": "backup chiller approved for zone temperature stabilization with HVAC maintenance",
+      "semanticVector": [0.75, 0.70]
+    },
+    {
+      "eventId": "embedding:37:ENV-VH-003:28",
+      "hour": 37,
+      "type": "embedding",
+      "envelopeId": "ENV-VH-003",
+      "severity": "info",
+      "label": "Nutrient adjustment embedded",
+      "detail": "NPK ratio optimization for basil production pattern stored.",
+      "actorRole": "Nutrition Steward",
+      "actorName": "NutrientBalancer",
+      "embeddingId": "EMB-VH-005",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:36_4:ENV-VH-003:8",
+      "semanticContext": "potassium increased 12% for basil with EC adjustment to 2.1 accelerating growth",
+      "semanticVector": [0.70, 0.42]
+    },
+    {
+      "eventId": "embedding:49:ENV-VH-003:29",
+      "hour": 49,
+      "type": "embedding",
+      "envelopeId": "ENV-VH-003",
+      "severity": "info",
+      "label": "pH critical event embedded",
+      "detail": "Water pH drift and root damage prevention pattern stored.",
+      "actorRole": "Nutrition Steward",
+      "actorName": "pHController",
+      "embeddingId": "EMB-VH-006",
+      "embeddingType": "boundary_interaction",
+      "vectorDimensions": 768,
+      "sourceEventId": "boundary_interaction:48_8:ENV-VH-003:9",
+      "semanticContext": "pH dropped to 4.7 triggering irrigation halt and buffer dosing for root protection",
+      "semanticVector": [0.92, 0.88]
+    },
+    {
+      "eventId": "embedding:50:ENV-VH-003:30",
+      "hour": 50,
+      "type": "embedding",
+      "envelopeId": "ENV-VH-003",
+      "severity": "info",
+      "label": "Reservoir purge embedded",
+      "detail": "Emergency pH correction and plant quarantine pattern stored.",
+      "actorRole": "Nutrition Steward",
+      "actorName": "Ana Martinez",
+      "embeddingId": "EMB-VH-007",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:49_5:ENV-VH-003:10",
+      "semanticContext": "reservoir drain and refill ordered with pH restoration and plant quarantine",
+      "semanticVector": [0.82, 0.78]
+    },
+    {
+      "eventId": "embedding:73:ENV-VH-001:31",
+      "hour": 73,
+      "type": "embedding",
+      "envelopeId": "ENV-VH-001",
+      "severity": "info",
+      "label": "Pest treatment embedded",
+      "detail": "Organic pest control recommendation pattern stored.",
+      "actorRole": "Growth Steward",
+      "actorName": "CropHealthMonitor",
+      "embeddingId": "EMB-VH-008",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:72_1:ENV-VH-001:11",
+      "semanticContext": "aphid detection triggering beneficial insect release for organic pest control",
+      "semanticVector": [0.68, 0.48]
+    },
+    {
+      "eventId": "embedding:97:ENV-VH-004:32",
+      "hour": 97,
+      "type": "embedding",
+      "envelopeId": "ENV-VH-004",
+      "severity": "info",
+      "label": "Harvest initiation embedded",
+      "detail": "Maturity assessment and harvest crew dispatch pattern stored.",
+      "actorRole": "Harvest Steward",
+      "actorName": "MaturityAssessor",
+      "embeddingId": "EMB-VH-009",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:96_3:ENV-VH-004:12",
+      "semanticContext": "lettuce harvest approved at 98% maturity with optimal nutrient density",
+      "semanticVector": [0.72, 0.38]
+    },
+    {
+      "eventId": "embedding:103:ENV-VH-004:33",
+      "hour": 103,
+      "type": "embedding",
+      "envelopeId": "ENV-VH-004",
+      "severity": "info",
+      "label": "Quality defect embedded",
+      "detail": "Visual inspection threshold violation pattern stored.",
+      "actorRole": "Harvest Steward",
+      "actorName": "QualityInspector",
+      "embeddingId": "EMB-VH-010",
+      "embeddingType": "boundary_interaction",
+      "vectorDimensions": 768,
+      "sourceEventId": "boundary_interaction:102_4:ENV-VH-004:13",
+      "semanticContext": "tip burn exceeded 5% threshold indicating calcium deficiency requiring nutrient adjustment",
+      "semanticVector": [0.85, 0.72]
+    },
+    {
+      "eventId": "embedding:109:ENV-VH-003:34",
+      "hour": 109,
+      "type": "embedding",
+      "envelopeId": "ENV-VH-003",
+      "severity": "info",
+      "label": "Nutrient protocol revision embedded",
+      "detail": "Calcium supplementation policy update pattern stored.",
+      "actorRole": "Nutrition Steward",
+      "actorName": "Ana Martinez",
+      "embeddingId": "EMB-VH-011",
+      "embeddingType": "revision",
+      "vectorDimensions": 768,
+      "sourceEventId": "revision:108:ENV-VH-003:14",
+      "semanticContext": "calcium increased 20% for lettuce varieties preventing tip burn deficiency",
+      "semanticVector": [0.22, 0.75]
+    },
+    {
+      "eventId": "embedding:121:ENV-VH-005:35",
+      "hour": 121,
+      "type": "embedding",
+      "envelopeId": "ENV-VH-005",
+      "severity": "info",
+      "label": "Demand response embedded",
+      "detail": "Load shifting and energy cost optimization pattern stored.",
+      "actorRole": "Energy Steward",
+      "actorName": "LoadOptimizer",
+      "embeddingId": "EMB-VH-012",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:120_5:ENV-VH-005:15",
+      "semanticContext": "HVAC load shifted to off-peak reducing energy cost 18% with solar battery support",
+      "semanticVector": [0.70, 0.45]
+    },
+    {
+      "eventId": "embedding:145:ENV-VH-005:36",
+      "hour": 145,
+      "type": "embedding",
+      "envelopeId": "ENV-VH-005",
+      "severity": "info",
+      "label": "Carbon threshold embedded",
+      "detail": "Carbon footprint violation and mitigation recommendation pattern stored.",
+      "actorRole": "Energy Steward",
+      "actorName": "CarbonTracker",
+      "embeddingId": "EMB-VH-013",
+      "embeddingType": "boundary_interaction",
+      "vectorDimensions": 768,
+      "sourceEventId": "boundary_interaction:144_2:ENV-VH-005:16",
+      "semanticContext": "carbon intensity exceeded 0.30 target during cloudy week requiring battery expansion",
+      "semanticVector": [0.80, 0.70]
+    },
+    {
+      "eventId": "embedding:169:ENV-VH-001:37",
+      "hour": 169,
+      "type": "embedding",
+      "envelopeId": "ENV-VH-001",
+      "severity": "info",
+      "label": "DSG yield review embedded",
+      "detail": "Weekly growth stewardship review pattern stored.",
+      "actorRole": "Growth Steward",
+      "actorName": "Dr. Sarah Chen",
+      "embeddingId": "EMB-VH-014",
+      "embeddingType": "session_artifact",
+      "vectorDimensions": 768,
+      "sourceEventId": "dsg_session:168:ENV-VH-001:17",
+      "semanticContext": "yield review identifying microgreens underperformance due to lighting spectrum mismatch",
+      "semanticVector": [0.18, 0.85]
+    },
+    {
+      "eventId": "embedding:173:ENV-VH-002:38",
+      "hour": 173,
+      "type": "embedding",
+      "envelopeId": "ENV-VH-002",
+      "severity": "info",
+      "label": "Microgreens lighting revision embedded",
+      "detail": "Spectrum adjustment for microgreens growth optimization pattern stored.",
+      "actorRole": "Environment Steward",
+      "actorName": "Marcus Johnson",
+      "embeddingId": "EMB-VH-015",
+      "embeddingType": "revision",
+      "vectorDimensions": 768,
+      "sourceEventId": "revision:172:ENV-VH-002:18",
+      "semanticContext": "microgreens LED spectrum increased red and far-red with 16 hour photoperiod",
+      "semanticVector": [0.20, 0.72]
+    },
+    {
+      "eventId": "embedding:217:ENV-VH-004:39",
+      "hour": 217,
+      "type": "embedding",
+      "envelopeId": "ENV-VH-004",
+      "severity": "info",
+      "label": "Shelf life validation embedded",
+      "detail": "Post-harvest quality and shelf life confirmation pattern stored.",
+      "actorRole": "Harvest Steward",
+      "actorName": "QualityInspector",
+      "embeddingId": "EMB-VH-016",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:216_3:ENV-VH-004:20",
+      "semanticContext": "harvest batch validated with 9.2 day shelf life and 94% nutrient retention",
+      "semanticVector": [0.68, 0.42]
+    },
+    {
+      "eventId": "embedding:229:ENV-VH-006:40",
+      "hour": 229,
+      "type": "embedding",
+      "envelopeId": "ENV-VH-006",
+      "severity": "info",
+      "label": "Certification renewal boundary embedded",
+      "detail": "Certification expiration escalation pattern stored.",
+      "actorRole": "Compliance Steward",
+      "actorName": "CertificationMonitor",
+      "embeddingId": "EMB-VH-017",
+      "embeddingType": "boundary_interaction",
+      "vectorDimensions": 768,
+      "sourceEventId": "boundary_interaction:228_6:ENV-VH-006:21",
+      "semanticContext": "organic certification expires in 45 days requiring renewal and inspector scheduling",
+      "semanticVector": [0.82, 0.75]
+    },
+    {
+      "eventId": "embedding:230_5:ENV-VH-006:41",
+      "hour": 230.5,
+      "type": "embedding",
+      "envelopeId": "ENV-VH-006",
+      "severity": "info",
+      "label": "Renewal process embedded",
+      "detail": "Certification renewal initiation pattern stored.",
+      "actorRole": "Compliance Steward",
+      "actorName": "David Park",
+      "embeddingId": "EMB-VH-018",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:230_1:ENV-VH-006:22",
+      "semanticContext": "USDA organic renewal submitted with inspector visit scheduled and zero non-conformances",
+      "semanticVector": [0.70, 0.68]
+    }
+  ]
+}

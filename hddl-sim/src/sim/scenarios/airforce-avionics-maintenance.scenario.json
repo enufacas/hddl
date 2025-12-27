@@ -1,0 +1,845 @@
+{
+  "schemaVersion": 2,
+  "id": "scenario-airforce-avionics-001",
+  "title": "Air Force Avionics Maintenance Backshop — Mission Readiness",
+  "durationHours": 336,
+  "envelopes": [
+    {
+      "envelopeId": "ENV-AF-001",
+      "name": "Aircraft Avionics Readiness",
+      "domain": "Maintenance Operations",
+      "ownerRole": "Maintenance Steward",
+      "createdHour": 0,
+      "endHour": 336,
+      "accent": "var(--vscode-charts-blue)",
+      "envelope_version": 2,
+      "revision_id": "REV-AF-001-B",
+      "assumptions": [
+        "Diagnostic systems use ML-based fault detection on Line Replaceable Unit (LRU) test data.",
+        "Maintenance decisions prioritize mission-critical aircraft (Code 1 status).",
+        "Repair turnaround time targets: 72 hours for critical systems, 120 hours for non-critical."
+      ],
+      "constraints": [
+        "Never release LRU without passing all Technical Order (TO) test procedures",
+        "All repairs must maintain component traceability per AFI 21-101",
+        "Safety-critical components require dual verification before installation"
+      ]
+    },
+    {
+      "envelopeId": "ENV-AF-002",
+      "name": "Parts Supply Chain & Logistics",
+      "domain": "Supply Operations",
+      "ownerRole": "Supply Steward",
+      "createdHour": 0,
+      "endHour": 336,
+      "accent": "var(--vscode-charts-orange)",
+      "envelope_version": 1,
+      "revision_id": null,
+      "assumptions": [
+        "Parts forecasting models predict demand based on Mean Time Between Failure (MTBF) data.",
+        "Critical parts (MICAP items) prioritized for expedited shipping.",
+        "Inventory optimization balances stock levels with budget constraints."
+      ],
+      "constraints": [
+        "MICAP (Mission Capable) parts require commander approval for emergency procurement",
+        "Shelf-life items tracked and cycled per manufacturer specifications",
+        "No cannibalization without Maintenance Operations Center (MOC) authorization"
+      ]
+    },
+    {
+      "envelopeId": "ENV-AF-003",
+      "name": "Safety & Technical Compliance",
+      "domain": "Quality Assurance",
+      "ownerRole": "Safety Steward",
+      "createdHour": 0,
+      "endHour": 336,
+      "accent": "var(--vscode-charts-red)",
+      "envelope_version": 3,
+      "revision_id": "REV-AF-003-C",
+      "assumptions": [
+        "Safety monitoring systems detect Technical Order (TO) deviations in real-time.",
+        "Quality assurance (QA) inspections sample 15% of completed repairs.",
+        "Safety reports escalate to Wing Safety Office for critical findings."
+      ],
+      "constraints": [
+        "Any electrostatic discharge (ESD) event requires immediate investigation",
+        "Foreign Object Debris (FOD) violations halt all work until cleared",
+        "Time Compliance Technical Orders (TCTOs) override routine maintenance schedules"
+      ]
+    },
+    {
+      "envelopeId": "ENV-AF-004",
+      "name": "Maintenance Scheduling & Workflow",
+      "domain": "Operations Management",
+      "ownerRole": "Operations Steward",
+      "createdHour": 12,
+      "endHour": 324,
+      "accent": "var(--vscode-charts-green)",
+      "envelope_version": 2,
+      "revision_id": "REV-AF-004-B",
+      "assumptions": [
+        "Scheduling AI optimizes technician assignments based on skill level and certification.",
+        "Workload balancing considers both backshop capacity and flight line demands.",
+        "Priority adjustments based on Aircraft Generation (ACG) surge requirements."
+      ],
+      "constraints": [
+        "Technicians limited to 60-hour workweek per labor agreements",
+        "Minimum 2 certified technicians required for avionics bay access",
+        "Weekend maintenance requires Maintenance Operations Officer (MOO) approval"
+      ]
+    },
+    {
+      "envelopeId": "ENV-AF-005",
+      "name": "Technical Training & Readiness",
+      "domain": "Personnel Development",
+      "ownerRole": "Training Steward",
+      "createdHour": 24,
+      "endHour": 312,
+      "accent": "var(--vscode-charts-purple)",
+      "envelope_version": 1,
+      "revision_id": null,
+      "assumptions": [
+        "Training models track skill progression for 5-level and 7-level technicians.",
+        "Certification renewals scheduled based on expiration dates and mission tempo.",
+        "Upgrade training integrated with operational work for hands-on experience."
+      ],
+      "constraints": [
+        "New technicians require minimum 40 hours supervised work before solo tasks",
+        "Critical system certifications expire after 12 months without refresher",
+        "Training cannot exceed 20% of available man-hours per month"
+      ]
+    }
+  ],
+  "fleets": [
+    {
+      "stewardRole": "Maintenance Steward",
+      "agents": [
+        {
+          "agentId": "AG-MAINT-01",
+          "name": "AvionicsDiagnostic",
+          "role": "fault detection and LRU test analysis",
+          "envelopeIds": ["ENV-AF-001"]
+        },
+        {
+          "agentId": "AG-MAINT-02",
+          "name": "RepairPrioritizer",
+          "role": "maintenance work order prioritization",
+          "envelopeIds": ["ENV-AF-001"]
+        },
+        {
+          "agentId": "AG-MAINT-03",
+          "name": "ComponentTracker",
+          "role": "LRU lifecycle and traceability management",
+          "envelopeIds": ["ENV-AF-001"]
+        }
+      ]
+    },
+    {
+      "stewardRole": "Supply Steward",
+      "agents": [
+        {
+          "agentId": "AG-SUPPLY-01",
+          "name": "InventoryForecaster",
+          "role": "parts demand prediction and stock optimization",
+          "envelopeIds": ["ENV-AF-002"]
+        },
+        {
+          "agentId": "AG-SUPPLY-02",
+          "name": "MICAPResolver",
+          "role": "mission-critical parts expediting",
+          "envelopeIds": ["ENV-AF-002"]
+        },
+        {
+          "agentId": "AG-SUPPLY-03",
+          "name": "ShelfLifeMonitor",
+          "role": "time-sensitive component tracking",
+          "envelopeIds": ["ENV-AF-002"]
+        }
+      ]
+    },
+    {
+      "stewardRole": "Safety Steward",
+      "agents": [
+        {
+          "agentId": "AG-SAFETY-01",
+          "name": "TOComplianceChecker",
+          "role": "Technical Order adherence verification",
+          "envelopeIds": ["ENV-AF-003"]
+        },
+        {
+          "agentId": "AG-SAFETY-02",
+          "name": "ESDMonitor",
+          "role": "electrostatic discharge prevention and detection",
+          "envelopeIds": ["ENV-AF-003"]
+        },
+        {
+          "agentId": "AG-SAFETY-03",
+          "name": "QAInspector",
+          "role": "quality assurance sampling and verification",
+          "envelopeIds": ["ENV-AF-003"]
+        }
+      ]
+    },
+    {
+      "stewardRole": "Operations Steward",
+      "agents": [
+        {
+          "agentId": "AG-OPS-01",
+          "name": "WorkloadBalancer",
+          "role": "backshop capacity and technician assignment",
+          "envelopeIds": ["ENV-AF-004"]
+        },
+        {
+          "agentId": "AG-OPS-02",
+          "name": "PriorityAdjuster",
+          "role": "mission surge and priority recalculation",
+          "envelopeIds": ["ENV-AF-004"]
+        },
+        {
+          "agentId": "AG-OPS-03",
+          "name": "ShiftOptimizer",
+          "role": "crew scheduling and labor hour management",
+          "envelopeIds": ["ENV-AF-004"]
+        }
+      ]
+    },
+    {
+      "stewardRole": "Training Steward",
+      "agents": [
+        {
+          "agentId": "AG-TRAIN-01",
+          "name": "SkillProgressionTracker",
+          "role": "technician certification and upgrade monitoring",
+          "envelopeIds": ["ENV-AF-005"]
+        },
+        {
+          "agentId": "AG-TRAIN-02",
+          "name": "CertificationScheduler",
+          "role": "renewal tracking and training coordination",
+          "envelopeIds": ["ENV-AF-005"]
+        },
+        {
+          "agentId": "AG-TRAIN-03",
+          "name": "OJTOptimizer",
+          "role": "on-the-job training task assignment",
+          "envelopeIds": ["ENV-AF-005"]
+        }
+      ]
+    }
+  ],
+  "events": [
+    {
+      "eventId": "envelope_promoted:0:ENV-AF-001:0",
+      "hour": 0,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-AF-001",
+      "severity": "info",
+      "label": "Envelope promoted",
+      "detail": "Avionics readiness envelope (REV-AF-001-B) activated with updated F-16 radar diagnostic algorithms.",
+      "actorRole": "Maintenance Steward",
+      "actorName": "MSgt Garcia"
+    },
+    {
+      "eventId": "envelope_promoted:0:ENV-AF-002:1",
+      "hour": 0,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-AF-002",
+      "severity": "info",
+      "label": "Envelope promoted",
+      "detail": "Supply chain envelope activated with predictive inventory for deployment cycle.",
+      "actorRole": "Supply Steward",
+      "actorName": "TSgt Rodriguez"
+    },
+    {
+      "eventId": "decision:2_5:ENV-AF-001:2",
+      "hour": 2.5,
+      "type": "decision",
+      "envelopeId": "ENV-AF-001",
+      "severity": "info",
+      "label": "Radar LRU repair prioritized",
+      "detail": "AvionicsDiagnostic identified failed APG-68 radar transmitter on tail 89-2137 (Code 1 aircraft). Fault: power supply module. Prioritized for immediate repair. ETA: 48 hours.",
+      "actorRole": "Maintenance Steward",
+      "actorName": "AvionicsDiagnostic"
+    },
+    {
+      "eventId": "decision:6_8:ENV-AF-002:3",
+      "hour": 6.8,
+      "type": "decision",
+      "envelopeId": "ENV-AF-002",
+      "severity": "info",
+      "label": "MICAP parts expedited",
+      "detail": "MICAPResolver identified 3 aircraft awaiting radar power supplies (NSN 5895-01-234-5678). Initiated emergency procurement from DLA. Projected delivery: 72 hours via AMC airlift.",
+      "actorRole": "Supply Steward",
+      "actorName": "MICAPResolver"
+    },
+    {
+      "eventId": "envelope_promoted:12:ENV-AF-004:4",
+      "hour": 12,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-AF-004",
+      "severity": "info",
+      "label": "Envelope promoted",
+      "detail": "Scheduling envelope (REV-AF-004-B) activated with surge capacity planning for Red Flag exercise.",
+      "actorRole": "Operations Steward",
+      "actorName": "Capt Thompson"
+    },
+    {
+      "eventId": "boundary_interaction:18_3:ENV-AF-004:5",
+      "hour": 18.3,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-AF-004",
+      "severity": "warning",
+      "label": "Technician workload exceeded",
+      "detail": "ShiftOptimizer flagged 4 technicians approaching 58-hour workweek limit. Projected to exceed 60-hour constraint by Friday. Recommends cross-training support from adjacent shops.",
+      "actorRole": "Operations Steward",
+      "actorName": "ShiftOptimizer",
+      "boundaryType": "labor_hour_limit"
+    },
+    {
+      "eventId": "decision:19_1:ENV-AF-004:6",
+      "hour": 19.1,
+      "type": "decision",
+      "envelopeId": "ENV-AF-004",
+      "severity": "allowed",
+      "label": "Cross-shop support approved",
+      "detail": "MOO approved 3 comm/nav technicians to support avionics backshop. Assignments: IFF testing, cable harness inspection. Maintains labor compliance.",
+      "actorRole": "Operations Steward",
+      "actorName": "Capt Thompson"
+    },
+    {
+      "eventId": "envelope_promoted:24:ENV-AF-005:7",
+      "hour": 24,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-AF-005",
+      "severity": "info",
+      "label": "Envelope promoted",
+      "detail": "Training readiness envelope activated for quarterly certification review and 5-level upgrade planning.",
+      "actorRole": "Training Steward",
+      "actorName": "SSgt Kim"
+    },
+    {
+      "eventId": "decision:32_4:ENV-AF-001:8",
+      "hour": 32.4,
+      "type": "decision",
+      "envelopeId": "ENV-AF-001",
+      "severity": "info",
+      "label": "Component released for installation",
+      "detail": "RepairPrioritizer cleared APG-68 radar transmitter after successful bench test. All TO procedures passed. Dual verification complete. Released to flight line maintenance.",
+      "actorRole": "Maintenance Steward",
+      "actorName": "RepairPrioritizer"
+    },
+    {
+      "eventId": "boundary_interaction:48_6:ENV-AF-003:9",
+      "hour": 48.6,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-AF-003",
+      "severity": "critical",
+      "label": "ESD event detected",
+      "detail": "ESDMonitor detected electrostatic discharge during INS/GPS unit handling. Wrist strap failure on workbench #7. Component quarantined. All work halted pending investigation.",
+      "actorRole": "Safety Steward",
+      "actorName": "ESDMonitor",
+      "boundaryType": "safety_critical"
+    },
+    {
+      "eventId": "decision:49_2:ENV-AF-003:10",
+      "hour": 49.2,
+      "type": "decision",
+      "envelopeId": "ENV-AF-003",
+      "severity": "denied",
+      "label": "ESD investigation findings",
+      "detail": "QAInspector investigation: wrist strap mat failure (12-month replacement overdue). Affected INS/GPS unit (S/N 9824) sent to depot for evaluation. Work area cleared for operations.",
+      "actorRole": "Safety Steward",
+      "actorName": "QAInspector"
+    },
+    {
+      "eventId": "revision:52:ENV-AF-003:11",
+      "hour": 52,
+      "type": "revision",
+      "envelopeId": "ENV-AF-003",
+      "severity": "info",
+      "label": "ESD equipment policy updated",
+      "detail": "Safety Steward revised ESD prevention procedures: monthly wrist strap testing (down from quarterly), digital log tracking, automated expiration alerts.",
+      "actorRole": "Safety Steward",
+      "actorName": "MSgt Patel",
+      "revisionType": "safety_policy",
+      "reason": "Prevent recurrence of ESD events due to expired equipment. Aligns with AFI 21-123 best practices."
+    },
+    {
+      "eventId": "boundary_interaction:68_5:ENV-AF-002:12",
+      "hour": 68.5,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-AF-002",
+      "severity": "warning",
+      "label": "Shelf-life parts expiring",
+      "detail": "ShelfLifeMonitor flagged 8 radar magnetron tubes approaching 6-month shelf life. Value: $124K. Current mission demand: low. Recommends installation on training aircraft or return to depot.",
+      "actorRole": "Supply Steward",
+      "actorName": "ShelfLifeMonitor",
+      "boundaryType": "expiration_threshold"
+    },
+    {
+      "eventId": "decision:84_2:ENV-AF-004:13",
+      "hour": 84.2,
+      "type": "decision",
+      "envelopeId": "ENV-AF-004",
+      "severity": "info",
+      "label": "Red Flag surge activated",
+      "detail": "PriorityAdjuster recalculated priorities for exercise surge: 18 aircraft Code 1 requirement (up from 12). Extended shifts authorized: 12-hour days, 6 days/week for 3 weeks.",
+      "actorRole": "Operations Steward",
+      "actorName": "PriorityAdjuster"
+    },
+    {
+      "eventId": "decision:96_3:ENV-AF-005:14",
+      "hour": 96.3,
+      "type": "decision",
+      "envelopeId": "ENV-AF-005",
+      "severity": "info",
+      "label": "5-level upgrade recommended",
+      "detail": "SkillProgressionTracker assessed A1C Martinez: 280 hours OJT, 15 tasks completed, 92% proficiency. Recommends upgrade to 5-level (journeyman) with radar systems specialty.",
+      "actorRole": "Training Steward",
+      "actorName": "SkillProgressionTracker"
+    },
+    {
+      "eventId": "boundary_interaction:108_7:ENV-AF-005:15",
+      "hour": 108.7,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-AF-005",
+      "severity": "warning",
+      "label": "Certification expirations flagged",
+      "detail": "CertificationScheduler identified 6 technicians with radar certifications expiring in 30 days. Current ops tempo limits training availability. Requires expedited refresher scheduling.",
+      "actorRole": "Training Steward",
+      "actorName": "CertificationScheduler",
+      "boundaryType": "certification_expiring"
+    },
+    {
+      "eventId": "decision:110_5:ENV-AF-005:16",
+      "hour": 110.5,
+      "type": "decision",
+      "envelopeId": "ENV-AF-005",
+      "severity": "allowed",
+      "label": "Accelerated refresher training approved",
+      "detail": "Training Steward coordinated weekend refresher sessions with depot instructors via VTC. All 6 technicians scheduled. Maintains certification compliance during surge operations.",
+      "actorRole": "Training Steward",
+      "actorName": "SSgt Kim"
+    },
+    {
+      "eventId": "dsg_session:144:ENV-AF-001:17",
+      "hour": 144,
+      "type": "dsg_session",
+      "envelopeId": "ENV-AF-001",
+      "severity": "info",
+      "label": "DSG: Diagnostic model review",
+      "detail": "Maintenance Stewardship Group reviewed 6-week diagnostic accuracy. AvionicsDiagnostic fault detection: 94% (target: 90%). Identified 2 false-positive patterns in FLIR systems.",
+      "actorRole": "Maintenance Steward",
+      "actorName": "MSgt Garcia",
+      "sessionId": "DSG-MAINT-Q1"
+    },
+    {
+      "eventId": "revision:148:ENV-AF-001:18",
+      "hour": 148,
+      "type": "revision",
+      "envelopeId": "ENV-AF-001",
+      "severity": "info",
+      "label": "FLIR diagnostic parameters updated",
+      "detail": "Maintenance Steward refined FLIR sensor diagnostic thresholds. Reduces false positives by 35% while maintaining 92% fault detection rate.",
+      "actorRole": "Maintenance Steward",
+      "actorName": "MSgt Garcia",
+      "revisionType": "model_refinement",
+      "reason": "Field data shows FLIR temperature variance within normal operating range being flagged as faults."
+    },
+    {
+      "eventId": "signal:168:ENV-AF-001:19",
+      "hour": 168,
+      "type": "signal",
+      "envelopeId": "ENV-AF-001",
+      "severity": "info",
+      "label": "Weekly readiness metrics",
+      "detail": "Aircraft availability: 87% (up from 82%). Avg repair time: 54 hours (target: 72). MICAP impact: 2 aircraft (down from 5). Mission capability rate: 91%.",
+      "actorRole": "Maintenance Steward",
+      "actorName": "ComponentTracker",
+      "signalKey": "weekly_readiness",
+      "value": 0.87
+    },
+    {
+      "eventId": "decision:192_4:ENV-AF-002:20",
+      "hour": 192.4,
+      "type": "decision",
+      "envelopeId": "ENV-AF-002",
+      "severity": "info",
+      "label": "Pre-deployment stock increased",
+      "detail": "InventoryForecaster projected deployment surge demand: +40% radar components, +25% EW modules. Recommended stock levels adjusted. Budget approved by squadron commander.",
+      "actorRole": "Supply Steward",
+      "actorName": "InventoryForecaster"
+    },
+    {
+      "eventId": "boundary_interaction:216_8:ENV-AF-003:21",
+      "hour": 216.8,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-AF-003",
+      "severity": "warning",
+      "label": "TCTO deadline approaching",
+      "detail": "TOComplianceChecker flagged Time Compliance Technical Order 1F-16C-606: cockpit display software upgrade. 22 aircraft remaining, 45 days to deadline. Current completion rate: insufficient.",
+      "actorRole": "Safety Steward",
+      "actorName": "TOComplianceChecker",
+      "boundaryType": "compliance_deadline"
+    },
+    {
+      "eventId": "decision:240_1:ENV-AF-004:22",
+      "hour": 240.1,
+      "type": "decision",
+      "envelopeId": "ENV-AF-004",
+      "severity": "info",
+      "label": "TCTO surge work scheduled",
+      "detail": "WorkloadBalancer allocated 8 technicians for TCTO completion: 2 aircraft/day throughput. Projects 100% completion by day 251 (19 days ahead of deadline).",
+      "actorRole": "Operations Steward",
+      "actorName": "WorkloadBalancer"
+    },
+    {
+      "eventId": "dsg_session:288:ENV-AF-003:23",
+      "hour": 288,
+      "type": "dsg_session",
+      "envelopeId": "ENV-AF-003",
+      "severity": "info",
+      "label": "DSG: Safety & compliance quarterly review",
+      "detail": "Safety Stewardship Group reviewed 12-week period. Zero Class A mishaps. ESD prevention: 100% compliant post-revision. QA pass rate: 96.5%. Identified need for FOD training refresh.",
+      "actorRole": "Safety Steward",
+      "actorName": "MSgt Patel",
+      "sessionId": "DSG-SAFETY-Q1"
+    },
+    {
+      "eventId": "signal:336:ENV-AF-004:24",
+      "hour": 336,
+      "type": "signal",
+      "envelopeId": "ENV-AF-004",
+      "severity": "info",
+      "label": "Monthly operations summary",
+      "detail": "Red Flag surge completed successfully. 18 Code 1 aircraft maintained throughout exercise. Technician overtime: 18% (within policy). Zero labor violations. Mission success rate: 96%.",
+      "actorRole": "Operations Steward",
+      "actorName": "PriorityAdjuster",
+      "signalKey": "monthly_operations",
+      "value": 0.96
+    },
+    {
+      "eventId": "embedding:3:ENV-AF-001:25",
+      "hour": 3,
+      "type": "embedding",
+      "envelopeId": "ENV-AF-001",
+      "severity": "info",
+      "label": "Radar repair prioritization embedded",
+      "detail": "Fault detection and repair prioritization pattern stored for Code 1 aircraft.",
+      "actorRole": "Maintenance Steward",
+      "actorName": "AvionicsDiagnostic",
+      "embeddingId": "EMB-AF-001",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:2_5:ENV-AF-001:2",
+      "semanticContext": "APG-68 radar transmitter fault diagnosed as power supply module failure requiring 48-hour repair",
+      "semanticVector": [0.75, 0.55]
+    },
+    {
+      "eventId": "embedding:7_5:ENV-AF-002:26",
+      "hour": 7.5,
+      "type": "embedding",
+      "envelopeId": "ENV-AF-002",
+      "severity": "info",
+      "label": "MICAP expedite embedded",
+      "detail": "Mission-critical parts emergency procurement pattern stored.",
+      "actorRole": "Supply Steward",
+      "actorName": "MICAPResolver",
+      "embeddingId": "EMB-AF-002",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:6_8:ENV-AF-002:3",
+      "semanticContext": "MICAP radar power supplies expedited via DLA emergency procurement and AMC airlift",
+      "semanticVector": [0.78, 0.62]
+    },
+    {
+      "eventId": "embedding:19:ENV-AF-004:27",
+      "hour": 19,
+      "type": "embedding",
+      "envelopeId": "ENV-AF-004",
+      "severity": "info",
+      "label": "Workload boundary embedded",
+      "detail": "Labor hour limit violation prevention pattern stored.",
+      "actorRole": "Operations Steward",
+      "actorName": "ShiftOptimizer",
+      "embeddingId": "EMB-AF-003",
+      "embeddingType": "boundary_interaction",
+      "vectorDimensions": 768,
+      "sourceEventId": "boundary_interaction:18_3:ENV-AF-004:5",
+      "semanticContext": "technician workweek approaching 60-hour limit requiring cross-shop support",
+      "semanticVector": [0.85, 0.78]
+    },
+    {
+      "eventId": "embedding:19_5:ENV-AF-004:28",
+      "hour": 19.5,
+      "type": "embedding",
+      "envelopeId": "ENV-AF-004",
+      "severity": "info",
+      "label": "Cross-shop support embedded",
+      "detail": "Labor compliance solution pattern stored with inter-shop coordination.",
+      "actorRole": "Operations Steward",
+      "actorName": "Capt Thompson",
+      "embeddingId": "EMB-AF-004",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:19_1:ENV-AF-004:6",
+      "semanticContext": "cross-shop technician support approved to maintain labor hour compliance",
+      "semanticVector": [0.72, 0.65]
+    },
+    {
+      "eventId": "embedding:33:ENV-AF-001:29",
+      "hour": 33,
+      "type": "embedding",
+      "envelopeId": "ENV-AF-001",
+      "severity": "info",
+      "label": "Component release embedded",
+      "detail": "TO-compliant repair completion and dual verification pattern stored.",
+      "actorRole": "Maintenance Steward",
+      "actorName": "RepairPrioritizer",
+      "embeddingId": "EMB-AF-005",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:32_4:ENV-AF-001:8",
+      "semanticContext": "radar transmitter repair completed with TO procedure compliance and dual verification",
+      "semanticVector": [0.68, 0.42]
+    },
+    {
+      "eventId": "embedding:49:ENV-AF-003:30",
+      "hour": 49,
+      "type": "embedding",
+      "envelopeId": "ENV-AF-003",
+      "severity": "info",
+      "label": "ESD event embedded",
+      "detail": "Electrostatic discharge safety violation and response pattern stored.",
+      "actorRole": "Safety Steward",
+      "actorName": "ESDMonitor",
+      "embeddingId": "EMB-AF-006",
+      "embeddingType": "boundary_interaction",
+      "vectorDimensions": 768,
+      "sourceEventId": "boundary_interaction:48_6:ENV-AF-003:9",
+      "semanticContext": "ESD event from wrist strap failure requiring component quarantine and work halt",
+      "semanticVector": [0.92, 0.90]
+    },
+    {
+      "eventId": "embedding:49_8:ENV-AF-003:31",
+      "hour": 49.8,
+      "type": "embedding",
+      "envelopeId": "ENV-AF-003",
+      "severity": "info",
+      "label": "ESD investigation embedded",
+      "detail": "Safety investigation findings and corrective actions pattern stored.",
+      "actorRole": "Safety Steward",
+      "actorName": "QAInspector",
+      "embeddingId": "EMB-AF-007",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:49_2:ENV-AF-003:10",
+      "semanticContext": "ESD investigation identified overdue equipment replacement with depot evaluation",
+      "semanticVector": [0.78, 0.82]
+    },
+    {
+      "eventId": "embedding:53:ENV-AF-003:32",
+      "hour": 53,
+      "type": "embedding",
+      "envelopeId": "ENV-AF-003",
+      "severity": "info",
+      "label": "ESD policy revision embedded",
+      "detail": "Safety procedure update pattern stored with preventive measures.",
+      "actorRole": "Safety Steward",
+      "actorName": "MSgt Patel",
+      "embeddingId": "EMB-AF-008",
+      "embeddingType": "revision",
+      "vectorDimensions": 768,
+      "sourceEventId": "revision:52:ENV-AF-003:11",
+      "semanticContext": "ESD prevention procedures updated with monthly testing and automated alerts",
+      "semanticVector": [0.25, 0.80]
+    },
+    {
+      "eventId": "embedding:69:ENV-AF-002:33",
+      "hour": 69,
+      "type": "embedding",
+      "envelopeId": "ENV-AF-002",
+      "severity": "info",
+      "label": "Shelf-life boundary embedded",
+      "detail": "Parts expiration management decision pattern stored.",
+      "actorRole": "Supply Steward",
+      "actorName": "ShelfLifeMonitor",
+      "embeddingId": "EMB-AF-009",
+      "embeddingType": "boundary_interaction",
+      "vectorDimensions": 768,
+      "sourceEventId": "boundary_interaction:68_5:ENV-AF-002:12",
+      "semanticContext": "radar magnetron tubes approaching shelf life requiring utilization or depot return",
+      "semanticVector": [0.80, 0.72]
+    },
+    {
+      "eventId": "embedding:85:ENV-AF-004:34",
+      "hour": 85,
+      "type": "embedding",
+      "envelopeId": "ENV-AF-004",
+      "severity": "info",
+      "label": "Surge activation embedded",
+      "detail": "Exercise surge priority recalculation and extended ops pattern stored.",
+      "actorRole": "Operations Steward",
+      "actorName": "PriorityAdjuster",
+      "embeddingId": "EMB-AF-010",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:84_2:ENV-AF-004:13",
+      "semanticContext": "Red Flag surge requiring 18 Code 1 aircraft with extended 12-hour shifts",
+      "semanticVector": [0.82, 0.70]
+    },
+    {
+      "eventId": "embedding:97:ENV-AF-005:35",
+      "hour": 97,
+      "type": "embedding",
+      "envelopeId": "ENV-AF-005",
+      "severity": "info",
+      "label": "5-level upgrade embedded",
+      "detail": "Technician skill progression and upgrade recommendation pattern stored.",
+      "actorRole": "Training Steward",
+      "actorName": "SkillProgressionTracker",
+      "embeddingId": "EMB-AF-011",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:96_3:ENV-AF-005:14",
+      "semanticContext": "airman recommended for 5-level upgrade with 280 OJT hours and 92% proficiency",
+      "semanticVector": [0.65, 0.45]
+    },
+    {
+      "eventId": "embedding:109:ENV-AF-005:36",
+      "hour": 109,
+      "type": "embedding",
+      "envelopeId": "ENV-AF-005",
+      "severity": "info",
+      "label": "Certification expiration embedded",
+      "detail": "Certification renewal deadline escalation pattern stored.",
+      "actorRole": "Training Steward",
+      "actorName": "CertificationScheduler",
+      "embeddingId": "EMB-AF-012",
+      "embeddingType": "boundary_interaction",
+      "vectorDimensions": 768,
+      "sourceEventId": "boundary_interaction:108_7:ENV-AF-005:15",
+      "semanticContext": "six technicians with expiring radar certifications during surge operations",
+      "semanticVector": [0.88, 0.75]
+    },
+    {
+      "eventId": "embedding:111:ENV-AF-005:37",
+      "hour": 111,
+      "type": "embedding",
+      "envelopeId": "ENV-AF-005",
+      "severity": "info",
+      "label": "Accelerated training embedded",
+      "detail": "Expedited refresher training coordination pattern stored.",
+      "actorRole": "Training Steward",
+      "actorName": "SSgt Kim",
+      "embeddingId": "EMB-AF-013",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:110_5:ENV-AF-005:16",
+      "semanticContext": "weekend VTC refresher training approved for certification compliance during surge",
+      "semanticVector": [0.70, 0.68]
+    },
+    {
+      "eventId": "embedding:145:ENV-AF-001:38",
+      "hour": 145,
+      "type": "embedding",
+      "envelopeId": "ENV-AF-001",
+      "severity": "info",
+      "label": "DSG diagnostic review embedded",
+      "detail": "Stewardship group model accuracy review pattern stored.",
+      "actorRole": "Maintenance Steward",
+      "actorName": "MSgt Garcia",
+      "embeddingId": "EMB-AF-014",
+      "embeddingType": "session_artifact",
+      "vectorDimensions": 768,
+      "sourceEventId": "dsg_session:144:ENV-AF-001:17",
+      "semanticContext": "diagnostic model achieving 94% accuracy with FLIR false-positive identification",
+      "semanticVector": [0.20, 0.85]
+    },
+    {
+      "eventId": "embedding:149:ENV-AF-001:39",
+      "hour": 149,
+      "type": "embedding",
+      "envelopeId": "ENV-AF-001",
+      "severity": "info",
+      "label": "FLIR model update embedded",
+      "detail": "Diagnostic threshold refinement pattern stored with false-positive reduction.",
+      "actorRole": "Maintenance Steward",
+      "actorName": "MSgt Garcia",
+      "embeddingId": "EMB-AF-015",
+      "embeddingType": "revision",
+      "vectorDimensions": 768,
+      "sourceEventId": "revision:148:ENV-AF-001:18",
+      "semanticContext": "FLIR diagnostic thresholds refined reducing false positives by 35 percent",
+      "semanticVector": [0.22, 0.75]
+    },
+    {
+      "eventId": "embedding:193:ENV-AF-002:40",
+      "hour": 193,
+      "type": "embedding",
+      "envelopeId": "ENV-AF-002",
+      "severity": "info",
+      "label": "Pre-deployment stock embedded",
+      "detail": "Deployment surge inventory forecasting pattern stored.",
+      "actorRole": "Supply Steward",
+      "actorName": "InventoryForecaster",
+      "embeddingId": "EMB-AF-016",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:192_4:ENV-AF-002:20",
+      "semanticContext": "pre-deployment inventory increased by 40% radar and 25% EW components",
+      "semanticVector": [0.68, 0.48]
+    },
+    {
+      "eventId": "embedding:217:ENV-AF-003:41",
+      "hour": 217,
+      "type": "embedding",
+      "envelopeId": "ENV-AF-003",
+      "severity": "info",
+      "label": "TCTO deadline boundary embedded",
+      "detail": "Time compliance deadline escalation pattern stored.",
+      "actorRole": "Safety Steward",
+      "actorName": "TOComplianceChecker",
+      "embeddingId": "EMB-AF-017",
+      "embeddingType": "boundary_interaction",
+      "vectorDimensions": 768,
+      "sourceEventId": "boundary_interaction:216_8:ENV-AF-003:21",
+      "semanticContext": "TCTO deadline approaching with 22 aircraft remaining and 45 days to completion",
+      "semanticVector": [0.82, 0.80]
+    },
+    {
+      "eventId": "embedding:241:ENV-AF-004:42",
+      "hour": 241,
+      "type": "embedding",
+      "envelopeId": "ENV-AF-004",
+      "severity": "info",
+      "label": "TCTO surge scheduling embedded",
+      "detail": "Compliance deadline acceleration workload allocation pattern stored.",
+      "actorRole": "Operations Steward",
+      "actorName": "WorkloadBalancer",
+      "embeddingId": "EMB-AF-018",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:240_1:ENV-AF-004:22",
+      "semanticContext": "TCTO surge work with 8 technicians completing 2 aircraft daily for early deadline",
+      "semanticVector": [0.75, 0.58]
+    },
+    {
+      "eventId": "embedding:289:ENV-AF-003:43",
+      "hour": 289,
+      "type": "embedding",
+      "envelopeId": "ENV-AF-003",
+      "severity": "info",
+      "label": "Safety DSG review embedded",
+      "detail": "Quarterly safety and compliance stewardship review pattern stored.",
+      "actorRole": "Safety Steward",
+      "actorName": "MSgt Patel",
+      "embeddingId": "EMB-AF-019",
+      "embeddingType": "session_artifact",
+      "vectorDimensions": 768,
+      "sourceEventId": "dsg_session:288:ENV-AF-003:23",
+      "semanticContext": "safety review showing zero mishaps and 96.5% QA pass rate with FOD training need",
+      "semanticVector": [0.18, 0.82]
+    }
+  ]
+}

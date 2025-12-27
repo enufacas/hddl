@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>HDDL Simulation — DSG Review Event (Stewardship View)</title>
+
+    <link rel="stylesheet" href="stylesheets/diagrams.css" />
+    <style>
+      :root { color-scheme: light; }
+
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial;
+        line-height: 1.5;
+        color: #0f172a;
+        background: #ffffff;
+      }
+
+      .page { max-width: 1100px; margin: 0 auto; padding: 24px 16px 56px; }
+      h1 { font-size: 24px; margin: 0 0 6px 0; }
+      .sub { margin: 0; color: rgba(15, 23, 42, 0.75); font-size: 14px; }
+      .divider { height: 1px; background: rgba(0, 0, 0, 0.08); margin: 18px 0; }
+      .topnav { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
+      .topnav a { font-size: 13px; text-decoration: none; color: rgba(15, 23, 42, 0.85); padding: 6px 10px; border-radius: 8px; border: 1px solid rgba(0,0,0,0.10); background: rgba(0,0,0,0.02); }
+
+      .panel {
+        --md-default-bg-color: #ffffff;
+        --md-code-bg-color: rgba(0, 0, 0, 0.03);
+        border: 1px solid rgba(0, 0, 0, 0.12);
+        border-radius: 16px;
+        padding: 18px;
+        background: linear-gradient(to bottom, var(--md-default-bg-color), var(--md-code-bg-color));
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      }
+
+      .hdr { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 12px; }
+      .title { margin: 0; font-size: 16px; font-weight: 900; }
+      .meta { font-size: 12.5px; opacity: 0.75; }
+
+      .event {
+        background: #fff;
+        border: 1px solid rgba(139, 92, 246, 0.25);
+        border-left: 5px solid rgba(139, 92, 246, 0.55);
+        border-radius: 14px;
+        padding: 14px;
+      }
+
+      .event__row {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 8px 10px;
+        border-radius: 10px;
+        background: rgba(139, 92, 246, 0.05);
+        margin-bottom: 8px;
+        font-size: 12.5px;
+      }
+
+      .k { font-weight: 900; }
+      .v { opacity: 0.85; text-align: right; }
+
+      .boxes {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-top: 14px;
+      }
+
+      @media (max-width: 900px) { .boxes { grid-template-columns: 1fr; } }
+
+      .box {
+        border: 1px solid rgba(0,0,0,0.12);
+        border-radius: 14px;
+        padding: 14px;
+        background: #fff;
+      }
+
+      .box__title { margin: 0 0 10px 0; font-size: 13px; font-weight: 900; }
+      ul { margin: 0; padding-left: 18px; font-size: 12.5px; opacity: 0.85; }
+
+      .artifact {
+        margin-top: 12px;
+        border: 1px dashed rgba(0,0,0,0.18);
+        border-radius: 14px;
+        padding: 14px;
+        background: rgba(0,0,0,0.02);
+      }
+
+      .artifact__title { margin: 0 0 10px 0; font-size: 13px; font-weight: 900; }
+
+      .pillrow { display: flex; gap: 6px; flex-wrap: wrap; }
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 3px 8px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 900;
+        border: 1px solid rgba(0,0,0,0.12);
+        background: rgba(0,0,0,0.03);
+        opacity: 0.9;
+      }
+
+      .pill--dsg { border-color: rgba(139,92,246,0.25); background: rgba(139,92,246,0.06); }
+      .pill--env { border-color: rgba(59,130,246,0.25); background: rgba(59,130,246,0.06); }
+
+      .hint { margin-top: 14px; font-size: 13px; color: rgba(15, 23, 42, 0.75); }
+      code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 0.95em; }
+    </style>
+  </head>
+
+  <body>
+    <div class="page">
+      <div class="topnav">
+        <a href="visuals.html">← Visual Index</a>
+        <a href="simulation.html">Simulation Visuals</a>
+      </div>
+
+      <header>
+        <h1>DSG Review Event (Mock)</h1>
+        <p class="sub">Cross-domain arbitration as durable artifacts (complementary: Stewardship view).</p>
+      </header>
+
+      <div class="divider"></div>
+
+      <div class="panel" role="group" aria-label="DSG review event mock">
+        <div class="hdr">
+          <h2 class="title">DSG Review — Event Record</h2>
+          <div class="meta">Time: <code>T5</code> · Scope: cross-domain boundary collision</div>
+        </div>
+
+        <div class="event">
+          <div class="event__row"><span class="k">Trigger</span><span class="v">Envelope boundaries intersect across domains</span></div>
+          <div class="event__row"><span class="k">Involved envelopes</span><span class="v"><code>leasing.lease_draft.prepare</code> · <code>tenant.communications</code></span></div>
+          <div class="event__row"><span class="k">Participating stewards</span><span class="v">Leasing Ops · Customer · Data · Compliance (as needed)</span></div>
+          <div class="event__row"><span class="k">Decision</span><span class="v">Clarify authority + constrain capability</span></div>
+        </div>
+
+        <div class="boxes">
+          <div class="box">
+            <p class="box__title">Cross-domain impact visualization (summary)</p>
+            <ul>
+              <li>Boundary overlap: lease drafting suggestions trigger outbound applicant messaging</li>
+              <li>People-impact: fair housing / accessibility accommodations and adverse-action sensitivity</li>
+              <li>Data boundary: PII sharing/export rules differ by domain and vendor</li>
+            </ul>
+          </div>
+
+          <div class="box">
+            <p class="box__title">Resolution policy (what changed)</p>
+            <ul>
+              <li>Authority: outbound tenant communications remain under <code>tenant.communications</code></li>
+              <li>Lease drafting: can propose terms but must escalate for non-standard clauses and compliance-sensitive cases</li>
+              <li>Telemetry: add boundary-interaction signals for cross-domain lease→message pathways</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="artifact">
+          <p class="artifact__title">Artifact output (always)</p>
+          <div class="pillrow">
+            <span class="pill pill--dsg">DSG</span>
+            <span class="pill pill--env">Envelope revision</span>
+            <span class="pill pill--env">Boundary clarification</span>
+          </div>
+          <ul style="margin-top: 10px;">
+            <li>Envelope: <code>leasing.lease_draft.prepare</code> v3 (non-standard terms require escalation)</li>
+            <li>Envelope: <code>tenant.communications</code> v2 (explicit ownership + templating constraints)</li>
+            <li>Annotation: cross-domain interaction documented for precedent</li>
+          </ul>
+        </div>
+
+        <p class="hint">Key idea: DSG produces durable artifacts; domain stewards own implementation and ongoing calibration.</p>
+      </div>
+    </div>
+  </body>
+</html>

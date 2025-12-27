@@ -1,0 +1,626 @@
+{
+  "schemaVersion": 2,
+  "id": "scenario-saas-dashboarding-001",
+  "title": "SaaS Dashboard Builder — Self-Service Analytics",
+  "durationHours": 96,
+  "envelopes": [
+    {
+      "envelopeId": "ENV-DASH-001",
+      "name": "Chart & Widget Recommendations",
+      "domain": "User Experience",
+      "ownerRole": "UX Steward",
+      "createdHour": 0,
+      "endHour": 96,
+      "accent": "var(--vscode-charts-green)",
+      "envelope_version": 2,
+      "revision_id": "REV-DASH-001-B",
+      "assumptions": [
+        "Chart recommendations based on data types and user intent.",
+        "Widget suggestions balance visual clarity with information density.",
+        "Users can override AI suggestions at any time."
+      ],
+      "constraints": [
+        "Never auto-create visualizations with >10 series without user confirmation",
+        "Recommend accessible color palettes (WCAG AA compliant)",
+        "Suggest aggregations that preserve data accuracy"
+      ]
+    },
+    {
+      "envelopeId": "ENV-DASH-002",
+      "name": "Query Generation & Optimization",
+      "domain": "Data Access",
+      "ownerRole": "Data Steward",
+      "createdHour": 0,
+      "endHour": 96,
+      "accent": "var(--vscode-charts-blue)",
+      "envelope_version": 3,
+      "revision_id": "REV-DASH-002-C",
+      "assumptions": [
+        "Natural language queries translate to SQL with 95%+ accuracy.",
+        "Query optimization balances speed with resource consumption.",
+        "Users see query preview before execution on large datasets."
+      ],
+      "constraints": [
+        "Queries must complete within 30 seconds or prompt for refinement",
+        "Block queries scanning >1M rows without explicit approval",
+        "Never expose raw PII fields in auto-generated queries"
+      ]
+    },
+    {
+      "envelopeId": "ENV-DASH-003",
+      "name": "Dashboard Sharing & Permissions",
+      "domain": "Access Control",
+      "ownerRole": "Security Steward",
+      "createdHour": 12,
+      "endHour": 84,
+      "accent": "var(--vscode-charts-orange)",
+      "envelope_version": 1,
+      "revision_id": null,
+      "assumptions": [
+        "Sharing defaults to organization-level visibility with opt-out.",
+        "Permission inheritance follows role-based access control.",
+        "External sharing requires explicit approval workflow."
+      ],
+      "constraints": [
+        "Public links expire after 30 days by default",
+        "Dashboard owners can revoke access at any time",
+        "Audit logs track all permission changes"
+      ]
+    },
+    {
+      "envelopeId": "ENV-DASH-004",
+      "name": "Onboarding & Template Suggestions",
+      "domain": "Customer Success",
+      "ownerRole": "Onboarding Steward",
+      "createdHour": 0,
+      "endHour": 48,
+      "accent": "var(--vscode-charts-green)",
+      "envelope_version": 1,
+      "revision_id": null,
+      "assumptions": [
+        "Template recommendations based on industry and use case.",
+        "Onboarding flow adapts to user skill level and data complexity.",
+        "Sample data helps users learn without connecting production sources."
+      ],
+      "constraints": [
+        "Templates must work with <10 minutes of setup",
+        "Sample data anonymized and GDPR-compliant",
+        "Tutorial prompts dismissible after first completion"
+      ]
+    }
+  ],
+  "fleets": [
+    {
+      "stewardRole": "UX Steward",
+      "agents": [
+        {
+          "agentId": "AG-UX-01",
+          "name": "ChartAdvisor",
+          "role": "visualization type recommendation",
+          "envelopeIds": ["ENV-DASH-001"]
+        },
+        {
+          "agentId": "AG-UX-02",
+          "name": "ColorPaletteGuard",
+          "role": "accessibility and brand compliance",
+          "envelopeIds": ["ENV-DASH-001"]
+        },
+        {
+          "agentId": "AG-UX-03",
+          "name": "LayoutOptimizer",
+          "role": "dashboard composition suggestions",
+          "envelopeIds": ["ENV-DASH-001"]
+        }
+      ]
+    },
+    {
+      "stewardRole": "Data Steward",
+      "agents": [
+        {
+          "agentId": "AG-DATA-01",
+          "name": "NLQueryTranslator",
+          "role": "natural language to SQL conversion",
+          "envelopeIds": ["ENV-DASH-002"]
+        },
+        {
+          "agentId": "AG-DATA-02",
+          "name": "QueryPerformanceGuard",
+          "role": "query cost and runtime estimation",
+          "envelopeIds": ["ENV-DASH-002"]
+        },
+        {
+          "agentId": "AG-DATA-03",
+          "name": "PIIRedactor",
+          "role": "sensitive data field masking",
+          "envelopeIds": ["ENV-DASH-002"]
+        }
+      ]
+    },
+    {
+      "stewardRole": "Security Steward",
+      "agents": [
+        {
+          "agentId": "AG-SEC-01",
+          "name": "PermissionCalculator",
+          "role": "role-based access resolution",
+          "envelopeIds": ["ENV-DASH-003"]
+        },
+        {
+          "agentId": "AG-SEC-02",
+          "name": "ExternalShareGuard",
+          "role": "public link and external access validation",
+          "envelopeIds": ["ENV-DASH-003"]
+        },
+        {
+          "agentId": "AG-SEC-03",
+          "name": "AuditLogger",
+          "role": "compliance audit trail generation",
+          "envelopeIds": ["ENV-DASH-003"]
+        }
+      ]
+    },
+    {
+      "stewardRole": "Onboarding Steward",
+      "agents": [
+        {
+          "agentId": "AG-ONBOARD-01",
+          "name": "TemplateRecommender",
+          "role": "industry-specific template matching",
+          "envelopeIds": ["ENV-DASH-004"]
+        },
+        {
+          "agentId": "AG-ONBOARD-02",
+          "name": "SkillLevelDetector",
+          "role": "user proficiency assessment",
+          "envelopeIds": ["ENV-DASH-004"]
+        },
+        {
+          "agentId": "AG-ONBOARD-03",
+          "name": "TutorialGuide",
+          "role": "contextual help and walkthroughs",
+          "envelopeIds": ["ENV-DASH-004"]
+        }
+      ]
+    }
+  ],
+  "events": [
+    {
+      "eventId": "envelope_promoted:0:ENV-DASH-001:0",
+      "hour": 0,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-DASH-001",
+      "severity": "info",
+      "label": "Envelope promoted",
+      "detail": "Chart and widget recommendation envelope (REV-DASH-001-B) activated with enhanced accessibility checks.",
+      "actorRole": "UX Steward",
+      "actorName": "Emma Wilson"
+    },
+    {
+      "eventId": "envelope_promoted:0:ENV-DASH-002:1",
+      "hour": 0,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-DASH-002",
+      "severity": "info",
+      "label": "Envelope promoted",
+      "detail": "Query generation and optimization envelope (REV-DASH-002-C) activated with PII redaction enforcement.",
+      "actorRole": "Data Steward",
+      "actorName": "Alex Kumar"
+    },
+    {
+      "eventId": "envelope_promoted:0:ENV-DASH-004:2",
+      "hour": 0,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-DASH-004",
+      "severity": "info",
+      "label": "Envelope promoted",
+      "detail": "Onboarding and template suggestion envelope activated for new user cohort.",
+      "actorRole": "Onboarding Steward",
+      "actorName": "Sofia Martinez"
+    },
+    {
+      "eventId": "decision:1_5:ENV-DASH-004:3",
+      "hour": 1.5,
+      "type": "decision",
+      "envelopeId": "ENV-DASH-004",
+      "severity": "info",
+      "label": "Template recommended",
+      "detail": "TemplateRecommender suggested 'Sales Pipeline Tracker' for user in e-commerce vertical. Template includes 6 pre-configured widgets.",
+      "actorRole": "Onboarding Steward",
+      "actorName": "TemplateRecommender"
+    },
+    {
+      "eventId": "decision:3_2:ENV-DASH-002:4",
+      "hour": 3.2,
+      "type": "decision",
+      "envelopeId": "ENV-DASH-002",
+      "severity": "info",
+      "label": "Natural language query translated",
+      "detail": "NLQueryTranslator converted 'Show me top 10 customers by revenue last quarter' to optimized SQL. Estimated runtime: 2.3 seconds.",
+      "actorRole": "Data Steward",
+      "actorName": "NLQueryTranslator"
+    },
+    {
+      "eventId": "boundary_interaction:5_8:ENV-DASH-002:5",
+      "hour": 5.8,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-DASH-002",
+      "severity": "warning",
+      "label": "Large query scan flagged",
+      "detail": "QueryPerformanceGuard blocked query scanning 2.4M rows. Suggested adding date filter or sampling. User prompted for explicit approval.",
+      "actorRole": "Data Steward",
+      "actorName": "QueryPerformanceGuard",
+      "boundaryType": "user_confirmation_required"
+    },
+    {
+      "eventId": "decision:6_1:ENV-DASH-002:6",
+      "hour": 6.1,
+      "type": "decision",
+      "envelopeId": "ENV-DASH-002",
+      "severity": "allowed",
+      "label": "User approved large query",
+      "detail": "User accepted performance warning and confirmed query execution. Query completed in 28.7 seconds (within 30s limit).",
+      "actorRole": "Data Steward",
+      "actorName": "QueryPerformanceGuard"
+    },
+    {
+      "eventId": "decision:8_4:ENV-DASH-001:7",
+      "hour": 8.4,
+      "type": "decision",
+      "envelopeId": "ENV-DASH-001",
+      "severity": "info",
+      "label": "Chart type recommended",
+      "detail": "ChartAdvisor suggested stacked area chart for time-series data with 5 categories. User accepted recommendation.",
+      "actorRole": "UX Steward",
+      "actorName": "ChartAdvisor"
+    },
+    {
+      "eventId": "boundary_interaction:10_3:ENV-DASH-001:8",
+      "hour": 10.3,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-DASH-001",
+      "severity": "warning",
+      "label": "Accessibility issue detected",
+      "detail": "ColorPaletteGuard flagged color palette with insufficient contrast ratio (2.8:1, required: 4.5:1). Suggested WCAG-compliant alternative.",
+      "actorRole": "UX Steward",
+      "actorName": "ColorPaletteGuard",
+      "boundaryType": "compliance_issue"
+    },
+    {
+      "eventId": "envelope_promoted:12:ENV-DASH-003:9",
+      "hour": 12,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-DASH-003",
+      "severity": "info",
+      "label": "Envelope promoted",
+      "detail": "Dashboard sharing and permissions envelope activated for team collaboration features.",
+      "actorRole": "Security Steward",
+      "actorName": "Jordan Hayes"
+    },
+    {
+      "eventId": "decision:15_7:ENV-DASH-003:10",
+      "hour": 15.7,
+      "type": "decision",
+      "envelopeId": "ENV-DASH-003",
+      "severity": "info",
+      "label": "Public link generated",
+      "detail": "ExternalShareGuard created public link for 'Q4 Revenue Dashboard' with 30-day expiration. Link includes view-only permissions.",
+      "actorRole": "Security Steward",
+      "actorName": "ExternalShareGuard"
+    },
+    {
+      "eventId": "boundary_interaction:18_2:ENV-DASH-002:11",
+      "hour": 18.2,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-DASH-002",
+      "severity": "blocked",
+      "label": "PII field redacted",
+      "detail": "PIIRedactor blocked query attempting to display customer_email and phone_number fields. User notified of data privacy constraints.",
+      "actorRole": "Data Steward",
+      "actorName": "PIIRedactor",
+      "boundaryType": "hard_constraint"
+    },
+    {
+      "eventId": "revision:24:ENV-DASH-001:12",
+      "hour": 24,
+      "type": "revision",
+      "envelopeId": "ENV-DASH-001",
+      "severity": "info",
+      "label": "Visualization limit adjusted",
+      "detail": "UX Steward increased series limit from 10 to 15 for power users based on feedback from data analyst cohort.",
+      "actorRole": "UX Steward",
+      "actorName": "Emma Wilson",
+      "revisionType": "boundary_adjustment",
+      "reason": "Advanced users need higher limits for complex multi-variable analysis while maintaining usability."
+    },
+    {
+      "eventId": "dsg_session:28:ENV-DASH-002:13",
+      "hour": 28,
+      "type": "dsg_session",
+      "envelopeId": "ENV-DASH-002",
+      "severity": "info",
+      "label": "DSG: Query performance review",
+      "detail": "Data Stewardship Group analyzed query patterns. 87% of queries complete <5s. Identified 3 common slow patterns for optimization.",
+      "actorRole": "Data Steward",
+      "actorName": "Alex Kumar",
+      "sessionId": "DSG-DATA-001-W1"
+    },
+    {
+      "eventId": "signal:36:ENV-DASH-004:14",
+      "hour": 36,
+      "type": "signal",
+      "envelopeId": "ENV-DASH-004",
+      "severity": "info",
+      "label": "Onboarding completion rate",
+      "detail": "SkillLevelDetector reports 78% of new users complete first dashboard within 15 minutes using template system. Target: 75%.",
+      "actorRole": "Onboarding Steward",
+      "actorName": "SkillLevelDetector",
+      "signalKey": "onboarding_success",
+      "value": 0.78
+    },
+    {
+      "eventId": "decision:42_5:ENV-DASH-003:15",
+      "hour": 42.5,
+      "type": "decision",
+      "envelopeId": "ENV-DASH-003",
+      "severity": "info",
+      "label": "Access revoked",
+      "detail": "Dashboard owner revoked external access after project completion. AuditLogger recorded permission change with timestamp.",
+      "actorRole": "Security Steward",
+      "actorName": "PermissionCalculator"
+    },
+    {
+      "eventId": "signal:48:ENV-DASH-002:16",
+      "hour": 48,
+      "type": "signal",
+      "envelopeId": "ENV-DASH-002",
+      "severity": "info",
+      "label": "Query performance stable",
+      "detail": "P95 query latency: 8.2 seconds (target: <10s). 94% of queries complete within timeout. PII redaction active on 100% of queries.",
+      "actorRole": "Data Steward",
+      "actorName": "QueryPerformanceGuard",
+      "signalKey": "query_health",
+      "value": 0.94
+    },
+    {
+      "eventId": "revision:60:ENV-DASH-003:17",
+      "hour": 60,
+      "type": "revision",
+      "envelopeId": "ENV-DASH-003",
+      "severity": "info",
+      "label": "Link expiration policy updated",
+      "detail": "Security Steward changed default public link expiration from 30 days to 14 days after security audit recommendations.",
+      "actorRole": "Security Steward",
+      "actorName": "Jordan Hayes",
+      "revisionType": "policy_change",
+      "reason": "Tighter expiration reduces risk of stale public links accessing outdated or sensitive data."
+    },
+    {
+      "eventId": "embedding:9:ENV-DASH-001:20",
+      "hour": 9,
+      "type": "embedding",
+      "envelopeId": "ENV-DASH-001",
+      "severity": "info",
+      "label": "Chart recommendation embedded",
+      "detail": "Visualization selection pattern stored for similar data type combinations.",
+      "actorRole": "UX Steward",
+      "actorName": "ChartAdvisor",
+      "embeddingId": "EMB-DASH-001",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:8_4:ENV-DASH-001:7",
+      "semanticContext": "stacked area chart recommendation for time-series with multiple categories",
+      "semanticVector": [0.70, 0.30]
+    },
+    {
+      "eventId": "embedding:19:ENV-DASH-002:21",
+      "hour": 19,
+      "type": "embedding",
+      "envelopeId": "ENV-DASH-002",
+      "severity": "info",
+      "label": "Query pattern embedded",
+      "detail": "PII redaction boundary interaction stored for similar data access scenarios.",
+      "actorRole": "Data Steward",
+      "actorName": "PIIRedactor",
+      "embeddingId": "EMB-DASH-002",
+      "embeddingType": "boundary_interaction",
+      "vectorDimensions": 768,
+      "sourceEventId": "boundary_interaction:18_2:ENV-DASH-002:11",
+      "semanticContext": "PII field blocking in auto-generated customer queries",
+      "semanticVector": [0.82, 0.78]
+    },
+    {
+      "eventId": "embedding:29:ENV-DASH-002:22",
+      "hour": 29,
+      "type": "embedding",
+      "envelopeId": "ENV-DASH-002",
+      "severity": "info",
+      "label": "Query optimization embedded",
+      "detail": "DSG session patterns stored for query performance improvement strategies.",
+      "actorRole": "Data Steward",
+      "actorName": "Alex Kumar",
+      "embeddingId": "EMB-DASH-003",
+      "embeddingType": "session_artifact",
+      "vectorDimensions": 768,
+      "sourceEventId": "dsg_session:28:ENV-DASH-002:13",
+      "semanticContext": "query performance review and common slow pattern optimizations",
+      "semanticVector": [0.18, 0.85]
+    },
+    {
+      "eventId": "embedding:2:ENV-DASH-004:20b",
+      "hour": 2,
+      "type": "embedding",
+      "envelopeId": "ENV-DASH-004",
+      "severity": "info",
+      "label": "Template selection embedded",
+      "detail": "Template recommendation for e-commerce vertical stored with user acceptance.",
+      "actorRole": "Onboarding Steward",
+      "actorName": "TemplateRecommender",
+      "embeddingId": "EMB-DASH-004",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:1_5:ENV-DASH-004:3",
+      "semanticContext": "sales pipeline template recommendation for e-commerce user onboarding",
+      "semanticVector": [0.65, 0.35]
+    },
+    {
+      "eventId": "embedding:4:ENV-DASH-002:20c",
+      "hour": 4,
+      "type": "embedding",
+      "envelopeId": "ENV-DASH-002",
+      "severity": "info",
+      "label": "NL query translation embedded",
+      "detail": "Natural language to SQL translation pattern stored for similar revenue queries.",
+      "actorRole": "Data Steward",
+      "actorName": "NLQueryTranslator",
+      "embeddingId": "EMB-DASH-005",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:3_2:ENV-DASH-002:4",
+      "semanticContext": "natural language customer revenue query translation with optimization",
+      "semanticVector": [0.72, 0.38]
+    },
+    {
+      "eventId": "embedding:6:ENV-DASH-002:20d",
+      "hour": 6,
+      "type": "embedding",
+      "envelopeId": "ENV-DASH-002",
+      "severity": "info",
+      "label": "Large scan boundary embedded",
+      "detail": "Query performance boundary interaction pattern stored for future prevention.",
+      "actorRole": "Data Steward",
+      "actorName": "QueryPerformanceGuard",
+      "embeddingId": "EMB-DASH-006",
+      "embeddingType": "boundary_interaction",
+      "vectorDimensions": 768,
+      "sourceEventId": "boundary_interaction:5_8:ENV-DASH-002:5",
+      "semanticContext": "large row scan flagged with user confirmation workflow for 2M+ rows",
+      "semanticVector": [0.85, 0.75]
+    },
+    {
+      "eventId": "embedding:7:ENV-DASH-002:20e",
+      "hour": 7,
+      "type": "embedding",
+      "envelopeId": "ENV-DASH-002",
+      "severity": "info",
+      "label": "User override decision embedded",
+      "detail": "User approval of performance warning stored as exception pattern.",
+      "actorRole": "Data Steward",
+      "actorName": "QueryPerformanceGuard",
+      "embeddingId": "EMB-DASH-007",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:6_1:ENV-DASH-002:6",
+      "semanticContext": "user accepted large query performance warning and completed within timeout",
+      "semanticVector": [0.75, 0.65]
+    },
+    {
+      "eventId": "embedding:11:ENV-DASH-001:20f",
+      "hour": 11,
+      "type": "embedding",
+      "envelopeId": "ENV-DASH-001",
+      "severity": "info",
+      "label": "Accessibility compliance embedded",
+      "detail": "WCAG contrast violation detection pattern stored for color palette guidance.",
+      "actorRole": "UX Steward",
+      "actorName": "ColorPaletteGuard",
+      "embeddingId": "EMB-DASH-008",
+      "embeddingType": "boundary_interaction",
+      "vectorDimensions": 768,
+      "sourceEventId": "boundary_interaction:10_3:ENV-DASH-001:8",
+      "semanticContext": "color contrast accessibility violation with WCAG-compliant alternative suggestion",
+      "semanticVector": [0.28, 0.72]
+    },
+    {
+      "eventId": "embedding:16:ENV-DASH-003:20g",
+      "hour": 16,
+      "type": "embedding",
+      "envelopeId": "ENV-DASH-003",
+      "severity": "info",
+      "label": "Public link generation embedded",
+      "detail": "External sharing decision with expiration policy stored for audit patterns.",
+      "actorRole": "Security Steward",
+      "actorName": "ExternalShareGuard",
+      "embeddingId": "EMB-DASH-009",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:15_7:ENV-DASH-003:10",
+      "semanticContext": "public link generation with 30-day expiration and view-only permissions",
+      "semanticVector": [0.68, 0.42]
+    },
+    {
+      "eventId": "embedding:25:ENV-DASH-001:20h",
+      "hour": 25,
+      "type": "embedding",
+      "envelopeId": "ENV-DASH-001",
+      "severity": "info",
+      "label": "Revision embedded",
+      "detail": "Visualization series limit adjustment stored with power user rationale.",
+      "actorRole": "UX Steward",
+      "actorName": "Emma Wilson",
+      "embeddingId": "EMB-DASH-010",
+      "embeddingType": "revision",
+      "vectorDimensions": 768,
+      "sourceEventId": "revision:24:ENV-DASH-001:12",
+      "semanticContext": "series limit increased from 10 to 15 for advanced data analyst users",
+      "semanticVector": [0.22, 0.70]
+    },
+    {
+      "eventId": "embedding:43:ENV-DASH-003:20i",
+      "hour": 43,
+      "type": "embedding",
+      "envelopeId": "ENV-DASH-003",
+      "severity": "info",
+      "label": "Access revocation embedded",
+      "detail": "Permission revocation decision stored for compliance audit trail.",
+      "actorRole": "Security Steward",
+      "actorName": "PermissionCalculator",
+      "embeddingId": "EMB-DASH-011",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:42_5:ENV-DASH-003:15",
+      "semanticContext": "dashboard owner revoked external access post-project with audit logging",
+      "semanticVector": [0.70, 0.48]
+    },
+    {
+      "eventId": "embedding:61:ENV-DASH-003:20j",
+      "hour": 61,
+      "type": "embedding",
+      "envelopeId": "ENV-DASH-003",
+      "severity": "info",
+      "label": "Security policy revision embedded",
+      "detail": "Link expiration policy change stored with security audit rationale.",
+      "actorRole": "Security Steward",
+      "actorName": "Jordan Hayes",
+      "embeddingId": "EMB-DASH-012",
+      "embeddingType": "revision",
+      "vectorDimensions": 768,
+      "sourceEventId": "revision:60:ENV-DASH-003:17",
+      "semanticContext": "public link expiration tightened from 30 to 14 days for security compliance",
+      "semanticVector": [0.20, 0.75]
+    },
+    {
+      "eventId": "signal:72:ENV-DASH-001:23",
+      "hour": 72,
+      "type": "signal",
+      "envelopeId": "ENV-DASH-001",
+      "severity": "info",
+      "label": "Recommendation acceptance rate",
+      "detail": "Users accepted 82% of chart recommendations from ChartAdvisor. Accessibility compliance: 98% of created dashboards meet WCAG AA.",
+      "actorRole": "UX Steward",
+      "actorName": "ChartAdvisor",
+      "signalKey": "recommendation_acceptance",
+      "value": 0.82
+    },
+    {
+      "eventId": "decision:84:ENV-DASH-003:24",
+      "hour": 84,
+      "type": "decision",
+      "envelopeId": "ENV-DASH-003",
+      "severity": "info",
+      "label": "Compliance audit export",
+      "detail": "AuditLogger generated SOC 2 compliance report covering 2,847 permission changes across 428 dashboards.",
+      "actorRole": "Security Steward",
+      "actorName": "AuditLogger"
+    }
+  ]
+}

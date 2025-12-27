@@ -1,0 +1,586 @@
+{
+  "schemaVersion": 2,
+  "id": "scenario-financial-lending-001",
+  "title": "Consumer Lending Decisions — Fairness & Compliance",
+  "durationHours": 120,
+  "envelopes": [
+    {
+      "envelopeId": "ENV-FIN-001",
+      "name": "Credit Underwriting",
+      "domain": "Lending Operations",
+      "ownerRole": "Lending Steward",
+      "createdHour": 0,
+      "endHour": 120,
+      "accent": "var(--vscode-charts-blue)",
+      "envelope_version": 4,
+      "revision_id": "REV-FIN-001-D",
+      "assumptions": [
+        "Credit models are tested for disparate impact across protected classes.",
+        "Applicants receive clear explanations for adverse actions.",
+        "Human review is required for all denials and near-threshold decisions."
+      ],
+      "constraints": [
+        "No use of protected class attributes in decisioning",
+        "All denials must include specific adverse action reasons",
+        "Manual review required for borderline cases (±5% of threshold)"
+      ]
+    },
+    {
+      "envelopeId": "ENV-FIN-002",
+      "name": "Fraud Detection",
+      "domain": "Risk Management",
+      "ownerRole": "Risk Steward",
+      "createdHour": 0,
+      "endHour": 120,
+      "accent": "var(--vscode-charts-red)",
+      "envelope_version": 2,
+      "revision_id": "REV-FIN-002-B",
+      "assumptions": [
+        "Fraud models prioritize accuracy over false positive minimization.",
+        "Customers can dispute fraud flags with documented evidence.",
+        "Geographic and behavioral patterns are monitored for legitimacy."
+      ],
+      "constraints": [
+        "High-risk flags require secondary verification",
+        "Legitimate customer transactions must not be blocked repeatedly",
+        "Appeal process completes within 48 hours"
+      ]
+    },
+    {
+      "envelopeId": "ENV-FIN-003",
+      "name": "Collections & Hardship Programs",
+      "domain": "Customer Recovery",
+      "ownerRole": "Recovery Steward",
+      "createdHour": 24,
+      "endHour": 96,
+      "accent": "var(--vscode-charts-orange)",
+      "envelope_version": 1,
+      "revision_id": null,
+      "assumptions": [
+        "Collections outreach is respectful and compliant with FDCPA.",
+        "Hardship programs are offered proactively to qualifying customers.",
+        "Payment plans are sustainable based on income verification."
+      ],
+      "constraints": [
+        "No contact outside permitted hours (8am-9pm local time)",
+        "Hardship eligibility assessed before aggressive collections",
+        "Cease communication upon written request"
+      ]
+    },
+    {
+      "envelopeId": "ENV-FIN-004",
+      "name": "Regulatory Compliance Monitoring",
+      "domain": "Compliance",
+      "ownerRole": "Compliance Steward",
+      "createdHour": 0,
+      "endHour": 120,
+      "accent": "var(--vscode-charts-purple)",
+      "envelope_version": 3,
+      "revision_id": "REV-FIN-004-C",
+      "assumptions": [
+        "All lending decisions are auditable with full lineage.",
+        "Regulatory reporting is automated and validated daily.",
+        "Model risk management processes are documented and tested."
+      ],
+      "constraints": [
+        "Adverse action notices sent within 30 days",
+        "Maintain 7-year audit trail for all credit decisions",
+        "Quarterly fairness testing for disparate impact"
+      ]
+    }
+  ],
+  "fleets": [
+    {
+      "stewardRole": "Lending Steward",
+      "agents": [
+        {
+          "agentId": "AG-LEND-01",
+          "name": "CreditScorer",
+          "role": "risk assessment within fairness bounds",
+          "envelopeIds": ["ENV-FIN-001"]
+        },
+        {
+          "agentId": "AG-LEND-02",
+          "name": "ExplanationBuilder",
+          "role": "adverse action reason generation",
+          "envelopeIds": ["ENV-FIN-001"]
+        },
+        {
+          "agentId": "AG-LEND-03",
+          "name": "BorderlineReviewer",
+          "role": "near-threshold case escalation",
+          "envelopeIds": ["ENV-FIN-001"]
+        }
+      ]
+    },
+    {
+      "stewardRole": "Risk Steward",
+      "agents": [
+        {
+          "agentId": "AG-RISK-01",
+          "name": "FraudDetector",
+          "role": "transaction anomaly detection",
+          "envelopeIds": ["ENV-FIN-002"]
+        },
+        {
+          "agentId": "AG-RISK-02",
+          "name": "IdentityVerifier",
+          "role": "multi-factor authentication",
+          "envelopeIds": ["ENV-FIN-002"]
+        },
+        {
+          "agentId": "AG-RISK-03",
+          "name": "AppealProcessor",
+          "role": "dispute resolution support",
+          "envelopeIds": ["ENV-FIN-002"]
+        }
+      ]
+    },
+    {
+      "stewardRole": "Recovery Steward",
+      "agents": [
+        {
+          "agentId": "AG-RECOV-01",
+          "name": "OutreachScheduler",
+          "role": "FDCPA-compliant contact timing",
+          "envelopeIds": ["ENV-FIN-003"]
+        },
+        {
+          "agentId": "AG-RECOV-02",
+          "name": "HardshipEvaluator",
+          "role": "financial distress assessment",
+          "envelopeIds": ["ENV-FIN-003"]
+        },
+        {
+          "agentId": "AG-RECOV-03",
+          "name": "PaymentPlanDesigner",
+          "role": "sustainable repayment structuring",
+          "envelopeIds": ["ENV-FIN-003"]
+        }
+      ]
+    },
+    {
+      "stewardRole": "Compliance Steward",
+      "agents": [
+        {
+          "agentId": "AG-COMP-01",
+          "name": "AuditTracer",
+          "role": "decision lineage tracking",
+          "envelopeIds": ["ENV-FIN-004"]
+        },
+        {
+          "agentId": "AG-COMP-02",
+          "name": "FairnessMonitor",
+          "role": "disparate impact testing",
+          "envelopeIds": ["ENV-FIN-004"]
+        },
+        {
+          "agentId": "AG-COMP-03",
+          "name": "ReportingAutomator",
+          "role": "regulatory filing generation",
+          "envelopeIds": ["ENV-FIN-004"]
+        }
+      ]
+    }
+  ],
+  "events": [
+    {
+      "eventId": "envelope_promoted:0:ENV-FIN-001:0",
+      "hour": 0,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-FIN-001",
+      "severity": "info",
+      "label": "Envelope promoted",
+      "detail": "Credit underwriting envelope (REV-FIN-001-D) activated with updated fairness constraints.",
+      "actorRole": "Lending Steward",
+      "actorName": "Rachel Thompson"
+    },
+    {
+      "eventId": "envelope_promoted:0:ENV-FIN-002:1",
+      "hour": 0,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-FIN-002",
+      "severity": "info",
+      "label": "Envelope promoted",
+      "detail": "Fraud detection envelope (REV-FIN-002-B) activated with improved false positive reduction.",
+      "actorRole": "Risk Steward",
+      "actorName": "Omar Hassan"
+    },
+    {
+      "eventId": "envelope_promoted:0:ENV-FIN-004:2",
+      "hour": 0,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-FIN-004",
+      "severity": "info",
+      "label": "Envelope promoted",
+      "detail": "Compliance monitoring envelope (REV-FIN-004-C) activated for Q1 regulatory period.",
+      "actorRole": "Compliance Steward",
+      "actorName": "Patricia Nguyen"
+    },
+    {
+      "eventId": "decision:2_5:ENV-FIN-001:3",
+      "hour": 2.5,
+      "type": "decision",
+      "envelopeId": "ENV-FIN-001",
+      "severity": "info",
+      "label": "Credit application approved",
+      "detail": "CreditScorer approved $15,000 personal loan at 8.2% APR. Risk score: 725, within auto-approve threshold.",
+      "actorRole": "Lending Steward",
+      "actorName": "CreditScorer"
+    },
+    {
+      "eventId": "boundary_interaction:5_8:ENV-FIN-001:4",
+      "hour": 5.8,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-FIN-001",
+      "severity": "warning",
+      "label": "Borderline case flagged",
+      "detail": "BorderlineReviewer escalated application to human underwriter. Score: 682 (threshold: 680±5%). Manual review required.",
+      "actorRole": "Lending Steward",
+      "actorName": "BorderlineReviewer",
+      "boundaryType": "manual_review_required"
+    },
+    {
+      "eventId": "decision:6_1:ENV-FIN-001:5",
+      "hour": 6.1,
+      "type": "decision",
+      "envelopeId": "ENV-FIN-001",
+      "severity": "allowed",
+      "label": "Manual approval with conditions",
+      "detail": "Human underwriter approved with income verification requirement. Conditional approval pending documentation.",
+      "actorRole": "Lending Steward",
+      "actorName": "Senior Underwriter #23"
+    },
+    {
+      "eventId": "signal:8_3:ENV-FIN-002:6",
+      "hour": 8.3,
+      "type": "signal",
+      "envelopeId": "ENV-FIN-002",
+      "severity": "warning",
+      "label": "Fraud pattern detected",
+      "detail": "FraudDetector identified 4 applications from same device with different SSNs. All flagged for verification.",
+      "actorRole": "Risk Steward",
+      "actorName": "FraudDetector",
+      "signalKey": "fraud_ring_indicator",
+      "value": 0.92
+    },
+    {
+      "eventId": "boundary_interaction:12_5:ENV-FIN-001:7",
+      "hour": 12.5,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-FIN-001",
+      "severity": "blocked",
+      "label": "Application denied",
+      "detail": "CreditScorer denied application due to debt-to-income ratio (58%, threshold: 45%). Adverse action notice generated.",
+      "actorRole": "Lending Steward",
+      "actorName": "CreditScorer",
+      "boundaryType": "hard_constraint"
+    },
+    {
+      "eventId": "decision:12_6:ENV-FIN-001:8",
+      "hour": 12.6,
+      "type": "decision",
+      "envelopeId": "ENV-FIN-001",
+      "severity": "info",
+      "label": "Adverse action notice sent",
+      "detail": "ExplanationBuilder generated notice: Denial reasons include high debt-to-income ratio and recent credit inquiries. Included credit score disclosure.",
+      "actorRole": "Lending Steward",
+      "actorName": "ExplanationBuilder"
+    },
+    {
+      "eventId": "envelope_promoted:24:ENV-FIN-003:9",
+      "hour": 24,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-FIN-003",
+      "severity": "info",
+      "label": "Envelope promoted",
+      "detail": "Collections and hardship program envelope activated for customer recovery operations.",
+      "actorRole": "Recovery Steward",
+      "actorName": "David Martinez"
+    },
+    {
+      "eventId": "decision:30_2:ENV-FIN-003:10",
+      "hour": 30.2,
+      "type": "decision",
+      "envelopeId": "ENV-FIN-003",
+      "severity": "info",
+      "label": "Hardship program offered",
+      "detail": "HardshipEvaluator identified customer with 60+ day delinquency and documented job loss. Offered 3-month payment deferral.",
+      "actorRole": "Recovery Steward",
+      "actorName": "HardshipEvaluator"
+    },
+    {
+      "eventId": "boundary_interaction:36_7:ENV-FIN-002:11",
+      "hour": 36.7,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-FIN-002",
+      "severity": "warning",
+      "label": "Fraud alert disputed",
+      "detail": "Customer disputed fraud flag on international transaction. AppealProcessor reviewing travel documentation.",
+      "actorRole": "Risk Steward",
+      "actorName": "AppealProcessor",
+      "boundaryType": "customer_dispute"
+    },
+    {
+      "eventId": "decision:38_1:ENV-FIN-002:12",
+      "hour": 38.1,
+      "type": "decision",
+      "envelopeId": "ENV-FIN-002",
+      "severity": "allowed",
+      "label": "Fraud flag reversed",
+      "detail": "AppealProcessor validated travel itinerary. Fraud flag removed, transaction approved retroactively. Customer notified.",
+      "actorRole": "Risk Steward",
+      "actorName": "AppealProcessor"
+    },
+    {
+      "eventId": "dsg_session:48:ENV-FIN-001:13",
+      "hour": 48,
+      "type": "dsg_session",
+      "envelopeId": "ENV-FIN-001",
+      "severity": "info",
+      "label": "DSG: Quarterly fairness review",
+      "detail": "Lending Stewardship Group conducted disparate impact analysis. No significant disparities detected across protected classes.",
+      "actorRole": "Lending Steward",
+      "actorName": "Rachel Thompson",
+      "sessionId": "DSG-LEND-001-Q1"
+    },
+    {
+      "eventId": "signal:72:ENV-FIN-004:14",
+      "hour": 72,
+      "type": "signal",
+      "envelopeId": "ENV-FIN-004",
+      "severity": "info",
+      "label": "Compliance metrics on target",
+      "detail": "FairnessMonitor: Approval rate variance across demographics <2%. Adverse action notices: 100% within regulatory timeline. Audit trail: complete.",
+      "actorRole": "Compliance Steward",
+      "actorName": "FairnessMonitor",
+      "signalKey": "compliance_health",
+      "value": 0.98
+    },
+    {
+      "eventId": "revision:84:ENV-FIN-001:15",
+      "hour": 84,
+      "type": "revision",
+      "envelopeId": "ENV-FIN-001",
+      "severity": "info",
+      "label": "Threshold adjustment based on DSG feedback",
+      "detail": "Lending Steward adjusted borderline review range from ±5% to ±7% after DSG analysis showed improved outcomes with wider human review band.",
+      "actorRole": "Lending Steward",
+      "actorName": "Rachel Thompson",
+      "revisionType": "boundary_adjustment",
+      "reason": "Increase human oversight for marginal cases to improve fairness outcomes and customer experience."
+    },
+    {
+      "eventId": "boundary_interaction:96_5:ENV-FIN-003:16",
+      "hour": 96.5,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-FIN-003",
+      "severity": "blocked",
+      "label": "Collections contact blocked",
+      "detail": "OutreachScheduler prevented contact attempt at 10:15pm customer local time. FDCPA violation avoided. Rescheduled for next business day.",
+      "actorRole": "Recovery Steward",
+      "actorName": "OutreachScheduler",
+      "boundaryType": "regulatory_constraint"
+    },
+    {
+      "eventId": "embedding:7:ENV-FIN-001:18",
+      "hour": 7,
+      "type": "embedding",
+      "envelopeId": "ENV-FIN-001",
+      "severity": "info",
+      "label": "Credit decision embedded",
+      "detail": "Manual approval decision pattern stored for borderline applicant profiles.",
+      "actorRole": "Lending Steward",
+      "actorName": "CreditScorer",
+      "embeddingId": "EMB-FIN-001",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:6_1:ENV-FIN-001:5",
+      "semanticContext": "manual credit approval with income verification for borderline applicants",
+      "semanticVector": [0.70, 0.45]
+    },
+    {
+      "eventId": "embedding:8:ENV-FIN-001:18b",
+      "hour": 8,
+      "type": "embedding",
+      "envelopeId": "ENV-FIN-001",
+      "severity": "info",
+      "label": "Boundary interaction embedded",
+      "detail": "Borderline case escalation pattern stored for similar score scenarios.",
+      "actorRole": "Lending Steward",
+      "actorName": "BorderlineReviewer",
+      "embeddingId": "EMB-FIN-001b",
+      "embeddingType": "boundary_interaction",
+      "vectorDimensions": 768,
+      "sourceEventId": "boundary_interaction:5_8:ENV-FIN-001:4",
+      "semanticContext": "borderline credit score escalation for human underwriter review",
+      "semanticVector": [0.85, 0.80]
+    },
+    {
+      "eventId": "embedding:10:ENV-FIN-002:19",
+      "hour": 10,
+      "type": "embedding",
+      "envelopeId": "ENV-FIN-002",
+      "severity": "info",
+      "label": "Fraud signal embedded",
+      "detail": "Fraud ring detection pattern stored for future anomaly matching.",
+      "actorRole": "Risk Steward",
+      "actorName": "FraudDetector",
+      "embeddingId": "EMB-FIN-002",
+      "embeddingType": "signal",
+      "vectorDimensions": 768,
+      "sourceEventId": "signal:8_3:ENV-FIN-002:6",
+      "semanticContext": "fraud ring detection pattern with multiple SSNs from same device",
+      "semanticVector": [0.35, 0.55]
+    },
+    {
+      "eventId": "embedding:14:ENV-FIN-001:19b",
+      "hour": 14,
+      "type": "embedding",
+      "envelopeId": "ENV-FIN-001",
+      "severity": "info",
+      "label": "Denial pattern embedded",
+      "detail": "Credit denial boundary interaction stored for similar DTI cases.",
+      "actorRole": "Lending Steward",
+      "actorName": "CreditScorer",
+      "embeddingId": "EMB-FIN-002b",
+      "embeddingType": "boundary_interaction",
+      "vectorDimensions": 768,
+      "sourceEventId": "boundary_interaction:12_5:ENV-FIN-001:7",
+      "semanticContext": "credit denial due to high debt-to-income ratio constraint",
+      "semanticVector": [0.80, 0.75]
+    },
+    {
+      "eventId": "embedding:15:ENV-FIN-001:19c",
+      "hour": 15,
+      "type": "embedding",
+      "envelopeId": "ENV-FIN-001",
+      "severity": "info",
+      "label": "Adverse action embedded",
+      "detail": "Adverse action notice generation pattern stored for regulatory compliance.",
+      "actorRole": "Lending Steward",
+      "actorName": "ExplanationBuilder",
+      "embeddingId": "EMB-FIN-002c",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:12_6:ENV-FIN-001:8",
+      "semanticContext": "adverse action notice with denial reasons for regulatory compliance",
+      "semanticVector": [0.30, 0.40]
+    },
+    {
+      "eventId": "embedding:32:ENV-FIN-003:19d",
+      "hour": 32,
+      "type": "embedding",
+      "envelopeId": "ENV-FIN-003",
+      "severity": "info",
+      "label": "Hardship decision embedded",
+      "detail": "Hardship program eligibility pattern stored for similar customer scenarios.",
+      "actorRole": "Recovery Steward",
+      "actorName": "HardshipEvaluator",
+      "embeddingId": "EMB-FIN-003",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:30_2:ENV-FIN-003:10",
+      "semanticContext": "hardship program eligibility for delinquent customer with documented job loss",
+      "semanticVector": [0.55, 0.70]
+    },
+    {
+      "eventId": "embedding:40:ENV-FIN-002:19e",
+      "hour": 40,
+      "type": "embedding",
+      "envelopeId": "ENV-FIN-002",
+      "severity": "info",
+      "label": "Fraud reversal embedded",
+      "detail": "Fraud flag reversal decision stored for similar dispute scenarios.",
+      "actorRole": "Risk Steward",
+      "actorName": "AppealProcessor",
+      "embeddingId": "EMB-FIN-004",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:38_1:ENV-FIN-002:12",
+      "semanticContext": "fraud flag reversal after travel documentation validation",
+      "semanticVector": [0.75, 0.65]
+    },
+    {
+      "eventId": "embedding:50:ENV-FIN-001:20",
+      "hour": 50,
+      "type": "embedding",
+      "envelopeId": "ENV-FIN-001",
+      "severity": "info",
+      "label": "DSG session embedded",
+      "detail": "Quarterly fairness review decisions and patterns stored.",
+      "actorRole": "Lending Steward",
+      "actorName": "Rachel Thompson",
+      "embeddingId": "EMB-FIN-005",
+      "embeddingType": "session_artifact",
+      "vectorDimensions": 768,
+      "sourceEventId": "dsg_session:48:ENV-FIN-001:13",
+      "semanticContext": "quarterly fairness review with disparate impact analysis results",
+      "semanticVector": [0.15, 0.90]
+    },
+    {
+      "eventId": "embedding:74:ENV-FIN-004:20b",
+      "hour": 74,
+      "type": "embedding",
+      "envelopeId": "ENV-FIN-004",
+      "severity": "info",
+      "label": "Compliance signal embedded",
+      "detail": "Compliance health metrics stored for regulatory benchmarking.",
+      "actorRole": "Compliance Steward",
+      "actorName": "FairnessMonitor",
+      "embeddingId": "EMB-FIN-006",
+      "embeddingType": "signal",
+      "vectorDimensions": 768,
+      "sourceEventId": "signal:72:ENV-FIN-004:14",
+      "semanticContext": "compliance metrics showing approval rate variance and audit trail completeness",
+      "semanticVector": [0.20, 0.25]
+    },
+    {
+      "eventId": "embedding:86:ENV-FIN-001:20c",
+      "hour": 86,
+      "type": "embedding",
+      "envelopeId": "ENV-FIN-001",
+      "severity": "info",
+      "label": "Revision embedded",
+      "detail": "Threshold adjustment revision stored with DSG rationale.",
+      "actorRole": "Lending Steward",
+      "actorName": "Rachel Thompson",
+      "embeddingId": "EMB-FIN-007",
+      "embeddingType": "revision",
+      "vectorDimensions": 768,
+      "sourceEventId": "revision:84:ENV-FIN-001:15",
+      "semanticContext": "borderline review threshold expansion from 5% to 7% for improved fairness",
+      "semanticVector": [0.20, 0.78]
+    },
+    {
+      "eventId": "embedding:98:ENV-FIN-003:20d",
+      "hour": 98,
+      "type": "embedding",
+      "envelopeId": "ENV-FIN-003",
+      "severity": "info",
+      "label": "Boundary interaction embedded",
+      "detail": "FDCPA violation prevention pattern stored for collections compliance.",
+      "actorRole": "Recovery Steward",
+      "actorName": "OutreachScheduler",
+      "embeddingId": "EMB-FIN-008",
+      "embeddingType": "boundary_interaction",
+      "vectorDimensions": 768,
+      "sourceEventId": "boundary_interaction:96_5:ENV-FIN-003:16",
+      "semanticContext": "FDCPA contact time constraint enforcement to prevent regulatory violation",
+      "semanticVector": [0.25, 0.85]
+    },
+    {
+      "eventId": "signal:120:ENV-FIN-001:21",
+      "hour": 120,
+      "type": "signal",
+      "envelopeId": "ENV-FIN-001",
+      "severity": "info",
+      "label": "Monthly lending summary",
+      "detail": "Applications processed: 1,847. Approved: 1,203 (65%). Manual reviews: 284 (15%). Avg approval time: 18 minutes. Zero compliance violations.",
+      "actorRole": "Lending Steward",
+      "actorName": "CreditScorer",
+      "signalKey": "lending_performance",
+      "value": 0.65
+    }
+  ]
+}

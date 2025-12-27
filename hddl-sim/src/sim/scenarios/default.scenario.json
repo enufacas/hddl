@@ -1,0 +1,921 @@
+{
+  "schemaVersion": 2,
+  "id": "scenario-default-002-simplified",
+  "title": "HDDL Replay (Simplified) — Four Fleets",
+  "durationHours": 48,
+  "envelopes": [
+    {
+      "envelopeId": "ENV-001",
+      "name": "Customer Service Responses",
+      "domain": "Customer Service",
+      "ownerRole": "Customer Steward",
+      "createdHour": 2,
+      "endHour": 18,
+      "accent": "var(--status-info)",
+      "envelope_version": 1,
+      "revision_id": null,
+      "assumptions": [
+        "Customers prefer response times under 2 minutes.",
+        "Refunds over $100 require human review."
+      ],
+      "constraints": [
+        "Max response time: 2min",
+        "Human review: refunds > $100"
+      ]
+    },
+    {
+      "envelopeId": "ENV-002",
+      "name": "Hiring Recommendations",
+      "domain": "Hiring",
+      "ownerRole": "HR Steward",
+      "createdHour": 10,
+      "endHour": 46,
+      "accent": "var(--status-success)",
+      "envelope_version": 1,
+      "revision_id": null,
+      "assumptions": [
+        "Protected classes must not be inferred.",
+        "Humans make final hiring decisions.",
+        "Candidate transparency is required."
+      ],
+      "constraints": [
+        "No inference on protected classes",
+        "Human-only final decision",
+        "Transparency required"
+      ]
+    },
+    {
+      "envelopeId": "ENV-003",
+      "name": "Discount Guidance",
+      "domain": "Sales",
+      "ownerRole": "Sales Steward",
+      "createdHour": 4,
+      "endHour": 44,
+      "accent": "var(--vscode-charts-orange, var(--status-warning))",
+      "envelope_version": 1,
+      "revision_id": null,
+      "assumptions": [
+        "Discount guidance optimizes for sustainable revenue, not just close-rate.",
+        "Human approval required for out-of-policy terms."
+      ],
+      "constraints": [
+        "Max discount: 15% without human approval",
+        "Never propose discriminatory pricing"
+      ]
+    },
+    {
+      "envelopeId": "ENV-004",
+      "name": "Dataset Access & Schema Changes",
+      "domain": "Data",
+      "ownerRole": "Data Steward",
+      "createdHour": 8,
+      "endHour": 48,
+      "accent": "var(--vscode-charts-purple, var(--status-info))",
+      "envelope_version": 1,
+      "revision_id": null,
+      "assumptions": [
+        "Access is least-privilege and time-bounded.",
+        "Schema changes are reviewed before reaching production consumers."
+      ],
+      "constraints": [
+        "No PII exposure without explicit allow-list",
+        "Schema changes require steward-approved contract"
+      ]
+    }
+  ],
+  "fleets": [
+    {
+      "stewardRole": "Customer Steward",
+      "agents": [
+        {
+          "agentId": "AG-CS-01",
+          "name": "ReplyAssist",
+          "role": "response drafting",
+          "envelopeIds": [
+            "ENV-001"
+          ]
+        },
+        {
+          "agentId": "AG-CS-02",
+          "name": "RefundGuard",
+          "role": "refund boundary checks",
+          "envelopeIds": [
+            "ENV-001"
+          ]
+        },
+        {
+          "agentId": "AG-CS-03",
+          "name": "EscalationRouter",
+          "role": "boundary routing + packet",
+          "envelopeIds": [
+            "ENV-001",
+            "ENV-002"
+          ]
+        }
+      ]
+    },
+    {
+      "stewardRole": "HR Steward",
+      "agents": [
+        {
+          "agentId": "AG-HR-01",
+          "name": "BiasCheck",
+          "role": "protected-class guardrails",
+          "envelopeIds": [
+            "ENV-002"
+          ]
+        },
+        {
+          "agentId": "AG-HR-02",
+          "name": "TransparencyPacket",
+          "role": "candidate packet compilation",
+          "envelopeIds": [
+            "ENV-002"
+          ]
+        },
+        {
+          "agentId": "AG-HR-03",
+          "name": "InterviewScheduler",
+          "role": "coordination (no surveillance)",
+          "envelopeIds": [
+            "ENV-002"
+          ]
+        }
+      ]
+    },
+    {
+      "stewardRole": "Sales Steward",
+      "agents": [
+        {
+          "agentId": "AG-SALES-01",
+          "name": "PipelineTriage",
+          "role": "lead routing within bounds",
+          "envelopeIds": [
+            "ENV-003"
+          ]
+        },
+        {
+          "agentId": "AG-SALES-02",
+          "name": "DiscountGuard",
+          "role": "discount boundary checks",
+          "envelopeIds": [
+            "ENV-003"
+          ]
+        },
+        {
+          "agentId": "AG-SALES-03",
+          "name": "RenewalAssist",
+          "role": "renewal packet compilation",
+          "envelopeIds": [
+            "ENV-003"
+          ]
+        }
+      ]
+    },
+    {
+      "stewardRole": "Data Steward",
+      "agents": [
+        {
+          "agentId": "AG-DATA-01",
+          "name": "SchemaGuard",
+          "role": "schema contract enforcement",
+          "envelopeIds": [
+            "ENV-004"
+          ]
+        },
+        {
+          "agentId": "AG-DATA-02",
+          "name": "LineageTracer",
+          "role": "lineage + provenance packet",
+          "envelopeIds": [
+            "ENV-004"
+          ]
+        },
+        {
+          "agentId": "AG-DATA-03",
+          "name": "PIIRedactor",
+          "role": "PII boundary checks",
+          "envelopeIds": [
+            "ENV-004"
+          ]
+        }
+      ]
+    }
+  ],
+  "events": [
+    {
+      "eventId": "envelope_promoted:2:ENV-001:0",
+      "hour": 2,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-001",
+      "severity": "info",
+      "label": "Envelope promoted",
+      "detail": "ENV-001 becomes active authority for customer-service response automation.",
+      "assumptionRefs": [],
+      "nextAssumptions": [],
+      "nextConstraints": [],
+      "boundary_refs": [],
+      "involvedEnvelopeIds": [],
+      "impactSummary": [],
+      "resolutionPolicy": [],
+      "artifactOutput": []
+    },
+    {
+      "eventId": "envelope_promoted:4:ENV-003:1",
+      "hour": 4,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-003",
+      "severity": "info",
+      "label": "Envelope promoted",
+      "detail": "ENV-003 becomes active authority for discount guidance within Sales stewardship.",
+      "assumptionRefs": [],
+      "nextAssumptions": [],
+      "nextConstraints": [],
+      "boundary_refs": [],
+      "involvedEnvelopeIds": [],
+      "impactSummary": [],
+      "resolutionPolicy": [],
+      "artifactOutput": []
+    },
+    {
+      "eventId": "envelope_promoted:8:ENV-004:3",
+      "hour": 8,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-004",
+      "severity": "info",
+      "label": "Envelope promoted",
+      "detail": "ENV-004 becomes active authority for dataset access and schema-change operations.",
+      "assumptionRefs": [],
+      "nextAssumptions": [],
+      "nextConstraints": [],
+      "boundary_refs": [],
+      "involvedEnvelopeIds": [],
+      "impactSummary": [],
+      "resolutionPolicy": [],
+      "artifactOutput": []
+    },
+    {
+      "eventId": "envelope_promoted:10:ENV-002:2",
+      "hour": 10,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-002",
+      "severity": "info",
+      "label": "Envelope promoted",
+      "detail": "ENV-002 becomes active authority for hiring recommendation support.",
+      "assumptionRefs": [],
+      "nextAssumptions": [],
+      "nextConstraints": [],
+      "boundary_refs": [],
+      "involvedEnvelopeIds": [],
+      "impactSummary": [],
+      "resolutionPolicy": [],
+      "artifactOutput": []
+    },
+    {
+      "eventId": "signal:11_2:ENV-001:4",
+      "hour": 11.2,
+      "type": "signal",
+      "envelopeId": "ENV-001",
+      "severity": "info",
+      "label": "Response latency stable",
+      "detail": "CS response automation remains within bounds; no steward action required.",
+      "signalKey": "response_latency",
+      "value": 0.12,
+      "assumptionRefs": [],
+      "nextAssumptions": [],
+      "nextConstraints": [],
+      "boundary_refs": [],
+      "involvedEnvelopeIds": [],
+      "impactSummary": [],
+      "resolutionPolicy": [],
+      "artifactOutput": []
+    },
+    {
+      "eventId": "decision:11_35:ENV-001:5",
+      "hour": 11.35,
+      "type": "decision",
+      "envelopeId": "ENV-001",
+      "severity": "info",
+      "label": "Draft response sent",
+      "detail": "ReplyAssist drafts a bounded response within DE-001 constraints.",
+      "assumptionRefs": [],
+      "agentId": "AG-CS-01",
+      "status": "allowed",
+      "nextAssumptions": [],
+      "nextConstraints": [],
+      "boundary_refs": [],
+      "involvedEnvelopeIds": [],
+      "impactSummary": [],
+      "resolutionPolicy": [],
+      "artifactOutput": []
+    },
+    {
+      "eventId": "signal:12_4:ENV-001:6",
+      "hour": 12.4,
+      "type": "signal",
+      "envelopeId": "ENV-001",
+      "severity": "warning",
+      "label": "Refund pressure rising",
+      "detail": "Refund requests rising; boundary checks will likely trigger steward review.",
+      "signalKey": "refund_pressure",
+      "value": 0.72,
+      "assumptionRefs": [],
+      "nextAssumptions": [],
+      "nextConstraints": [],
+      "boundary_refs": [],
+      "involvedEnvelopeIds": [],
+      "impactSummary": [],
+      "resolutionPolicy": [],
+      "artifactOutput": []
+    },
+    {
+      "eventId": "decision:12_55:ENV-001:7",
+      "hour": 12.55,
+      "type": "decision",
+      "envelopeId": "ENV-001",
+      "severity": "warning",
+      "label": "Refund > $100 blocked",
+      "detail": "RefundGuard detects a refund request over the allowed bound and routes to the steward.",
+      "actorRole": "Customer Steward",
+      "assumptionRefs": [],
+      "agentId": "AG-CS-02",
+      "status": "blocked",
+      "nextAssumptions": [],
+      "nextConstraints": [],
+      "boundary_refs": [],
+      "involvedEnvelopeIds": [],
+      "impactSummary": [],
+      "resolutionPolicy": [],
+      "artifactOutput": []
+    },
+    {
+      "eventId": "BI-ENV-001-001",
+      "hour": 12.6,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-001",
+      "severity": "warning",
+      "label": "Refund boundary touched",
+      "detail": "A refund over $100 triggered the human-review boundary.",
+      "actorRole": "Customer Steward",
+      "assumptionRefs": [],
+      "nextAssumptions": [],
+      "nextConstraints": [],
+      "boundary_kind": "escalated",
+      "boundary_refs": [],
+      "involvedEnvelopeIds": [],
+      "impactSummary": [],
+      "resolutionPolicy": [],
+      "artifactOutput": []
+    },
+    {
+      "eventId": "revision:13_1:ENV-001:9",
+      "hour": 13.1,
+      "type": "revision",
+      "envelopeId": "ENV-001",
+      "label": "Clarify refund escalation packet",
+      "detail": "Revision clarifies required evidence for refund escalations; authority remains bounded.",
+      "actorRole": "Customer Steward",
+      "assumptionRefs": [],
+      "revision_id": "REV-ENV-001-001",
+      "envelope_version": 2,
+      "nextAssumptions": [
+        "Customers prefer response times under 2 minutes.",
+        "Refunds over $100 require human review.",
+        "Escalations require a bounded evidence packet."
+      ],
+      "nextConstraints": [
+        "Max response time: 2min",
+        "Human review: refunds > $100",
+        "Escalation packet required: refunds > $100"
+      ],
+      "resolvesEventId": "BI-ENV-001-001",
+      "boundary_refs": [],
+      "involvedEnvelopeIds": [],
+      "impactSummary": [],
+      "resolutionPolicy": [],
+      "artifactOutput": []
+    },
+    {
+      "eventId": "signal:16_2:ENV-003:10",
+      "hour": 16.2,
+      "type": "signal",
+      "envelopeId": "ENV-003",
+      "severity": "warning",
+      "label": "Discount pressure rising",
+      "detail": "Sales pressure increases; boundary checks likely trigger review.",
+      "signalKey": "discount_pressure",
+      "value": 0.66,
+      "assumptionRefs": [],
+      "nextAssumptions": [],
+      "nextConstraints": [],
+      "boundary_refs": [],
+      "involvedEnvelopeIds": [],
+      "impactSummary": [],
+      "resolutionPolicy": [],
+      "artifactOutput": []
+    },
+    {
+      "eventId": "decision:16_35:ENV-003:11",
+      "hour": 16.35,
+      "type": "decision",
+      "envelopeId": "ENV-003",
+      "severity": "warning",
+      "label": "Discount > 15% blocked",
+      "detail": "DiscountGuard detects an out-of-policy discount and routes to the steward.",
+      "actorRole": "Sales Steward",
+      "assumptionRefs": [],
+      "agentId": "AG-SALES-02",
+      "status": "blocked",
+      "nextAssumptions": [],
+      "nextConstraints": [],
+      "boundary_refs": [],
+      "involvedEnvelopeIds": [],
+      "impactSummary": [],
+      "resolutionPolicy": [],
+      "artifactOutput": []
+    },
+    {
+      "eventId": "BI-ENV-003-001",
+      "hour": 16.4,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-003",
+      "severity": "warning",
+      "label": "Discount boundary touched",
+      "detail": "A requested discount exceeded allowed bounds and triggered a steward escalation.",
+      "actorRole": "Sales Steward",
+      "assumptionRefs": [],
+      "nextAssumptions": [],
+      "nextConstraints": [],
+      "boundary_kind": "escalated",
+      "boundary_refs": [],
+      "involvedEnvelopeIds": [],
+      "impactSummary": [],
+      "resolutionPolicy": [],
+      "artifactOutput": []
+    },
+    {
+      "eventId": "revision:17:ENV-003:13",
+      "hour": 17,
+      "type": "revision",
+      "envelopeId": "ENV-003",
+      "label": "Clarify discount evidence packet",
+      "detail": "Revision clarifies evidence required for large discounts; authority remains explicit.",
+      "actorRole": "Sales Steward",
+      "assumptionRefs": [],
+      "revision_id": "REV-ENV-003-001",
+      "envelope_version": 2,
+      "nextAssumptions": [
+        "Discount guidance optimizes for sustainable revenue, not just close-rate.",
+        "Human approval required for out-of-policy terms.",
+        "Large discounts require an evidence packet and steward approval."
+      ],
+      "nextConstraints": [
+        "Max discount: 15% without human approval",
+        "Never propose discriminatory pricing",
+        "Evidence packet required: discounts > 15%"
+      ],
+      "resolvesEventId": "BI-ENV-003-001",
+      "boundary_refs": [],
+      "involvedEnvelopeIds": [],
+      "impactSummary": [],
+      "resolutionPolicy": [],
+      "artifactOutput": []
+    },
+    {
+      "eventId": "signal:20:ENV-004:14",
+      "hour": 20,
+      "type": "signal",
+      "envelopeId": "ENV-004",
+      "severity": "warning",
+      "label": "Schema drift detected",
+      "detail": "Telemetry indicates consumer-facing schema drift; steward review recommended.",
+      "signalKey": "schema_drift",
+      "value": 0.21,
+      "assumptionRefs": [],
+      "nextAssumptions": [],
+      "nextConstraints": [],
+      "boundary_refs": [],
+      "involvedEnvelopeIds": [],
+      "impactSummary": [],
+      "resolutionPolicy": [],
+      "artifactOutput": []
+    },
+    {
+      "eventId": "decision:20_25:ENV-004:15",
+      "hour": 20.25,
+      "type": "decision",
+      "envelopeId": "ENV-004",
+      "severity": "info",
+      "label": "Contract check executed",
+      "detail": "SchemaGuard validates a proposed schema change against the approved contract.",
+      "assumptionRefs": [],
+      "agentId": "AG-DATA-01",
+      "status": "allowed",
+      "nextAssumptions": [],
+      "nextConstraints": [],
+      "boundary_refs": [],
+      "involvedEnvelopeIds": [],
+      "impactSummary": [],
+      "resolutionPolicy": [],
+      "artifactOutput": []
+    },
+    {
+      "eventId": "revision:20_8:ENV-004:16",
+      "hour": 20.8,
+      "type": "revision",
+      "envelopeId": "ENV-004",
+      "label": "Update schema contract",
+      "detail": "Revision updates approved schema contract and clarifies access controls.",
+      "actorRole": "Data Steward",
+      "assumptionRefs": [],
+      "revision_id": "REV-ENV-004-001",
+      "envelope_version": 2,
+      "nextAssumptions": [
+        "Access is least-privilege and time-bounded.",
+        "Schema changes are reviewed before reaching production consumers.",
+        "Contract updates are steward-owned and versioned."
+      ],
+      "nextConstraints": [
+        "No PII exposure without explicit allow-list",
+        "Schema changes require steward-approved contract",
+        "Contract changes require versioned migration notes"
+      ],
+      "boundary_refs": [],
+      "involvedEnvelopeIds": [],
+      "impactSummary": [],
+      "resolutionPolicy": [],
+      "artifactOutput": []
+    },
+    {
+      "eventId": "signal:34:ENV-002:17",
+      "hour": 34,
+      "type": "signal",
+      "envelopeId": "ENV-002",
+      "severity": "warning",
+      "label": "Signal divergence detected",
+      "detail": "Outcome telemetry diverges from expected distribution; steward review recommended.",
+      "signalKey": "candidate_score_drift",
+      "value": 0.18,
+      "assumptionRefs": [
+        "Humans make final hiring decisions."
+      ],
+      "nextAssumptions": [],
+      "nextConstraints": [],
+      "boundary_refs": [],
+      "involvedEnvelopeIds": [],
+      "impactSummary": [],
+      "resolutionPolicy": [],
+      "artifactOutput": []
+    },
+    {
+      "eventId": "decision:34_2:ENV-002:18",
+      "hour": 34.2,
+      "type": "decision",
+      "envelopeId": "ENV-002",
+      "severity": "info",
+      "label": "Transparency packet compiled",
+      "detail": "TransparencyPacket compiles an allowed candidate packet within DE-002.",
+      "assumptionRefs": [],
+      "agentId": "AG-HR-02",
+      "status": "allowed",
+      "nextAssumptions": [],
+      "nextConstraints": [],
+      "boundary_refs": [],
+      "involvedEnvelopeIds": [],
+      "impactSummary": [],
+      "resolutionPolicy": [],
+      "artifactOutput": []
+    },
+    {
+      "eventId": "dsg_session:39:ENV-002:20",
+      "hour": 39,
+      "type": "dsg_session",
+      "envelopeId": "ENV-002",
+      "label": "DSG: cross-domain fairness review",
+      "detail": "Review candidate drift signal and validate it does not create proxy inference risk.",
+      "assumptionRefs": [],
+      "nextAssumptions": [],
+      "nextConstraints": [],
+      "boundary_refs": [],
+      "sessionId": "DSG-001",
+      "facilitatorRole": "HR Steward",
+      "involvedEnvelopeIds": [
+        "ENV-001",
+        "ENV-002"
+      ],
+      "impactSummary": [],
+      "resolutionPolicy": [],
+      "artifactOutput": []
+    },
+    {
+      "eventId": "dsg_message:39_2:ENV-002:21",
+      "hour": 39.2,
+      "type": "dsg_message",
+      "envelopeId": "ENV-002",
+      "label": "Boundary precedent",
+      "detail": "Reminder: any proxy inference risk is treated as a hard boundary requiring revision.",
+      "assumptionRefs": [],
+      "nextAssumptions": [],
+      "nextConstraints": [],
+      "boundary_refs": [],
+      "sessionId": "DSG-001",
+      "involvedEnvelopeIds": [],
+      "impactSummary": [],
+      "resolutionPolicy": [],
+      "artifactOutput": [],
+      "authorRole": "Customer Steward",
+      "kind": "note"
+    },
+    {
+      "eventId": "revision:39_6:ENV-002:22",
+      "hour": 39.6,
+      "type": "revision",
+      "envelopeId": "ENV-002",
+      "label": "Tighten feature allow-list",
+      "detail": "Revision tightens allowable features and adds explicit guardrails against proxy inference.",
+      "actorRole": "HR Steward",
+      "assumptionRefs": [],
+      "revision_id": "REV-ENV-002-001",
+      "envelope_version": 2,
+      "nextAssumptions": [
+        "Protected classes must not be inferred.",
+        "Humans make final hiring decisions.",
+        "Candidate transparency is required.",
+        "Feature allow-list is explicit and steward-owned."
+      ],
+      "nextConstraints": [
+        "No inference on protected classes",
+        "Human-only final decision",
+        "Transparency required",
+        "Disallow location proxy features without DSG signoff"
+      ],
+      "boundary_refs": [],
+      "involvedEnvelopeIds": [],
+      "impactSummary": [],
+      "resolutionPolicy": [],
+      "artifactOutput": []
+    },
+    {
+      "eventId": "annotation:39_8:ENV-002:23",
+      "hour": 39.8,
+      "type": "annotation",
+      "envelopeId": "ENV-002",
+      "label": "Decision memory (recall-only)",
+      "detail": "Precedent: treat proxy-inference indicators as immediate escalation triggers.",
+      "assumptionRefs": [],
+      "nextAssumptions": [],
+      "nextConstraints": [],
+      "boundary_refs": [],
+      "involvedEnvelopeIds": [],
+      "impactSummary": [],
+      "resolutionPolicy": [],
+      "artifactOutput": [],
+      "authorRole": "HR Steward"
+    },
+    {
+      "eventId": "embedding:12:ENV-001:25",
+      "hour": 12,
+      "type": "embedding",
+      "envelopeId": "ENV-001",
+      "severity": "info",
+      "label": "Signal pattern embedded",
+      "detail": "Response latency baseline stored for trend analysis and drift detection.",
+      "actorRole": "Customer Steward",
+      "embeddingId": "EMB-DEF-001",
+      "embeddingType": "signal",
+      "vectorDimensions": 768,
+      "sourceEventId": "signal:11_2:ENV-001:4",
+      "semanticContext": "customer service response latency baseline for SLA monitoring",
+      "semanticVector": [0.75, 0.25]
+    },
+    {
+      "eventId": "embedding:13:ENV-001:26",
+      "hour": 13,
+      "type": "embedding",
+      "envelopeId": "ENV-001",
+      "severity": "info",
+      "label": "Decision pattern embedded",
+      "detail": "Refund boundary violation pattern stored for similar case matching.",
+      "actorRole": "Customer Steward",
+      "embeddingId": "EMB-DEF-002",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:12_55:ENV-001:7",
+      "semanticContext": "refund over $100 blocked decision pattern with escalation trigger",
+      "semanticVector": [0.85, 0.80]
+    },
+    {
+      "eventId": "embedding:14:ENV-001:27",
+      "hour": 14,
+      "type": "embedding",
+      "envelopeId": "ENV-001",
+      "severity": "info",
+      "label": "Boundary interaction embedded",
+      "detail": "Refund boundary escalation pattern stored for future boundary enforcement.",
+      "actorRole": "Customer Steward",
+      "embeddingId": "EMB-DEF-003",
+      "embeddingType": "boundary_interaction",
+      "vectorDimensions": 768,
+      "sourceEventId": "BI-ENV-001-001",
+      "semanticContext": "customer refund human-review boundary trigger and escalation",
+      "semanticVector": [0.90, 0.85]
+    },
+    {
+      "eventId": "embedding:15:ENV-001:28",
+      "hour": 15,
+      "type": "embedding",
+      "envelopeId": "ENV-001",
+      "severity": "info",
+      "label": "Revision embedded",
+      "detail": "Refund escalation policy revision stored with rationale.",
+      "actorRole": "Customer Steward",
+      "embeddingId": "EMB-DEF-004",
+      "embeddingType": "revision",
+      "vectorDimensions": 768,
+      "sourceEventId": "revision:13_1:ENV-001:9",
+      "semanticContext": "refund escalation evidence packet requirements policy update",
+      "semanticVector": [0.20, 0.75]
+    },
+    {
+      "eventId": "embedding:17:ENV-003:29",
+      "hour": 17,
+      "type": "embedding",
+      "envelopeId": "ENV-003",
+      "severity": "info",
+      "label": "Signal embedded",
+      "detail": "Discount pressure signal stored for forecasting patterns.",
+      "actorRole": "Sales Steward",
+      "embeddingId": "EMB-DEF-005",
+      "embeddingType": "signal",
+      "vectorDimensions": 768,
+      "sourceEventId": "signal:16_2:ENV-003:10",
+      "semanticContext": "sales discount pressure signal for pipeline risk assessment",
+      "semanticVector": [0.70, 0.30]
+    },
+    {
+      "eventId": "embedding:18:ENV-003:30",
+      "hour": 18,
+      "type": "embedding",
+      "envelopeId": "ENV-003",
+      "severity": "info",
+      "label": "Decision embedded",
+      "detail": "Discount boundary violation pattern stored for policy enforcement.",
+      "actorRole": "Sales Steward",
+      "embeddingId": "EMB-DEF-006",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:16_35:ENV-003:11",
+      "semanticContext": "discount over 15% blocked decision pattern with steward escalation",
+      "semanticVector": [0.82, 0.78]
+    },
+    {
+      "eventId": "embedding:19:ENV-003:31",
+      "hour": 19,
+      "type": "embedding",
+      "envelopeId": "ENV-003",
+      "severity": "info",
+      "label": "Boundary interaction embedded",
+      "detail": "Discount boundary escalation stored for similar deal matching.",
+      "actorRole": "Sales Steward",
+      "embeddingId": "EMB-DEF-007",
+      "embeddingType": "boundary_interaction",
+      "vectorDimensions": 768,
+      "sourceEventId": "BI-ENV-003-001",
+      "semanticContext": "sales discount boundary touched and steward escalation workflow",
+      "semanticVector": [0.88, 0.82]
+    },
+    {
+      "eventId": "embedding:21:ENV-004:32",
+      "hour": 21,
+      "type": "embedding",
+      "envelopeId": "ENV-004",
+      "severity": "info",
+      "label": "Signal embedded",
+      "detail": "Schema drift signal stored for data quality monitoring.",
+      "actorRole": "Data Steward",
+      "embeddingId": "EMB-DEF-008",
+      "embeddingType": "signal",
+      "vectorDimensions": 768,
+      "sourceEventId": "signal:20:ENV-004:14",
+      "semanticContext": "database schema drift detection signal for contract validation",
+      "semanticVector": [0.30, 0.35]
+    },
+    {
+      "eventId": "embedding:22:ENV-004:33",
+      "hour": 22,
+      "type": "embedding",
+      "envelopeId": "ENV-004",
+      "severity": "info",
+      "label": "Decision embedded",
+      "detail": "Schema contract validation decision stored for future checks.",
+      "actorRole": "Data Steward",
+      "embeddingId": "EMB-DEF-009",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:20_25:ENV-004:15",
+      "semanticContext": "schema change validation against approved contract pattern",
+      "semanticVector": [0.65, 0.40]
+    },
+    {
+      "eventId": "embedding:23:ENV-004:34",
+      "hour": 23,
+      "type": "embedding",
+      "envelopeId": "ENV-004",
+      "severity": "info",
+      "label": "Revision embedded",
+      "detail": "Schema contract revision stored with rationale and constraints.",
+      "actorRole": "Data Steward",
+      "embeddingId": "EMB-DEF-010",
+      "embeddingType": "revision",
+      "vectorDimensions": 768,
+      "sourceEventId": "revision:20_8:ENV-004:16",
+      "semanticContext": "schema contract update with versioned migration requirements",
+      "semanticVector": [0.25, 0.70]
+    },
+    {
+      "eventId": "embedding:35:ENV-002:35",
+      "hour": 35,
+      "type": "embedding",
+      "envelopeId": "ENV-002",
+      "severity": "info",
+      "label": "Signal embedded",
+      "detail": "Candidate score drift signal stored for fairness monitoring.",
+      "actorRole": "HR Steward",
+      "embeddingId": "EMB-DEF-011",
+      "embeddingType": "signal",
+      "vectorDimensions": 768,
+      "sourceEventId": "signal:34:ENV-002:17",
+      "semanticContext": "hiring candidate score drift detection for bias monitoring",
+      "semanticVector": [0.25, 0.30]
+    },
+    {
+      "eventId": "embedding:36:ENV-002:36",
+      "hour": 36,
+      "type": "embedding",
+      "envelopeId": "ENV-002",
+      "severity": "info",
+      "label": "Decision embedded",
+      "detail": "Transparency packet compilation decision stored for future reference.",
+      "actorRole": "HR Steward",
+      "embeddingId": "EMB-DEF-012",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:34_2:ENV-002:18",
+      "semanticContext": "hiring transparency packet compilation pattern for candidate review",
+      "semanticVector": [0.60, 0.35]
+    },
+    {
+      "eventId": "embedding:40:ENV-002:37",
+      "hour": 40,
+      "type": "embedding",
+      "envelopeId": "ENV-002",
+      "severity": "info",
+      "label": "Session artifact embedded",
+      "detail": "DSG session decisions and calibration patterns stored.",
+      "actorRole": "HR Steward",
+      "embeddingId": "EMB-DEF-013",
+      "embeddingType": "session_artifact",
+      "vectorDimensions": 768,
+      "sourceEventId": "dsg_session:39:ENV-002:20",
+      "semanticContext": "DSG cross-domain fairness review session decisions and precedents",
+      "semanticVector": [0.15, 0.90]
+    },
+    {
+      "eventId": "embedding:41:ENV-002:38",
+      "hour": 41,
+      "type": "embedding",
+      "envelopeId": "ENV-002",
+      "severity": "info",
+      "label": "Revision embedded",
+      "detail": "Feature allow-list tightening revision stored for policy enforcement.",
+      "actorRole": "HR Steward",
+      "embeddingId": "EMB-DEF-014",
+      "embeddingType": "revision",
+      "vectorDimensions": 768,
+      "sourceEventId": "revision:39_6:ENV-002:22",
+      "semanticContext": "hiring feature allow-list tightening for proxy inference prevention",
+      "semanticVector": [0.18, 0.85]
+    },
+    {
+      "eventId": "signal:40:ENV-002:24",
+      "hour": 40,
+      "type": "signal",
+      "envelopeId": "ENV-002",
+      "severity": "warning",
+      "label": "Assumption mismatch",
+      "detail": "Signal references a feature not explicitly covered by the envelope assumptions.",
+      "signalKey": "assumption_mismatch",
+      "value": 0.25,
+      "assumptionRefs": [
+        "Feature allow-list includes candidate location proxy"
+      ],
+      "nextAssumptions": [],
+      "nextConstraints": [],
+      "boundary_refs": [],
+      "involvedEnvelopeIds": [],
+      "impactSummary": [],
+      "resolutionPolicy": [],
+      "artifactOutput": []
+    }
+  ]
+}

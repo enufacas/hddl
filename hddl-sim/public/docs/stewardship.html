@@ -1,0 +1,662 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>HDDL Stewardship — Process View</title>
+
+    <!--
+      Standalone page for local preview + GitHub Pages publishing.
+      Served as a static asset at /stewardship.html.
+    -->
+    <link rel="stylesheet" href="stylesheets/diagrams.css" />
+    <style>
+      :root {
+        color-scheme: light;
+      }
+
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial;
+        line-height: 1.5;
+        color: #0f172a;
+        background: #ffffff;
+      }
+
+      .page {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 24px 16px 56px;
+      }
+
+      header {
+        margin-bottom: 16px;
+      }
+
+      h1 {
+        font-size: 24px;
+        margin: 0 0 6px 0;
+      }
+
+      .sub {
+        margin: 0;
+        color: rgba(15, 23, 42, 0.75);
+        font-size: 14px;
+      }
+
+      .divider {
+        height: 1px;
+        background: rgba(0, 0, 0, 0.08);
+        margin: 18px 0;
+      }
+
+      .hint {
+        margin-top: 14px;
+        font-size: 13px;
+        color: rgba(15, 23, 42, 0.75);
+      }
+
+      code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        font-size: 0.95em;
+      }
+
+      /* Stewardship Diagram Styles */
+      .stewardship-diagram {
+        --md-default-bg-color: #ffffff;
+        --md-code-bg-color: rgba(0, 0, 0, 0.03);
+        --md-default-fg-color--lightest: rgba(0, 0, 0, 0.12);
+        border: 1px solid var(--md-default-fg-color--lightest);
+        border-radius: 16px;
+        padding: 24px;
+        background: linear-gradient(to bottom, var(--md-default-bg-color), var(--md-code-bg-color));
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      }
+
+      .stewardship-diagram__header {
+        text-align: center;
+        margin-bottom: 32px;
+      }
+
+      .stewardship-diagram__title {
+        font-weight: 700;
+        font-size: 1.5em;
+        margin: 0 0 8px 0;
+      }
+
+      .stewardship-diagram__subtitle {
+        margin: 0;
+        font-size: 0.95em;
+        opacity: 0.7;
+      }
+
+      /* Flow Layout */
+      .stewardship-flow {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        gap: 32px;
+        align-items: start;
+        margin-bottom: 32px;
+        position: relative;
+      }
+
+      @media (max-width: 1024px) {
+        .stewardship-flow {
+          grid-template-columns: 1fr;
+          gap: 24px;
+        }
+      }
+
+      /* Column Containers */
+      .flow-column {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .flow-column__header {
+        text-align: center;
+        margin-bottom: 8px;
+      }
+
+      .flow-column__title {
+        font-weight: 700;
+        font-size: 1.1em;
+        margin: 0 0 4px 0;
+      }
+
+      .flow-column__badge {
+        display: inline-block;
+        padding: 4px 12px;
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: 6px;
+        font-size: 0.75em;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      /* Flow Connector */
+      .flow-connector {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        padding: 20px 0;
+        min-width: 100px;
+      }
+
+      .flow-connector__arrow {
+        font-size: 2em;
+        color: rgba(139, 92, 246, 0.6);
+        animation: pulse 2s ease-in-out infinite;
+      }
+
+      @keyframes pulse {
+        0%, 100% { opacity: 0.6; transform: scale(1); }
+        50% { opacity: 1; transform: scale(1.1); }
+      }
+
+      .flow-connector__label {
+        writing-mode: vertical-rl;
+        text-orientation: mixed;
+        font-weight: 650;
+        font-size: 0.85em;
+        color: rgba(139, 92, 246, 0.8);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      @media (max-width: 1024px) {
+        .flow-connector {
+          flex-direction: row;
+          padding: 0;
+          min-width: auto;
+        }
+
+        .flow-connector__arrow {
+          transform: rotate(90deg);
+        }
+
+        .flow-connector__label {
+          writing-mode: horizontal-tb;
+        }
+      }
+
+      /* Steward Group Box */
+      .steward-group {
+        background: var(--md-default-bg-color, #fff);
+        border: 2px solid;
+        border-radius: 12px;
+        padding: 18px;
+        position: relative;
+        transition: all 0.3s ease;
+      }
+
+      .steward-group:hover {
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+      }
+
+      .steward-group--domain {
+        border-color: rgba(59, 130, 246, 0.5);
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.02), var(--md-default-bg-color, #fff));
+      }
+
+      .steward-group--dsg {
+        border-color: rgba(139, 92, 246, 0.5);
+        background: linear-gradient(135deg, rgba(139, 92, 246, 0.02), var(--md-default-bg-color, #fff));
+      }
+
+      .steward-group__icon {
+        font-size: 2em;
+        margin-bottom: 8px;
+        display: block;
+      }
+
+      .steward-group__title {
+        font-weight: 700;
+        font-size: 1.05em;
+        margin: 0 0 12px 0;
+      }
+
+      /* Steward Roles Compact */
+      .steward-roles-compact {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+
+      .steward-role-compact {
+        padding: 8px 10px;
+        background: rgba(59, 130, 246, 0.06);
+        border-radius: 6px;
+        border-left: 3px solid rgba(59, 130, 246, 0.4);
+        font-size: 0.88em;
+        font-weight: 600;
+        transition: all 0.2s ease;
+      }
+
+      .steward-role-compact:hover {
+        background: rgba(59, 130, 246, 0.12);
+        border-left-color: rgba(59, 130, 246, 0.7);
+        transform: translateX(4px);
+      }
+
+      /* Responsibilities Compact */
+      .responsibilities-compact {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .responsibility-compact {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        font-size: 0.88em;
+      }
+
+      .responsibility-compact__icon {
+        font-size: 1.1em;
+        line-height: 1;
+        margin-top: 2px;
+        flex-shrink: 0;
+      }
+
+      .responsibility-compact__text {
+        line-height: 1.4;
+      }
+
+      .responsibility-compact__title {
+        font-weight: 650;
+        display: block;
+        margin-bottom: 2px;
+      }
+
+      .responsibility-compact__desc {
+        opacity: 0.75;
+        font-size: 0.95em;
+      }
+
+      /* Shared Practices Grid */
+      .shared-practices {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 14px;
+        margin-top: 20px;
+        padding: 18px;
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.03), transparent);
+        border-radius: 12px;
+        border: 2px dashed rgba(16, 185, 129, 0.3);
+      }
+
+      .shared-practices__header {
+        grid-column: 1 / -1;
+        text-align: center;
+        font-weight: 700;
+        font-size: 1em;
+        margin-bottom: 4px;
+        color: rgba(16, 185, 129, 0.9);
+      }
+
+      .shared-practice {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 12px;
+        background: var(--md-default-bg-color, #fff);
+        border-radius: 8px;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+        font-size: 0.85em;
+        font-weight: 600;
+      }
+
+      .shared-practice__icon {
+        font-size: 1.2em;
+      }
+
+      @media (max-width: 768px) {
+        .shared-practices {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* Interaction Flows - Simplified */
+      .interaction-flows {
+        background: var(--md-code-bg-color, rgba(0, 0, 0, 0.03));
+        border-radius: 12px;
+        padding: 20px;
+        margin-top: 24px;
+      }
+
+      .interaction-flows__title {
+        font-weight: 700;
+        font-size: 1em;
+        margin: 0 0 16px 0;
+        text-align: center;
+      }
+
+      .flows-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 12px;
+      }
+
+      .flow-card {
+        background: var(--md-default-bg-color, #fff);
+        border-radius: 8px;
+        padding: 12px;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        font-size: 0.88em;
+      }
+
+      .flow-card__header {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 6px;
+        font-weight: 650;
+        font-size: 0.95em;
+      }
+
+      .flow-card__arrow {
+        color: rgba(139, 92, 246, 0.7);
+        font-weight: 700;
+      }
+
+      .flow-card__desc {
+        opacity: 0.8;
+        margin: 0;
+        line-height: 1.4;
+      }
+
+      /* Legend */
+      .legend {
+        display: flex;
+        justify-content: center;
+        gap: 24px;
+        flex-wrap: wrap;
+        margin-top: 24px;
+        padding-top: 20px;
+        border-top: 1px solid rgba(0, 0, 0, 0.08);
+      }
+
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.88em;
+      }
+
+      .legend-item__color {
+        width: 20px;
+        height: 20px;
+        border-radius: 4px;
+        border: 2px solid;
+      }
+
+      .legend-item__color--domain {
+        border-color: rgba(59, 130, 246, 0.6);
+        background: rgba(59, 130, 246, 0.1);
+      }
+
+      .legend-item__color--cross {
+        border-color: rgba(139, 92, 246, 0.6);
+        background: rgba(139, 92, 246, 0.1);
+      }
+
+      .legend-item__color--shared {
+        border-color: rgba(16, 185, 129, 0.6);
+        background: rgba(16, 185, 129, 0.1);
+      }
+
+      @media (max-width: 768px) {
+        .steward-roles {
+          grid-template-columns: 1fr;
+        }
+
+        .flows-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="page">
+      <header>
+        <h1>HDDL Stewardship (Process View)</h1>
+        <p class="sub">Escalation/resolution loop and shared practices (4+1: Process view).</p>
+      </header>
+
+      <div class="stewardship-diagram" role="group" aria-label="HDDL stewardship relationships diagram">
+        <div class="stewardship-diagram__header">
+          <h2 class="stewardship-diagram__title">Stewardship Model</h2>
+          <p class="stewardship-diagram__subtitle">How decision authority is organized, shared, and escalated</p>
+        </div>
+
+        <div class="stewardship-flow">
+          <!-- Left Column: Domain Stewards -->
+          <div class="flow-column">
+            <div class="flow-column__header">
+              <h3 class="flow-column__title">Domain Stewards</h3>
+              <span class="flow-column__badge">Domain-Scoped Authority</span>
+            </div>
+
+            <div class="steward-group steward-group--domain">
+              <span class="steward-group__icon">👤</span>
+              <h4 class="steward-group__title">Steward Roles</h4>
+              <div class="steward-roles-compact">
+                <div class="steward-role-compact">Business Domain Steward</div>
+                <div class="steward-role-compact">Engineering Steward</div>
+                <div class="steward-role-compact">Data Steward</div>
+                <div class="steward-role-compact">Sales Steward</div>
+                <div class="steward-role-compact">HR Steward</div>
+                <div class="steward-role-compact">Resiliency Steward</div>
+              </div>
+            </div>
+
+            <div class="steward-group steward-group--domain">
+              <span class="steward-group__icon">⚙️</span>
+              <h4 class="steward-group__title">Domain Responsibilities</h4>
+              <div class="responsibilities-compact">
+                <div class="responsibility-compact">
+                  <span class="responsibility-compact__icon">📝</span>
+                  <div class="responsibility-compact__text">
+                    <span class="responsibility-compact__title">Own Envelopes</span>
+                    <span class="responsibility-compact__desc">Define & maintain decision boundaries</span>
+                  </div>
+                </div>
+                <div class="responsibility-compact">
+                  <span class="responsibility-compact__icon">⚖️</span>
+                  <div class="responsibility-compact__text">
+                    <span class="responsibility-compact__title">Calibrate</span>
+                    <span class="responsibility-compact__desc">Routine adjustments within bounds</span>
+                  </div>
+                </div>
+                <div class="responsibility-compact">
+                  <span class="responsibility-compact__icon">👁️</span>
+                  <div class="responsibility-compact__text">
+                    <span class="responsibility-compact__title">Monitor</span>
+                    <span class="responsibility-compact__desc">Track quality & outcomes</span>
+                  </div>
+                </div>
+                <div class="responsibility-compact">
+                  <span class="responsibility-compact__icon">🔄</span>
+                  <div class="responsibility-compact__text">
+                    <span class="responsibility-compact__title">Succession</span>
+                    <span class="responsibility-compact__desc">Ensure continuity</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Center: Flow Connector -->
+          <div class="flow-connector">
+            <div class="flow-connector__arrow">→</div>
+            <div class="flow-connector__label">Escalate</div>
+            <div class="flow-connector__arrow">←</div>
+            <div class="flow-connector__label">Resolve</div>
+          </div>
+
+          <!-- Right Column: DSG -->
+          <div class="flow-column">
+            <div class="flow-column__header">
+              <h3 class="flow-column__title">Decision Stewardship Group</h3>
+              <span class="flow-column__badge">Cross-Domain Only</span>
+            </div>
+
+            <div class="steward-group steward-group--dsg">
+              <span class="steward-group__icon">🔀</span>
+              <h4 class="steward-group__title">When DSG Engages</h4>
+              <div class="responsibilities-compact">
+                <div class="responsibility-compact">
+                  <span class="responsibility-compact__icon">⚔️</span>
+                  <div class="responsibility-compact__text">
+                    <span class="responsibility-compact__title">Boundary Conflicts</span>
+                    <span class="responsibility-compact__desc">Envelopes overlap or collide</span>
+                  </div>
+                </div>
+                <div class="responsibility-compact">
+                  <span class="responsibility-compact__icon">❓</span>
+                  <div class="responsibility-compact__text">
+                    <span class="responsibility-compact__title">Unclear Authority</span>
+                    <span class="responsibility-compact__desc">Ownership is contested</span>
+                  </div>
+                </div>
+                <div class="responsibility-compact">
+                  <span class="responsibility-compact__icon">🌐</span>
+                  <div class="responsibility-compact__text">
+                    <span class="responsibility-compact__title">Cross-Domain Tradeoffs</span>
+                    <span class="responsibility-compact__desc">Impacts multiple domains</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="steward-group steward-group--dsg">
+              <span class="steward-group__icon">📄</span>
+              <h4 class="steward-group__title">DSG Outputs</h4>
+              <div class="responsibilities-compact">
+                <div class="responsibility-compact">
+                  <span class="responsibility-compact__icon">✅</span>
+                  <div class="responsibility-compact__text">
+                    <span class="responsibility-compact__title">Envelope Revisions</span>
+                    <span class="responsibility-compact__desc">Updated boundary artifacts</span>
+                  </div>
+                </div>
+                <div class="responsibility-compact">
+                  <span class="responsibility-compact__icon">🎯</span>
+                  <div class="responsibility-compact__text">
+                    <span class="responsibility-compact__title">Authority Clarification</span>
+                    <span class="responsibility-compact__desc">Clear ownership determination</span>
+                  </div>
+                </div>
+                <div class="responsibility-compact">
+                  <span class="responsibility-compact__icon">🚫</span>
+                  <div class="responsibility-compact__text">
+                    <span class="responsibility-compact__title">Not a Gate</span>
+                    <span class="responsibility-compact__desc">No routine approval required</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Shared Practices Below -->
+        <div class="shared-practices">
+          <div class="shared-practices__header">🤝 Shared Stewardship Practices (All Roles)</div>
+          <div class="shared-practice">
+            <span class="shared-practice__icon">📊</span>
+            <span>Decision Telemetry Review</span>
+          </div>
+          <div class="shared-practice">
+            <span class="shared-practice__icon">📚</span>
+            <span>Decision Memory Curation</span>
+          </div>
+          <div class="shared-practice">
+            <span class="shared-practice__icon">🔍</span>
+            <span>Continuous Inspection</span>
+          </div>
+          <div class="shared-practice">
+            <span class="shared-practice__icon">⬆️</span>
+            <span>Escalation Protocol</span>
+          </div>
+        </div>
+
+        <!-- Interaction Flows -->
+        <div class="interaction-flows">
+          <h3 class="interaction-flows__title">Common Interaction Patterns</h3>
+          <div class="flows-grid">
+            <div class="flow-card">
+              <div class="flow-card__header">
+                <span>Domain</span>
+                <span class="flow-card__arrow">↔</span>
+                <span>Domain</span>
+              </div>
+              <p class="flow-card__desc">
+                Collaborate directly; escalate to DSG only for conflicts
+              </p>
+            </div>
+
+            <div class="flow-card">
+              <div class="flow-card__header">
+                <span>Domain</span>
+                <span class="flow-card__arrow">→</span>
+                <span>DSG</span>
+              </div>
+              <p class="flow-card__desc">
+                Escalate boundary collisions or unclear authority
+              </p>
+            </div>
+
+            <div class="flow-card">
+              <div class="flow-card__header">
+                <span>DSG</span>
+                <span class="flow-card__arrow">→</span>
+                <span>Domain</span>
+              </div>
+              <p class="flow-card__desc">
+                Return revised envelopes and clarifications
+              </p>
+            </div>
+
+            <div class="flow-card">
+              <div class="flow-card__header">
+                <span>Resiliency</span>
+                <span class="flow-card__arrow">→</span>
+                <span>DSG</span>
+              </div>
+              <p class="flow-card__desc">
+                Escalate cross-domain degradation
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Legend -->
+        <div class="legend">
+          <div class="legend-item">
+            <span class="legend-item__color legend-item__color--domain"></span>
+            <span>Domain-Scoped (within boundaries)</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-item__color legend-item__color--cross"></span>
+            <span>Cross-Domain (arbitration only)</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-item__color legend-item__color--shared"></span>
+            <span>Shared Practices (all stewards)</span>
+          </div>
+        </div>
+      </div>
+
+      <p class="hint">Tip: For best preview fidelity, view via a local static server rather than opening this file directly.</p>
+    </div>
+  </body>
+</html>
