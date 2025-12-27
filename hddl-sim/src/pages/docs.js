@@ -1,7 +1,10 @@
 async function loadMarkdown(path) {
   try {
-    const response = await fetch(path);
-    if (!response.ok) throw new Error(`Failed to load ${path}`);
+    // Use BASE_URL to handle both development (/) and production (/hddl/) base paths
+    const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, ''); // Remove trailing slash
+    const fullPath = path.startsWith('/') ? `${baseUrl}${path}` : path;
+    const response = await fetch(fullPath);
+    if (!response.ok) throw new Error(`Failed to load ${fullPath}`);
     return await response.text();
   } catch (err) {
     console.error('Error loading markdown:', err);
