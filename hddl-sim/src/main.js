@@ -30,17 +30,6 @@ titleLeft.appendChild(titleText)
 const titleRight = document.createElement('div')
 titleRight.style.cssText = 'display: flex; align-items: center; gap: 4px;'
 
-// Add specification explorer button
-const specBtn = document.createElement('a')
-specBtn.className = 'title-actions-button'
-specBtn.setAttribute('role', 'button')
-specBtn.setAttribute('aria-label', 'Explore HDDL Specification')
-specBtn.title = 'Explore HDDL Specification'
-specBtn.style.cssText = 'cursor: pointer; padding: 4px 8px; display: flex; align-items: center; gap: 6px;'
-specBtn.innerHTML = '<span class="codicon codicon-json"></span><span>Explore Specification</span>'
-specBtn.addEventListener('click', () => navigateTo('/specification'))
-titleRight.appendChild(specBtn)
-
 const refreshBtn = document.createElement('a')
 refreshBtn.className = 'codicon codicon-refresh'
 refreshBtn.setAttribute('role', 'button')
