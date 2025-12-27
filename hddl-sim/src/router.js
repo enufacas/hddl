@@ -80,8 +80,6 @@ function normalizePath(pathname) {
   if (base !== '/' && noQuery.startsWith(base)) {
     // Remove base path, keeping the leading slash
     noQuery = '/' + noQuery.slice(base.length)
-    // Handle edge case where path equals base exactly (e.g., /hddl/ -> /)
-    if (noQuery === '/' || noQuery === '') noQuery = '/'
   }
   
   if (noQuery.length > 1 && noQuery.endsWith('/')) return noQuery.slice(0, -1)
