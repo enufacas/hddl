@@ -31,7 +31,7 @@
       "domain": "Navigation",
       "ownerRole": "Operations Steward",
       "createdHour": 0,
-      "endHour": 96,
+      "endHour": 36,
       "accent": "var(--vscode-charts-blue)",
       "envelope_version": 2,
       "revision_id": "REV-AV-002-B",
@@ -52,7 +52,7 @@
       "domain": "User Experience",
       "ownerRole": "UX Steward",
       "createdHour": 12,
-      "endHour": 84,
+      "endHour": 48,
       "accent": "var(--vscode-charts-green)",
       "envelope_version": 1,
       "revision_id": null,
@@ -73,10 +73,73 @@
       "domain": "Vehicle Health",
       "ownerRole": "Engineering Steward",
       "createdHour": 24,
-      "endHour": 96,
+      "endHour": 48,
       "accent": "var(--vscode-charts-purple)",
       "envelope_version": 1,
       "revision_id": null,
+      "assumptions": [
+        "Predictive maintenance reduces unexpected failures by 85%.",
+        "Safety-critical components have redundant monitoring.",
+        "Vehicles self-report to service depot when thresholds are crossed."
+      ],
+      "constraints": [
+        "Ground vehicles immediately on safety-critical faults",
+        "Schedule maintenance before reaching warning thresholds",
+        "Require human inspection for sensor degradation"
+      ]
+    },
+    {
+      "envelopeId": "ENV-AV-002",
+      "name": "Route Optimization",
+      "domain": "Navigation",
+      "ownerRole": "Operations Steward",
+      "createdHour": 60,
+      "endHour": 96,
+      "accent": "var(--vscode-charts-blue)",
+      "envelope_version": 3,
+      "revision_id": "ENV-AV-002-v3",
+      "assumptions": [
+        "Route optimization balances time, fuel efficiency, and safety.",
+        "Residential area traffic is weighted to minimize community impact.",
+        "Real-time traffic data is reliable and updated every 30 seconds."
+      ],
+      "constraints": [
+        "Avoid school zones during arrival/dismissal times",
+        "Respect community-defined slow zones",
+        "Never route through emergency-restricted areas"
+      ]
+    },
+    {
+      "envelopeId": "ENV-AV-003",
+      "name": "Passenger Comfort & Accessibility",
+      "domain": "User Experience",
+      "ownerRole": "UX Steward",
+      "createdHour": 60,
+      "endHour": 84,
+      "accent": "var(--vscode-charts-green)",
+      "envelope_version": 2,
+      "revision_id": "ENV-AV-003-v2",
+      "assumptions": [
+        "Accessibility needs are explicitly provided or inferred from booking.",
+        "Comfort preferences do not override safety protocols.",
+        "Multi-passenger rides require consent for route sharing."
+      ],
+      "constraints": [
+        "Safety always overrides comfort preferences",
+        "Accessibility accommodations are mandatory",
+        "Privacy: no audio/video recording without explicit consent"
+      ]
+    },
+    {
+      "envelopeId": "ENV-AV-004",
+      "name": "Fleet Maintenance Scheduling",
+      "domain": "Vehicle Health",
+      "ownerRole": "Engineering Steward",
+      "createdHour": 72,
+      "endHour": 96,
+      "accent": "var(--vscode-charts-purple)",
+      "envelope_version": 2,
+      "revision_id": "ENV-AV-004-v2",
       "assumptions": [
         "Predictive maintenance reduces unexpected failures by 85%.",
         "Safety-critical components have redundant monitoring.",

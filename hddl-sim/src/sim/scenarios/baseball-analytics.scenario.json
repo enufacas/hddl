@@ -10,7 +10,7 @@
       "domain": "Performance Analytics",
       "ownerRole": "Performance Steward",
       "createdHour": 0,
-      "endHour": 168,
+      "endHour": 84,
       "accent": "var(--vscode-charts-blue)",
       "envelope_version": 1,
       "revision_id": null,
@@ -31,7 +31,7 @@
       "domain": "Game Strategy",
       "ownerRole": "Strategy Steward",
       "createdHour": 0,
-      "endHour": 168,
+      "endHour": 120,
       "accent": "var(--vscode-charts-orange)",
       "envelope_version": 2,
       "revision_id": "REV-BB-002-B",
@@ -73,10 +73,73 @@
       "domain": "Roster Management",
       "ownerRole": "Roster Steward",
       "createdHour": 0,
-      "endHour": 168,
+      "endHour": 60,
       "accent": "var(--vscode-charts-green)",
       "envelope_version": 3,
       "revision_id": "REV-BB-004-C",
+      "assumptions": [
+        "Trade value models consider contract, age, performance, and positional scarcity.",
+        "Prospect projections based on minor league performance and scouting reports.",
+        "Roster optimization balances win-now vs. long-term competitive windows."
+      ],
+      "constraints": [
+        "Trade recommendations must fit within salary cap constraints",
+        "Never recommend trading away controllable young talent without GM approval",
+        "40-man roster and option limits enforced in all roster suggestions"
+      ]
+    },
+    {
+      "envelopeId": "ENV-BB-001",
+      "name": "Player Performance Analysis",
+      "domain": "Performance Analytics",
+      "ownerRole": "Performance Steward",
+      "createdHour": 144,
+      "endHour": 168,
+      "accent": "var(--vscode-charts-blue)",
+      "envelope_version": 2,
+      "revision_id": "ENV-BB-001-v2",
+      "assumptions": [
+        "Performance models trained on Statcast data and historical player metrics.",
+        "Analysis considers both traditional stats and advanced metrics (xwOBA, barrel rate, sprint speed).",
+        "Recommendations balance current performance with projected development curves."
+      ],
+      "constraints": [
+        "Never recommend roster moves based solely on small sample sizes (<50 PA/IP)",
+        "Performance projections must include confidence intervals",
+        "Age and injury history factored into long-term recommendations"
+      ]
+    },
+    {
+      "envelopeId": "ENV-BB-002",
+      "name": "In-Game Strategy & Lineup Optimization",
+      "domain": "Game Strategy",
+      "ownerRole": "Strategy Steward",
+      "createdHour": 144,
+      "endHour": 168,
+      "accent": "var(--vscode-charts-orange)",
+      "envelope_version": 3,
+      "revision_id": "ENV-BB-002-v3",
+      "assumptions": [
+        "Lineup optimization maximizes run expectancy based on matchup data.",
+        "Bullpen usage balances win probability with pitcher rest requirements.",
+        "Real-time strategy adjustments react to game state and opposing decisions."
+      ],
+      "constraints": [
+        "Never suggest overusing relievers — max 3 appearances in 5 days",
+        "Starting pitcher recommendations respect pitch count limits (100 pitches typical)",
+        "Defensive shifts must account for runner-on-base scenarios"
+      ]
+    },
+    {
+      "envelopeId": "ENV-BB-004",
+      "name": "Roster Construction & Trade Analysis",
+      "domain": "Roster Management",
+      "ownerRole": "Roster Steward",
+      "createdHour": 140,
+      "endHour": 168,
+      "accent": "var(--vscode-charts-green)",
+      "envelope_version": 4,
+      "revision_id": "ENV-BB-004-v4",
       "assumptions": [
         "Trade value models consider contract, age, performance, and positional scarcity.",
         "Prospect projections based on minor league performance and scouting reports.",

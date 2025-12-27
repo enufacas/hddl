@@ -1,4 +1,5 @@
 import './style-workspace.css'
+import 'intro.js/introjs.css'
 import { initRouter, navigateTo } from './router'
 import { createWorkspace } from './components/workspace'
 import { createScenarioSelector } from './components/scenario-selector'
@@ -192,7 +193,18 @@ const scrubberFill = document.createElement('div')
 scrubberFill.style.cssText = `width: ${(currentTime / initialDuration) * 100}%; height: 100%; background: var(--status-info); opacity: 0.3; pointer-events: none; position: relative; z-index: 0;`
 
 const scrubberHandle = document.createElement('div')
-scrubberHandle.style.cssText = `position: absolute; left: ${(currentTime / initialDuration) * 100}%; top: -2px; width: 3px; height: 28px; background: var(--status-info); cursor: ew-resize; z-index: 6;`
+scrubberHandle.style.cssText = `position: absolute; left: ${(currentTime / initialDuration) * 100}%; top: -4px; width: 16px; height: 32px; background: var(--status-info); border: 2px solid var(--vscode-editor-background); border-radius: 4px; cursor: ew-resize; z-index: 6; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4); transform: translateX(-50%); transition: transform 0.1s ease; will-change: transform;`
+scrubberHandle.setAttribute('title', 'Drag to scrub timeline')
+
+// Add hover effect
+scrubberHandle.addEventListener('mouseenter', () => {
+  scrubberHandle.style.transform = 'translateX(-50%) scale(1.1)'
+  scrubberHandle.style.boxShadow = '0 2px 12px rgba(75, 150, 255, 0.6)'
+})
+scrubberHandle.addEventListener('mouseleave', () => {
+  scrubberHandle.style.transform = 'translateX(-50%) scale(1)'
+  scrubberHandle.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.4)'
+})
 
 scrubberContainer.appendChild(envelopeSpans)
 scrubberContainer.appendChild(eventMarkers)

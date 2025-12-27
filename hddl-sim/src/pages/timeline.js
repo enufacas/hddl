@@ -89,10 +89,16 @@ function renderTimelineViz(container, scenario, timeHour) {
     return
   }
 
-  envelopes.sort((a, b) => (a.createdHour ?? 0) - (b.createdHour ?? 0))
+  // Get unique envelope IDs for y-axis (but render ALL envelope segments)
+  const uniqueEnvelopeIds = Array.from(new Set(envelopes.map(e => e.envelopeId)))
+  uniqueEnvelopeIds.sort((a, b) => {
+    const aFirst = envelopes.find(e => e.envelopeId === a)
+    const bFirst = envelopes.find(e => e.envelopeId === b)
+    return (aFirst?.createdHour ?? 0) - (bFirst?.createdHour ?? 0)
+  })
 
   const width = container.clientWidth || 900
-  const height = Math.max(220, envelopes.length * 32 + 70)
+  const height = Math.max(220, uniqueEnvelopeIds.length * 32 + 70)
   const margin = { top: 20, right: 30, bottom: 40, left: 120 }
 
   const svg = d3.select(container)
@@ -105,7 +111,7 @@ function renderTimelineViz(container, scenario, timeHour) {
     .range([margin.left, width - margin.right])
 
   const y = d3.scaleBand()
-    .domain(envelopes.map(e => e.envelopeId))
+    .domain(uniqueEnvelopeIds)
     .range([margin.top, height - margin.bottom])
     .padding(0.25)
 
@@ -114,15 +120,22 @@ function renderTimelineViz(container, scenario, timeHour) {
     .call(d3.axisBottom(x).ticks(Math.min(8, duration)).tickFormat(d => `${d}h`))
     .selectAll('text')
     .attr('fill', 'var(--vscode-statusBar-foreground)')
+  
+  svg.selectAll('.domain, .tick line')
+    .attr('stroke', 'var(--vscode-sideBar-border)')
 
   svg.append('g')
     .attr('transform', `translate(${margin.left},0)`)
     .call(d3.axisLeft(y))
     .selectAll('text')
     .attr('fill', 'var(--vscode-statusBar-foreground)')
+  
+  svg.selectAll('.domain, .tick line')
+    .attr('stroke', 'var(--vscode-sideBar-border)')
 
+  // Render ALL envelope segments (including reopened envelopes with same ID)
   svg.selectAll('.envelope-bar')
-    .data(envelopes)
+    .data(envelopes.map((env, idx) => ({ ...env, _index: idx })))
     .enter()
     .append('rect')
     .attr('class', 'envelope-bar')
@@ -133,6 +146,13 @@ function renderTimelineViz(container, scenario, timeHour) {
     .attr('fill', d => d.accent || 'var(--status-muted)')
     .attr('opacity', 0.7)
     .attr('rx', 3)
+    .append('title')
+    .text(d => {
+      const version = d.envelope_version || 1
+      const start = formatSimTime(d.createdHour ?? 0)
+      const end = formatSimTime(d.endHour ?? duration)
+      return `${d.envelopeId} v${version}\n${d.name}\n${start} → ${end}`
+    })
 
   const clampedTime = Math.max(0, Math.min(duration, timeHour))
   svg.append('line')

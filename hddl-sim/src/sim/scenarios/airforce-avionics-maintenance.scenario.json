@@ -10,7 +10,7 @@
       "domain": "Maintenance Operations",
       "ownerRole": "Maintenance Steward",
       "createdHour": 0,
-      "endHour": 336,
+      "endHour": 168,
       "accent": "var(--vscode-charts-blue)",
       "envelope_version": 2,
       "revision_id": "REV-AF-001-B",
@@ -31,7 +31,7 @@
       "domain": "Supply Operations",
       "ownerRole": "Supply Steward",
       "createdHour": 0,
-      "endHour": 336,
+      "endHour": 120,
       "accent": "var(--vscode-charts-orange)",
       "envelope_version": 1,
       "revision_id": null,
@@ -73,7 +73,7 @@
       "domain": "Operations Management",
       "ownerRole": "Operations Steward",
       "createdHour": 12,
-      "endHour": 324,
+      "endHour": 168,
       "accent": "var(--vscode-charts-green)",
       "envelope_version": 2,
       "revision_id": "REV-AF-004-B",
@@ -94,10 +94,136 @@
       "domain": "Personnel Development",
       "ownerRole": "Training Steward",
       "createdHour": 24,
-      "endHour": 312,
+      "endHour": 96,
       "accent": "var(--vscode-charts-purple)",
       "envelope_version": 1,
       "revision_id": null,
+      "assumptions": [
+        "Training models track skill progression for 5-level and 7-level technicians.",
+        "Certification renewals scheduled based on expiration dates and mission tempo.",
+        "Upgrade training integrated with operational work for hands-on experience."
+      ],
+      "constraints": [
+        "New technicians require minimum 40 hours supervised work before solo tasks",
+        "Critical system certifications expire after 12 months without refresher",
+        "Training cannot exceed 20% of available man-hours per month"
+      ]
+    },
+    {
+      "envelopeId": "ENV-AF-002",
+      "name": "Parts Supply Chain & Logistics",
+      "domain": "Supply Operations",
+      "ownerRole": "Supply Steward",
+      "createdHour": 168,
+      "endHour": 264,
+      "accent": "var(--vscode-charts-orange)",
+      "envelope_version": 2,
+      "revision_id": "ENV-AF-002-v2",
+      "assumptions": [
+        "Parts forecasting models predict demand based on Mean Time Between Failure (MTBF) data.",
+        "Critical parts (MICAP items) prioritized for expedited shipping.",
+        "Inventory optimization balances stock levels with budget constraints."
+      ],
+      "constraints": [
+        "MICAP (Mission Capable) parts require commander approval for emergency procurement",
+        "Shelf-life items tracked and cycled per manufacturer specifications",
+        "No cannibalization without Maintenance Operations Center (MOC) authorization"
+      ]
+    },
+    {
+      "envelopeId": "ENV-AF-005",
+      "name": "Technical Training & Readiness",
+      "domain": "Personnel Development",
+      "ownerRole": "Training Steward",
+      "createdHour": 168,
+      "endHour": 240,
+      "accent": "var(--vscode-charts-purple)",
+      "envelope_version": 2,
+      "revision_id": "ENV-AF-005-v2",
+      "assumptions": [
+        "Training models track skill progression for 5-level and 7-level technicians.",
+        "Certification renewals scheduled based on expiration dates and mission tempo.",
+        "Upgrade training integrated with operational work for hands-on experience."
+      ],
+      "constraints": [
+        "New technicians require minimum 40 hours supervised work before solo tasks",
+        "Critical system certifications expire after 12 months without refresher",
+        "Training cannot exceed 20% of available man-hours per month"
+      ]
+    },
+    {
+      "envelopeId": "ENV-AF-001",
+      "name": "Aircraft Avionics Readiness",
+      "domain": "Maintenance Operations",
+      "ownerRole": "Maintenance Steward",
+      "createdHour": 192,
+      "endHour": 336,
+      "accent": "var(--vscode-charts-blue)",
+      "envelope_version": 3,
+      "revision_id": "ENV-AF-001-v3",
+      "assumptions": [
+        "Diagnostic systems use ML-based fault detection on Line Replaceable Unit (LRU) test data.",
+        "Maintenance decisions prioritize mission-critical aircraft (Code 1 status).",
+        "Repair turnaround time targets: 72 hours for critical systems, 120 hours for non-critical."
+      ],
+      "constraints": [
+        "Never release LRU without passing all Technical Order (TO) test procedures",
+        "All repairs must maintain component traceability per AFI 21-101",
+        "Safety-critical components require dual verification before installation"
+      ]
+    },
+    {
+      "envelopeId": "ENV-AF-004",
+      "name": "Maintenance Scheduling & Workflow",
+      "domain": "Operations Management",
+      "ownerRole": "Operations Steward",
+      "createdHour": 192,
+      "endHour": 324,
+      "accent": "var(--vscode-charts-green)",
+      "envelope_version": 3,
+      "revision_id": "ENV-AF-004-v3",
+      "assumptions": [
+        "Scheduling AI optimizes technician assignments based on skill level and certification.",
+        "Workload balancing considers both backshop capacity and flight line demands.",
+        "Priority adjustments based on Aircraft Generation (ACG) surge requirements."
+      ],
+      "constraints": [
+        "Technicians limited to 60-hour workweek per labor agreements",
+        "Minimum 2 certified technicians required for avionics bay access",
+        "Weekend maintenance requires Maintenance Operations Officer (MOO) approval"
+      ]
+    },
+    {
+      "envelopeId": "ENV-AF-002",
+      "name": "Parts Supply Chain & Logistics",
+      "domain": "Supply Operations",
+      "ownerRole": "Supply Steward",
+      "createdHour": 288,
+      "endHour": 336,
+      "accent": "var(--vscode-charts-orange)",
+      "envelope_version": 3,
+      "revision_id": "ENV-AF-002-v3",
+      "assumptions": [
+        "Parts forecasting models predict demand based on Mean Time Between Failure (MTBF) data.",
+        "Critical parts (MICAP items) prioritized for expedited shipping.",
+        "Inventory optimization balances stock levels with budget constraints."
+      ],
+      "constraints": [
+        "MICAP (Mission Capable) parts require commander approval for emergency procurement",
+        "Shelf-life items tracked and cycled per manufacturer specifications",
+        "No cannibalization without Maintenance Operations Center (MOC) authorization"
+      ]
+    },
+    {
+      "envelopeId": "ENV-AF-005",
+      "name": "Technical Training & Readiness",
+      "domain": "Personnel Development",
+      "ownerRole": "Training Steward",
+      "createdHour": 288,
+      "endHour": 312,
+      "accent": "var(--vscode-charts-purple)",
+      "envelope_version": 3,
+      "revision_id": "ENV-AF-005-v3",
       "assumptions": [
         "Training models track skill progression for 5-level and 7-level technicians.",
         "Certification renewals scheduled based on expiration dates and mission tempo.",
