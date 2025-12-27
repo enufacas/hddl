@@ -2073,17 +2073,62 @@ export function createHDDLMap(container, options = {}) {
     const sourceX = sourceNode ? sourceNode.x : width / 2
     const sourceY = sourceNode ? sourceNode.y : mapHeight / 2
 
-    // Steward color mapping
+    // Steward color mapping - comprehensive across all scenarios
     const stewardColors = {
+      // Default scenario
       'Customer Steward': '#EC4899',
       'Customer Success Steward': '#EC4899',
       'HR Steward': '#A855F7',
       'Human Resources Steward': '#A855F7',
       'Sales Steward': '#F59E0B',
       'Data Steward': '#4B96FF',
+      
+      // Medical scenario
+      'Medical Steward': '#10B981',
+      'Pharmacy Steward': '#8B5CF6',
+      'Emergency Steward': '#EF4444',
+      
+      // Autonomous vehicles
+      'Safety Steward': '#EF4444',
+      'Engineering Steward': '#14B8A6',
+      'UX Steward': '#EC4899',
+      
+      // Financial lending
+      'Lending Steward': '#10B981',
+      'Risk Steward': '#F59E0B',
+      'Recovery Steward': '#EF4444',
+      'Compliance Steward': '#8B5CF6',
+      
+      // Database performance
       'Performance Steward': '#4B96FF',
       'Operations Steward': '#EF4444',
-      'Infrastructure Steward': '#14B8A6'
+      'Infrastructure Steward': '#14B8A6',
+      
+      // SaaS dashboarding
+      'Security Steward': '#F59E0B',
+      'Onboarding Steward': '#A855F7',
+      
+      // Insurance underwriting
+      'Underwriting Steward': '#10B981',
+      'Claims Steward': '#EC4899',
+      'Pricing Steward': '#F59E0B',
+      
+      // Baseball analytics
+      'Strategy Steward': '#10B981',
+      'Health Steward': '#EC4899',
+      'Roster Steward': '#8B5CF6',
+      
+      // Air Force avionics
+      'Maintenance Steward': '#3B82F6',
+      'Supply Steward': '#F59E0B',
+      'Training Steward': '#A855F7',
+      
+      // Vertical hydroponics farm
+      'Growth Steward': '#10B981',
+      'Environment Steward': '#4B96FF',
+      'Nutrition Steward': '#F59E0B',
+      'Harvest Steward': '#8B5CF6',
+      'Energy Steward': '#EAB308'
     }
     
     const embeddingColor = stewardColors[event.actorRole] || '#4B96FF'
@@ -2111,7 +2156,9 @@ export function createHDDLMap(container, options = {}) {
       // Use pre-computed semantic position
       normalizedX = 0.1 + event.semanticVector[0] * 0.8  // Map to 0.1-0.9 range with padding
       depthT = 0.1 + event.semanticVector[1] * 0.8      // Y maps to depth (routine=back, exceptional=front)
+      console.log(`Using semanticVector [${event.semanticVector[0]}, ${event.semanticVector[1]}] → normalizedX=${normalizedX.toFixed(2)}, depthT=${depthT.toFixed(2)} for ${event.embeddingId}`)
     } else {
+      console.log(`No semanticVector found for ${event.eventId}, using fallback positioning`)
       // Fallback: envelope-based positioning (legacy behavior)
       const scenario = getScenario()
       const envelopeIds = [...new Set(scenario.envelopes.map(e => e.envelopeId))]

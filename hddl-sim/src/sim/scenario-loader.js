@@ -7,6 +7,9 @@ import financialLendingScenario from './scenarios/financial-lending.scenario.jso
 import databasePerformanceScenario from './scenarios/database-performance.scenario.json'
 import saasDashboardingScenario from './scenarios/saas-dashboarding.scenario.json'
 import insuranceUnderwritingScenario from './scenarios/insurance-underwriting.scenario.json'
+import baseballAnalyticsScenario from './scenarios/baseball-analytics.scenario.json'
+import airforceAvionicsScenario from './scenarios/airforce-avionics-maintenance.scenario.json'
+import verticalHydroponicsScenario from './scenarios/vertical-hydroponics-farm.scenario.json'
 
 export const SCENARIOS = {
   'default': {
@@ -57,6 +60,27 @@ export const SCENARIOS = {
     description: 'Risk assessment, claims processing, and regulatory compliance across 120 hours of insurance operations.',
     data: insuranceUnderwritingScenario,
     tags: ['insurance', 'regulated', 'fairness']
+  },
+  'baseball-analytics': {
+    id: 'baseball-analytics',
+    title: 'Baseball Analytics — Performance & Strategy',
+    description: 'Professional baseball team analytics: player performance, in-game strategy, injury risk management, and roster optimization across 168 hours.',
+    data: baseballAnalyticsScenario,
+    tags: ['sports', 'analytics', 'performance']
+  },
+  'airforce-avionics-maintenance': {
+    id: 'airforce-avionics-maintenance',
+    title: 'Air Force Avionics Maintenance Backshop',
+    description: 'Aircraft avionics readiness: diagnostics, parts supply chain, safety compliance, maintenance scheduling, and training across 336 hours.',
+    data: airforceAvionicsScenario,
+    tags: ['defense', 'maintenance', 'safety-critical']
+  },
+  'vertical-hydroponics-farm': {
+    id: 'vertical-hydroponics-farm',
+    title: 'Vertical Hydroponics Farm — Sustainable Urban Agriculture',
+    description: 'Crop growth optimization, environmental controls, water/nutrient management, harvest quality, energy efficiency, and food safety compliance across 240 hours.',
+    data: verticalHydroponicsScenario,
+    tags: ['agriculture', 'sustainability', 'food-safety']
   }
 }
 

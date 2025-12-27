@@ -326,6 +326,9 @@ export function normalizeScenario(rawScenario) {
         vectorDimensions: asNumber(event.vectorDimensions) ?? undefined,
         sourceEventId: asString(event.sourceEventId) ?? undefined,
         semanticContext: asString(event.semanticContext) ?? undefined,
+        semanticVector: Array.isArray(event.semanticVector) && event.semanticVector.length === 2 
+          ? [asNumber(event.semanticVector[0]) ?? 0, asNumber(event.semanticVector[1]) ?? 0]
+          : undefined,
         similarityThreshold: asNumber(event.similarityThreshold) ?? undefined,
       }
 

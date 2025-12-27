@@ -1,0 +1,676 @@
+{
+  "schemaVersion": 2,
+  "id": "scenario-baseball-analytics-001",
+  "title": "Baseball Analytics — Performance & Strategy Optimization",
+  "durationHours": 168,
+  "envelopes": [
+    {
+      "envelopeId": "ENV-BB-001",
+      "name": "Player Performance Analysis",
+      "domain": "Performance Analytics",
+      "ownerRole": "Performance Steward",
+      "createdHour": 0,
+      "endHour": 168,
+      "accent": "var(--vscode-charts-blue)",
+      "envelope_version": 1,
+      "revision_id": null,
+      "assumptions": [
+        "Performance models trained on Statcast data and historical player metrics.",
+        "Analysis considers both traditional stats and advanced metrics (xwOBA, barrel rate, sprint speed).",
+        "Recommendations balance current performance with projected development curves."
+      ],
+      "constraints": [
+        "Never recommend roster moves based solely on small sample sizes (<50 PA/IP)",
+        "Performance projections must include confidence intervals",
+        "Age and injury history factored into long-term recommendations"
+      ]
+    },
+    {
+      "envelopeId": "ENV-BB-002",
+      "name": "In-Game Strategy & Lineup Optimization",
+      "domain": "Game Strategy",
+      "ownerRole": "Strategy Steward",
+      "createdHour": 0,
+      "endHour": 168,
+      "accent": "var(--vscode-charts-orange)",
+      "envelope_version": 2,
+      "revision_id": "REV-BB-002-B",
+      "assumptions": [
+        "Lineup optimization maximizes run expectancy based on matchup data.",
+        "Bullpen usage balances win probability with pitcher rest requirements.",
+        "Real-time strategy adjustments react to game state and opposing decisions."
+      ],
+      "constraints": [
+        "Never suggest overusing relievers — max 3 appearances in 5 days",
+        "Starting pitcher recommendations respect pitch count limits (100 pitches typical)",
+        "Defensive shifts must account for runner-on-base scenarios"
+      ]
+    },
+    {
+      "envelopeId": "ENV-BB-003",
+      "name": "Injury Risk & Load Management",
+      "domain": "Player Health",
+      "ownerRole": "Health Steward",
+      "createdHour": 12,
+      "endHour": 156,
+      "accent": "var(--vscode-charts-red)",
+      "envelope_version": 1,
+      "revision_id": null,
+      "assumptions": [
+        "Biomechanics data and workload tracking predict injury risk.",
+        "Rest recommendations balance player availability with injury prevention.",
+        "Medical staff has final authority on playing status."
+      ],
+      "constraints": [
+        "High injury risk flags require medical evaluation before clearance",
+        "Pitcher workload limits enforced (innings pitched, pitch counts, rest days)",
+        "Position player fatigue monitored via sprint speed and exit velocity decline"
+      ]
+    },
+    {
+      "envelopeId": "ENV-BB-004",
+      "name": "Roster Construction & Trade Analysis",
+      "domain": "Roster Management",
+      "ownerRole": "Roster Steward",
+      "createdHour": 0,
+      "endHour": 168,
+      "accent": "var(--vscode-charts-green)",
+      "envelope_version": 3,
+      "revision_id": "REV-BB-004-C",
+      "assumptions": [
+        "Trade value models consider contract, age, performance, and positional scarcity.",
+        "Prospect projections based on minor league performance and scouting reports.",
+        "Roster optimization balances win-now vs. long-term competitive windows."
+      ],
+      "constraints": [
+        "Trade recommendations must fit within salary cap constraints",
+        "Never recommend trading away controllable young talent without GM approval",
+        "40-man roster and option limits enforced in all roster suggestions"
+      ]
+    }
+  ],
+  "fleets": [
+    {
+      "stewardRole": "Performance Steward",
+      "agents": [
+        {
+          "agentId": "AG-PERF-01",
+          "name": "BattingAnalyzer",
+          "role": "hitting performance evaluation and projections",
+          "envelopeIds": ["ENV-BB-001"]
+        },
+        {
+          "agentId": "AG-PERF-02",
+          "name": "PitchingAnalyzer",
+          "role": "pitching performance and arsenal optimization",
+          "envelopeIds": ["ENV-BB-001"]
+        },
+        {
+          "agentId": "AG-PERF-03",
+          "name": "DefenseEvaluator",
+          "role": "fielding metrics and positioning analysis",
+          "envelopeIds": ["ENV-BB-001"]
+        }
+      ]
+    },
+    {
+      "stewardRole": "Strategy Steward",
+      "agents": [
+        {
+          "agentId": "AG-STRAT-01",
+          "name": "LineupOptimizer",
+          "role": "batting order and platoon matchup optimization",
+          "envelopeIds": ["ENV-BB-002"]
+        },
+        {
+          "agentId": "AG-STRAT-02",
+          "name": "BullpenManager",
+          "role": "relief pitcher usage and matchup recommendations",
+          "envelopeIds": ["ENV-BB-002"]
+        },
+        {
+          "agentId": "AG-STRAT-03",
+          "name": "ShiftAdvisor",
+          "role": "defensive positioning based on spray charts",
+          "envelopeIds": ["ENV-BB-002"]
+        }
+      ]
+    },
+    {
+      "stewardRole": "Health Steward",
+      "agents": [
+        {
+          "agentId": "AG-HEALTH-01",
+          "name": "BiomechanicsMonitor",
+          "role": "pitcher mechanics and injury risk assessment",
+          "envelopeIds": ["ENV-BB-003"]
+        },
+        {
+          "agentId": "AG-HEALTH-02",
+          "name": "WorkloadTracker",
+          "role": "fatigue detection and rest recommendations",
+          "envelopeIds": ["ENV-BB-003"]
+        },
+        {
+          "agentId": "AG-HEALTH-03",
+          "name": "RecoveryOptimizer",
+          "role": "rehabilitation protocol recommendations",
+          "envelopeIds": ["ENV-BB-003"]
+        }
+      ]
+    },
+    {
+      "stewardRole": "Roster Steward",
+      "agents": [
+        {
+          "agentId": "AG-ROSTER-01",
+          "name": "TradeEvaluator",
+          "role": "trade value and team fit analysis",
+          "envelopeIds": ["ENV-BB-004"]
+        },
+        {
+          "agentId": "AG-ROSTER-02",
+          "name": "ProspectProjector",
+          "role": "minor league player development forecasting",
+          "envelopeIds": ["ENV-BB-004"]
+        },
+        {
+          "agentId": "AG-ROSTER-03",
+          "name": "ContractOptimizer",
+          "role": "salary allocation and arbitration analysis",
+          "envelopeIds": ["ENV-BB-004"]
+        }
+      ]
+    }
+  ],
+  "events": [
+    {
+      "eventId": "envelope_promoted:0:ENV-BB-001:0",
+      "hour": 0,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-BB-001",
+      "severity": "info",
+      "label": "Envelope promoted",
+      "detail": "Player performance analysis envelope activated for season with updated Statcast integration.",
+      "actorRole": "Performance Steward",
+      "actorName": "Sarah Chen"
+    },
+    {
+      "eventId": "envelope_promoted:0:ENV-BB-002:1",
+      "hour": 0,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-BB-002",
+      "severity": "info",
+      "label": "Envelope promoted",
+      "detail": "In-game strategy envelope (REV-BB-002-B) activated with refined bullpen usage algorithms.",
+      "actorRole": "Strategy Steward",
+      "actorName": "Marcus Johnson"
+    },
+    {
+      "eventId": "decision:3_5:ENV-BB-002:2",
+      "hour": 3.5,
+      "type": "decision",
+      "envelopeId": "ENV-BB-002",
+      "severity": "info",
+      "label": "Lineup optimized for opener",
+      "detail": "LineupOptimizer generated starting lineup vs. LHP: leadoff speedster, power hitters 3-4-5, defensive specialists 7-8-9. Projected run expectancy: 4.8 runs.",
+      "actorRole": "Strategy Steward",
+      "actorName": "LineupOptimizer"
+    },
+    {
+      "eventId": "decision:8_2:ENV-BB-001:3",
+      "hour": 8.2,
+      "type": "decision",
+      "envelopeId": "ENV-BB-001",
+      "severity": "info",
+      "label": "Prospect promotion recommended",
+      "detail": "BattingAnalyzer recommends promoting SS prospect (#3 org ranking). Triple-A performance: .312 BA, .890 OPS, elite contact skills. Projected MLB WAR: 2.1 (age 23).",
+      "actorRole": "Performance Steward",
+      "actorName": "BattingAnalyzer"
+    },
+    {
+      "eventId": "envelope_promoted:12:ENV-BB-003:4",
+      "hour": 12,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-BB-003",
+      "severity": "info",
+      "label": "Envelope promoted",
+      "detail": "Injury risk and load management envelope activated with biomechanics tracking for pitching staff.",
+      "actorRole": "Health Steward",
+      "actorName": "Dr. Emily Rodriguez"
+    },
+    {
+      "eventId": "boundary_interaction:18_7:ENV-BB-003:5",
+      "hour": 18.7,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-BB-003",
+      "severity": "warning",
+      "label": "Pitcher workload threshold exceeded",
+      "detail": "BiomechanicsMonitor flagged ace pitcher: 4 starts in 15 days, 112 pitches last outing, arm slot deviation detected. Elevated Tommy John risk. Recommends 7-day rest.",
+      "actorRole": "Health Steward",
+      "actorName": "BiomechanicsMonitor",
+      "boundaryType": "injury_risk_elevated"
+    },
+    {
+      "eventId": "decision:19_1:ENV-BB-003:6",
+      "hour": 19.1,
+      "type": "decision",
+      "envelopeId": "ENV-BB-003",
+      "severity": "allowed",
+      "label": "Rest period approved",
+      "detail": "Medical staff and Health Steward approved 7-day rest for ace pitcher. Bullpen day scheduled, rookie promoted for spot start.",
+      "actorRole": "Health Steward",
+      "actorName": "Dr. Emily Rodriguez"
+    },
+    {
+      "eventId": "decision:24_3:ENV-BB-002:7",
+      "hour": 24.3,
+      "type": "decision",
+      "envelopeId": "ENV-BB-002",
+      "severity": "info",
+      "label": "Defensive shift recommended",
+      "detail": "ShiftAdvisor suggests extreme pull-shift for power LHB slugger: 3 infielders right side, SS shallow right field. Historical groundball rate vs. this alignment: 68%.",
+      "actorRole": "Strategy Steward",
+      "actorName": "ShiftAdvisor"
+    },
+    {
+      "eventId": "boundary_interaction:36_5:ENV-BB-002:8",
+      "hour": 36.5,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-BB-002",
+      "severity": "warning",
+      "label": "Bullpen overuse detected",
+      "detail": "BullpenManager flagged closer: 4 appearances in 5 days, 62 pitches thrown. Violates 3-in-5 usage policy. Recommends rest, setup man to close tonight.",
+      "actorRole": "Strategy Steward",
+      "actorName": "BullpenManager",
+      "boundaryType": "usage_limit_exceeded"
+    },
+    {
+      "eventId": "decision:48_8:ENV-BB-004:9",
+      "hour": 48.8,
+      "type": "decision",
+      "envelopeId": "ENV-BB-004",
+      "severity": "info",
+      "label": "Trade acquisition analyzed",
+      "detail": "TradeEvaluator assessed offer for veteran OF (2 years control, $8M AAV). Projects 1.8 WAR, fills platoon hole. Cost: #12 prospect (45 FV). Recommends approval.",
+      "actorRole": "Roster Steward",
+      "actorName": "TradeEvaluator"
+    },
+    {
+      "eventId": "boundary_interaction:52_2:ENV-BB-004:10",
+      "hour": 52.2,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-BB-004",
+      "severity": "warning",
+      "label": "Salary cap threshold flagged",
+      "detail": "ContractOptimizer blocked proposed trade: would exceed luxury tax threshold by $1.2M. Requires restructuring or GM override for tax penalty acceptance.",
+      "actorRole": "Roster Steward",
+      "actorName": "ContractOptimizer",
+      "boundaryType": "budget_constraint"
+    },
+    {
+      "eventId": "decision:54_1:ENV-BB-004:11",
+      "hour": 54.1,
+      "type": "decision",
+      "envelopeId": "ENV-BB-004",
+      "severity": "allowed",
+      "label": "Trade restructured and approved",
+      "detail": "GM approved modified trade with salary offset: acquiring team covers $800K. Now under luxury tax by $200K. Trade executed.",
+      "actorRole": "Roster Steward",
+      "actorName": "GM David Park"
+    },
+    {
+      "eventId": "dsg_session:72:ENV-BB-001:12",
+      "hour": 72,
+      "type": "dsg_session",
+      "envelopeId": "ENV-BB-001",
+      "severity": "info",
+      "label": "DSG: Mid-season analytics review",
+      "detail": "Analytics Stewardship Group reviewed 84 game sample. Batting model accuracy: 92%. Pitching projections: 88%. Identified 3 areas for model refinement.",
+      "actorRole": "Performance Steward",
+      "actorName": "Sarah Chen",
+      "sessionId": "DSG-ANALYTICS-Q2"
+    },
+    {
+      "eventId": "revision:76:ENV-BB-001:13",
+      "hour": 76,
+      "type": "revision",
+      "envelopeId": "ENV-BB-001",
+      "severity": "info",
+      "label": "Performance model updated",
+      "detail": "Performance Steward updated hitting projections to weight exit velocity more heavily for power hitters. Improves HR projection accuracy by 12%.",
+      "actorRole": "Performance Steward",
+      "actorName": "Sarah Chen",
+      "revisionType": "model_refinement",
+      "reason": "Mid-season data shows exit velo correlates better with power output than previous weighting."
+    },
+    {
+      "eventId": "signal:96:ENV-BB-003:14",
+      "hour": 96,
+      "type": "signal",
+      "envelopeId": "ENV-BB-003",
+      "severity": "info",
+      "label": "Injury prevention metrics",
+      "detail": "WorkloadTracker reports 0 major injuries this month. Average pitcher rest: 4.8 days. Position player fatigue index: 0.23 (healthy: <0.30).",
+      "actorRole": "Health Steward",
+      "actorName": "WorkloadTracker",
+      "signalKey": "injury_prevention_success",
+      "value": 0.23
+    },
+    {
+      "eventId": "decision:108_5:ENV-BB-001:15",
+      "hour": 108.5,
+      "type": "decision",
+      "envelopeId": "ENV-BB-001",
+      "severity": "info",
+      "label": "Pitcher arsenal adjustment recommended",
+      "detail": "PitchingAnalyzer suggests reliever add cutter to arsenal. Fastball/slider combo generating 28% whiff rate (target: 35%). Cutter projects +4% whiff rate vs. RHB.",
+      "actorRole": "Performance Steward",
+      "actorName": "PitchingAnalyzer"
+    },
+    {
+      "eventId": "boundary_interaction:120_3:ENV-BB-001:16",
+      "hour": 120.3,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-BB-001",
+      "severity": "warning",
+      "label": "Performance decline flagged",
+      "detail": "DefenseEvaluator detected veteran 1B: sprint speed down 12%, range factor declined. Recommends defensive replacement in late innings of close games.",
+      "actorRole": "Performance Steward",
+      "actorName": "DefenseEvaluator",
+      "boundaryType": "performance_threshold"
+    },
+    {
+      "eventId": "decision:132_7:ENV-BB-002:17",
+      "hour": 132.7,
+      "type": "decision",
+      "envelopeId": "ENV-BB-002",
+      "severity": "info",
+      "label": "Playoff roster construction",
+      "detail": "LineupOptimizer generated 26-man playoff roster: 13 pitchers (5 starters, 8 relievers), 13 position players. Prioritizes elite defense and bullpen depth.",
+      "actorRole": "Strategy Steward",
+      "actorName": "Marcus Johnson"
+    },
+    {
+      "eventId": "revision:144:ENV-BB-002:18",
+      "hour": 144,
+      "type": "revision",
+      "envelopeId": "ENV-BB-002",
+      "severity": "info",
+      "label": "Bullpen usage policy updated",
+      "detail": "Strategy Steward relaxed rest requirements for playoffs: 2 appearances in 4 days (down from 3 in 5) with medical monitoring.",
+      "actorRole": "Strategy Steward",
+      "actorName": "Marcus Johnson",
+      "revisionType": "policy_adjustment",
+      "reason": "Playoff urgency justifies increased workload with enhanced injury monitoring."
+    },
+    {
+      "eventId": "embedding:4:ENV-BB-002:19",
+      "hour": 4,
+      "type": "embedding",
+      "envelopeId": "ENV-BB-002",
+      "severity": "info",
+      "label": "Lineup optimization embedded",
+      "detail": "Optimal lineup construction pattern stored for LHP matchup scenarios.",
+      "actorRole": "Strategy Steward",
+      "actorName": "LineupOptimizer",
+      "embeddingId": "EMB-BB-001",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:3_5:ENV-BB-002:2",
+      "semanticContext": "batting order optimization vs LHP with speedster leadoff and power middle lineup",
+      "semanticVector": [0.72, 0.35]
+    },
+    {
+      "eventId": "embedding:9:ENV-BB-001:20",
+      "hour": 9,
+      "type": "embedding",
+      "envelopeId": "ENV-BB-001",
+      "severity": "info",
+      "label": "Prospect promotion embedded",
+      "detail": "Minor league promotion decision pattern stored for similar player profiles.",
+      "actorRole": "Performance Steward",
+      "actorName": "BattingAnalyzer",
+      "embeddingId": "EMB-BB-002",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:8_2:ENV-BB-001:3",
+      "semanticContext": "shortstop prospect promotion based on triple-A performance and MLB WAR projection",
+      "semanticVector": [0.68, 0.45]
+    },
+    {
+      "eventId": "embedding:19:ENV-BB-003:21",
+      "hour": 19,
+      "type": "embedding",
+      "envelopeId": "ENV-BB-003",
+      "severity": "info",
+      "label": "Workload boundary embedded",
+      "detail": "Pitcher injury risk escalation pattern stored for biomechanics monitoring.",
+      "actorRole": "Health Steward",
+      "actorName": "BiomechanicsMonitor",
+      "embeddingId": "EMB-BB-003",
+      "embeddingType": "boundary_interaction",
+      "vectorDimensions": 768,
+      "sourceEventId": "boundary_interaction:18_7:ENV-BB-003:5",
+      "semanticContext": "pitcher workload exceeded with arm slot deviation requiring rest period",
+      "semanticVector": [0.88, 0.85]
+    },
+    {
+      "eventId": "embedding:19_5:ENV-BB-003:22",
+      "hour": 19.5,
+      "type": "embedding",
+      "envelopeId": "ENV-BB-003",
+      "severity": "info",
+      "label": "Rest approval embedded",
+      "detail": "Medical clearance decision pattern stored for injury prevention protocols.",
+      "actorRole": "Health Steward",
+      "actorName": "Dr. Emily Rodriguez",
+      "embeddingId": "EMB-BB-004",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:19_1:ENV-BB-003:6",
+      "semanticContext": "ace pitcher 7-day rest approved with spot start substitution",
+      "semanticVector": [0.75, 0.70]
+    },
+    {
+      "eventId": "embedding:25:ENV-BB-002:23",
+      "hour": 25,
+      "type": "embedding",
+      "envelopeId": "ENV-BB-002",
+      "severity": "info",
+      "label": "Defensive shift embedded",
+      "detail": "Spray chart positioning pattern stored for pull-heavy power hitters.",
+      "actorRole": "Strategy Steward",
+      "actorName": "ShiftAdvisor",
+      "embeddingId": "EMB-BB-005",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:24_3:ENV-BB-002:7",
+      "semanticContext": "extreme pull shift for LHB slugger with infield realignment",
+      "semanticVector": [0.70, 0.38]
+    },
+    {
+      "eventId": "embedding:37:ENV-BB-002:24",
+      "hour": 37,
+      "type": "embedding",
+      "envelopeId": "ENV-BB-002",
+      "severity": "info",
+      "label": "Bullpen overuse embedded",
+      "detail": "Relief pitcher usage violation pattern stored for workload management.",
+      "actorRole": "Strategy Steward",
+      "actorName": "BullpenManager",
+      "embeddingId": "EMB-BB-006",
+      "embeddingType": "boundary_interaction",
+      "vectorDimensions": 768,
+      "sourceEventId": "boundary_interaction:36_5:ENV-BB-002:8",
+      "semanticContext": "closer overuse violation with rest recommendation and setup man substitution",
+      "semanticVector": [0.82, 0.75]
+    },
+    {
+      "eventId": "embedding:49:ENV-BB-004:25",
+      "hour": 49,
+      "type": "embedding",
+      "envelopeId": "ENV-BB-004",
+      "severity": "info",
+      "label": "Trade analysis embedded",
+      "detail": "Trade valuation decision pattern stored for veteran acquisition scenarios.",
+      "actorRole": "Roster Steward",
+      "actorName": "TradeEvaluator",
+      "embeddingId": "EMB-BB-007",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:48_8:ENV-BB-004:9",
+      "semanticContext": "veteran outfielder trade approval with WAR projection and prospect cost analysis",
+      "semanticVector": [0.65, 0.48]
+    },
+    {
+      "eventId": "embedding:52_5:ENV-BB-004:26",
+      "hour": 52.5,
+      "type": "embedding",
+      "envelopeId": "ENV-BB-004",
+      "severity": "info",
+      "label": "Salary cap boundary embedded",
+      "detail": "Luxury tax constraint violation pattern stored for roster construction.",
+      "actorRole": "Roster Steward",
+      "actorName": "ContractOptimizer",
+      "embeddingId": "EMB-BB-008",
+      "embeddingType": "boundary_interaction",
+      "vectorDimensions": 768,
+      "sourceEventId": "boundary_interaction:52_2:ENV-BB-004:10",
+      "semanticContext": "luxury tax threshold exceeded requiring trade restructuring or GM override",
+      "semanticVector": [0.85, 0.78]
+    },
+    {
+      "eventId": "embedding:54_5:ENV-BB-004:27",
+      "hour": 54.5,
+      "type": "embedding",
+      "envelopeId": "ENV-BB-004",
+      "severity": "info",
+      "label": "Trade restructure embedded",
+      "detail": "Modified trade approval pattern stored with salary offset solution.",
+      "actorRole": "Roster Steward",
+      "actorName": "GM David Park",
+      "embeddingId": "EMB-BB-009",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:54_1:ENV-BB-004:11",
+      "semanticContext": "trade modified with salary offset to remain under luxury tax threshold",
+      "semanticVector": [0.70, 0.65]
+    },
+    {
+      "eventId": "embedding:73:ENV-BB-001:28",
+      "hour": 73,
+      "type": "embedding",
+      "envelopeId": "ENV-BB-001",
+      "severity": "info",
+      "label": "DSG analytics review embedded",
+      "detail": "Mid-season model performance review patterns stored for governance continuity.",
+      "actorRole": "Performance Steward",
+      "actorName": "Sarah Chen",
+      "embeddingId": "EMB-BB-010",
+      "embeddingType": "session_artifact",
+      "vectorDimensions": 768,
+      "sourceEventId": "dsg_session:72:ENV-BB-001:12",
+      "semanticContext": "analytics stewardship review identifying model accuracy and refinement areas",
+      "semanticVector": [0.18, 0.88]
+    },
+    {
+      "eventId": "embedding:77:ENV-BB-001:29",
+      "hour": 77,
+      "type": "embedding",
+      "envelopeId": "ENV-BB-001",
+      "severity": "info",
+      "label": "Model revision embedded",
+      "detail": "Performance model update pattern stored with accuracy improvement rationale.",
+      "actorRole": "Performance Steward",
+      "actorName": "Sarah Chen",
+      "embeddingId": "EMB-BB-011",
+      "embeddingType": "revision",
+      "vectorDimensions": 768,
+      "sourceEventId": "revision:76:ENV-BB-001:13",
+      "semanticContext": "hitting model updated with exit velocity weighting for power projection accuracy",
+      "semanticVector": [0.20, 0.72]
+    },
+    {
+      "eventId": "embedding:109:ENV-BB-001:30",
+      "hour": 109,
+      "type": "embedding",
+      "envelopeId": "ENV-BB-001",
+      "severity": "info",
+      "label": "Arsenal adjustment embedded",
+      "detail": "Pitch mix optimization recommendation pattern stored for reliever development.",
+      "actorRole": "Performance Steward",
+      "actorName": "PitchingAnalyzer",
+      "embeddingId": "EMB-BB-012",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:108_5:ENV-BB-001:15",
+      "semanticContext": "reliever cutter addition recommendation for improved whiff rate vs righties",
+      "semanticVector": [0.68, 0.42]
+    },
+    {
+      "eventId": "embedding:121:ENV-BB-001:31",
+      "hour": 121,
+      "type": "embedding",
+      "envelopeId": "ENV-BB-001",
+      "severity": "info",
+      "label": "Performance decline embedded",
+      "detail": "Defensive regression detection pattern stored for late-game substitution decisions.",
+      "actorRole": "Performance Steward",
+      "actorName": "DefenseEvaluator",
+      "embeddingId": "EMB-BB-013",
+      "embeddingType": "boundary_interaction",
+      "vectorDimensions": 768,
+      "sourceEventId": "boundary_interaction:120_3:ENV-BB-001:16",
+      "semanticContext": "veteran first baseman defensive decline with late-inning replacement recommendation",
+      "semanticVector": [0.80, 0.68]
+    },
+    {
+      "eventId": "embedding:133:ENV-BB-002:32",
+      "hour": 133,
+      "type": "embedding",
+      "envelopeId": "ENV-BB-002",
+      "severity": "info",
+      "label": "Playoff roster embedded",
+      "detail": "Postseason roster construction pattern stored for high-leverage optimization.",
+      "actorRole": "Strategy Steward",
+      "actorName": "Marcus Johnson",
+      "embeddingId": "EMB-BB-014",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:132_7:ENV-BB-002:17",
+      "semanticContext": "26-man playoff roster with 13 pitchers prioritizing defense and bullpen depth",
+      "semanticVector": [0.65, 0.52]
+    },
+    {
+      "eventId": "embedding:145:ENV-BB-002:33",
+      "hour": 145,
+      "type": "embedding",
+      "envelopeId": "ENV-BB-002",
+      "severity": "info",
+      "label": "Playoff policy revision embedded",
+      "detail": "Workload policy adjustment stored with playoff urgency justification.",
+      "actorRole": "Strategy Steward",
+      "actorName": "Marcus Johnson",
+      "embeddingId": "EMB-BB-015",
+      "embeddingType": "revision",
+      "vectorDimensions": 768,
+      "sourceEventId": "revision:144:ENV-BB-002:18",
+      "semanticContext": "bullpen rest requirements relaxed for playoffs with enhanced injury monitoring",
+      "semanticVector": [0.22, 0.75]
+    },
+    {
+      "eventId": "signal:168:ENV-BB-001:34",
+      "hour": 168,
+      "type": "signal",
+      "envelopeId": "ENV-BB-001",
+      "severity": "info",
+      "label": "Season analytics summary",
+      "detail": "Model accuracy: Batting 91%, Pitching 89%, Defense 93%. Recommendations accepted: 78%. Team finished 94-68 (+12 wins vs. projection).",
+      "actorRole": "Performance Steward",
+      "actorName": "BattingAnalyzer",
+      "signalKey": "season_performance",
+      "value": 0.91
+    }
+  ]
+}
