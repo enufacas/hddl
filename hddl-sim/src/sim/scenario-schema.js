@@ -126,34 +126,63 @@ export function validateScenario(rawScenario) {
       if (!asString(event.sessionId)) errors.push(`DSG message[${idx}] missing sessionId.`)
     }
     // ═══════════════════════════════════════════════════════════════════════════
-    // EMBEDDING SPEC: Aggressive memory storage for AI-native operations
+    // EMBEDDING GENERATION SPEC: Agent Action → Memory Pattern
     // ═══════════════════════════════════════════════════════════════════════════
-    // Embeddings are NOT random - they capture agent actions, inputs, and outcomes.
-    // HDDL systems store memories of every meaningful operation for similarity retrieval.
+    // HDDL systems store embeddings of agent actions for similarity-based retrieval.
+    // This spec defines a GENERATIVE rule: how to create embeddings from events.
     //
-    // AGGRESSIVE embedding triggers (embed liberally):
-    //   - decision: ALL decisions create embeddings (approved, blocked, escalated)
-    //     → Captures input context + output decision for pattern matching
-    //   - boundary_interaction: ALL boundary touches (violations, escalations, reviews)
-    //     → Stores edge cases and exception handling patterns
-    //   - revision: ALL policy changes with rationale and impact
-    //     → Policy evolution memory for governance continuity
-    //   - signal: Significant signals (baselines, anomalies, drift, thresholds)
-    //     → Monitoring patterns and operational health indicators
-    //   - dsg_session: ALL governance sessions with decisions and calibrations
-    //     → Cross-domain precedents and stewardship judgment patterns
+    // RULE: For every event with an actorName (agent), create an embedding.
     //
-    // Agent action memory principle:
-    //   - Every agent action that produces a decision is embedded
-    //   - Input state + reasoning + outcome captured in semanticContext
-    //   - Creates retrievable memory for future similar scenarios
+    // Embedding creation formula:
+    //   IF event.type IN ['decision', 'boundary_interaction', 'revision', 'dsg_session']
+    //   AND event.actorName exists (agent performed action)
+    //   THEN create embedding shortly after event
     //
-    // Embedding rules:
-    //   - embeddingType MUST match the sourceEventId event type
-    //   - sourceEventId MUST reference an existing event
-    //   - hour should be shortly after the source event (embedding captures it)
-    //   - semanticContext describes input conditions, reasoning, and outcome
-    //   - semanticVector [x,y] positions in policy↔operational, routine↔exceptional space
+    // Required embedding structure:
+    //   {
+    //     "type": "embedding",
+    //     "hour": <sourceEvent.hour + 0.5 to 2 hours>,
+    //     "embeddingId": "EMB-<scenario>-<sequence>",
+    //     "embeddingType": "<sourceEvent.type>",  // MUST match source
+    //     "sourceEventId": "<sourceEvent.eventId>",
+    //     "actorRole": "<sourceEvent.actorRole>",
+    //     "actorName": "<sourceEvent.actorName>",
+    //     "envelopeId": "<sourceEvent.envelopeId>",
+    //     "semanticContext": "<input_state> + <agent_reasoning> + <outcome>",
+    //     "semanticVector": [x, y],  // policy(0)↔operational(1), routine(0)↔exceptional(1)
+    //     "vectorDimensions": 768,
+    //     "label": "<type> pattern embedded",
+    //     "detail": "Pattern stored for similarity matching in future scenarios.",
+    //     "severity": "info"
+    //   }
+    //
+    // semanticContext template:
+    //   - decision: "<what_was_evaluated> <decision_made> <conditions_or_constraints>"
+    //   - boundary_interaction: "<boundary_touched> <escalation_or_block> <resolution_path>"
+    //   - revision: "<policy_changed> <rationale> <new_constraints>"
+    //   - dsg_session: "<governance_topic> <decisions_made> <cross-domain_impact>"
+    //
+    // semanticVector positioning guide:
+    //   X-axis (policy ↔ operational):
+    //     - 0.0-0.3: Policy/governance (revisions, DSG sessions, compliance)
+    //     - 0.3-0.6: Hybrid (decisions with policy implications)
+    //     - 0.6-1.0: Operational (agent decisions, monitoring, approvals)
+    //   
+    //   Y-axis (routine ↔ exceptional):
+    //     - 0.0-0.3: Routine (normal flow, baselines, monitoring)
+    //     - 0.3-0.6: Elevated (warnings, soft boundaries)
+    //     - 0.6-1.0: Exceptional (blocks, escalations, safety-critical)
+    //
+    // Generation examples:
+    //   decision (approved) → embedding at +1hr, semanticVector [0.70, 0.35]
+    //   decision (blocked) → embedding at +0.5hr, semanticVector [0.85, 0.80]
+    //   boundary_interaction → embedding at +0.5hr, semanticVector [0.85, 0.85]
+    //   revision → embedding at +1hr, semanticVector [0.20, 0.75]
+    //   dsg_session → embedding at +1hr, semanticVector [0.15, 0.90]
+    //
+    // Signal embeddings (optional, selective):
+    //   Only embed significant signals (baselines, anomalies, drift detection)
+    //   Not routine operational health checks
     // ═══════════════════════════════════════════════════════════════════════════
     if (type === 'embedding') {
       if (!asString(event.embeddingId)) warnings.push(`Embedding[${idx}] missing embeddingId.`)
