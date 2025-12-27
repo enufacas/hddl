@@ -78,7 +78,10 @@ function normalizePath(pathname) {
   // Strip base path for production deployment (e.g., /hddl/)
   const base = import.meta.env.BASE_URL
   if (base !== '/' && noQuery.startsWith(base)) {
-    noQuery = noQuery.slice(base.length - 1) // Keep leading slash
+    // Remove base path, keeping the leading slash
+    noQuery = '/' + noQuery.slice(base.length)
+    // Handle edge case where path equals base exactly (e.g., /hddl/ -> /)
+    if (noQuery === '/' || noQuery === '') noQuery = '/'
   }
   
   if (noQuery.length > 1 && noQuery.endsWith('/')) return noQuery.slice(0, -1)
