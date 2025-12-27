@@ -43,14 +43,14 @@ function setBottomCollapsed(collapsed) {
 const activityBarItems = [
   { id: 'envelopes', icon: 'shield', label: 'Envelopes', route: '/' },
   { id: 'dts', icon: 'pulse', label: 'Decision Telemetry System', route: '/decision-telemetry' },
-  { id: 'stewardship', icon: 'git-pull-request', label: 'Stewardship', route: '/stewardship' },
+  { id: 'stewardship', icon: 'law', label: 'Stewardship', route: '/stewardship' },
 ]
 
 const navItems = [
   // Primary
   { id: 'envelopes', label: 'Envelopes', icon: 'shield', route: '/', section: 'primary' },
   { id: 'dts', label: 'Decision Telemetry System', icon: 'pulse', route: '/decision-telemetry', section: 'primary' },
-  { id: 'stewardship', label: 'Stewardship', icon: 'git-pull-request', route: '/stewardship', section: 'primary' },
+  { id: 'stewardship', label: 'Stewardship', icon: 'law', route: '/stewardship', section: 'primary' },
 
   // Secondary
   { id: 'fleets', label: 'Fleets', icon: 'organization', route: '/steward-fleets', section: 'secondary' },
@@ -59,7 +59,7 @@ const navItems = [
 
   // Reference
   { id: 'docs', label: 'Docs', icon: 'book', route: '/docs', section: 'reference' },
-  { id: 'authority', label: 'Authority Order', icon: 'law', route: '/authority', section: 'reference' },
+  { id: 'authority', label: 'Authority Order', icon: 'law', route: '/authority', section: 'reference', disabled: true },
 ]
 
 const sidebarSections = [
@@ -539,11 +539,20 @@ function createListRow(item) {
     row.title = 'Experimental: Phase 2 feature';
   }
   
+  // Mark disabled items
+  if (item.disabled) {
+    row.style.opacity = '0.4';
+    row.style.cursor = 'default';
+    row.title = 'Coming soon';
+  }
+  
   row.appendChild(icon);
   row.appendChild(label);
   
   row.addEventListener('click', () => {
-    navigateTo(item.route);
+    if (!item.disabled) {
+      navigateTo(item.route);
+    }
   });
   
   return row;

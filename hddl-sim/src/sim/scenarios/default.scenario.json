@@ -29,7 +29,7 @@
       "domain": "Hiring",
       "ownerRole": "HR Steward",
       "createdHour": 10,
-      "endHour": 46,
+      "endHour": 24,
       "accent": "var(--status-success)",
       "envelope_version": 1,
       "revision_id": null,
@@ -50,7 +50,7 @@
       "domain": "Sales",
       "ownerRole": "Sales Steward",
       "createdHour": 4,
-      "endHour": 44,
+      "endHour": 20,
       "accent": "var(--vscode-charts-orange, var(--status-warning))",
       "envelope_version": 1,
       "revision_id": null,
@@ -69,10 +69,69 @@
       "domain": "Data",
       "ownerRole": "Data Steward",
       "createdHour": 8,
-      "endHour": 48,
+      "endHour": 24,
       "accent": "var(--vscode-charts-purple, var(--status-info))",
       "envelope_version": 1,
       "revision_id": null,
+      "assumptions": [
+        "Access is least-privilege and time-bounded.",
+        "Schema changes are reviewed before reaching production consumers."
+      ],
+      "constraints": [
+        "No PII exposure without explicit allow-list",
+        "Schema changes require steward-approved contract"
+      ]
+    },
+    {
+      "envelopeId": "ENV-002",
+      "name": "Hiring Recommendations",
+      "domain": "Hiring",
+      "ownerRole": "HR Steward",
+      "createdHour": 36,
+      "endHour": 46,
+      "accent": "var(--status-success)",
+      "envelope_version": 2,
+      "revision_id": "ENV-002-v2",
+      "assumptions": [
+        "Protected classes must not be inferred.",
+        "Humans make final hiring decisions.",
+        "Candidate transparency is required."
+      ],
+      "constraints": [
+        "No inference on protected classes",
+        "Human-only final decision",
+        "Transparency required"
+      ]
+    },
+    {
+      "envelopeId": "ENV-003",
+      "name": "Discount Guidance",
+      "domain": "Sales",
+      "ownerRole": "Sales Steward",
+      "createdHour": 32,
+      "endHour": 44,
+      "accent": "var(--vscode-charts-orange, var(--status-warning))",
+      "envelope_version": 2,
+      "revision_id": "ENV-003-v2",
+      "assumptions": [
+        "Discount guidance optimizes for sustainable revenue, not just close-rate.",
+        "Human approval required for out-of-policy terms."
+      ],
+      "constraints": [
+        "Max discount: 15% without human approval",
+        "Never propose discriminatory pricing"
+      ]
+    },
+    {
+      "envelopeId": "ENV-004",
+      "name": "Dataset Access & Schema Changes",
+      "domain": "Data",
+      "ownerRole": "Data Steward",
+      "createdHour": 36,
+      "endHour": 48,
+      "accent": "var(--vscode-charts-purple, var(--status-info))",
+      "envelope_version": 2,
+      "revision_id": "ENV-004-v2",
       "assumptions": [
         "Access is least-privilege and time-bounded.",
         "Schema changes are reviewed before reaching production consumers."
@@ -909,6 +968,57 @@
       "assumptionRefs": [
         "Feature allow-list includes candidate location proxy"
       ],
+      "nextAssumptions": [],
+      "nextConstraints": [],
+      "boundary_refs": [],
+      "involvedEnvelopeIds": [],
+      "impactSummary": [],
+      "resolutionPolicy": [],
+      "artifactOutput": []
+    },
+    {
+      "eventId": "envelope_promoted:32:ENV-003-v2:25",
+      "hour": 32,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-003",
+      "severity": "info",
+      "label": "Sales campaign reopened",
+      "detail": "ENV-003 reopens for Q2 sales campaign with refined discount parameters.",
+      "assumptionRefs": [],
+      "nextAssumptions": [],
+      "nextConstraints": [],
+      "boundary_refs": [],
+      "involvedEnvelopeIds": [],
+      "impactSummary": [],
+      "resolutionPolicy": [],
+      "artifactOutput": []
+    },
+    {
+      "eventId": "envelope_promoted:36:ENV-002-v2:26",
+      "hour": 36,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-002",
+      "severity": "info",
+      "label": "Hiring cycle resumed",
+      "detail": "ENV-002 reopens after interview review cycle completion.",
+      "assumptionRefs": [],
+      "nextAssumptions": [],
+      "nextConstraints": [],
+      "boundary_refs": [],
+      "involvedEnvelopeIds": [],
+      "impactSummary": [],
+      "resolutionPolicy": [],
+      "artifactOutput": []
+    },
+    {
+      "eventId": "envelope_promoted:36:ENV-004-v2:27",
+      "hour": 36,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-004",
+      "severity": "info",
+      "label": "Data access restored",
+      "detail": "ENV-004 reopens after security audit and schema validation.",
+      "assumptionRefs": [],
       "nextAssumptions": [],
       "nextConstraints": [],
       "boundary_refs": [],

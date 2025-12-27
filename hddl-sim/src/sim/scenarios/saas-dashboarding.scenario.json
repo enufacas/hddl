@@ -10,7 +10,7 @@
       "domain": "User Experience",
       "ownerRole": "UX Steward",
       "createdHour": 0,
-      "endHour": 96,
+      "endHour": 48,
       "accent": "var(--vscode-charts-green)",
       "envelope_version": 2,
       "revision_id": "REV-DASH-001-B",
@@ -31,7 +31,7 @@
       "domain": "Data Access",
       "ownerRole": "Data Steward",
       "createdHour": 0,
-      "endHour": 96,
+      "endHour": 42,
       "accent": "var(--vscode-charts-blue)",
       "envelope_version": 3,
       "revision_id": "REV-DASH-002-C",
@@ -52,7 +52,7 @@
       "domain": "Access Control",
       "ownerRole": "Security Steward",
       "createdHour": 12,
-      "endHour": 84,
+      "endHour": 48,
       "accent": "var(--vscode-charts-orange)",
       "envelope_version": 1,
       "revision_id": null,
@@ -86,6 +86,69 @@
         "Templates must work with <10 minutes of setup",
         "Sample data anonymized and GDPR-compliant",
         "Tutorial prompts dismissible after first completion"
+      ]
+    },
+    {
+      "envelopeId": "ENV-DASH-002",
+      "name": "Query Generation & Optimization",
+      "domain": "Data Access",
+      "ownerRole": "Data Steward",
+      "createdHour": 54,
+      "endHour": 96,
+      "accent": "var(--vscode-charts-blue)",
+      "envelope_version": 4,
+      "revision_id": "ENV-DASH-002-v4",
+      "assumptions": [
+        "Natural language queries translate to SQL with 95%+ accuracy.",
+        "Query optimization balances speed with resource consumption.",
+        "Users see query preview before execution on large datasets."
+      ],
+      "constraints": [
+        "Queries must complete within 30 seconds or prompt for refinement",
+        "Block queries scanning >1M rows without explicit approval",
+        "Never expose raw PII fields in auto-generated queries"
+      ]
+    },
+    {
+      "envelopeId": "ENV-DASH-001",
+      "name": "Chart & Widget Recommendations",
+      "domain": "User Experience",
+      "ownerRole": "UX Steward",
+      "createdHour": 60,
+      "endHour": 96,
+      "accent": "var(--vscode-charts-green)",
+      "envelope_version": 3,
+      "revision_id": "ENV-DASH-001-v3",
+      "assumptions": [
+        "Chart recommendations based on data types and user intent.",
+        "Widget suggestions balance visual clarity with information density.",
+        "Users can override AI suggestions at any time."
+      ],
+      "constraints": [
+        "Never auto-create visualizations with >10 series without user confirmation",
+        "Recommend accessible color palettes (WCAG AA compliant)",
+        "Suggest aggregations that preserve data accuracy"
+      ]
+    },
+    {
+      "envelopeId": "ENV-DASH-003",
+      "name": "Dashboard Sharing & Permissions",
+      "domain": "Access Control",
+      "ownerRole": "Security Steward",
+      "createdHour": 60,
+      "endHour": 84,
+      "accent": "var(--vscode-charts-orange)",
+      "envelope_version": 2,
+      "revision_id": "ENV-DASH-003-v2",
+      "assumptions": [
+        "Sharing defaults to organization-level visibility with opt-out.",
+        "Permission inheritance follows role-based access control.",
+        "External sharing requires explicit approval workflow."
+      ],
+      "constraints": [
+        "Public links expire after 30 days by default",
+        "Dashboard owners can revoke access at any time",
+        "Audit logs track all permission changes"
       ]
     }
   ],

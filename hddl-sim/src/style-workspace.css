@@ -2147,3 +2147,78 @@ body.aux-hidden .monaco-sash#panel-resize {
 .monaco-workbench {
     forced-color-adjust: none;
 }
+
+/* ===== INTRO.JS TOUR CUSTOMIZATION ===== */
+.introjs-tooltip {
+    background: var(--vscode-editorWidget-background) !important;
+    border: 1px solid var(--vscode-focusBorder) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(31, 111, 235, 0.2) !important;
+    padding: 20px !important;
+}
+
+.introjs-tooltip::before {
+    content: '' !important;
+    position: absolute !important;
+    top: -2px !important;
+    left: -2px !important;
+    right: -2px !important;
+    bottom: -2px !important;
+    background: linear-gradient(135deg, rgba(31, 111, 235, 0.1), rgba(139, 92, 246, 0.1)) !important;
+    border-radius: 12px !important;
+    z-index: -1 !important;
+    opacity: 0.5 !important;
+}
+
+.introjs-tooltiptext {
+    color: var(--vscode-editor-foreground) !important;
+}
+
+.introjs-tooltip-title {
+    color: var(--vscode-editor-foreground) !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+}
+
+.introjs-button {
+    background: var(--vscode-button-background) !important;
+    color: var(--vscode-button-foreground) !important;
+    border: none !important;
+    text-shadow: none !important;
+    font-weight: 600 !important;
+}
+
+.introjs-button:hover {
+    background: var(--vscode-button-hoverBackground) !important;
+}
+
+.introjs-skipbutton {
+    color: var(--vscode-statusBar-foreground) !important;
+}
+
+.introjs-skipbutton:hover {
+    color: var(--vscode-editor-foreground) !important;
+}
+
+.introjs-bullets ul li a {
+    background: var(--vscode-sideBar-border) !important;
+}
+
+.introjs-bullets ul li a.active {
+    background: var(--vscode-button-background) !important;
+}
+
+.introjs-progressbar {
+    background: var(--vscode-button-background) !important;
+}
+
+.introjs-progress {
+    background: var(--vscode-sideBar-background) !important;
+}
+
+.introjs-helperLayer {
+    background: rgba(0, 0, 0, 0.7) !important;
+    border: 2px solid var(--vscode-focusBorder) !important;
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.6) !important;
+}
+

@@ -4,6 +4,7 @@ import { formatSimTime, getBoundaryInteractionCounts, getEnvelopeAtTime, getEnve
 import { navigateTo } from '../router'
 import { createHDDLMap } from '../components/hddl-map'
 import { getStewardColor, toSemver } from '../sim/steward-colors'
+import { createTourButton } from '../components/tour'
 
 // Track active map cleanup to prevent leaks
 let activeMapCleanup = null
@@ -23,13 +24,14 @@ export function renderHome(container) {
 
   container.innerHTML = `
     <div class="page-container">
-      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
         <div style="display: flex; align-items: center; gap: 12px;">
-          <span class="codicon codicon-shield" style="font-size: 28px;"></span>
+          <span class="codicon codicon-shield" style="font-size: 20px;"></span>
           <div>
-            <h1 style="margin: 0;">Decision Envelopes</h1>
-            <p style="margin: 0; color: var(--vscode-statusBar-foreground);">What authority exists right now?</p>
+            <h1 style="margin: 0; font-size: 16px;">Decision Envelopes</h1>
+            <p style="margin: 0; color: var(--vscode-statusBar-foreground); font-size: 11px;">What authority exists right now?</p>
           </div>
+          <div id="tour-button-container" style="display: flex; align-items: center;"></div>
         </div>
         
         <div style="min-width: 200px;">
@@ -65,11 +67,11 @@ export function renderHome(container) {
         </div>
       </div>
 
-      <div id="glossary-inline" style="display:none; background: var(--vscode-sideBar-background); border: 1px solid var(--vscode-sideBar-border); padding: 12px; border-radius: 6px; margin-bottom: 14px;"></div>
+      <div id="glossary-inline" style="display:none; background: var(--vscode-sideBar-background); border: 1px solid var(--vscode-sideBar-border); padding: 10px; border-radius: 4px; margin-bottom: 10px;"></div>
 
-      <div style="background: var(--vscode-notifications-background); border: 1px solid var(--vscode-notifications-border); padding: 12px; border-radius: 6px; margin-bottom: 24px; display: flex; align-items: start; gap: 12px;">
-        <span class="codicon codicon-info" style="font-size: 20px; color: var(--status-info); flex-shrink: 0;"></span>
-        <div style="font-size: 13px;">
+      <div style="background: var(--vscode-notifications-background); border: 1px solid var(--vscode-notifications-border); padding: 10px; border-radius: 4px; margin-bottom: 12px; display: flex; align-items: start; gap: 10px;">
+        <span class="codicon codicon-info" style="font-size: 16px; color: var(--status-info); flex-shrink: 0;"></span>
+        <div style="font-size: 12px;">
           <strong>How to use this simulation:</strong> Use the timeline scrubber above to replay events. Filter by steward type using the dropdown above to see specific authority. Click any envelope to inspect details.
         </div>
       </div>
@@ -94,6 +96,13 @@ export function renderHome(container) {
       console.error('HDDL Map Error:', e)
       mapContainer.innerHTML = `<div style="color:var(--status-error); padding: 10px;">Error loading map: ${e.message}</div>`
     }
+  }
+
+  // Add tour button
+  const tourButtonContainer = container.querySelector('#tour-button-container')
+  if (tourButtonContainer) {
+    const tourButton = createTourButton()
+    tourButtonContainer.appendChild(tourButton)
   }
 
   const grid = container.querySelector('#envelope-grid')
@@ -311,6 +320,7 @@ export function renderHome(container) {
 
   const unsubScenario = onScenarioChange(() => {
     if (!container.isConnected) { unsubScenario(); unsubTime(); return }
+    populateStewardFilter()
     renderEnvelopeCards()
   })
   const unsubTime = onTimeChange(() => {

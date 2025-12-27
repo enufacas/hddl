@@ -10,7 +10,7 @@
       "domain": "Production Management",
       "ownerRole": "Growth Steward",
       "createdHour": 0,
-      "endHour": 240,
+      "endHour": 96,
       "accent": "var(--vscode-charts-green)",
       "envelope_version": 2,
       "revision_id": "REV-VH-001-B",
@@ -52,7 +52,7 @@
       "domain": "Resource Optimization",
       "ownerRole": "Nutrition Steward",
       "createdHour": 0,
-      "endHour": 240,
+      "endHour": 84,
       "accent": "var(--vscode-charts-orange)",
       "envelope_version": 2,
       "revision_id": "REV-VH-003-B",
@@ -73,7 +73,7 @@
       "domain": "Product Quality",
       "ownerRole": "Harvest Steward",
       "createdHour": 12,
-      "endHour": 228,
+      "endHour": 108,
       "accent": "var(--vscode-charts-purple)",
       "envelope_version": 1,
       "revision_id": null,
@@ -94,7 +94,7 @@
       "domain": "Resource Efficiency",
       "ownerRole": "Energy Steward",
       "createdHour": 0,
-      "endHour": 240,
+      "endHour": 96,
       "accent": "var(--vscode-charts-yellow)",
       "envelope_version": 1,
       "revision_id": null,
@@ -115,7 +115,7 @@
       "domain": "Regulatory Adherence",
       "ownerRole": "Compliance Steward",
       "createdHour": 24,
-      "endHour": 240,
+      "endHour": 108,
       "accent": "var(--vscode-charts-red)",
       "envelope_version": 1,
       "revision_id": null,
@@ -128,6 +128,111 @@
         "Any food safety violation requires immediate corrective action and reporting",
         "Traceability gaps exceeding 30 minutes trigger investigation",
         "Certification expiration within 60 days requires renewal initiation"
+      ]
+    },
+    {
+      "envelopeId": "ENV-VH-003",
+      "name": "Water & Nutrient Management",
+      "domain": "Resource Optimization",
+      "ownerRole": "Nutrition Steward",
+      "createdHour": 96,
+      "endHour": 240,
+      "accent": "var(--vscode-charts-orange)",
+      "envelope_version": 3,
+      "revision_id": "ENV-VH-003-v3",
+      "assumptions": [
+        "Nutrient solution models balance N-P-K ratios, pH (5.5-6.5), and EC (1.2-2.4 mS/cm) by crop type.",
+        "Water recirculation achieves 95% reuse efficiency with minimal waste.",
+        "Automated dosing systems adjust based on sensor feedback and plant uptake."
+      ],
+      "constraints": [
+        "pH drift beyond 5.0-7.0 range requires immediate correction",
+        "EC imbalance >0.3 mS/cm from target triggers nutrient adjustment",
+        "Water contamination detected must halt irrigation and initiate purge"
+      ]
+    },
+    {
+      "envelopeId": "ENV-VH-001",
+      "name": "Crop Growth Optimization",
+      "domain": "Production Management",
+      "ownerRole": "Growth Steward",
+      "createdHour": 120,
+      "endHour": 240,
+      "accent": "var(--vscode-charts-green)",
+      "envelope_version": 3,
+      "revision_id": "ENV-VH-001-v3",
+      "assumptions": [
+        "Growth models trained on 18 months of crop cycle data across lettuce, herbs, and microgreens.",
+        "Yield predictions account for variety genetics, growth stage, and environmental conditions.",
+        "Harvest timing optimizes both nutritional value and market demand."
+      ],
+      "constraints": [
+        "Never harvest below 95% optimal maturity without quality override",
+        "Growth cycles must maintain 30% buffer capacity for demand spikes",
+        "Crop rotation schedules respect nutrient recovery periods"
+      ]
+    },
+    {
+      "envelopeId": "ENV-VH-005",
+      "name": "Energy & Sustainability",
+      "domain": "Resource Efficiency",
+      "ownerRole": "Energy Steward",
+      "createdHour": 120,
+      "endHour": 240,
+      "accent": "var(--vscode-charts-yellow)",
+      "envelope_version": 2,
+      "revision_id": "ENV-VH-005-v2",
+      "assumptions": [
+        "Energy models optimize HVAC, lighting, and pumps for cost and carbon footprint.",
+        "Solar panels and battery storage offset 40% of grid consumption.",
+        "Demand response programs shift loads to off-peak hours."
+      ],
+      "constraints": [
+        "Peak energy usage cannot exceed 85% of contracted capacity",
+        "Carbon intensity targets: <0.3 kg CO2e per kg produce",
+        "Renewable energy percentage must stay above 35%"
+      ]
+    },
+    {
+      "envelopeId": "ENV-VH-006",
+      "name": "Food Safety & Compliance",
+      "domain": "Regulatory Adherence",
+      "ownerRole": "Compliance Steward",
+      "createdHour": 132,
+      "endHour": 240,
+      "accent": "var(--vscode-charts-red)",
+      "envelope_version": 2,
+      "revision_id": "ENV-VH-006-v2",
+      "assumptions": [
+        "Compliance models track USDA GAP, FSMA, and organic certification requirements.",
+        "Traceability systems log every batch from seed to sale.",
+        "Audit readiness maintained with continuous monitoring and documentation."
+      ],
+      "constraints": [
+        "Any food safety violation requires immediate corrective action and reporting",
+        "Traceability gaps exceeding 30 minutes trigger investigation",
+        "Certification expiration within 60 days requires renewal initiation"
+      ]
+    },
+    {
+      "envelopeId": "ENV-VH-004",
+      "name": "Harvest & Quality Assurance",
+      "domain": "Product Quality",
+      "ownerRole": "Harvest Steward",
+      "createdHour": 144,
+      "endHour": 228,
+      "accent": "var(--vscode-charts-purple)",
+      "envelope_version": 2,
+      "revision_id": "ENV-VH-004-v2",
+      "assumptions": [
+        "Quality models assess visual appearance, nutrient density, shelf life, and pathogen risk.",
+        "Harvest windows optimize freshness for 24-48 hour delivery cycles.",
+        "Post-harvest handling maintains cold chain integrity."
+      ],
+      "constraints": [
+        "Never ship produce testing positive for E. coli or Salmonella",
+        "Shelf life projections must guarantee 7+ days post-delivery",
+        "Visual defects exceeding 5% trigger batch quality review"
       ]
     }
   ],

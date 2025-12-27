@@ -10,7 +10,7 @@
       "domain": "Clinical Diagnostics",
       "ownerRole": "Medical Steward",
       "createdHour": 0,
-      "endHour": 24,
+      "endHour": 20,
       "accent": "var(--vscode-charts-red)",
       "envelope_version": 1,
       "revision_id": null,
@@ -31,7 +31,7 @@
       "domain": "Pharmacy Safety",
       "ownerRole": "Pharmacy Steward",
       "createdHour": 6,
-      "endHour": 48,
+      "endHour": 30,
       "accent": "var(--vscode-charts-orange)",
       "envelope_version": 1,
       "revision_id": null,
@@ -52,10 +52,73 @@
       "domain": "Emergency Care",
       "ownerRole": "Emergency Steward",
       "createdHour": 12,
-      "endHour": 72,
+      "endHour": 36,
       "accent": "var(--vscode-charts-yellow)",
       "envelope_version": 2,
       "revision_id": "REV-MED-003-A",
+      "assumptions": [
+        "Triage decisions are advisory — clinical staff have final authority.",
+        "Vital signs are continuously monitored and accurate.",
+        "Wait time optimization does not override clinical urgency."
+      ],
+      "constraints": [
+        "Never downgrade clinician-assigned triage levels",
+        "Flag deteriorating vital signs immediately",
+        "Maintain audit trail of all triage recommendations"
+      ]
+    },
+    {
+      "envelopeId": "ENV-MED-001",
+      "name": "Diagnostic Recommendations",
+      "domain": "Clinical Diagnostics",
+      "ownerRole": "Medical Steward",
+      "createdHour": 28,
+      "endHour": 36,
+      "accent": "var(--vscode-charts-red)",
+      "envelope_version": 2,
+      "revision_id": "ENV-MED-001-v2",
+      "assumptions": [
+        "AI provides differential diagnosis suggestions only, never final diagnoses.",
+        "All recommendations include confidence levels and evidence sources.",
+        "Patient safety is paramount — false negatives are weighted heavily."
+      ],
+      "constraints": [
+        "Never present recommendations as conclusive diagnoses",
+        "Require human physician review for all critical findings",
+        "Flag low-confidence suggestions prominently"
+      ]
+    },
+    {
+      "envelopeId": "ENV-MED-002",
+      "name": "Medication Interaction Alerts",
+      "domain": "Pharmacy Safety",
+      "ownerRole": "Pharmacy Steward",
+      "createdHour": 42,
+      "endHour": 48,
+      "accent": "var(--vscode-charts-orange)",
+      "envelope_version": 2,
+      "revision_id": "ENV-MED-002-v2",
+      "assumptions": [
+        "Drug interaction database is continuously updated.",
+        "Patient allergy history is complete and accurate.",
+        "Severity ratings follow FDA guidelines."
+      ],
+      "constraints": [
+        "Block high-severity interactions automatically",
+        "Require pharmacist override for moderate interactions",
+        "Log all interaction checks for audit"
+      ]
+    },
+    {
+      "envelopeId": "ENV-MED-003",
+      "name": "Patient Triage Priority",
+      "domain": "Emergency Care",
+      "ownerRole": "Emergency Steward",
+      "createdHour": 48,
+      "endHour": 72,
+      "accent": "var(--vscode-charts-yellow)",
+      "envelope_version": 3,
+      "revision_id": "ENV-MED-003-v3",
       "assumptions": [
         "Triage decisions are advisory — clinical staff have final authority.",
         "Vital signs are continuously monitored and accurate.",

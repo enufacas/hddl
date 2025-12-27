@@ -1,4 +1,5 @@
 import './style-workspace.css'
+import 'intro.js/introjs.css'
 import { initRouter, navigateTo } from './router'
 import { createWorkspace } from './components/workspace'
 import { createScenarioSelector } from './components/scenario-selector'
@@ -22,12 +23,24 @@ titleLeft.style.cssText = 'display: flex; align-items: center; gap: 8px;'
 const titleIcon = document.createElement('span')
 titleIcon.className = 'codicon codicon-pulse'
 const titleText = document.createElement('span')
-titleText.textContent = 'HDDL Simulation Platform'
+titleText.textContent = 'Human-Derived Decision Layer (HDDL) Simulation Platform'
 titleLeft.appendChild(titleIcon)
 titleLeft.appendChild(titleText)
 
 const titleRight = document.createElement('div')
 titleRight.style.cssText = 'display: flex; align-items: center; gap: 4px;'
+
+// Add specification explorer button
+const specBtn = document.createElement('a')
+specBtn.className = 'title-actions-button'
+specBtn.setAttribute('role', 'button')
+specBtn.setAttribute('aria-label', 'Explore HDDL Specification')
+specBtn.title = 'Explore HDDL Specification'
+specBtn.style.cssText = 'cursor: pointer; padding: 4px 8px; display: flex; align-items: center; gap: 6px;'
+specBtn.innerHTML = '<span class="codicon codicon-json"></span><span>Explore Specification</span>'
+specBtn.addEventListener('click', () => navigateTo('/specification'))
+titleRight.appendChild(specBtn)
+
 const refreshBtn = document.createElement('a')
 refreshBtn.className = 'codicon codicon-refresh'
 refreshBtn.setAttribute('role', 'button')
@@ -35,26 +48,6 @@ refreshBtn.setAttribute('aria-label', 'Refresh')
 refreshBtn.style.cssText = 'cursor: pointer; padding: 4px;'
 refreshBtn.addEventListener('click', () => location.reload())
 titleRight.appendChild(refreshBtn)
-
-const reviewBtn = document.createElement('a')
-reviewBtn.className = 'codicon codicon-comment-discussion'
-reviewBtn.setAttribute('role', 'button')
-reviewBtn.setAttribute('aria-label', 'Toggle UX Review Mode')
-reviewBtn.title = 'Toggle UX Review Mode'
-reviewBtn.style.cssText = 'cursor: pointer; padding: 4px;'
-
-function syncReviewBtn() {
-  const on = isReviewModeEnabled()
-  reviewBtn.style.opacity = on ? '1' : '0.65'
-}
-
-reviewBtn.addEventListener('click', () => {
-  const next = setReviewModeEnabled(!isReviewModeEnabled())
-  syncReviewBtn()
-  setTimelineStatus(next ? 'UX Review Mode on.' : 'UX Review Mode off.')
-})
-
-titleRight.appendChild(reviewBtn)
 
 // Add scenario selector to titlebar
 const scenarioSelector = createScenarioSelector()
@@ -192,7 +185,18 @@ const scrubberFill = document.createElement('div')
 scrubberFill.style.cssText = `width: ${(currentTime / initialDuration) * 100}%; height: 100%; background: var(--status-info); opacity: 0.3; pointer-events: none; position: relative; z-index: 0;`
 
 const scrubberHandle = document.createElement('div')
-scrubberHandle.style.cssText = `position: absolute; left: ${(currentTime / initialDuration) * 100}%; top: -2px; width: 3px; height: 28px; background: var(--status-info); cursor: ew-resize; z-index: 6;`
+scrubberHandle.style.cssText = `position: absolute; left: ${(currentTime / initialDuration) * 100}%; top: -4px; width: 16px; height: 32px; background: var(--status-info); border: 2px solid var(--vscode-editor-background); border-radius: 4px; cursor: ew-resize; z-index: 6; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4); transform: translateX(-50%); transition: transform 0.1s ease; will-change: transform;`
+scrubberHandle.setAttribute('title', 'Drag to scrub timeline')
+
+// Add hover effect
+scrubberHandle.addEventListener('mouseenter', () => {
+  scrubberHandle.style.transform = 'translateX(-50%) scale(1.1)'
+  scrubberHandle.style.boxShadow = '0 2px 12px rgba(75, 150, 255, 0.6)'
+})
+scrubberHandle.addEventListener('mouseleave', () => {
+  scrubberHandle.style.transform = 'translateX(-50%) scale(1)'
+  scrubberHandle.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.4)'
+})
 
 scrubberContainer.appendChild(envelopeSpans)
 scrubberContainer.appendChild(eventMarkers)
@@ -533,7 +537,6 @@ app.appendChild(statusbar)
 
 // UX review harness (optional)
 initReviewHarness()
-syncReviewBtn()
 
 // Initialize router (pages will render into #editor-area)
 initRouter()

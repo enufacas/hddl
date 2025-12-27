@@ -5,9 +5,9 @@ import { getStewardColor, STEWARD_PALETTE, toSemver, getEventColor } from '../si
 export function createHDDLMap(container, options = {}) {
   // 1. Setup SVG and Dimensions
   const width = container.clientWidth || 800
-  const mapHeight = 570
-  const embeddingHeight = 180
-  const height = mapHeight + embeddingHeight  // Total: 750px
+  const mapHeight = 480
+  const embeddingHeight = 200
+  const height = mapHeight + embeddingHeight  // Total: 680px
   
   // Filter state
   let currentFilter = options.initialFilter || 'all'
@@ -41,10 +41,10 @@ export function createHDDLMap(container, options = {}) {
 
   // Lifecycle loop cues (subtle background curves across system boundaries)
   // These are intentionally static: they communicate the conceptual flow.
-  const cycleYTop = 118
-  const cycleYBottom = mapHeight - 56  // Use mapHeight, not total height
+  const cycleYTop = 100
+  const cycleYBottom = mapHeight - 48  // Use mapHeight, not total height
   const cycleYMid = (cycleYTop + cycleYBottom) / 2
-  const cycleRy = Math.max(70, (cycleYBottom - cycleYTop) * 0.42)
+  const cycleRy = Math.max(65, (cycleYBottom - cycleYTop) * 0.42)
 
   function loopPath(x1, x2) {
     const rx = Math.max(80, Math.abs(x2 - x1) * 0.55)
@@ -106,7 +106,7 @@ export function createHDDLMap(container, options = {}) {
     .attr('x', 0)
     .attr('y', 0)
     .attr('width', width)
-    .attr('height', 34)
+    .attr('height', 26)
     .attr('fill', 'var(--vscode-editor-background)')
     .attr('opacity', 0.84)
 
@@ -122,18 +122,18 @@ export function createHDDLMap(container, options = {}) {
   const col1Right = col1Width
   const col3Left = col1Width + col2Width
 
-  headerLayer.append('text').attr('x', col1Center).attr('y', 24).attr('text-anchor', 'middle').text('AGENT FLEETS').attr('fill', 'var(--vscode-editor-foreground)').style('font-size', '9px').style('font-weight', '800').style('letter-spacing', '0.6px').style('paint-order', 'stroke').style('stroke', 'var(--vscode-editor-background)').style('stroke-width', '3px').style('opacity', 0.85)
-  headerLayer.append('text').attr('x', col2Center).attr('y', 24).attr('text-anchor', 'middle').text('DECISION ENVELOPES').attr('fill', 'var(--vscode-editor-foreground)').style('font-size', '9px').style('font-weight', '800').style('letter-spacing', '0.6px').style('paint-order', 'stroke').style('stroke', 'var(--vscode-editor-background)').style('stroke-width', '3px').style('opacity', 0.85)
-  headerLayer.append('text').attr('x', col3Center).attr('y', 24).attr('text-anchor', 'middle').text('STEWARDS').attr('fill', 'var(--vscode-editor-foreground)').style('font-size', '9px').style('font-weight', '800').style('letter-spacing', '0.6px').style('paint-order', 'stroke').style('stroke', 'var(--vscode-editor-background)').style('stroke-width', '3px').style('opacity', 0.85)
+  headerLayer.append('text').attr('x', col1Center).attr('y', 18).attr('text-anchor', 'middle').text('AGENT FLEETS').attr('fill', 'var(--vscode-editor-foreground)').style('font-size', '8px').style('font-weight', '800').style('letter-spacing', '0.6px').style('paint-order', 'stroke').style('stroke', 'var(--vscode-editor-background)').style('stroke-width', '3px').style('opacity', 0.85)
+  headerLayer.append('text').attr('x', col2Center).attr('y', 18).attr('text-anchor', 'middle').text('DECISION ENVELOPES').attr('fill', 'var(--vscode-editor-foreground)').style('font-size', '8px').style('font-weight', '800').style('letter-spacing', '0.6px').style('paint-order', 'stroke').style('stroke', 'var(--vscode-editor-background)').style('stroke-width', '3px').style('opacity', 0.85)
+  headerLayer.append('text').attr('x', col3Center).attr('y', 18).attr('text-anchor', 'middle').text('STEWARDS').attr('fill', 'var(--vscode-editor-foreground)').style('font-size', '8px').style('font-weight', '800').style('letter-spacing', '0.6px').style('paint-order', 'stroke').style('stroke', 'var(--vscode-editor-background)').style('stroke-width', '3px').style('opacity', 0.85)
 
   // Source-of-truth cue for signals so the flow reads as "world -> envelope".
   headerLayer.append('text')
     .attr('x', col2Center)
-    .attr('y', 12)
+    .attr('y', 8)
     .attr('text-anchor', 'middle')
     .text('WORLD (Telemetry) ↓')
     .attr('fill', 'var(--vscode-statusBar-foreground)')
-    .style('font-size', '8px')
+    .style('font-size', '7px')
     .style('font-weight', '700')
     .style('opacity', 0.65)
     .style('paint-order', 'stroke')
@@ -306,15 +306,28 @@ export function createHDDLMap(container, options = {}) {
       ? allEnvelopes
       : allEnvelopes.filter(env => env.ownerRole === currentFilter)
     
-    const activeEnvelopes = filteredEnvelopes.map(envelope => {
-      return getEnvelopeAtTime(scenario, envelope.envelopeId, hour) || envelope
-    })
+    // Find the active instance of each envelope at the current time
+    // Multiple envelope instances with the same ID can exist (for reopening patterns)
+    // We want the instance that is active at the current hour
+    const envelopesById = new Map()
+    for (const envelope of filteredEnvelopes) {
+      const status = getEnvelopeStatus(envelope, hour)
+      const existing = envelopesById.get(envelope.envelopeId)
+      
+      // Prefer active envelopes, then the most recent instance
+      if (!existing || status === 'active' || 
+          (status !== 'active' && existing.status !== 'active' && envelope.createdHour > existing.createdHour)) {
+        envelopesById.set(envelope.envelopeId, { ...envelope, status })
+      }
+    }
+    
+    const activeEnvelopes = Array.from(envelopesById.values())
 
     // Sort envelopes for layout: Active first, then by ID
     // This creates the "come to the top" behavior
     activeEnvelopes.sort((a, b) => {
-        const statusA = getEnvelopeStatus(a, hour)
-        const statusB = getEnvelopeStatus(b, hour)
+        const statusA = a.status
+        const statusB = b.status
         if (statusA === 'active' && statusB !== 'active') return -1
         if (statusA !== 'active' && statusB === 'active') return 1
         return a.envelopeId.localeCompare(b.envelopeId)
@@ -347,8 +360,8 @@ export function createHDDLMap(container, options = {}) {
         .filter(Boolean)
     )
 
-    const topMargin = 52
-    const bottomMargin = 28
+    const topMargin = 38
+    const bottomMargin = 16
     const usableHeight = Math.max(160, mapHeight - topMargin - bottomMargin)  // Use mapHeight, not total height
     const rowCount = Math.max(1, activeEnvelopes.length)
     const rowHeight = usableHeight / rowCount
@@ -359,8 +372,8 @@ export function createHDDLMap(container, options = {}) {
     const newNodes = activeEnvelopes.map((envelope, index) => {
       const existing = nodes.find(n => n.id === envelope.envelopeId)
       
-      // Determine if envelope is active in the current time window
-      const status = getEnvelopeStatus(envelope, hour)
+      // Status already computed earlier
+      const status = envelope.status
       const isActive = status === 'active'
       
       // Get effective envelope at current time (with revisions applied)
@@ -477,8 +490,8 @@ export function createHDDLMap(container, options = {}) {
     const rightPadding = 18
     const idleX = col1Left + leftPadding + 20
     const workingX = col1Left + Math.max(96, (col1Right - col1Left) * 0.43)
-    const agentStep = Math.max(26, Math.min(34, rowHeight * 0.42))
-    const fleetBand = Math.max(64, Math.min(140, usableHeight / Math.max(1, fleetOrder.length)))
+    const agentStep = Math.max(26, Math.min(30, rowHeight * 0.42))
+    const fleetBand = Math.max(52, Math.min(120, usableHeight / Math.max(1, fleetOrder.length)))
 
     // Fleet vertical slots (prevents fleets from overlapping even when a fleet has many agents).
     const stewardDomain = stewardScale.domain()
@@ -510,8 +523,8 @@ export function createHDDLMap(container, options = {}) {
 
       const span = Math.max(0, maxY - minY)
       // Agent name + role occupy ~30px vertical space (name at y=-2, role at y=12, plus margins)
-      // Need at least 32-35px between agent centers to prevent text overlap
-      const safeMinStep = 34
+      // Need at least 28px between agent centers to prevent text overlap (reduced for compactness)
+      const safeMinStep = 28
       const ideal = span / Math.max(1, (count - 1))
       const step = Math.max(safeMinStep, Math.min(agentStep, ideal))
       
@@ -1232,9 +1245,9 @@ export function createHDDLMap(container, options = {}) {
       .attr('class', 'agent-name')
       .attr('text-anchor', 'start')
       .attr('x', 16)
-      .attr('y', -2)
+      .attr('y', -3)
       .style('pointer-events', 'none')
-      .style('font-size', '10px')
+      .style('font-size', '9px')
       .style('font-weight', '700')
       .style('paint-order', 'stroke')
       .style('stroke', 'var(--vscode-editor-background)')
@@ -1247,9 +1260,9 @@ export function createHDDLMap(container, options = {}) {
       .attr('class', 'agent-role')
       .attr('text-anchor', 'start')
       .attr('x', 16)
-      .attr('y', 12)
+      .attr('y', 10)
       .style('pointer-events', 'none')
-      .style('font-size', '9px')
+      .style('font-size', '8px')
       .style('paint-order', 'stroke')
       .style('stroke', 'var(--vscode-editor-background)')
       .style('stroke-width', '3px')
@@ -1755,7 +1768,7 @@ export function createHDDLMap(container, options = {}) {
   // EMBEDDING VECTOR SPACE (3D Memory Store)
   // ============================================================================
   
-  const embeddingStoreHeight = 180
+  const embeddingStoreHeight = embeddingHeight
   const embeddingStoreLayer = svg.append('g')
     .attr('class', 'embedding-store')
     .attr('transform', `translate(0, ${mapHeight})`)
@@ -2246,7 +2259,7 @@ export function createHDDLMap(container, options = {}) {
       d3.select(this).transition().duration(100).attr('opacity', 1)
       
       // Update tooltip content and show
-      tooltip
+      const tooltipNode = tooltip
         .style('border-color', embeddingColor)
         .style('display', 'block')
         .html(`
@@ -2270,13 +2283,19 @@ export function createHDDLMap(container, options = {}) {
             ⏱️ Hour ${tooltipData.hour}
           </div>
         `)
-        .style('left', (mouseEvent.pageX + 15) + 'px')
-        .style('top', (mouseEvent.pageY - 10) + 'px')
-    })
-    .on('mousemove', function(mouseEvent) {
+      
+      // Position tooltip above cursor
+      const tooltipHeight = tooltipNode.node().offsetHeight
       tooltip
         .style('left', (mouseEvent.pageX + 15) + 'px')
-        .style('top', (mouseEvent.pageY - 10) + 'px')
+        .style('top', (mouseEvent.pageY - tooltipHeight - 10) + 'px')
+    })
+    .on('mousemove', function(mouseEvent) {
+      // Position tooltip above cursor
+      const tooltipHeight = tooltip.node().offsetHeight
+      tooltip
+        .style('left', (mouseEvent.pageX + 15) + 'px')
+        .style('top', (mouseEvent.pageY - tooltipHeight - 10) + 'px')
     })
     .on('mouseleave', function() {
       d3.select(this).transition().duration(200).attr('opacity', depthOpacity)

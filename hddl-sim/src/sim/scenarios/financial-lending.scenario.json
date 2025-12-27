@@ -10,7 +10,7 @@
       "domain": "Lending Operations",
       "ownerRole": "Lending Steward",
       "createdHour": 0,
-      "endHour": 120,
+      "endHour": 60,
       "accent": "var(--vscode-charts-blue)",
       "envelope_version": 4,
       "revision_id": "REV-FIN-001-D",
@@ -31,7 +31,7 @@
       "domain": "Risk Management",
       "ownerRole": "Risk Steward",
       "createdHour": 0,
-      "endHour": 120,
+      "endHour": 48,
       "accent": "var(--vscode-charts-red)",
       "envelope_version": 2,
       "revision_id": "REV-FIN-002-B",
@@ -52,7 +52,7 @@
       "domain": "Customer Recovery",
       "ownerRole": "Recovery Steward",
       "createdHour": 24,
-      "endHour": 96,
+      "endHour": 60,
       "accent": "var(--vscode-charts-orange)",
       "envelope_version": 1,
       "revision_id": null,
@@ -73,7 +73,7 @@
       "domain": "Compliance",
       "ownerRole": "Compliance Steward",
       "createdHour": 0,
-      "endHour": 120,
+      "endHour": 48,
       "accent": "var(--vscode-charts-purple)",
       "envelope_version": 3,
       "revision_id": "REV-FIN-004-C",
@@ -86,6 +86,90 @@
         "Adverse action notices sent within 30 days",
         "Maintain 7-year audit trail for all credit decisions",
         "Quarterly fairness testing for disparate impact"
+      ]
+    },
+    {
+      "envelopeId": "ENV-FIN-004",
+      "name": "Regulatory Compliance Monitoring",
+      "domain": "Compliance",
+      "ownerRole": "Compliance Steward",
+      "createdHour": 60,
+      "endHour": 120,
+      "accent": "var(--vscode-charts-purple)",
+      "envelope_version": 4,
+      "revision_id": "ENV-FIN-004-v4",
+      "assumptions": [
+        "All lending decisions are auditable with full lineage.",
+        "Regulatory reporting is automated and validated daily.",
+        "Model risk management processes are documented and tested."
+      ],
+      "constraints": [
+        "Adverse action notices sent within 30 days",
+        "Maintain 7-year audit trail for all credit decisions",
+        "Quarterly fairness testing for disparate impact"
+      ]
+    },
+    {
+      "envelopeId": "ENV-FIN-002",
+      "name": "Fraud Detection",
+      "domain": "Risk Management",
+      "ownerRole": "Risk Steward",
+      "createdHour": 72,
+      "endHour": 120,
+      "accent": "var(--vscode-charts-red)",
+      "envelope_version": 3,
+      "revision_id": "ENV-FIN-002-v3",
+      "assumptions": [
+        "Fraud models prioritize accuracy over false positive minimization.",
+        "Customers can dispute fraud flags with documented evidence.",
+        "Geographic and behavioral patterns are monitored for legitimacy."
+      ],
+      "constraints": [
+        "High-risk flags require secondary verification",
+        "Legitimate customer transactions must not be blocked repeatedly",
+        "Appeal process completes within 48 hours"
+      ]
+    },
+    {
+      "envelopeId": "ENV-FIN-001",
+      "name": "Credit Underwriting",
+      "domain": "Lending Operations",
+      "ownerRole": "Lending Steward",
+      "createdHour": 84,
+      "endHour": 120,
+      "accent": "var(--vscode-charts-blue)",
+      "envelope_version": 5,
+      "revision_id": "ENV-FIN-001-v5",
+      "assumptions": [
+        "Credit models are tested for disparate impact across protected classes.",
+        "Applicants receive clear explanations for adverse actions.",
+        "Human review is required for all denials and near-threshold decisions."
+      ],
+      "constraints": [
+        "No use of protected class attributes in decisioning",
+        "All denials must include specific adverse action reasons",
+        "Manual review required for borderline cases (±5% of threshold)"
+      ]
+    },
+    {
+      "envelopeId": "ENV-FIN-003",
+      "name": "Collections & Hardship Programs",
+      "domain": "Customer Recovery",
+      "ownerRole": "Recovery Steward",
+      "createdHour": 84,
+      "endHour": 96,
+      "accent": "var(--vscode-charts-orange)",
+      "envelope_version": 2,
+      "revision_id": "ENV-FIN-003-v2",
+      "assumptions": [
+        "Collections outreach is respectful and compliant with FDCPA.",
+        "Hardship programs are offered proactively to qualifying customers.",
+        "Payment plans are sustainable based on income verification."
+      ],
+      "constraints": [
+        "No contact outside permitted hours (8am-9pm local time)",
+        "Hardship eligibility assessed before aggressive collections",
+        "Cease communication upon written request"
       ]
     }
   ],

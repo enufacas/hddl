@@ -2,6 +2,7 @@ import { formatSimTime, getScenario, getTimeHour, onScenarioChange, onTimeChange
 import { initGlossaryInline } from '../components/glossary'
 import { navigateTo } from '../router'
 import { getStewardColor } from '../sim/steward-colors'
+import { createTourButton, startDTSTour } from '../components/tour'
 
 export function renderDecisionTelemetry(container) {
   let disposeGlossary = () => {}
@@ -18,6 +19,7 @@ export function renderDecisionTelemetry(container) {
             <h1 style="margin: 0;">Decision Telemetry Stream</h1>
             <p style="margin: 0; color: var(--vscode-statusBar-foreground);">Query-first DTS event log</p>
           </div>
+          <div id="dts-tour-button-container" style="display: flex; align-items: center;"></div>
         </div>
         <div style="min-width: 180px;">
           <div style="font-size: 9px; color: var(--vscode-statusBar-foreground); margin-bottom: 4px; letter-spacing: 0.5px; text-transform: uppercase;">Filter By Steward</div>
@@ -271,7 +273,31 @@ export function renderDecisionTelemetry(container) {
   
   // Initialize steward filter
   let currentFilter = getStewardFilter()
+  
+  // Populate filter options based on scenario
+  function populateStewardFilter() {
+    if (!stewardFilter) return
+    const scenario = getScenario()
+    const envelopes = scenario?.envelopes ?? []
+    const uniqueRoles = new Set(envelopes.map(e => e.ownerRole).filter(Boolean))
+    const sortedRoles = Array.from(uniqueRoles).sort()
+    
+    const currentValue = stewardFilter.value
+    stewardFilter.innerHTML = '<option value="all">All Envelopes</option>' +
+      sortedRoles.map(role => `<option value="${role}">${role}</option>`).join('')
+    
+    // Restore selection if it still exists
+    if (sortedRoles.includes(currentValue) || currentValue === 'all') {
+      stewardFilter.value = currentValue
+    } else {
+      stewardFilter.value = 'all'
+      currentFilter = 'all'
+      setStewardFilter('all')
+    }
+  }
+  
   if (stewardFilter) {
+    populateStewardFilter()
     stewardFilter.value = currentFilter
     stewardFilter.addEventListener('change', (e) => {
       currentFilter = e.target.value
@@ -298,6 +324,13 @@ export function renderDecisionTelemetry(container) {
   }
 
   bindGlossary()
+
+  // Add tour button with DTS-specific tour
+  const dtsTourButtonContainer = container.querySelector('#dts-tour-button-container')
+  if (dtsTourButtonContainer) {
+    const tourButton = createTourButton(startDTSTour)
+    dtsTourButtonContainer.appendChild(tourButton)
+  }
 
   // Query parser
   function parseQuery(queryString) {

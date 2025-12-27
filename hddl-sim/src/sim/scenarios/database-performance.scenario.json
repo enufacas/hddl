@@ -10,7 +10,7 @@
       "domain": "Performance Engineering",
       "ownerRole": "Performance Steward",
       "createdHour": 0,
-      "endHour": 72,
+      "endHour": 36,
       "accent": "var(--vscode-charts-green)",
       "envelope_version": 2,
       "revision_id": "REV-DB-001-B",
@@ -52,7 +52,7 @@
       "domain": "Infrastructure Planning",
       "ownerRole": "Infrastructure Steward",
       "createdHour": 12,
-      "endHour": 60,
+      "endHour": 36,
       "accent": "var(--vscode-charts-blue)",
       "envelope_version": 1,
       "revision_id": null,
@@ -73,10 +73,73 @@
       "domain": "Customer Success",
       "ownerRole": "Customer Success Steward",
       "createdHour": 24,
-      "endHour": 72,
+      "endHour": 48,
       "accent": "var(--vscode-charts-orange)",
       "envelope_version": 1,
       "revision_id": null,
+      "assumptions": [
+        "SLA calculations align with customer contract definitions.",
+        "Downtime attribution is based on root cause analysis.",
+        "Credits are automatically flagged when thresholds are breached."
+      ],
+      "constraints": [
+        "Uptime calculations must exclude scheduled maintenance",
+        "Customer-facing reports reviewed before automated delivery",
+        "SLA breach notifications escalate to account team within 1 hour"
+      ]
+    },
+    {
+      "envelopeId": "ENV-DB-001",
+      "name": "Query Optimization Recommendations",
+      "domain": "Performance Engineering",
+      "ownerRole": "Performance Steward",
+      "createdHour": 42,
+      "endHour": 72,
+      "accent": "var(--vscode-charts-green)",
+      "envelope_version": 3,
+      "revision_id": "ENV-DB-001-v3",
+      "assumptions": [
+        "AI identifies slow queries based on execution time and resource consumption.",
+        "Optimization recommendations balance performance gains with schema stability.",
+        "Production changes require DBA approval and rollback plan."
+      ],
+      "constraints": [
+        "Never recommend index changes without impact analysis",
+        "Flag queries touching PII tables for security review",
+        "All recommendations include estimated performance improvement"
+      ]
+    },
+    {
+      "envelopeId": "ENV-DB-003",
+      "name": "Capacity Planning & Forecasting",
+      "domain": "Infrastructure Planning",
+      "ownerRole": "Infrastructure Steward",
+      "createdHour": 48,
+      "endHour": 60,
+      "accent": "var(--vscode-charts-blue)",
+      "envelope_version": 2,
+      "revision_id": "ENV-DB-003-v2",
+      "assumptions": [
+        "Growth projections account for seasonal patterns and product launches.",
+        "Resource recommendations include cost-benefit analysis.",
+        "Forecasts update weekly based on actual usage trends."
+      ],
+      "constraints": [
+        "Scaling recommendations must maintain 20% capacity buffer",
+        "Cost projections must include multi-cloud pricing",
+        "Never recommend downsizing within 30 days of scale-up"
+      ]
+    },
+    {
+      "envelopeId": "ENV-DB-004",
+      "name": "Customer SLA Compliance Reporting",
+      "domain": "Customer Success",
+      "ownerRole": "Customer Success Steward",
+      "createdHour": 66,
+      "endHour": 72,
+      "accent": "var(--vscode-charts-orange)",
+      "envelope_version": 2,
+      "revision_id": "ENV-DB-004-v2",
       "assumptions": [
         "SLA calculations align with customer contract definitions.",
         "Downtime attribution is based on root cause analysis.",

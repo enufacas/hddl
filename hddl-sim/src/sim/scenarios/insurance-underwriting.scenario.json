@@ -10,7 +10,7 @@
       "domain": "Underwriting",
       "ownerRole": "Underwriting Steward",
       "createdHour": 0,
-      "endHour": 120,
+      "endHour": 48,
       "accent": "var(--vscode-charts-blue)",
       "envelope_version": 4,
       "revision_id": "REV-INS-001-D",
@@ -31,7 +31,7 @@
       "domain": "Claims Processing",
       "ownerRole": "Claims Steward",
       "createdHour": 0,
-      "endHour": 120,
+      "endHour": 36,
       "accent": "var(--vscode-charts-red)",
       "envelope_version": 3,
       "revision_id": "REV-INS-002-C",
@@ -52,7 +52,7 @@
       "domain": "Pricing Strategy",
       "ownerRole": "Pricing Steward",
       "createdHour": 12,
-      "endHour": 108,
+      "endHour": 48,
       "accent": "var(--vscode-charts-green)",
       "envelope_version": 2,
       "revision_id": "REV-INS-003-B",
@@ -73,7 +73,7 @@
       "domain": "Compliance",
       "ownerRole": "Compliance Steward",
       "createdHour": 0,
-      "endHour": 120,
+      "endHour": 48,
       "accent": "var(--vscode-charts-purple)",
       "envelope_version": 1,
       "revision_id": null,
@@ -86,6 +86,111 @@
         "All AI-driven decisions must be explainable to regulators",
         "Quarterly fairness audits required for risk models",
         "Material model changes require actuarial sign-off"
+      ]
+    },
+    {
+      "envelopeId": "ENV-INS-001",
+      "name": "Policy Risk Assessment",
+      "domain": "Underwriting",
+      "ownerRole": "Underwriting Steward",
+      "createdHour": 60,
+      "endHour": 120,
+      "accent": "var(--vscode-charts-blue)",
+      "envelope_version": 5,
+      "revision_id": "ENV-INS-001-v5",
+      "assumptions": [
+        "Risk models trained on historical claims data and actuarial tables.",
+        "Assessments consider geographical, demographic, and behavioral factors.",
+        "Underwriters review AI recommendations for policies exceeding thresholds."
+      ],
+      "constraints": [
+        "No use of protected characteristics (race, religion, etc.) in risk scoring",
+        "High-risk classifications require human underwriter justification",
+        "Rate recommendations must align with state regulatory limits"
+      ]
+    },
+    {
+      "envelopeId": "ENV-INS-002",
+      "name": "Claims Triage & Fraud Detection",
+      "domain": "Claims Processing",
+      "ownerRole": "Claims Steward",
+      "createdHour": 60,
+      "endHour": 96,
+      "accent": "var(--vscode-charts-red)",
+      "envelope_version": 4,
+      "revision_id": "ENV-INS-002-v4",
+      "assumptions": [
+        "Fraud detection balances false positives with loss prevention.",
+        "Automated triage speeds legitimate claims processing.",
+        "Pattern analysis identifies suspicious claim networks."
+      ],
+      "constraints": [
+        "Fraud flags must include specific indicators for adjuster review",
+        "Never auto-deny claims — only recommend further investigation",
+        "Claimants notified of delays within 48 hours"
+      ]
+    },
+    {
+      "envelopeId": "ENV-INS-004",
+      "name": "Regulatory Compliance & Reporting",
+      "domain": "Compliance",
+      "ownerRole": "Compliance Steward",
+      "createdHour": 60,
+      "endHour": 120,
+      "accent": "var(--vscode-charts-purple)",
+      "envelope_version": 2,
+      "revision_id": "ENV-INS-004-v2",
+      "assumptions": [
+        "Automated compliance checks against state and federal regulations.",
+        "Model fairness testing detects disparate impact before deployment.",
+        "Audit trails maintain 10-year retention for regulatory inquiries."
+      ],
+      "constraints": [
+        "All AI-driven decisions must be explainable to regulators",
+        "Quarterly fairness audits required for risk models",
+        "Material model changes require actuarial sign-off"
+      ]
+    },
+    {
+      "envelopeId": "ENV-INS-003",
+      "name": "Premium Pricing & Quote Generation",
+      "domain": "Pricing Strategy",
+      "ownerRole": "Pricing Steward",
+      "createdHour": 72,
+      "endHour": 108,
+      "accent": "var(--vscode-charts-green)",
+      "envelope_version": 3,
+      "revision_id": "ENV-INS-003-v3",
+      "assumptions": [
+        "Dynamic pricing reflects real-time risk assessment and market conditions.",
+        "Discount eligibility is transparent and consistently applied.",
+        "Price optimization balances competitiveness with profitability."
+      ],
+      "constraints": [
+        "Premium increases limited to 15% per renewal without review",
+        "Quotes valid for 30 days from generation",
+        "Discounts must not create discriminatory pricing patterns"
+      ]
+    },
+    {
+      "envelopeId": "ENV-INS-002",
+      "name": "Claims Triage & Fraud Detection",
+      "domain": "Claims Processing",
+      "ownerRole": "Claims Steward",
+      "createdHour": 108,
+      "endHour": 120,
+      "accent": "var(--vscode-charts-red)",
+      "envelope_version": 5,
+      "revision_id": "ENV-INS-002-v5",
+      "assumptions": [
+        "Fraud detection balances false positives with loss prevention.",
+        "Automated triage speeds legitimate claims processing.",
+        "Pattern analysis identifies suspicious claim networks."
+      ],
+      "constraints": [
+        "Fraud flags must include specific indicators for adjuster review",
+        "Never auto-deny claims — only recommend further investigation",
+        "Claimants notified of delays within 48 hours"
       ]
     }
   ],
