@@ -7,6 +7,7 @@ import { renderDocs } from './pages/docs'
 import { render as renderTimeline } from './pages/timeline'
 import { render as renderStewardship } from './pages/stewardship'
 import { render as renderInteractive } from './pages/interactive'
+import { render as renderSpecification } from './pages/specification'
 import { updateActiveNav } from './components/workspace'
 
 const routes = {
@@ -20,6 +21,7 @@ const routes = {
   '/timeline': renderHome,
   '/stewardship': renderStewardship,
   '/interactive': renderInteractive,
+  '/specification': renderSpecification,
 }
 
 export function initRouter() {

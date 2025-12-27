@@ -23,12 +23,24 @@ titleLeft.style.cssText = 'display: flex; align-items: center; gap: 8px;'
 const titleIcon = document.createElement('span')
 titleIcon.className = 'codicon codicon-pulse'
 const titleText = document.createElement('span')
-titleText.textContent = 'HDDL Simulation Platform'
+titleText.textContent = 'Human-Derived Decision Layer (HDDL) Simulation Platform'
 titleLeft.appendChild(titleIcon)
 titleLeft.appendChild(titleText)
 
 const titleRight = document.createElement('div')
 titleRight.style.cssText = 'display: flex; align-items: center; gap: 4px;'
+
+// Add specification explorer button
+const specBtn = document.createElement('a')
+specBtn.className = 'title-actions-button'
+specBtn.setAttribute('role', 'button')
+specBtn.setAttribute('aria-label', 'Explore HDDL Specification')
+specBtn.title = 'Explore HDDL Specification'
+specBtn.style.cssText = 'cursor: pointer; padding: 4px 8px; display: flex; align-items: center; gap: 6px;'
+specBtn.innerHTML = '<span class="codicon codicon-json"></span><span>Explore Specification</span>'
+specBtn.addEventListener('click', () => navigateTo('/specification'))
+titleRight.appendChild(specBtn)
+
 const refreshBtn = document.createElement('a')
 refreshBtn.className = 'codicon codicon-refresh'
 refreshBtn.setAttribute('role', 'button')
@@ -36,26 +48,6 @@ refreshBtn.setAttribute('aria-label', 'Refresh')
 refreshBtn.style.cssText = 'cursor: pointer; padding: 4px;'
 refreshBtn.addEventListener('click', () => location.reload())
 titleRight.appendChild(refreshBtn)
-
-const reviewBtn = document.createElement('a')
-reviewBtn.className = 'codicon codicon-comment-discussion'
-reviewBtn.setAttribute('role', 'button')
-reviewBtn.setAttribute('aria-label', 'Toggle UX Review Mode')
-reviewBtn.title = 'Toggle UX Review Mode'
-reviewBtn.style.cssText = 'cursor: pointer; padding: 4px;'
-
-function syncReviewBtn() {
-  const on = isReviewModeEnabled()
-  reviewBtn.style.opacity = on ? '1' : '0.65'
-}
-
-reviewBtn.addEventListener('click', () => {
-  const next = setReviewModeEnabled(!isReviewModeEnabled())
-  syncReviewBtn()
-  setTimelineStatus(next ? 'UX Review Mode on.' : 'UX Review Mode off.')
-})
-
-titleRight.appendChild(reviewBtn)
 
 // Add scenario selector to titlebar
 const scenarioSelector = createScenarioSelector()
@@ -545,7 +537,6 @@ app.appendChild(statusbar)
 
 // UX review harness (optional)
 initReviewHarness()
-syncReviewBtn()
 
 // Initialize router (pages will render into #editor-area)
 initRouter()
