@@ -44,7 +44,10 @@ export function initRouter() {
 
 export function navigateTo(path) {
   const normalized = normalizePath(path)
-  history.pushState(null, null, normalized)
+  // Use base-aware path for pushState
+  const base = import.meta.env.BASE_URL
+  const fullPath = base !== '/' ? base.slice(0, -1) + normalized : normalized
+  history.pushState(null, null, fullPath)
   navigate(normalized)
 }
 
@@ -70,7 +73,14 @@ function navigate(path) {
 
 function normalizePath(pathname) {
   if (!pathname) return '/'
-  const noQuery = String(pathname).split('?')[0].split('#')[0]
+  let noQuery = String(pathname).split('?')[0].split('#')[0]
+  
+  // Strip base path for production deployment (e.g., /hddl/)
+  const base = import.meta.env.BASE_URL
+  if (base !== '/' && noQuery.startsWith(base)) {
+    noQuery = noQuery.slice(base.length - 1) // Keep leading slash
+  }
+  
   if (noQuery.length > 1 && noQuery.endsWith('/')) return noQuery.slice(0, -1)
   // Back-compat: old route name.
   if (noQuery === '/capability-matrix') return '/steward-fleets'
