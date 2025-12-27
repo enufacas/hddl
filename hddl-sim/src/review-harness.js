@@ -1,5 +1,4 @@
 import { getTimeHour } from './sim/sim-state'
-import { getStoryModeEnabled } from './story-mode'
 
 const STORAGE_KEY = 'hddl:uxReview'
 
@@ -49,7 +48,6 @@ function snapshotContext() {
     path: window.location.pathname,
     timeHour: typeof t === 'number' ? t : null,
     persona: getPersona(),
-    storyMode: getStoryModeEnabled(),
     userAgent: navigator.userAgent,
   }
 }

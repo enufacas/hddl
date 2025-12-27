@@ -1,11 +1,13 @@
 import * as d3 from 'd3'
-import { getScenario, getEnvelopeAtTime, getEventsNearTime, getTimeHour, onTimeChange, getEnvelopeStatus } from '../sim/sim-state'
+import { getScenario, getEnvelopeAtTime, getEventsNearTime, getTimeHour, onTimeChange, onScenarioChange, getEnvelopeStatus } from '../sim/sim-state'
 import { getStewardColor, STEWARD_PALETTE, toSemver, getEventColor } from '../sim/steward-colors'
 
 export function createHDDLMap(container, options = {}) {
   // 1. Setup SVG and Dimensions
   const width = container.clientWidth || 800
-  const height = 640
+  const mapHeight = 570
+  const embeddingHeight = 180
+  const height = mapHeight + embeddingHeight  // Total: 750px
   
   // Filter state
   let currentFilter = options.initialFilter || 'all'
@@ -1749,9 +1751,535 @@ export function createHDDLMap(container, options = {}) {
     update()
   })
 
+  // ============================================================================
+  // EMBEDDING VECTOR SPACE (3D Memory Store)
+  // ============================================================================
+  
+  const embeddingStoreHeight = 180
+  const embeddingStoreLayer = svg.append('g')
+    .attr('class', 'embedding-store')
+    .attr('transform', `translate(0, ${mapHeight})`)
+
+  // 3D box background with perspective
+  const box3D = embeddingStoreLayer.append('g')
+    .attr('class', 'embedding-box-3d')
+
+  const floorTop = embeddingStoreHeight * 0.3
+  const floorBottom = embeddingStoreHeight - 10
+  const floorDepthRange = floorBottom - floorTop
+
+  // Back wall (trapezoid for perspective)
+  box3D.append('polygon')
+    .attr('points', `
+      ${width * 0.05},${floorTop}
+      ${width * 0.95},${floorTop}
+      ${width * 0.85},${floorBottom}
+      ${width * 0.15},${floorBottom}
+    `)
+    .attr('fill', 'url(#embedding-back-wall)')
+    .attr('stroke', 'rgba(100, 150, 255, 0.35)')
+    .attr('stroke-width', 1)
+
+  // Floor (trapezoid receding into distance)
+  box3D.append('polygon')
+    .attr('points', `
+      ${width * 0.15},${floorTop}
+      ${width * 0.85},${floorTop}
+      ${width * 0.85},${floorBottom}
+      ${width * 0.15},${floorBottom}
+    `)
+    .attr('fill', 'url(#embedding-floor)')
+    .attr('stroke', 'rgba(100, 150, 255, 0.25)')
+    .attr('stroke-width', 1)
+
+  // Left wall
+  box3D.append('polygon')
+    .attr('points', `
+      ${width * 0.05},${floorTop}
+      ${width * 0.15},${floorTop}
+      ${width * 0.15},${floorBottom}
+      ${width * 0.05},${floorBottom}
+    `)
+    .attr('fill', 'rgba(4, 6, 12, 0.92)')
+    .attr('stroke', 'rgba(100, 150, 255, 0.3)')
+    .attr('stroke-width', 1)
+
+  // Right wall
+  box3D.append('polygon')
+    .attr('points', `
+      ${width * 0.85},${floorTop}
+      ${width * 0.95},${floorTop}
+      ${width * 0.95},${floorBottom}
+      ${width * 0.85},${floorBottom}
+    `)
+    .attr('fill', 'rgba(4, 6, 12, 0.92)')
+    .attr('stroke', 'rgba(100, 150, 255, 0.3)')
+    .attr('stroke-width', 1)
+
+  // Gradients for 3D depth
+  const boxDefs = svg.append('defs')
+  
+  const backWallGradient = boxDefs.append('linearGradient')
+    .attr('id', 'embedding-back-wall')
+    .attr('x1', '0%')
+    .attr('y1', '0%')
+    .attr('x2', '0%')
+    .attr('y2', '100%')
+  backWallGradient.append('stop')
+    .attr('offset', '0%')
+    .attr('stop-color', 'rgba(5, 8, 15, 0.98)')
+  backWallGradient.append('stop')
+    .attr('offset', '100%')
+    .attr('stop-color', 'rgba(2, 4, 10, 1)')
+
+  const floorGradient = boxDefs.append('linearGradient')
+    .attr('id', 'embedding-floor')
+    .attr('x1', '0%')
+    .attr('y1', '0%')
+    .attr('x2', '0%')
+    .attr('y2', '100%')
+  floorGradient.append('stop')
+    .attr('offset', '0%')
+    .attr('stop-color', 'rgba(5, 8, 15, 0.95)')
+  floorGradient.append('stop')
+    .attr('offset', '100%')
+    .attr('stop-color', 'rgba(10, 14, 22, 0.98)')
+
+  // Perspective grid lines
+  const gridLayer = embeddingStoreLayer.append('g')
+    .attr('class', 'perspective-grid')
+    .attr('opacity', 0.25)
+
+  // Vertical lines converging to vanishing points
+  for (let i = 0; i <= 10; i++) {
+    const t = i / 10
+    const backX = width * 0.05 + t * (width * 0.9)
+    const frontX = width * 0.15 + t * (width * 0.7)
+    gridLayer.append('line')
+      .attr('x1', backX)
+      .attr('y1', floorTop)
+      .attr('x2', frontX)
+      .attr('y2', floorBottom)
+      .attr('stroke', 'rgba(100, 150, 255, 0.4)')
+      .attr('stroke-width', 0.5)
+  }
+
+  // Horizontal depth lines
+  for (let i = 0; i <= 8; i++) {
+    const t = i / 8
+    const y = floorTop + t * floorDepthRange
+    const perspectiveScale = 0.7 + t * 0.3
+    const leftX = width * 0.05 + (1 - perspectiveScale) * (width * 0.1)
+    const rightX = width * 0.95 - (1 - perspectiveScale) * (width * 0.1)
+    gridLayer.append('line')
+      .attr('x1', leftX)
+      .attr('y1', y)
+      .attr('x2', rightX)
+      .attr('y2', y)
+      .attr('stroke', 'rgba(100, 150, 255, 0.4)')
+      .attr('stroke-width', 0.5)
+  }
+
+  // Header text
+  const headerGroup = embeddingStoreLayer.append('g')
+    .attr('transform', 'translate(16, 20)')
+
+  headerGroup.append('text')
+    .attr('x', 20)
+    .attr('y', 0)
+    .attr('fill', 'rgba(255, 255, 255, 0.9)')
+    .attr('font-size', '13px')
+    .attr('font-weight', '600')
+    .text('💾 Memories — Embedding Vector Space')
+
+  const embeddingBadge = headerGroup.append('g')
+    .attr('transform', 'translate(260, -8)')
+
+  embeddingBadge.append('rect')
+    .attr('width', 70)
+    .attr('height', 18)
+    .attr('rx', 4)
+    .attr('fill', 'rgba(75, 150, 255, 0.15)')
+    .attr('stroke', 'rgba(75, 150, 255, 0.4)')
+    .attr('stroke-width', 1)
+
+  const embeddingBadgeText = embeddingBadge.append('text')
+    .attr('x', 35)
+    .attr('y', 13)
+    .attr('text-anchor', 'middle')
+    .attr('fill', 'rgb(75, 150, 255)')
+    .attr('font-size', '11px')
+    .attr('font-weight', '500')
+    .text('0 vectors')
+
+  // Embedding icons layer
+  const embeddingIconsLayer = embeddingStoreLayer.append('g')
+    .attr('class', 'embedding-icons')
+
+  // Single reusable tooltip element (performance optimization)
+  const tooltip = d3.select('body').append('div')
+    .attr('class', 'embedding-tooltip')
+    .style('position', 'absolute')
+    .style('display', 'none')
+    .style('background', 'rgba(20, 25, 35, 0.98)')
+    .style('border', '1px solid')
+    .style('border-radius', '6px')
+    .style('padding', '12px')
+    .style('font-size', '13px')
+    .style('pointer-events', 'none')
+    .style('z-index', '10000')
+    .style('box-shadow', '0 4px 12px rgba(0,0,0,0.5)')
+    .style('backdrop-filter', 'blur(8px)')
+    .style('max-width', '320px')
+
+  // Define 3D box bounds for embedding positioning
+  const box3DBounds = {
+    floorTop: embeddingStoreHeight * 0.3,
+    floorBottom: embeddingStoreHeight - 10,
+    floorLeft: width * 0.15,
+    floorRight: width * 0.85,
+    wallLeft: width * 0.05,
+    wallRight: width * 0.95
+  }
+
+  let embeddingElements = []
+  let embeddingCount = 0
+
+  function createFloatingEmbedding(event) {
+    // Find source node position
+    const sourceNode = nodes.find(n => n.id === event.primarySteward || n.id === event.actorRole)
+    const sourceX = sourceNode ? sourceNode.x : width / 2
+    const sourceY = sourceNode ? sourceNode.y : mapHeight / 2
+
+    // Steward color mapping
+    const stewardColors = {
+      'Customer Steward': '#EC4899',
+      'Customer Success Steward': '#EC4899',
+      'HR Steward': '#A855F7',
+      'Human Resources Steward': '#A855F7',
+      'Sales Steward': '#F59E0B',
+      'Data Steward': '#4B96FF',
+      'Performance Steward': '#4B96FF',
+      'Operations Steward': '#EF4444',
+      'Infrastructure Steward': '#14B8A6'
+    }
+    
+    const embeddingColor = stewardColors[event.actorRole] || '#4B96FF'
+
+    // Clustering logic: position based on embeddingType (depth) and actorRole (horizontal)
+    const typeDepthMap = {
+      'decision': 0.2,
+      'boundary_interaction': 0.4,
+      'revision': 0.5,
+      'signal': 0.7,
+      'session_artifact': 0.85
+    }
+    
+    const stewardPositionMap = {
+      'Customer Steward': 0.15,
+      'Customer Success Steward': 0.15,
+      'HR Steward': 0.35,
+      'Human Resources Steward': 0.35,
+      'Sales Steward': 0.5,
+      'Data Steward': 0.65,
+      'Performance Steward': 0.65,
+      'Operations Steward': 0.8,
+      'Infrastructure Steward': 0.8
+    }
+
+    // Base position from type and steward
+    const baseDepthT = typeDepthMap[event.embeddingType] || 0.5
+    const baseStewardPos = stewardPositionMap[event.actorRole] || 0.5
+
+    // Add random variation for natural clustering
+    const depthVariation = (Math.random() - 0.5) * 0.12
+    const horizontalVariation = (Math.random() - 0.5) * 0.1
+    
+    const depthT = Math.max(0, Math.min(1, baseDepthT + depthVariation))
+    const stewardOffset = Math.max(0, Math.min(1, baseStewardPos + horizontalVariation))
+
+    // Perspective-aware positioning
+    const perspectiveScale = 0.7 + depthT * 0.3
+    const backLeftX = box3DBounds.wallLeft
+    const backRightX = box3DBounds.wallRight
+    const frontLeftX = box3DBounds.floorLeft
+    const frontRightX = box3DBounds.floorRight
+    
+    const leftAtDepth = backLeftX + depthT * (frontLeftX - backLeftX)
+    const rightAtDepth = backRightX + depthT * (frontRightX - backRightX)
+    const widthAtDepth = rightAtDepth - leftAtDepth
+    
+    const targetX = leftAtDepth + stewardOffset * widthAtDepth
+    const targetY = box3DBounds.floorTop + depthT * floorDepthRange
+    const depthZ = depthT * 100
+    
+    // Scale based on perspective (smaller = further away)
+    const depthScale = 0.5 + perspectiveScale * 0.5  // 0.5 to 1.0
+    
+    // Rotation follows perspective: chips at back should appear to tilt away
+    const perspectiveTilt = -20 * (1 - depthT)  // -20° at back, 0° at front
+    const randomWobble = (Math.random() - 0.5) * 15
+    const rotateAngle = perspectiveTilt + randomWobble
+
+    // Create chip group with detailed 3D design
+    const chipGroup = embeddingIconsLayer.append('g')
+      .attr('class', 'embedding-chip')
+      .attr('transform', `translate(${sourceX}, ${sourceY - mapHeight})`)
+      .attr('opacity', 0)
+      .style('cursor', 'pointer')
+      .attr('data-embedding-id', event.embeddingId || event.eventId)
+    
+    // Store tooltip data for hover
+    const embeddingTypeLabels = {
+      'decision': 'Decision Pattern',
+      'signal': 'Signal Pattern',
+      'boundary_interaction': 'Boundary Interaction',
+      'revision': 'Policy Revision',
+      'session_artifact': 'Stewardship Session'
+    }
+    
+    const embeddingTypeLabel = embeddingTypeLabels[event.embeddingType] || event.embeddingType || 'Unknown'
+    
+    const tooltipData = {
+      type: embeddingTypeLabel,
+      label: event.label || 'Embedding',
+      steward: event.actorRole || 'Unknown',
+      envelope: event.envelopeId || 'N/A',
+      id: event.embeddingId || event.eventId || 'N/A',
+      context: event.semanticContext || event.detail || 'No context available',
+      hour: event.hour
+    }
+    
+    // Add hover interaction with optimized tooltip
+    chipGroup.on('mouseenter', function(mouseEvent) {
+      d3.select(this).transition().duration(100).attr('opacity', 1)
+      
+      // Update tooltip content and show
+      tooltip
+        .style('border-color', embeddingColor)
+        .style('display', 'block')
+        .html(`
+          <div style="border-bottom: 1px solid ${embeddingColor}; padding-bottom: 8px; margin-bottom: 8px;">
+            <div style="font-size: 11px; color: ${embeddingColor}; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">${tooltipData.type}</div>
+            <div style="font-size: 15px; font-weight: 600; margin-top: 4px;">${tooltipData.label}</div>
+          </div>
+          <div style="display: grid; grid-template-columns: auto 1fr; gap: 8px 12px; font-size: 12px;">
+            <div style="color: rgba(255,255,255,0.6);">Steward:</div>
+            <div style="font-weight: 500;">${tooltipData.steward}</div>
+            <div style="color: rgba(255,255,255,0.6);">Envelope:</div>
+            <div style="font-weight: 500; font-family: monospace; font-size: 11px;">${tooltipData.envelope}</div>
+            <div style="color: rgba(255,255,255,0.6);">ID:</div>
+            <div style="font-family: monospace; font-size: 11px;">${tooltipData.id}</div>
+          </div>
+          <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);">
+            <div style="color: rgba(255,255,255,0.6); font-size: 11px; margin-bottom: 4px;">SEMANTIC CONTEXT:</div>
+            <div style="font-size: 12px; line-height: 1.5; color: rgba(255,255,255,0.9);">${tooltipData.context}</div>
+          </div>
+          <div style="margin-top: 12px; text-align: right; font-size: 11px; color: ${embeddingColor}; opacity: 0.8;">
+            ⏱️ Hour ${tooltipData.hour}
+          </div>
+        `)
+        .style('left', (mouseEvent.pageX + 15) + 'px')
+        .style('top', (mouseEvent.pageY - 10) + 'px')
+    })
+    .on('mousemove', function(mouseEvent) {
+      tooltip
+        .style('left', (mouseEvent.pageX + 15) + 'px')
+        .style('top', (mouseEvent.pageY - 10) + 'px')
+    })
+    .on('mouseleave', function() {
+      d3.select(this).transition().duration(200).attr('opacity', 0.75 + depthZ / 400)
+      tooltip.style('display', 'none')
+    })
+
+    // 3D chip design (microchip/memory card style)
+    const chipSize = 14
+    
+    // Back face (darkest - creates depth)
+    chipGroup.append('rect')
+      .attr('x', -chipSize / 2 + 1)
+      .attr('y', -chipSize / 2 - 2)
+      .attr('width', chipSize)
+      .attr('height', chipSize)
+      .attr('rx', 2)
+      .attr('fill', 'rgba(0, 0, 0, 0.6)')
+      .attr('stroke', 'none')
+
+    // Top face (angled for 3D effect)
+    chipGroup.append('polygon')
+      .attr('points', `
+        ${-chipSize / 2},${-chipSize / 2 - 2}
+        ${chipSize / 2},${-chipSize / 2 - 2}
+        ${chipSize / 2 + 2},${-chipSize / 2}
+        ${-chipSize / 2 + 2},${-chipSize / 2}
+      `)
+      .attr('fill', 'rgba(0, 0, 0, 0.4)')
+      .attr('stroke', 'none')
+
+    // Right face (angled for 3D effect)
+    chipGroup.append('polygon')
+      .attr('points', `
+        ${chipSize / 2},${-chipSize / 2 - 2}
+        ${chipSize / 2 + 2},${-chipSize / 2}
+        ${chipSize / 2 + 2},${chipSize / 2}
+        ${chipSize / 2},${chipSize / 2 - 2}
+      `)
+      .attr('fill', 'rgba(0, 0, 0, 0.5)')
+      .attr('stroke', 'none')
+
+    // Main front face with gradient
+    const chipGradient = boxDefs.append('radialGradient')
+      .attr('id', `chip-gradient-${event.eventId}`)
+    chipGradient.append('stop')
+      .attr('offset', '0%')
+      .attr('stop-color', embeddingColor)
+      .attr('stop-opacity', 0.9)
+    chipGradient.append('stop')
+      .attr('offset', '100%')
+      .attr('stop-color', embeddingColor)
+      .attr('stop-opacity', 0.6)
+
+    chipGroup.append('rect')
+      .attr('x', -chipSize / 2)
+      .attr('y', -chipSize / 2)
+      .attr('width', chipSize)
+      .attr('height', chipSize)
+      .attr('rx', 2)
+      .attr('fill', `url(#chip-gradient-${event.eventId})`)
+      .attr('stroke', embeddingColor)
+      .attr('stroke-width', 1.5)
+      .attr('filter', `drop-shadow(0 0 4px ${embeddingColor})`)
+
+    // Circuit pattern on chip
+    const circuitGroup = chipGroup.append('g')
+      .attr('opacity', 0.6)
+    
+    // Horizontal traces
+    circuitGroup.append('line')
+      .attr('x1', -chipSize / 2 + 2)
+      .attr('y1', -2)
+      .attr('x2', chipSize / 2 - 2)
+      .attr('y2', -2)
+      .attr('stroke', 'rgba(255,255,255,0.8)')
+      .attr('stroke-width', 0.5)
+    
+    circuitGroup.append('line')
+      .attr('x1', -chipSize / 2 + 2)
+      .attr('y1', 2)
+      .attr('x2', chipSize / 2 - 2)
+      .attr('y2', 2)
+      .attr('stroke', 'rgba(255,255,255,0.8)')
+      .attr('stroke-width', 0.5)
+
+    // Vertical traces
+    circuitGroup.append('line')
+      .attr('x1', -2)
+      .attr('y1', -chipSize / 2 + 2)
+      .attr('x2', -2)
+      .attr('y2', chipSize / 2 - 2)
+      .attr('stroke', 'rgba(255,255,255,0.8)')
+      .attr('stroke-width', 0.5)
+    
+    circuitGroup.append('line')
+      .attr('x1', 2)
+      .attr('y1', -chipSize / 2 + 2)
+      .attr('x2', 2)
+      .attr('y2', chipSize / 2 - 2)
+      .attr('stroke', 'rgba(255,255,255,0.8)')
+      .attr('stroke-width', 0.5)
+
+    // Center icon
+    chipGroup.append('text')
+      .attr('x', 0)
+      .attr('y', 0)
+      .attr('text-anchor', 'middle')
+      .attr('dominant-baseline', 'central')
+      .attr('font-size', '8px')
+      .attr('font-family', 'monospace')
+      .attr('font-weight', 'bold')
+      .attr('stroke', 'rgba(0,0,0,0.5)')
+      .attr('stroke-width', 0.5)
+      .attr('filter', `drop-shadow(0 0 3px ${embeddingColor})`)
+      .attr('fill', 'rgba(255,255,255,0.9)')
+      .text('</>')
+
+    // Animate to target with rotation and scale
+    chipGroup.transition()
+      .duration(2500)
+      .ease(d3.easeCubicOut)
+      .attr('transform', `translate(${targetX}, ${targetY}) scale(${depthScale}) rotate(${rotateAngle})`)
+      .attr('opacity', 0.75 + depthZ / 400)
+
+    embeddingElements.push({ element: chipGroup, event, timestamp: Date.now() })
+    embeddingCount++
+    embeddingBadgeText.text(`${embeddingCount} vector${embeddingCount !== 1 ? 's' : ''}`)
+  }
+
+  function renderEmbeddings() {
+    const scenario = getScenario()
+    const currentHour = getTimeHour()
+
+    const embeddingEvents = scenario.events
+      .filter(e => e.type === 'embedding' && e.hour <= currentHour)
+      .sort((a, b) => a.hour - b.hour)
+
+    // Check if we need to clear (time went backwards)
+    const shouldClear = embeddingElements.some(e => e.event.hour > currentHour)
+    if (shouldClear) {
+      console.log('Clearing embeddings (time went backwards)')
+      embeddingIconsLayer.selectAll('*').remove()
+      embeddingElements = []
+      embeddingCount = 0
+      embeddingBadgeText.text('0 vectors')
+    }
+
+    // Only add new embeddings
+    const existingIds = new Set(embeddingElements.map(e => e.event.eventId))
+    const newEvents = embeddingEvents.filter(e => !existingIds.has(e.eventId))
+
+    console.log(`renderEmbeddings at hour ${currentHour}: ${embeddingEvents.length} total, ${existingIds.size} existing, ${newEvents.length} new`)
+    
+    if (newEvents.length > 0) {
+      console.log(`Adding ${newEvents.length} new embedding(s):`)
+      newEvents.forEach(e => {
+        console.log(`  - eventId: ${e.eventId}, embeddingId: ${e.embeddingId}, type: ${e.embeddingType}, steward: ${e.actorRole}`)
+      })
+    }
+
+    newEvents.forEach((event, index) => {
+      setTimeout(() => {
+        createFloatingEmbedding(event)
+      }, index * 150)
+    })
+  }
+
+  renderEmbeddings()
+
+  // Subscribe to scenario changes
+  const scenarioUnsubscribe = onScenarioChange(() => {
+    embeddingIconsLayer.selectAll('*').remove()
+    embeddingElements = []
+    embeddingCount = 0
+    embeddingBadgeText.text('0 vectors')
+    tooltip.style('display', 'none')
+    renderEmbeddings()
+  })
+
+  // Subscribe to time changes for embeddings
+  const embeddingUnsubscribe = onTimeChange(() => {
+    renderEmbeddings()
+  })
+
+  // ============================================================================
+  // END EMBEDDING VECTOR SPACE
+  // ============================================================================
+
   return {
     cleanup: () => {
       unsubscribe()
+      scenarioUnsubscribe()
+      embeddingUnsubscribe()
+      tooltip.remove()
       simulation.stop()
     },
     setFilter: (filter) => {

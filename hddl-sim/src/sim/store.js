@@ -1,4 +1,4 @@
-import { createDefaultScenario } from './scenario-default-simplified'
+import { loadScenario, getCurrentScenarioId } from './scenario-loader'
 import { normalizeScenario } from './scenario-schema'
 
 const listeners = {
@@ -8,7 +8,7 @@ const listeners = {
 }
 
 const state = {
-  scenario: normalizeScenario(createDefaultScenario()).scenario,
+  scenario: normalizeScenario(loadScenario(getCurrentScenarioId())).scenario,
   timeHour: 25,
   stewardFilter: 'all',
 }

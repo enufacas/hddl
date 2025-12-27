@@ -1,4 +1,4 @@
-import { formatSimTime, getScenario, getTimeHour, onScenarioChange, onTimeChange } from '../sim/sim-state'
+import { formatSimTime, getScenario, getTimeHour, onScenarioChange, onTimeChange, getStewardFilter, setStewardFilter, onFilterChange } from '../sim/sim-state'
 import { initGlossaryInline } from '../components/glossary'
 import { navigateTo } from '../router'
 import { getStewardColor } from '../sim/steward-colors'
@@ -7,15 +7,28 @@ export function renderDecisionTelemetry(container) {
   let disposeGlossary = () => {}
   let currentQuery = ''
   let currentEvents = []
-  let timelineSync = false // default to showing all events; enable to sync with timeline
+  let timelineSync = true // default to sync with timeline
 
   container.innerHTML = `
-    <div class="page-container">
-      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
-        <span class="codicon codicon-database" style="font-size: 28px;"></span>
-        <div>
-          <h1 style="margin: 0;">Decision Telemetry Stream</h1>
-          <p style="margin: 0; color: var(--vscode-statusBar-foreground);">Query-first DTS event log</p>
+    <div class="page-container" style="max-width: 100%; padding: 16px 24px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <span class="codicon codicon-database" style="font-size: 28px;"></span>
+          <div>
+            <h1 style="margin: 0;">Decision Telemetry Stream</h1>
+            <p style="margin: 0; color: var(--vscode-statusBar-foreground);">Query-first DTS event log</p>
+          </div>
+        </div>
+        <div style="min-width: 180px;">
+          <div style="font-size: 9px; color: var(--vscode-statusBar-foreground); margin-bottom: 4px; letter-spacing: 0.5px; text-transform: uppercase;">Filter By Steward</div>
+          <select id="steward-filter" style="width: 100%; padding: 6px 10px; background: var(--vscode-input-background); color: var(--vscode-editor-foreground); border: 1px solid var(--vscode-input-border); border-radius: 2px; font-size: 12px; cursor: pointer;">
+            <option value="all">All Envelopes</option>
+            <option value="Customer Steward">Customer Steward</option>
+            <option value="HR Steward">HR Steward</option>
+            <option value="Sales Steward">Sales Steward</option>
+            <option value="Data Steward">Data Steward</option>
+            <option value="Domain Engineer">Domain Engineer</option>
+          </select>
         </div>
       </div>
 
@@ -54,7 +67,7 @@ export function renderDecisionTelemetry(container) {
           <button class="query-chip" data-query="status:blocked">Blocked</button>
           <button class="query-chip" data-query="envelope:ENV-003">Pricing Envelope</button>
           <span style="margin-left: auto; display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--vscode-statusBar-foreground);">
-            <input type="checkbox" id="timeline-sync" style="accent-color: var(--status-info);" />
+            <input type="checkbox" id="timeline-sync" checked style="accent-color: var(--status-info);" />
             <label for="timeline-sync">Sync with timeline</label>
             <span id="timeline-indicator" style="padding: 2px 8px; background: var(--status-info); color: var(--vscode-button-foreground); border-radius: 3px; font-weight: 600;"></span>
           </span>
@@ -65,7 +78,7 @@ export function renderDecisionTelemetry(container) {
       <div id="stats-bar" style="display: flex; gap: 16px; padding: 12px; background: var(--vscode-editorWidget-background); border: 1px solid var(--vscode-sideBar-border); border-radius: 4px; margin-bottom: 16px; font-size: 13px;"></div>
 
       <!-- Event Stream -->
-      <div id="event-stream" style="display: flex; flex-direction: column; gap: 12px;"></div>
+      <div id="event-stream" style="display: flex; flex-direction: column; gap: 2px;"></div>
     </div>
 
     <style>
@@ -84,58 +97,168 @@ export function renderDecisionTelemetry(container) {
         color: var(--vscode-button-foreground);
       }
       
-      .event-card {
-        background: var(--vscode-editor-background);
-        border: 1px solid var(--vscode-sideBar-border);
-        border-left: 3px solid;
-        border-radius: 4px;
-        padding: 12px;
-        font-family: ui-monospace, SFMono-Regular, monospace;
-        font-size: 12px;
-      }
-      
-      .event-card.type-decision { border-left-color: var(--status-info); }
-      .event-card.type-boundary_interaction { border-left-color: var(--status-warning); }
-      .event-card.type-dsg_session { border-left-color: var(--status-error); }
-      .event-card.type-signal { border-left-color: var(--vscode-charts-blue); }
-      .event-card.type-revision { border-left-color: var(--vscode-charts-purple); }
-      .event-card.type-envelope_promoted { border-left-color: var(--status-success); }
-      
-      .event-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: start;
-        margin-bottom: 8px;
-      }
-      
-      .event-field {
-        margin: 4px 0;
+      .log-line {
         display: grid;
-        grid-template-columns: 140px 1fr;
-        gap: 8px;
+        grid-template-columns: 130px 160px 110px 180px 1fr auto;
+        gap: 16px;
+        align-items: start;
+        padding: 10px 16px;
+        font-family: ui-monospace, SFMono-Regular, 'Cascadia Code', monospace;
+        font-size: 12px;
+        border-bottom: 1px solid var(--vscode-sideBar-border);
+        background: var(--vscode-editor-background);
+        transition: background 0.15s;
+        line-height: 1.5;
       }
       
-      .event-field-label {
+      .log-line:hover {
+        background: color-mix(in srgb, var(--vscode-list-hoverBackground) 50%, transparent);
+      }
+      
+      .log-line.current {
+        background: color-mix(in srgb, var(--status-info) 8%, var(--vscode-editor-background));
+        border-left: 3px solid var(--status-info);
+        padding-left: 9px;
+      }
+      
+      .log-timestamp {
         color: var(--vscode-statusBar-foreground);
         font-weight: 600;
+        flex-shrink: 0;
+        white-space: nowrap;
+        padding-top: 2px;
       }
       
-      .event-field-value {
+      .type-pill {
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        white-space: nowrap;
+        text-align: center;
+        align-self: start;
+      }
+      
+      .type-pill.decision {
+        background: color-mix(in srgb, var(--status-info) 25%, transparent);
+        color: var(--status-info);
+        border: 1px solid var(--status-info);
+      }
+      
+      .type-pill.boundary_interaction {
+        background: color-mix(in srgb, var(--status-warning) 25%, transparent);
+        color: var(--status-warning);
+        border: 1px solid var(--status-warning);
+      }
+      
+      .type-pill.dsg_session {
+        background: color-mix(in srgb, var(--status-error) 25%, transparent);
+        color: var(--status-error);
+        border: 1px solid var(--status-error);
+      }
+      
+      .type-pill.signal {
+        background: color-mix(in srgb, var(--vscode-charts-blue) 25%, transparent);
+        color: var(--vscode-charts-blue);
+        border: 1px solid var(--vscode-charts-blue);
+      }
+      
+      .type-pill.revision {
+        background: color-mix(in srgb, var(--vscode-charts-purple) 25%, transparent);
+        color: var(--vscode-charts-purple);
+        border: 1px solid var(--vscode-charts-purple);
+      }
+      
+      .type-pill.envelope_promoted {
+        background: color-mix(in srgb, var(--status-success) 25%, transparent);
+        color: var(--status-success);
+        border: 1px solid var(--status-success);
+      }
+      
+      .log-envelope {
+        color: var(--vscode-charts-purple);
+        font-weight: 600;
+        flex-shrink: 0;
+        white-space: nowrap;
+        padding-top: 2px;
+      }
+      
+      .log-actor {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+        padding-top: 2px;
+      }
+      
+      .actor-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+      
+      .log-message {
         color: var(--vscode-editor-foreground);
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        padding-top: 2px;
       }
       
-      .badge {
+      .log-meta {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+        padding-top: 2px;
+      }
+      
+      .meta-badge {
         padding: 2px 8px;
-        border-radius: 3px;
+        border-radius: 10px;
         font-size: 10px;
         font-weight: 600;
         text-transform: uppercase;
       }
       
-      .badge-info { background: var(--status-info); opacity: 0.2; }
-      .badge-warning { background: var(--status-warning); opacity: 0.2; }
-      .badge-error { background: var(--status-error); opacity: 0.2; }
-      .badge-success { background: var(--status-success); opacity: 0.2; }
+      .meta-badge.warning {
+        background: color-mix(in srgb, var(--status-warning) 20%, transparent);
+        color: var(--status-warning);
+      }
+      
+      .meta-badge.error {
+        background: color-mix(in srgb, var(--status-error) 20%, transparent);
+        color: var(--status-error);
+      }
+      
+      .meta-badge.success {
+        background: color-mix(in srgb, var(--status-success) 20%, transparent);
+        color: var(--status-success);
+      }
+      
+      .meta-badge.blocked {
+        background: color-mix(in srgb, var(--status-error) 20%, transparent);
+        color: var(--status-error);
+      }
+      
+      .meta-badge.allowed {
+        background: color-mix(in srgb, var(--status-success) 20%, transparent);
+        color: var(--status-success);
+      }
+      
+      .meta-badge.info {
+        background: color-mix(in srgb, var(--status-info) 20%, transparent);
+        color: var(--status-info);
+      }
+      
+      .log-id {
+        color: var(--vscode-statusBar-foreground);
+        font-size: 11px;
+        opacity: 0.7;
+      }
     </style>
   `
 
@@ -144,6 +267,25 @@ export function renderDecisionTelemetry(container) {
   const clearBtn = container.querySelector('#clear-btn')
   const eventStream = container.querySelector('#event-stream')
   const statsBar = container.querySelector('#stats-bar')
+  const stewardFilter = container.querySelector('#steward-filter')
+  
+  // Initialize steward filter
+  let currentFilter = getStewardFilter()
+  if (stewardFilter) {
+    stewardFilter.value = currentFilter
+    stewardFilter.addEventListener('change', (e) => {
+      currentFilter = e.target.value
+      setStewardFilter(currentFilter)
+      renderEvents()
+    })
+  }
+  
+  // Listen for filter changes from other pages
+  const unsubFilter = onFilterChange((newFilter) => {
+    currentFilter = newFilter
+    if (stewardFilter) stewardFilter.value = newFilter
+    renderEvents()
+  })
 
   const bindGlossary = () => {
     disposeGlossary()
@@ -206,112 +348,79 @@ export function renderDecisionTelemetry(container) {
     `
   }
 
-  // Pretty print event field
-  function prettyPrintValue(key, value) {
-    if (!value) return '<span style="color: var(--vscode-statusBar-foreground);">—</span>'
-    
-    if (key === 'timestamp') {
-      return `<strong>${formatSimTime(value)}</strong>`
-    }
-    
-    if (key === 'envelope_id' || key === 'decision_id' || key === 'session_id' || key === 'agent_id') {
-      return `<code style="background: var(--vscode-input-background); padding: 2px 6px; border-radius: 3px;">${value}</code>`
-    }
-    
-    if (Array.isArray(value)) {
-      return value.map(v => `<div style="margin: 2px 0; padding-left: 8px; border-left: 2px solid var(--vscode-focusBorder);">${v}</div>`).join('')
-    }
-    
-    if (typeof value === 'object') {
-      return `<pre style="margin: 4px 0; padding: 8px; background: var(--vscode-input-background); border-radius: 3px; font-size: 11px; overflow-x: auto;">${JSON.stringify(value, null, 2)}</pre>`
-    }
-    
-    return String(value)
-  }
-
-  // Render event card
-  function renderEventCard(event, currentHour) {
-    const card = document.createElement('div')
-    card.className = `event-card type-${event.type || 'unknown'}`
+  // Render event as log line
+  function renderLogLine(event, currentHour) {
+    const line = document.createElement('div')
     
     // Check if this event is at or near the current timeline position
     const isCurrentEvent = event.hour !== undefined && 
       Math.abs(event.hour - currentHour) < 0.5
     
-    if (isCurrentEvent) {
-      card.style.boxShadow = '0 0 8px var(--status-info)'
-      card.style.borderWidth = '2px'
+    line.className = 'log-line' + (isCurrentEvent ? ' current' : '')
+    
+    // Timestamp
+    const timestamp = event.hour !== undefined 
+      ? formatSimTime(event.hour) 
+      : '—'
+    
+    // Type pill
+    const eventType = event.type || 'unknown'
+    
+    // Actor with color
+    const actorColor = event.actorRole ? getStewardColor(event.actorRole) : null
+    const actorDisplay = event.actorRole 
+      ? `<span class="actor-dot" style="background: ${actorColor};"></span><span>${event.actorRole}</span>`
+      : '<span style="opacity: 0.5;">—</span>'
+    
+    // Envelope
+    const envelope = event.envelopeId || ''
+    
+    // Build message
+    let message = event.label || event.detail || ''
+    if (!message) {
+      // Construct default message based on type
+      if (eventType === 'decision') {
+        message = `Decision ${event.status || ''} ${event.id || ''}`
+      } else if (eventType === 'boundary_interaction') {
+        message = `Boundary ${event.boundary_kind || 'interaction'}: ${event.reason || ''}`
+      } else if (eventType === 'signal') {
+        message = `Signal ${event.signalKey || ''} = ${event.value !== undefined ? event.value : ''}`
+      } else if (eventType === 'dsg_session') {
+        message = `DSG session ${event.sessionId || ''}`
+      } else if (eventType === 'revision') {
+        message = `Revision v${event.envelope_version || ''}`
+      } else {
+        message = eventType
+      }
     }
     
-    const severityBadge = event.severity 
-      ? `<span class="badge badge-${event.severity}">${event.severity}</span>` 
-      : ''
+    // Meta badges
+    const metaBadges = []
+    if (event.severity && event.severity !== 'info') {
+      metaBadges.push(`<span class="meta-badge ${event.severity}">${event.severity}</span>`)
+    }
+    if (event.status === 'blocked') {
+      metaBadges.push(`<span class="meta-badge blocked">blocked</span>`)
+    } else if (event.status === 'allowed') {
+      metaBadges.push(`<span class="meta-badge allowed">allowed</span>`)
+    }
+    if (event.boundary_kind) {
+      metaBadges.push(`<span class="meta-badge info">${event.boundary_kind}</span>`)
+    }
     
-    const statusBadge = event.status 
-      ? `<span class="badge badge-${event.status === 'allowed' ? 'success' : event.status === 'blocked' ? 'error' : 'info'}">${event.status}</span>` 
-      : ''
-
-    const kindBadge = event.boundary_kind
-      ? `<span class="badge badge-warning">${event.boundary_kind}</span>`
-      : ''
+    // ID (if present)
+    const idDisplay = event.id ? `<span class="log-id">${event.id}</span>` : ''
     
-    // Actor color badge - use steward color if actor is a steward
-    const actorColor = event.actorRole ? getStewardColor(event.actorRole) : null
-    const actorBadge = actorColor 
-      ? `<span style="display: inline-flex; align-items: center; gap: 4px;"><span style="width: 8px; height: 8px; border-radius: 50%; background: ${actorColor}; display: inline-block;"></span></span>`
-      : ''
-
-    // Build field list based on DTS spec
-    const fields = []
-    
-    if (event.hour !== undefined) fields.push({ label: 'timestamp', value: event.hour })
-    if (event.id) fields.push({ label: 'decision_id', value: event.id })
-    if (event.sessionId) fields.push({ label: 'session_id', value: event.sessionId })
-    if (event.envelopeId) fields.push({ label: 'envelope_id', value: event.envelopeId })
-    if (event.type) fields.push({ label: 'event_type', value: event.type })
-    if (event.agentId) fields.push({ label: 'agent_id', value: event.agentId })
-    if (event.actorRole) fields.push({ label: 'actor_role', value: event.actorRole, actorColor: actorColor })
-    if (event.boundary_kind) fields.push({ label: 'boundary_interaction', value: event.boundary_kind })
-    if (event.status) fields.push({ label: 'outcome', value: event.status })
-    if (event.reason) fields.push({ label: 'reason', value: event.reason })
-    if (event.signalKey) fields.push({ label: 'signal_key', value: event.signalKey })
-    if (event.value !== undefined) fields.push({ label: 'value', value: event.value })
-    if (event.assumptionRefs) fields.push({ label: 'assumption_refs', value: event.assumptionRefs })
-    if (event.label) fields.push({ label: 'label', value: event.label })
-    if (event.detail) fields.push({ label: 'detail', value: event.detail })
-
-    card.innerHTML = `
-      <div class="event-header">
-        <div>
-          <div style="font-weight: 600; font-size: 13px; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
-            ${actorBadge}
-            ${event.label || event.type || 'Event'}
-          </div>
-          <div style="display: flex; gap: 6px;">
-            ${severityBadge}
-            ${statusBadge}
-            ${kindBadge}
-          </div>
-        </div>
-        <div style="text-align: right; color: var(--vscode-statusBar-foreground); font-size: 11px;">
-          ${event.hour !== undefined ? formatSimTime(event.hour) : ''}
-          ${isCurrentEvent ? '<span style="display: block; font-size: 10px; color: var(--status-info);">▶ Current</span>' : ''}
-        </div>
-      </div>
-      
-      <div style="margin-top: 12px; border-top: 1px solid var(--vscode-sideBar-border); padding-top: 8px;">
-        ${fields.map(f => `
-          <div class="event-field">
-            <div class="event-field-label">${f.label}</div>
-            <div class="event-field-value">${f.actorColor 
-              ? `<span style="display: flex; align-items: center; gap: 6px;"><span style="width: 10px; height: 10px; border-radius: 50%; background: ${f.actorColor};"></span>${prettyPrintValue(f.label, f.value)}</span>` 
-              : prettyPrintValue(f.label, f.value)}</div>
-          </div>
-        `).join('')}
-      </div>
+    line.innerHTML = `
+      <span class="log-timestamp">${timestamp}</span>
+      <span class="type-pill ${eventType}">${eventType.replace('_', ' ')}</span>
+      <span class="log-envelope">${envelope || '—'}</span>
+      <span class="log-actor">${actorDisplay}</span>
+      <span class="log-message" title="${message}">${message}</span>
+      <span class="log-meta">${metaBadges.join('')}${idDisplay}</span>
     `
     
-    return card
+    return line
   }
 
   // Render events
@@ -333,6 +442,18 @@ export function renderDecisionTelemetry(container) {
     
     const filters = parseQuery(currentQuery)
     let filtered = filterEvents(allEvents, filters)
+    
+    // Apply steward filter
+    if (currentFilter !== 'all') {
+      const envelopes = scenario?.envelopes || []
+      const filteredEnvelopeIds = envelopes
+        .filter(env => env.ownerRole === currentFilter)
+        .map(env => env.envelopeId)
+      
+      filtered = filtered.filter(event => 
+        !event.envelopeId || filteredEnvelopeIds.includes(event.envelopeId)
+      )
+    }
     
     // Apply timeline filter if sync is enabled
     if (timelineSync) {
@@ -361,7 +482,7 @@ export function renderDecisionTelemetry(container) {
     filtered
       .sort((a, b) => (b.hour || 0) - (a.hour || 0))
       .forEach(event => {
-        eventStream.appendChild(renderEventCard(event, currentHour))
+        eventStream.appendChild(renderLogLine(event, currentHour))
       })
   }
 
@@ -415,5 +536,6 @@ export function renderDecisionTelemetry(container) {
     disposeGlossary()
     unsubTime()
     unsubScenario()
+    unsubFilter()
   }
 }

@@ -10,6 +10,7 @@ const VALID_EVENT_TYPES = new Set([
   'dsg_session',
   'dsg_message',
   'annotation',
+  'embedding',
 ])
 
 function isRecord(value) {
@@ -253,6 +254,14 @@ export function normalizeScenario(rawScenario) {
         authorName: asString(event.authorName) ?? undefined,
         kind: asString(event.kind) ?? undefined,
         text: asString(event.text) ?? undefined,
+
+        // Embeddings (decision memory vector storage)
+        embeddingId: asString(event.embeddingId) ?? undefined,
+        embeddingType: asString(event.embeddingType) ?? undefined,
+        vectorDimensions: asNumber(event.vectorDimensions) ?? undefined,
+        sourceEventId: asString(event.sourceEventId) ?? undefined,
+        semanticContext: asString(event.semanticContext) ?? undefined,
+        similarityThreshold: asNumber(event.similarityThreshold) ?? undefined,
       }
 
       if (!VALID_EVENT_TYPES.has(normalized.type)) {

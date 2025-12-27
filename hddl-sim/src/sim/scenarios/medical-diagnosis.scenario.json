@@ -1,0 +1,322 @@
+{
+  "schemaVersion": 2,
+  "id": "scenario-medical-diagnosis-001",
+  "title": "Medical Diagnosis Support — Healthcare Stewardship",
+  "durationHours": 72,
+  "envelopes": [
+    {
+      "envelopeId": "ENV-MED-001",
+      "name": "Diagnostic Recommendations",
+      "domain": "Clinical Diagnostics",
+      "ownerRole": "Medical Steward",
+      "createdHour": 0,
+      "endHour": 24,
+      "accent": "var(--vscode-charts-red)",
+      "envelope_version": 1,
+      "revision_id": null,
+      "assumptions": [
+        "AI provides differential diagnosis suggestions only, never final diagnoses.",
+        "All recommendations include confidence levels and evidence sources.",
+        "Patient safety is paramount — false negatives are weighted heavily."
+      ],
+      "constraints": [
+        "Never present recommendations as conclusive diagnoses",
+        "Require human physician review for all critical findings",
+        "Flag low-confidence suggestions prominently"
+      ]
+    },
+    {
+      "envelopeId": "ENV-MED-002",
+      "name": "Medication Interaction Alerts",
+      "domain": "Pharmacy Safety",
+      "ownerRole": "Pharmacy Steward",
+      "createdHour": 6,
+      "endHour": 48,
+      "accent": "var(--vscode-charts-orange)",
+      "envelope_version": 1,
+      "revision_id": null,
+      "assumptions": [
+        "Drug interaction database is continuously updated.",
+        "Patient allergy history is complete and accurate.",
+        "Severity ratings follow FDA guidelines."
+      ],
+      "constraints": [
+        "Block high-severity interactions automatically",
+        "Require pharmacist override for moderate interactions",
+        "Log all interaction checks for audit"
+      ]
+    },
+    {
+      "envelopeId": "ENV-MED-003",
+      "name": "Patient Triage Priority",
+      "domain": "Emergency Care",
+      "ownerRole": "Emergency Steward",
+      "createdHour": 12,
+      "endHour": 72,
+      "accent": "var(--vscode-charts-yellow)",
+      "envelope_version": 2,
+      "revision_id": "REV-MED-003-A",
+      "assumptions": [
+        "Triage decisions are advisory — clinical staff have final authority.",
+        "Vital signs are continuously monitored and accurate.",
+        "Wait time optimization does not override clinical urgency."
+      ],
+      "constraints": [
+        "Never downgrade clinician-assigned triage levels",
+        "Flag deteriorating vital signs immediately",
+        "Maintain audit trail of all triage recommendations"
+      ]
+    }
+  ],
+  "fleets": [
+    {
+      "stewardRole": "Medical Steward",
+      "agents": [
+        {
+          "agentId": "AG-MED-01",
+          "name": "DiagnosticAssist",
+          "role": "differential diagnosis suggestions",
+          "envelopeIds": ["ENV-MED-001"]
+        },
+        {
+          "agentId": "AG-MED-02",
+          "name": "EvidenceLinker",
+          "role": "research citation and confidence scoring",
+          "envelopeIds": ["ENV-MED-001"]
+        },
+        {
+          "agentId": "AG-MED-03",
+          "name": "CriticalFlagGuard",
+          "role": "urgent finding escalation",
+          "envelopeIds": ["ENV-MED-001", "ENV-MED-003"]
+        }
+      ]
+    },
+    {
+      "stewardRole": "Pharmacy Steward",
+      "agents": [
+        {
+          "agentId": "AG-PHARM-01",
+          "name": "InteractionChecker",
+          "role": "drug interaction validation",
+          "envelopeIds": ["ENV-MED-002"]
+        },
+        {
+          "agentId": "AG-PHARM-02",
+          "name": "AllergyGuard",
+          "role": "allergy cross-reference",
+          "envelopeIds": ["ENV-MED-002"]
+        },
+        {
+          "agentId": "AG-PHARM-03",
+          "name": "DosageVerifier",
+          "role": "dose range validation",
+          "envelopeIds": ["ENV-MED-002"]
+        }
+      ]
+    },
+    {
+      "stewardRole": "Emergency Steward",
+      "agents": [
+        {
+          "agentId": "AG-ER-01",
+          "name": "TriageAdvisor",
+          "role": "priority recommendation",
+          "envelopeIds": ["ENV-MED-003"]
+        },
+        {
+          "agentId": "AG-ER-02",
+          "name": "VitalTrendMonitor",
+          "role": "deterioration detection",
+          "envelopeIds": ["ENV-MED-003"]
+        },
+        {
+          "agentId": "AG-ER-03",
+          "name": "ResourceOptimizer",
+          "role": "capacity-aware routing",
+          "envelopeIds": ["ENV-MED-003"]
+        }
+      ]
+    }
+  ],
+  "events": [
+    {
+      "eventId": "envelope_promoted:0:ENV-MED-001:0",
+      "hour": 0,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-MED-001",
+      "severity": "info",
+      "label": "Envelope promoted",
+      "detail": "Diagnostic recommendation envelope activated for clinical support.",
+      "actorRole": "Medical Steward",
+      "actorName": "Dr. Sarah Chen"
+    },
+    {
+      "eventId": "decision:2_5:ENV-MED-001:1",
+      "hour": 2.5,
+      "type": "decision",
+      "envelopeId": "ENV-MED-001",
+      "severity": "info",
+      "label": "Differential diagnosis generated",
+      "detail": "DiagnosticAssist suggests pneumonia (82% confidence) based on imaging and symptoms. Flagged for physician review.",
+      "actorRole": "Medical Steward",
+      "actorName": "DiagnosticAssist"
+    },
+    {
+      "eventId": "envelope_promoted:6:ENV-MED-002:2",
+      "hour": 6,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-MED-002",
+      "severity": "info",
+      "label": "Envelope promoted",
+      "detail": "Medication interaction checking envelope activated for pharmacy operations.",
+      "actorRole": "Pharmacy Steward",
+      "actorName": "Pharmacist Mike Torres"
+    },
+    {
+      "eventId": "boundary_interaction:8_2:ENV-MED-002:3",
+      "hour": 8.2,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-MED-002",
+      "severity": "warning",
+      "label": "Drug interaction detected",
+      "detail": "InteractionChecker identified moderate interaction between warfarin and aspirin. Escalated to pharmacist for review.",
+      "actorRole": "Pharmacy Steward",
+      "actorName": "InteractionChecker",
+      "boundaryType": "constraint_approached"
+    },
+    {
+      "eventId": "decision:8_3:ENV-MED-002:4",
+      "hour": 8.3,
+      "type": "decision",
+      "envelopeId": "ENV-MED-002",
+      "severity": "allowed",
+      "label": "Pharmacist override approved",
+      "detail": "Pharmacist reviewed interaction, confirmed patient monitoring plan. Decision: Dispense with warning label.",
+      "actorRole": "Pharmacy Steward",
+      "actorName": "Pharmacist Mike Torres"
+    },
+    {
+      "eventId": "envelope_promoted:12:ENV-MED-003:5",
+      "hour": 12,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-MED-003",
+      "severity": "info",
+      "label": "Envelope promoted",
+      "detail": "Emergency triage advisory envelope activated. Revision REV-MED-003-A includes updated vital sign thresholds.",
+      "actorRole": "Emergency Steward",
+      "actorName": "Dr. James Park"
+    },
+    {
+      "eventId": "signal:14_8:ENV-MED-003:6",
+      "hour": 14.8,
+      "type": "signal",
+      "envelopeId": "ENV-MED-003",
+      "severity": "warning",
+      "label": "Vital signs deteriorating",
+      "detail": "VitalTrendMonitor detected BP drop and O2 saturation decline in patient #4472. Priority escalation recommended.",
+      "actorRole": "Emergency Steward",
+      "actorName": "VitalTrendMonitor",
+      "signalKey": "vitals_deterioration",
+      "value": 0.78
+    },
+    {
+      "eventId": "revision:16_5:ENV-MED-001:7",
+      "hour": 16.5,
+      "type": "revision",
+      "envelopeId": "ENV-MED-001",
+      "severity": "info",
+      "label": "Confidence threshold adjusted",
+      "detail": "Medical Steward updated minimum confidence from 75% to 80% after DSG review of false positive rates.",
+      "actorRole": "Medical Steward",
+      "actorName": "Dr. Sarah Chen",
+      "revisionType": "boundary_adjustment",
+      "reason": "Reduce false positive escalations while maintaining patient safety margins."
+    },
+    {
+      "eventId": "dsg_session:18:ENV-MED-001:8",
+      "hour": 18,
+      "type": "dsg_session",
+      "envelopeId": "ENV-MED-001",
+      "severity": "info",
+      "label": "DSG: Diagnostic accuracy review",
+      "detail": "Stewardship group convened to review diagnostic recommendation performance over past week.",
+      "actorRole": "Medical Steward",
+      "actorName": "Dr. Sarah Chen",
+      "sessionId": "DSG-MED-001-W1"
+    },
+    {
+      "eventId": "boundary_interaction:22_1:ENV-MED-002:9",
+      "hour": 22.1,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-MED-002",
+      "severity": "blocked",
+      "label": "High-severity interaction blocked",
+      "detail": "AllergyGuard blocked prescription: Patient documented allergy to penicillin class. Alternative required.",
+      "actorRole": "Pharmacy Steward",
+      "actorName": "AllergyGuard",
+      "boundaryType": "hard_constraint"
+    },
+    {
+      "eventId": "signal:24:ENV-MED-003:10",
+      "hour": 24,
+      "type": "signal",
+      "envelopeId": "ENV-MED-003",
+      "severity": "info",
+      "label": "Triage accuracy stable",
+      "detail": "ER triage recommendations aligned with clinical decisions in 94% of cases. No boundary adjustments needed.",
+      "actorRole": "Emergency Steward",
+      "actorName": "TriageAdvisor",
+      "signalKey": "triage_accuracy",
+      "value": 0.94
+    },
+    {
+      "eventId": "embedding:3:ENV-MED-001:11",
+      "hour": 3,
+      "type": "embedding",
+      "envelopeId": "ENV-MED-001",
+      "severity": "info",
+      "label": "Diagnosis pattern embedded",
+      "detail": "Differential diagnosis recommendation stored for similar symptom clusters.",
+      "actorRole": "Medical Steward",
+      "actorName": "DiagnosticAssistant",
+      "embeddingId": "EMB-MED-001",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:2_5:ENV-MED-001:1",
+      "semanticContext": "differential diagnosis for chest pain with EKG abnormalities"
+    },
+    {
+      "eventId": "embedding:8:ENV-MED-002:12",
+      "hour": 8,
+      "type": "embedding",
+      "envelopeId": "ENV-MED-002",
+      "severity": "info",
+      "label": "Drug interaction embedded",
+      "detail": "Medication interaction pattern stored for future safety checks.",
+      "actorRole": "Pharmacy Steward",
+      "actorName": "InteractionChecker",
+      "embeddingId": "EMB-MED-002",
+      "embeddingType": "boundary_interaction",
+      "vectorDimensions": 768,
+      "sourceEventId": "boundary_interaction:7_5:ENV-MED-002:3",
+      "semanticContext": "warfarin and aspirin contraindication for bleeding risk patients"
+    },
+    {
+      "eventId": "embedding:25:ENV-MED-003:13",
+      "hour": 25,
+      "type": "embedding",
+      "envelopeId": "ENV-MED-003",
+      "severity": "info",
+      "label": "Triage decision embedded",
+      "detail": "Emergency triage pattern stored for trauma priority assessment.",
+      "actorRole": "Emergency Steward",
+      "actorName": "TriageAdvisor",
+      "embeddingId": "EMB-MED-003",
+      "embeddingType": "signal",
+      "vectorDimensions": 768,
+      "sourceEventId": "signal:24:ENV-MED-003:10",
+      "semanticContext": "emergency triage accuracy and clinical alignment patterns"
+    }
+  ]
+}

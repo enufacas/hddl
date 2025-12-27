@@ -1,0 +1,545 @@
+{
+  "schemaVersion": 2,
+  "id": "scenario-database-performance-001",
+  "title": "Database Performance Monitoring — Observability & SLAs",
+  "durationHours": 72,
+  "envelopes": [
+    {
+      "envelopeId": "ENV-DB-001",
+      "name": "Query Optimization Recommendations",
+      "domain": "Performance Engineering",
+      "ownerRole": "Performance Steward",
+      "createdHour": 0,
+      "endHour": 72,
+      "accent": "var(--vscode-charts-green)",
+      "envelope_version": 2,
+      "revision_id": "REV-DB-001-B",
+      "assumptions": [
+        "AI identifies slow queries based on execution time and resource consumption.",
+        "Optimization recommendations balance performance gains with schema stability.",
+        "Production changes require DBA approval and rollback plan."
+      ],
+      "constraints": [
+        "Never recommend index changes without impact analysis",
+        "Flag queries touching PII tables for security review",
+        "All recommendations include estimated performance improvement"
+      ]
+    },
+    {
+      "envelopeId": "ENV-DB-002",
+      "name": "Anomaly Detection & Alerting",
+      "domain": "Reliability Operations",
+      "ownerRole": "Operations Steward",
+      "createdHour": 0,
+      "endHour": 72,
+      "accent": "var(--vscode-charts-red)",
+      "envelope_version": 3,
+      "revision_id": "REV-DB-002-C",
+      "assumptions": [
+        "Baseline behavior is established from 30-day historical data.",
+        "Alert thresholds adapt to traffic patterns and time-of-day.",
+        "On-call engineers prefer actionable alerts over noise."
+      ],
+      "constraints": [
+        "Critical alerts must include remediation guidance",
+        "Alert rate cannot exceed 5 per hour per service",
+        "False positive rate must stay below 10%"
+      ]
+    },
+    {
+      "envelopeId": "ENV-DB-003",
+      "name": "Capacity Planning & Forecasting",
+      "domain": "Infrastructure Planning",
+      "ownerRole": "Infrastructure Steward",
+      "createdHour": 12,
+      "endHour": 60,
+      "accent": "var(--vscode-charts-blue)",
+      "envelope_version": 1,
+      "revision_id": null,
+      "assumptions": [
+        "Growth projections account for seasonal patterns and product launches.",
+        "Resource recommendations include cost-benefit analysis.",
+        "Forecasts update weekly based on actual usage trends."
+      ],
+      "constraints": [
+        "Scaling recommendations must maintain 20% capacity buffer",
+        "Cost projections must include multi-cloud pricing",
+        "Never recommend downsizing within 30 days of scale-up"
+      ]
+    },
+    {
+      "envelopeId": "ENV-DB-004",
+      "name": "Customer SLA Compliance Reporting",
+      "domain": "Customer Success",
+      "ownerRole": "Customer Success Steward",
+      "createdHour": 24,
+      "endHour": 72,
+      "accent": "var(--vscode-charts-orange)",
+      "envelope_version": 1,
+      "revision_id": null,
+      "assumptions": [
+        "SLA calculations align with customer contract definitions.",
+        "Downtime attribution is based on root cause analysis.",
+        "Credits are automatically flagged when thresholds are breached."
+      ],
+      "constraints": [
+        "Uptime calculations must exclude scheduled maintenance",
+        "Customer-facing reports reviewed before automated delivery",
+        "SLA breach notifications escalate to account team within 1 hour"
+      ]
+    }
+  ],
+  "fleets": [
+    {
+      "stewardRole": "Performance Steward",
+      "agents": [
+        {
+          "agentId": "AG-PERF-01",
+          "name": "QueryOptimizer",
+          "role": "slow query analysis and index recommendations",
+          "envelopeIds": ["ENV-DB-001"]
+        },
+        {
+          "agentId": "AG-PERF-02",
+          "name": "SchemaAdvisor",
+          "role": "schema design improvement suggestions",
+          "envelopeIds": ["ENV-DB-001"]
+        },
+        {
+          "agentId": "AG-PERF-03",
+          "name": "ImpactAnalyzer",
+          "role": "change impact assessment",
+          "envelopeIds": ["ENV-DB-001"]
+        }
+      ]
+    },
+    {
+      "stewardRole": "Operations Steward",
+      "agents": [
+        {
+          "agentId": "AG-OPS-01",
+          "name": "AnomalyDetector",
+          "role": "behavioral anomaly identification",
+          "envelopeIds": ["ENV-DB-002"]
+        },
+        {
+          "agentId": "AG-OPS-02",
+          "name": "AlertRouter",
+          "role": "intelligent alert prioritization and routing",
+          "envelopeIds": ["ENV-DB-002"]
+        },
+        {
+          "agentId": "AG-OPS-03",
+          "name": "IncidentCorrelator",
+          "role": "multi-signal incident correlation",
+          "envelopeIds": ["ENV-DB-002"]
+        }
+      ]
+    },
+    {
+      "stewardRole": "Infrastructure Steward",
+      "agents": [
+        {
+          "agentId": "AG-INFRA-01",
+          "name": "CapacityForecaster",
+          "role": "growth projection and capacity modeling",
+          "envelopeIds": ["ENV-DB-003"]
+        },
+        {
+          "agentId": "AG-INFRA-02",
+          "name": "CostOptimizer",
+          "role": "resource right-sizing recommendations",
+          "envelopeIds": ["ENV-DB-003"]
+        },
+        {
+          "agentId": "AG-INFRA-03",
+          "name": "TrendAnalyzer",
+          "role": "usage pattern analysis",
+          "envelopeIds": ["ENV-DB-003"]
+        }
+      ]
+    },
+    {
+      "stewardRole": "Customer Success Steward",
+      "agents": [
+        {
+          "agentId": "AG-CS-01",
+          "name": "SLACalculator",
+          "role": "uptime and performance SLA tracking",
+          "envelopeIds": ["ENV-DB-004"]
+        },
+        {
+          "agentId": "AG-CS-02",
+          "name": "ReportGenerator",
+          "role": "customer-facing report compilation",
+          "envelopeIds": ["ENV-DB-004"]
+        },
+        {
+          "agentId": "AG-CS-03",
+          "name": "BreachNotifier",
+          "role": "SLA breach detection and escalation",
+          "envelopeIds": ["ENV-DB-004"]
+        }
+      ]
+    }
+  ],
+  "events": [
+    {
+      "eventId": "envelope_promoted:0:ENV-DB-001:0",
+      "hour": 0,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-DB-001",
+      "severity": "info",
+      "label": "Envelope promoted",
+      "detail": "Query optimization recommendation envelope (REV-DB-001-B) activated with enhanced impact analysis.",
+      "actorRole": "Performance Steward",
+      "actorName": "Maya Chen"
+    },
+    {
+      "eventId": "envelope_promoted:0:ENV-DB-002:1",
+      "hour": 0,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-DB-002",
+      "severity": "info",
+      "label": "Envelope promoted",
+      "detail": "Anomaly detection and alerting envelope (REV-DB-002-C) activated with adaptive thresholds.",
+      "actorRole": "Operations Steward",
+      "actorName": "Carlos Rodriguez"
+    },
+    {
+      "eventId": "decision:2_5:ENV-DB-001:2",
+      "hour": 2.5,
+      "type": "decision",
+      "envelopeId": "ENV-DB-001",
+      "severity": "info",
+      "label": "Index recommendation generated",
+      "detail": "QueryOptimizer recommends composite index on users(email, created_at). Estimated 78% query time reduction. Impact analysis: 250MB index size, 2min build time.",
+      "actorRole": "Performance Steward",
+      "actorName": "QueryOptimizer"
+    },
+    {
+      "eventId": "signal:4_2:ENV-DB-002:3",
+      "hour": 4.2,
+      "type": "signal",
+      "envelopeId": "ENV-DB-002",
+      "severity": "warning",
+      "label": "Connection pool saturation detected",
+      "detail": "AnomalyDetector identified connection pool at 92% capacity (baseline: 45%). Traffic spike from API endpoint /v2/analytics.",
+      "actorRole": "Operations Steward",
+      "actorName": "AnomalyDetector",
+      "signalKey": "connection_pool_saturation",
+      "value": 0.92
+    },
+    {
+      "eventId": "decision:4_3:ENV-DB-002:4",
+      "hour": 4.3,
+      "type": "decision",
+      "envelopeId": "ENV-DB-002",
+      "severity": "warning",
+      "label": "Critical alert generated",
+      "detail": "AlertRouter escalated to on-call: Connection pool saturation. Remediation: Scale connection pool or throttle /v2/analytics endpoint.",
+      "actorRole": "Operations Steward",
+      "actorName": "AlertRouter"
+    },
+    {
+      "eventId": "boundary_interaction:6_8:ENV-DB-001:5",
+      "hour": 6.8,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-DB-001",
+      "severity": "warning",
+      "label": "PII table flagged for review",
+      "detail": "QueryOptimizer identified optimization on customer_profiles table (contains PII). Escalated to security review per constraints.",
+      "actorRole": "Performance Steward",
+      "actorName": "QueryOptimizer",
+      "boundaryType": "security_review_required"
+    },
+    {
+      "eventId": "envelope_promoted:12:ENV-DB-003:6",
+      "hour": 12,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-DB-003",
+      "severity": "info",
+      "label": "Envelope promoted",
+      "detail": "Capacity planning and forecasting envelope activated for Q1 growth projections.",
+      "actorRole": "Infrastructure Steward",
+      "actorName": "Priya Patel"
+    },
+    {
+      "eventId": "decision:16_5:ENV-DB-003:7",
+      "hour": 16.5,
+      "type": "decision",
+      "envelopeId": "ENV-DB-003",
+      "severity": "info",
+      "label": "Capacity forecast updated",
+      "detail": "CapacityForecaster projects 40% growth in next 60 days based on new customer onboarding trends. Recommends scaling from 16 to 24 nodes by Day 45.",
+      "actorRole": "Infrastructure Steward",
+      "actorName": "CapacityForecaster"
+    },
+    {
+      "eventId": "revision:20:ENV-DB-002:8",
+      "hour": 20,
+      "type": "revision",
+      "envelopeId": "ENV-DB-002",
+      "severity": "info",
+      "label": "Alert threshold adjusted",
+      "detail": "Operations Steward increased connection pool alert threshold from 85% to 92% after analysis of false positives during traffic spikes.",
+      "actorRole": "Operations Steward",
+      "actorName": "Carlos Rodriguez",
+      "revisionType": "boundary_adjustment",
+      "reason": "Reduce false positives while maintaining safety margins for genuine saturation events."
+    },
+    {
+      "eventId": "envelope_promoted:24:ENV-DB-004:9",
+      "hour": 24,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-DB-004",
+      "severity": "info",
+      "label": "Envelope promoted",
+      "detail": "Customer SLA compliance reporting envelope activated for monthly reporting cycle.",
+      "actorRole": "Customer Success Steward",
+      "actorName": "Jordan Lee"
+    },
+    {
+      "eventId": "signal:28_3:ENV-DB-004:10",
+      "hour": 28.3,
+      "type": "signal",
+      "envelopeId": "ENV-DB-004",
+      "severity": "warning",
+      "label": "SLA at risk for customer ACME-Corp",
+      "detail": "SLACalculator detected uptime at 99.85% (contract: 99.9%) for current month. 4.5 hours remaining in measurement period.",
+      "actorRole": "Customer Success Steward",
+      "actorName": "SLACalculator",
+      "signalKey": "sla_at_risk",
+      "value": 0.9985
+    },
+    {
+      "eventId": "decision:28_4:ENV-DB-004:11",
+      "hour": 28.4,
+      "type": "decision",
+      "envelopeId": "ENV-DB-004",
+      "severity": "warning",
+      "label": "Account team notified",
+      "detail": "BreachNotifier escalated SLA risk to account manager and CSM for ACME-Corp. Credit calculation prepared ($2,400 if breached).",
+      "actorRole": "Customer Success Steward",
+      "actorName": "BreachNotifier"
+    },
+    {
+      "eventId": "dsg_session:32:ENV-DB-001:12",
+      "hour": 32,
+      "type": "dsg_session",
+      "envelopeId": "ENV-DB-001",
+      "severity": "info",
+      "label": "DSG: Query optimization review",
+      "detail": "Performance Stewardship Group reviewed 47 optimization recommendations. Approved 38, deferred 9 for deeper impact analysis.",
+      "actorRole": "Performance Steward",
+      "actorName": "Maya Chen",
+      "sessionId": "DSG-PERF-001-W2"
+    },
+    {
+      "eventId": "boundary_interaction:36_7:ENV-DB-003:13",
+      "hour": 36.7,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-DB-003",
+      "severity": "warning",
+      "label": "Capacity buffer constraint approached",
+      "detail": "CostOptimizer recommended downsizing test environment to save costs, but current utilization at 82% (buffer constraint: 20%).",
+      "actorRole": "Infrastructure Steward",
+      "actorName": "CostOptimizer",
+      "boundaryType": "constraint_approached"
+    },
+    {
+      "eventId": "signal:48:ENV-DB-002:14",
+      "hour": 48,
+      "type": "signal",
+      "envelopeId": "ENV-DB-002",
+      "severity": "info",
+      "label": "Alert quality metrics",
+      "detail": "Alert false positive rate: 7.2% (target: <10%). Mean time to acknowledge: 4.3 minutes. On-call satisfaction: 8.1/10.",
+      "actorRole": "Operations Steward",
+      "actorName": "AlertRouter",
+      "signalKey": "alert_quality",
+      "value": 0.928
+    },
+    {
+      "eventId": "decision:52_1:ENV-DB-004:15",
+      "hour": 52.1,
+      "type": "decision",
+      "envelopeId": "ENV-DB-004",
+      "severity": "info",
+      "label": "Monthly SLA report generated",
+      "detail": "ReportGenerator compiled SLA compliance report for 127 customers. 124 met SLA, 3 received credits. Total credits issued: $8,600.",
+      "actorRole": "Customer Success Steward",
+      "actorName": "ReportGenerator"
+    },
+    {
+      "eventId": "revision:60:ENV-DB-003:16",
+      "hour": 60,
+      "type": "revision",
+      "envelopeId": "ENV-DB-003",
+      "severity": "info",
+      "label": "Forecast model updated",
+      "detail": "Infrastructure Steward incorporated product launch traffic patterns into capacity model. Adjusted growth projections from 40% to 55% for next quarter.",
+      "actorRole": "Infrastructure Steward",
+      "actorName": "Priya Patel",
+      "revisionType": "model_update",
+      "reason": "New product launch creates non-linear growth pattern requiring model recalibration."
+    },
+    {
+      "eventId": "embedding:3:ENV-DB-001:18",
+      "hour": 3,
+      "type": "embedding",
+      "envelopeId": "ENV-DB-001",
+      "severity": "info",
+      "label": "Decision embedded",
+      "detail": "Index recommendation embedded into vector space for similarity search. Future slow query patterns will retrieve this optimization.",
+      "actorRole": "Performance Steward",
+      "actorName": "QueryOptimizer",
+      "embeddingId": "EMB-001",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:2_5:ENV-DB-001:2",
+      "semanticContext": "database index optimization for composite queries on user table"
+    },
+    {
+      "eventId": "embedding:5:ENV-DB-002:19",
+      "hour": 5,
+      "type": "embedding",
+      "envelopeId": "ENV-DB-002",
+      "severity": "info",
+      "label": "Anomaly pattern embedded",
+      "detail": "Connection pool saturation pattern stored. Similar traffic spikes will trigger faster detection.",
+      "actorRole": "Operations Steward",
+      "actorName": "AnomalyDetector",
+      "embeddingId": "EMB-002",
+      "embeddingType": "signal",
+      "vectorDimensions": 768,
+      "sourceEventId": "signal:4_2:ENV-DB-002:3",
+      "semanticContext": "connection pool saturation during API traffic spike"
+    },
+    {
+      "eventId": "embedding:21:ENV-DB-002:20",
+      "hour": 21,
+      "type": "embedding",
+      "envelopeId": "ENV-DB-002",
+      "severity": "info",
+      "label": "Revision embedded",
+      "detail": "Alert threshold adjustment stored with rationale. Similar false positive patterns will reference this decision.",
+      "actorRole": "Operations Steward",
+      "actorName": "Carlos Rodriguez",
+      "embeddingId": "EMB-003",
+      "embeddingType": "revision",
+      "vectorDimensions": 768,
+      "sourceEventId": "revision:20:ENV-DB-002:8",
+      "semanticContext": "alert threshold tuning to reduce false positives"
+    },
+    {
+      "eventId": "embedding:33:ENV-DB-001:21",
+      "hour": 33,
+      "type": "embedding",
+      "envelopeId": "ENV-DB-001",
+      "severity": "info",
+      "label": "DSG session embedded",
+      "detail": "Performance review decisions and patterns stored. 47 optimization examples now available for similarity matching.",
+      "actorRole": "Performance Steward",
+      "actorName": "Maya Chen",
+      "embeddingId": "EMB-004",
+      "embeddingType": "session_artifact",
+      "vectorDimensions": 768,
+      "sourceEventId": "dsg_session:32:ENV-DB-001:12",
+      "semanticContext": "query optimization review and approval patterns"
+    },
+    {
+      "eventId": "embedding:49:ENV-DB-002:22",
+      "hour": 49,
+      "type": "embedding",
+      "envelopeId": "ENV-DB-002",
+      "severity": "info",
+      "label": "Quality metrics embedded",
+      "detail": "Alert quality patterns stored for continuous learning. False positive rate and MTTA patterns now retrievable.",
+      "actorRole": "Operations Steward",
+      "actorName": "AlertRouter",
+      "embeddingId": "EMB-005",
+      "embeddingType": "signal",
+      "vectorDimensions": 768,
+      "sourceEventId": "signal:48:ENV-DB-002:14",
+      "semanticContext": "alert system quality metrics and performance indicators"
+    },
+    {
+      "eventId": "embedding:15:ENV-DB-001:24",
+      "hour": 15,
+      "type": "embedding",
+      "envelopeId": "ENV-DB-001",
+      "severity": "info",
+      "label": "Boundary interaction embedded",
+      "detail": "Query timeout boundary interaction stored for pattern detection.",
+      "actorRole": "Performance Steward",
+      "actorName": "QueryOptimizer",
+      "embeddingId": "EMB-006",
+      "embeddingType": "boundary_interaction",
+      "vectorDimensions": 768,
+      "sourceEventId": "boundary_interaction:14:ENV-DB-001:7",
+      "semanticContext": "query execution time limit escalation"
+    },
+    {
+      "eventId": "embedding:38:ENV-DB-001:25",
+      "hour": 38,
+      "type": "embedding",
+      "envelopeId": "ENV-DB-001",
+      "severity": "info",
+      "label": "Session artifact embedded",
+      "detail": "Performance DSG session patterns and decisions stored.",
+      "actorRole": "Performance Steward",
+      "actorName": "Maya Chen",
+      "embeddingId": "EMB-007",
+      "embeddingType": "session_artifact",
+      "vectorDimensions": 768,
+      "sourceEventId": "dsg_session:32:ENV-DB-001:12",
+      "semanticContext": "query optimization governance and approval workflows"
+    },
+    {
+      "eventId": "embedding:55:ENV-DB-002:26",
+      "hour": 55,
+      "type": "embedding",
+      "envelopeId": "ENV-DB-002",
+      "severity": "info",
+      "label": "Decision embedded",
+      "detail": "Alert routing decision pattern stored for ML improvement.",
+      "actorRole": "Operations Steward",
+      "actorName": "AlertRouter",
+      "embeddingId": "EMB-008",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:54:ENV-DB-002:18",
+      "semanticContext": "anomaly detection alert priority and routing logic"
+    },
+    {
+      "eventId": "embedding:65:ENV-DB-001:27",
+      "hour": 65,
+      "type": "embedding",
+      "envelopeId": "ENV-DB-001",
+      "severity": "info",
+      "label": "Revision embedded",
+      "detail": "Index strategy revision stored with performance benchmarks.",
+      "actorRole": "Performance Steward",
+      "actorName": "Maya Chen",
+      "embeddingId": "EMB-009",
+      "embeddingType": "revision",
+      "vectorDimensions": 768,
+      "sourceEventId": "revision:64:ENV-DB-001:20",
+      "semanticContext": "database indexing strategy refinement and validation"
+    },
+    {
+      "eventId": "signal:72:ENV-DB-001:23",
+      "hour": 72,
+      "type": "signal",
+      "envelopeId": "ENV-DB-001",
+      "severity": "info",
+      "label": "Optimization impact summary",
+      "detail": "38 optimizations deployed: Average query time reduced 42%. P95 latency improved from 850ms to 520ms. Zero production incidents from changes.",
+      "actorRole": "Performance Steward",
+      "actorName": "QueryOptimizer",
+      "signalKey": "optimization_impact",
+      "value": 0.42
+    }
+  ]
+}

@@ -83,7 +83,8 @@
             "escalation",
             "dsg_session",
             "dsg_message",
-            "annotation"
+            "annotation",
+            "embedding"
           ]
         },
         "hour": { "type": "number" },
@@ -128,7 +129,17 @@
         "authorRole": { "type": "string" },
         "authorName": { "type": "string" },
         "kind": { "type": "string" },
-        "text": { "type": "string" }
+        "text": { "type": "string" },
+
+        "embeddingId": { "type": "string" },
+        "embeddingType": { 
+          "type": "string",
+          "enum": ["decision", "signal", "boundary_interaction", "revision", "session_artifact"]
+        },
+        "vectorDimensions": { "type": "integer", "minimum": 1 },
+        "sourceEventId": { "type": "string" },
+        "semanticContext": { "type": "string" },
+        "similarityThreshold": { "type": "number", "minimum": 0, "maximum": 1 }
       }
     }
   }

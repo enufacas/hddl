@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none" stroke="currentColor" stroke-width="4">
+  <!-- Chip body -->
+  <rect x="40" y="40" width="120" height="120" rx="8" stroke-width="4"/>
+  
+  <!-- Top pins -->
+  <line x1="70" y1="20" x2="70" y2="40"/>
+  <circle cx="70" cy="10" r="6"/>
+  <line x1="100" y1="20" x2="100" y2="40"/>
+  <circle cx="100" cy="10" r="6"/>
+  <line x1="130" y1="20" x2="130" y2="40"/>
+  <circle cx="130" cy="10" r="6"/>
+  
+  <!-- Bottom pins -->
+  <line x1="70" y1="160" x2="70" y2="180"/>
+  <circle cx="70" cy="190" r="6"/>
+  <line x1="100" y1="160" x2="100" y2="180"/>
+  <circle cx="100" cy="190" r="6"/>
+  <line x1="130" y1="160" x2="130" y2="180"/>
+  <circle cx="130" cy="190" r="6"/>
+  
+  <!-- Left pins -->
+  <line x1="20" y1="70" x2="40" y2="70"/>
+  <circle cx="10" cy="70" r="6"/>
+  <line x1="20" y1="100" x2="40" y2="100"/>
+  <circle cx="10" cy="100" r="6"/>
+  <line x1="20" y1="130" x2="40" y2="130"/>
+  <circle cx="10" cy="130" r="6"/>
+  
+  <!-- Right pins -->
+  <line x1="160" y1="70" x2="180" y2="70"/>
+  <circle cx="190" cy="70" r="6"/>
+  <line x1="160" y1="100" x2="180" y2="100"/>
+  <circle cx="190" cy="100" r="6"/>
+  <line x1="160" y1="130" x2="180" y2="130"/>
+  <circle cx="190" cy="130" r="6"/>
+  
+  <!-- Code symbol inside -->
+  <text x="100" y="115" font-size="60" font-family="monospace" text-anchor="middle" fill="currentColor" stroke="none">&lt;/&gt;</text>
+  
+  <!-- Inner chip details -->
+  <line x1="75" y1="50" x2="95" y2="50" stroke-width="2"/>
+  <line x1="105" y1="50" x2="125" y2="50" stroke-width="2"/>
+  <line x1="75" y1="150" x2="95" y2="150" stroke-width="2"/>
+  <line x1="105" y1="150" x2="125" y2="150" stroke-width="2"/>
+  <line x1="50" y1="75" x2="50" y2="85" stroke-width="2"/>
+  <line x1="50" y1="95" x2="50" y2="105" stroke-width="2"/>
+  <line x1="50" y1="115" x2="50" y2="125" stroke-width="2"/>
+  <line x1="150" y1="75" x2="150" y2="85" stroke-width="2"/>
+  <line x1="150" y1="95" x2="150" y2="105" stroke-width="2"/>
+  <line x1="150" y1="115" x2="150" y2="125" stroke-width="2"/>
+</svg>

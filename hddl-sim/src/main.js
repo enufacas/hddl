@@ -1,12 +1,11 @@
 import './style-workspace.css'
 import { initRouter, navigateTo } from './router'
 import { createWorkspace } from './components/workspace'
+import { createScenarioSelector } from './components/scenario-selector'
 import { formatSimTime, getEnvelopeAtTime, getScenario, getTimeHour, onScenarioChange, onTimeChange, setTimeHour, getStewardFilter, onFilterChange } from './sim/sim-state'
 import { getStewardColor } from './sim/steward-colors'
-import { addRandomEnvelope, addRandomEvents, addStewardFleet, resetScenarioToDefault, tryExpandAuthority } from './sim/scenario-actions'
 import { getStoryModeEnabled, onStoryModeChange, setStoryModeEnabled } from './story-mode'
 import { initReviewHarness, isReviewModeEnabled, setReviewModeEnabled } from './review-harness'
-import { isInteractiveMode, setInteractiveMode } from './sim/interactive-store'
 
 // Initialize app
 const app = document.querySelector('#app')
@@ -56,6 +55,10 @@ reviewBtn.addEventListener('click', () => {
 })
 
 titleRight.appendChild(reviewBtn)
+
+// Add scenario selector to titlebar
+const scenarioSelector = createScenarioSelector()
+titleRight.insertBefore(scenarioSelector, titleRight.firstChild)
 
 titlebar.appendChild(titleLeft)
 titlebar.appendChild(titleRight)
@@ -161,75 +164,10 @@ speedSelector.style.cssText = 'background: var(--vscode-input-background); borde
 speedSelector.innerHTML = '<option value="1">1x</option><option value="2">2x</option><option value="3">3x</option><option value="4">4x</option>'
 speedSelector.value = '2'
 
-// Story Mode toggle (persisted)
-const storyWrap = document.createElement('label')
-storyWrap.style.cssText = 'display:flex; align-items:center; gap: 6px; font-size: 12px; color: var(--vscode-statusBar-foreground); user-select: none;'
-storyWrap.title = 'Enable to unlock guided walkthroughs and teaching demos'
-
-const storyToggle = document.createElement('input')
-storyToggle.type = 'checkbox'
-storyToggle.id = 'timeline-story-mode'
-storyToggle.checked = getStoryModeEnabled()
-storyToggle.style.cssText = 'accent-color: var(--status-info);'
-
-const storyLabel = document.createElement('span')
-storyLabel.textContent = 'Story Mode'
-
-const storyHelpIcon = document.createElement('span')
-storyHelpIcon.className = 'codicon codicon-question'
-storyHelpIcon.style.cssText = 'opacity: 0.7; cursor: help;'
-storyHelpIcon.title = 'Story Mode adds guided teaching moments: narrative beats at key times and interactive demos that explain HDDL concepts.'
-
-storyWrap.appendChild(storyToggle)
-storyWrap.appendChild(storyLabel)
-storyWrap.appendChild(storyHelpIcon)
-
-storyToggle.addEventListener('change', () => {
-  const enabled = setStoryModeEnabled(storyToggle.checked)
-  setTimelineStatus(enabled ? 'Story Mode on.' : 'Story Mode off.')
-  syncTryExpandVisibility()
-})
-
-// Interactive Mode toggle (experimental Phase 2)
-const interactiveWrap = document.createElement('label')
-interactiveWrap.style.cssText = 'display:flex; align-items:center; gap: 6px; font-size: 12px; color: var(--vscode-statusBar-foreground); user-select: none; margin-left: 8px; padding-left: 8px; border-left: 1px solid var(--vscode-sideBar-border);'
-interactiveWrap.title = 'Switch to action-driven scenario (experimental Phase 2)'
-
-const interactiveToggle = document.createElement('input')
-interactiveToggle.type = 'checkbox'
-interactiveToggle.id = 'timeline-interactive-mode'
-interactiveToggle.checked = isInteractiveMode()
-interactiveToggle.style.cssText = 'accent-color: var(--status-warning);'
-
-const interactiveLabel = document.createElement('span')
-interactiveLabel.textContent = 'Interactive'
-interactiveLabel.style.opacity = '0.8'
-
-interactiveWrap.appendChild(interactiveToggle)
-interactiveWrap.appendChild(interactiveLabel)
-
-interactiveToggle.addEventListener('change', () => {
-  const enabled = interactiveToggle.checked
-  setInteractiveMode(enabled)
-  
-  // Pause playback when switching modes
-  if (enabled && isPlaying) {
-    playBtn.click()
-  }
-  
-  // Show mode indicator
-  const message = enabled 
-    ? 'Interactive mode (experimental): actions drive progression' 
-    : 'Replay mode: time-based playback'
-  setTimelineStatus(message)
-})
-
 timelineControls.appendChild(playBtn)
 timelineControls.appendChild(timeDisplay)
 timelineControls.appendChild(speedSelector)
 timelineControls.appendChild(loopContainer)
-timelineControls.appendChild(storyWrap)
-timelineControls.appendChild(interactiveWrap)
 
 const scrubberContainer = document.createElement('div')
 scrubberContainer.id = 'timeline-scrubber'
@@ -247,11 +185,6 @@ eventMarkers.setAttribute('aria-hidden', 'true')
 const mismatchMarkers = document.createElement('div')
 mismatchMarkers.className = 'timeline-mismatch-markers'
 
-
-const storyBeatMarkers = document.createElement('div')
-storyBeatMarkers.className = 'timeline-story-beat-markers'
-
-
 const initialScenario = getScenario()
 const initialDuration = initialScenario?.durationHours ?? 48
 
@@ -264,7 +197,6 @@ scrubberHandle.style.cssText = `position: absolute; left: ${(currentTime / initi
 scrubberContainer.appendChild(envelopeSpans)
 scrubberContainer.appendChild(eventMarkers)
 scrubberContainer.appendChild(mismatchMarkers)
-scrubberContainer.appendChild(storyBeatMarkers)
 scrubberContainer.appendChild(scrubberFill)
 scrubberContainer.appendChild(scrubberHandle)
 
@@ -463,7 +395,6 @@ function syncTimelineUI(nextHour) {
 renderEnvelopeSpans()
 renderEventMarkers()
 renderMismatchMarkers()
-renderStoryBeatMarkers()
 
 // Scrubber drag functionality
 let isDragging = false
@@ -500,11 +431,6 @@ onScenarioChange(() => {
   renderEnvelopeSpans()
   renderEventMarkers()
   renderMismatchMarkers()
-  renderStoryBeatMarkers()
-})
-
-onStoryModeChange(() => {
-  renderStoryBeatMarkers()
 })
 
 // Re-render timeline when filter changes
@@ -522,247 +448,9 @@ const timelineEnd = document.createElement('div')
 timelineEnd.style.cssText = 'font-size: 11px; color: var(--vscode-statusBar-foreground);'
 timelineEnd.textContent = '48h'
 
-// Timeline header actions (home-only)
-const timelineActions = document.createElement('div')
-timelineActions.id = 'timeline-actions'
-timelineActions.className = 'timeline-actions'
-timelineActions.setAttribute('data-testid', 'timeline-actions')
-timelineActions.innerHTML = `
-  <div class="timeline-actions__buttons">
-    <button class="monaco-button timeline-action-button" data-action="try-expand-primary" aria-label="Demo: Try expand authority" title="Demo: try to expand authority (will be refused)">
-      <span class="codicon codicon-law"></span>
-      <span class="timeline-action-label">Demo: Try expand authority</span>
-    </button>
-    <button class="monaco-button monaco-text-button timeline-action-button" data-action="toggle-actions-menu" aria-label="Actions" aria-expanded="false" title="Simulation actions">
-      <span class="codicon codicon-ellipsis"></span>
-      <span class="timeline-action-label">Actions</span>
-    </button>
-    <div class="timeline-actions-menu" id="timeline-actions-menu" role="menu" aria-label="Simulation actions">
-      <button class="monaco-button monaco-text-button timeline-action-button" data-action="random-events" aria-label="Add random events" title="Add random events (10)">
-        <span class="codicon codicon-sparkle"></span>
-        <span class="timeline-action-label">+10</span>
-      </button>
-      <button class="monaco-button monaco-text-button timeline-action-button" data-action="add-steward" aria-label="Add steward" title="Add a steward (up to 5 total)">
-        <span class="codicon codicon-account"></span>
-        <span class="timeline-action-label">Steward</span>
-      </button>
-      <button class="monaco-button monaco-text-button timeline-action-button" data-action="random-envelope" aria-label="Add random envelope" title="Add random envelope">
-        <span class="codicon codicon-new-file"></span>
-        <span class="timeline-action-label">Envelope</span>
-      </button>
-      <button class="monaco-button monaco-text-button timeline-action-button" data-action="reset" aria-label="Clear & reset" title="Clear & reset">
-        <span class="codicon codicon-clear-all"></span>
-        <span class="timeline-action-label">Reset</span>
-      </button>
-    </div>
-  </div>
-  <div class="timeline-actions__status" id="timeline-actions-status" aria-live="polite"></div>
-`
-
-const actionsMenu = timelineActions.querySelector('#timeline-actions-menu')
-const actionsMenuToggle = timelineActions.querySelector('button[data-action="toggle-actions-menu"]')
-
-function closeActionsMenu() {
-  if (!actionsMenu || !actionsMenuToggle) return
-  actionsMenu.hidden = true
-  actionsMenuToggle.setAttribute('aria-expanded', 'false')
-}
-
-function toggleActionsMenu() {
-  if (!actionsMenu || !actionsMenuToggle) return
-  const open = !actionsMenu.hidden
-  if (open) {
-    closeActionsMenu()
-    return
-  }
-  actionsMenu.hidden = false
-  actionsMenuToggle.setAttribute('aria-expanded', 'true')
-}
-
-// Ensure the menu is closed on initial render.
-closeActionsMenu()
-
-document.addEventListener('click', (e) => {
-  if (!actionsMenu || actionsMenu.hidden) return
-  if (!timelineActions.contains(e.target)) closeActionsMenu()
-})
-
-document.addEventListener('keydown', (e) => {
-  if (e.key !== 'Escape') return
-  if (!actionsMenu || actionsMenu.hidden) return
-  closeActionsMenu()
-})
-
-let statusTimer = null
-function setTimelineStatus(message, { kind = 'info', html = false } = {}) {
-  const el = document.getElementById('timeline-actions-status')
-  if (!el) return
-
-  if (html) {
-    el.innerHTML = String(message || '')
-  } else {
-    el.textContent = String(message || '')
-  }
-  el.dataset.kind = kind
-
-  if (statusTimer) {
-    clearTimeout(statusTimer)
-    statusTimer = null
-  }
-
-  if (!message) return
-  statusTimer = setTimeout(() => {
-    const current = document.getElementById('timeline-actions-status')
-    if (!current) return
-    current.textContent = ''
-    current.dataset.kind = ''
-  }, 3500)
-}
-
-// Allow simple in-status navigation affordances.
-timelineActions.addEventListener('click', (e) => {
-  const link = e.target.closest('a[data-route]')
-  if (!link) return
-  e.preventDefault()
-  const route = link.getAttribute('data-route')
-  if (route) navigateTo(route)
-})
-
-window.addEventListener('hddl:status', (e) => {
-  const msg = e?.detail?.message
-  const kind = e?.detail?.kind || 'info'
-  if (!msg) return
-  setTimelineStatus(msg, { kind })
-})
-
-function isHomePath(pathname) {
-  const p = String(pathname || '/').split('?')[0].split('#')[0]
-  const normalized = (p.length > 1 && p.endsWith('/')) ? p.slice(0, -1) : p
-  return normalized === '/'
-}
-
-function syncTimelineActionsVisibility(pathname) {
-  const show = isHomePath(pathname)
-  timelineActions.style.display = show ? 'flex' : 'none'
-}
-
-function syncTryExpandVisibility() {
-  const on = getStoryModeEnabled()
-  const primaryBtn = timelineActions.querySelector('button[data-action="try-expand-primary"]')
-  if (primaryBtn) {
-    primaryBtn.style.display = on ? '' : 'none'
-    primaryBtn.setAttribute('aria-label', on ? 'Demo: Try expand authority' : 'Demo: Try expand authority')
-    primaryBtn.title = on
-      ? 'Demo: try to expand authority (will be refused)'
-      : 'Enable Story Mode to run this demo'
-  }
-}
-
-syncTimelineActionsVisibility(window.location.pathname)
-syncTryExpandVisibility()
-window.addEventListener('hddl:navigate', (e) => {
-  syncTimelineActionsVisibility(e?.detail?.path || window.location.pathname)
-  syncTryExpandVisibility()
-})
-window.addEventListener('popstate', () => {
-  syncTimelineActionsVisibility(window.location.pathname)
-  syncTryExpandVisibility()
-})
-
-onStoryModeChange(() => {
-  // Keep action visibility in sync with Story Mode.
-  syncTryExpandVisibility()
-})
-
-timelineActions.addEventListener('click', async (e) => {
-  const btn = e.target.closest('button[data-action]')
-  if (!btn) return
-
-  const action = btn.dataset.action
-  if (!action) return
-
-  if (action === 'toggle-actions-menu') {
-    e.preventDefault()
-    e.stopPropagation()
-    toggleActionsMenu()
-    return
-  }
-
-  const beforeEvents = (getScenario()?.events ?? []).length
-  const beforeEnvelopes = (getScenario()?.envelopes ?? []).length
-
-  try {
-    if (action === 'random-events') {
-      closeActionsMenu()
-      window.dispatchEvent(new CustomEvent('hddl:log-heavy'))
-      const report = addRandomEvents(10)
-      if (report?.errors?.length) {
-        setTimelineStatus(`Schema error: ${report.errors[0]}`, { kind: 'error' })
-        return
-      }
-      const afterEvents = (getScenario()?.events ?? []).length
-      const added = Math.max(0, afterEvents - beforeEvents)
-      setTimelineStatus(`Added ${added} event${added === 1 ? '' : 's'}.`)
-      return
-    }
-
-    if (action === 'add-steward') {
-      closeActionsMenu()
-      window.dispatchEvent(new CustomEvent('hddl:log-heavy'))
-      const report = addStewardFleet()
-      if (report?.errors?.length) {
-        setTimelineStatus(report.errors[0], { kind: 'warning' })
-        return
-      }
-      setTimelineStatus('Added steward fleet.')
-      return
-    }
-
-    if (action === 'random-envelope') {
-      closeActionsMenu()
-      window.dispatchEvent(new CustomEvent('hddl:log-heavy'))
-      const report = addRandomEnvelope()
-      if (report?.errors?.length) {
-        setTimelineStatus(`Schema error: ${report.errors[0]}`, { kind: 'error' })
-        return
-      }
-      const afterEvents = (getScenario()?.events ?? []).length
-      const afterEnvelopes = (getScenario()?.envelopes ?? []).length
-      const eventsAdded = Math.max(0, afterEvents - beforeEvents)
-      const envelopesAdded = Math.max(0, afterEnvelopes - beforeEnvelopes)
-      setTimelineStatus(`Added ${envelopesAdded} envelope, ${eventsAdded} event${eventsAdded === 1 ? '' : 's'}.`)
-      return
-    }
-
-    if (action === 'try-expand' || action === 'try-expand-primary') {
-      closeActionsMenu()
-      window.dispatchEvent(new CustomEvent('hddl:log-heavy'))
-      const report = tryExpandAuthority()
-      if (report?.errors?.length) {
-        setTimelineStatus(`Schema error: ${report.errors[0]}`, { kind: 'error' })
-        return
-      }
-      setTimelineStatus('Authority expansion refused (see <a class="timeline-status-link" href="#" data-route="/decision-telemetry">Evidence</a>).', { kind: 'warning', html: true })
-      return
-    }
-
-    if (action === 'reset') {
-      closeActionsMenu()
-      window.dispatchEvent(new CustomEvent('hddl:log-heavy'))
-      resetScenarioToDefault()
-      setTimelineStatus('Reset to default scenario.')
-      return
-    }
-  } catch (err) {
-    console.error(err)
-    setTimelineStatus('Action failed.', { kind: 'error' })
-  }
-})
-
 timelineBar.appendChild(timelineControls)
 timelineBar.appendChild(timelineLabel)
 timelineBar.appendChild(scrubberContainer)
-timelineBar.appendChild(timelineActions)
 timelineBar.appendChild(timelineEnd)
 
 // Initial render + reactive updates

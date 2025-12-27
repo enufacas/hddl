@@ -1,0 +1,482 @@
+{
+  "schemaVersion": 2,
+  "id": "scenario-insurance-underwriting-001",
+  "title": "Insurance Underwriting — Risk Assessment & Claims",
+  "durationHours": 120,
+  "envelopes": [
+    {
+      "envelopeId": "ENV-INS-001",
+      "name": "Policy Risk Assessment",
+      "domain": "Underwriting",
+      "ownerRole": "Underwriting Steward",
+      "createdHour": 0,
+      "endHour": 120,
+      "accent": "var(--vscode-charts-blue)",
+      "envelope_version": 4,
+      "revision_id": "REV-INS-001-D",
+      "assumptions": [
+        "Risk models trained on historical claims data and actuarial tables.",
+        "Assessments consider geographical, demographic, and behavioral factors.",
+        "Underwriters review AI recommendations for policies exceeding thresholds."
+      ],
+      "constraints": [
+        "No use of protected characteristics (race, religion, etc.) in risk scoring",
+        "High-risk classifications require human underwriter justification",
+        "Rate recommendations must align with state regulatory limits"
+      ]
+    },
+    {
+      "envelopeId": "ENV-INS-002",
+      "name": "Claims Triage & Fraud Detection",
+      "domain": "Claims Processing",
+      "ownerRole": "Claims Steward",
+      "createdHour": 0,
+      "endHour": 120,
+      "accent": "var(--vscode-charts-red)",
+      "envelope_version": 3,
+      "revision_id": "REV-INS-002-C",
+      "assumptions": [
+        "Fraud detection balances false positives with loss prevention.",
+        "Automated triage speeds legitimate claims processing.",
+        "Pattern analysis identifies suspicious claim networks."
+      ],
+      "constraints": [
+        "Fraud flags must include specific indicators for adjuster review",
+        "Never auto-deny claims — only recommend further investigation",
+        "Claimants notified of delays within 48 hours"
+      ]
+    },
+    {
+      "envelopeId": "ENV-INS-003",
+      "name": "Premium Pricing & Quote Generation",
+      "domain": "Pricing Strategy",
+      "ownerRole": "Pricing Steward",
+      "createdHour": 12,
+      "endHour": 108,
+      "accent": "var(--vscode-charts-green)",
+      "envelope_version": 2,
+      "revision_id": "REV-INS-003-B",
+      "assumptions": [
+        "Dynamic pricing reflects real-time risk assessment and market conditions.",
+        "Discount eligibility is transparent and consistently applied.",
+        "Price optimization balances competitiveness with profitability."
+      ],
+      "constraints": [
+        "Premium increases limited to 15% per renewal without review",
+        "Quotes valid for 30 days from generation",
+        "Discounts must not create discriminatory pricing patterns"
+      ]
+    },
+    {
+      "envelopeId": "ENV-INS-004",
+      "name": "Regulatory Compliance & Reporting",
+      "domain": "Compliance",
+      "ownerRole": "Compliance Steward",
+      "createdHour": 0,
+      "endHour": 120,
+      "accent": "var(--vscode-charts-purple)",
+      "envelope_version": 1,
+      "revision_id": null,
+      "assumptions": [
+        "Automated compliance checks against state and federal regulations.",
+        "Model fairness testing detects disparate impact before deployment.",
+        "Audit trails maintain 10-year retention for regulatory inquiries."
+      ],
+      "constraints": [
+        "All AI-driven decisions must be explainable to regulators",
+        "Quarterly fairness audits required for risk models",
+        "Material model changes require actuarial sign-off"
+      ]
+    }
+  ],
+  "fleets": [
+    {
+      "stewardRole": "Underwriting Steward",
+      "agents": [
+        {
+          "agentId": "AG-UW-01",
+          "name": "RiskScorer",
+          "role": "policy risk assessment and rating",
+          "envelopeIds": ["ENV-INS-001"]
+        },
+        {
+          "agentId": "AG-UW-02",
+          "name": "FairnessGuard",
+          "role": "protected characteristic screening",
+          "envelopeIds": ["ENV-INS-001"]
+        },
+        {
+          "agentId": "AG-UW-03",
+          "name": "ThresholdEscalator",
+          "role": "high-risk case routing to underwriters",
+          "envelopeIds": ["ENV-INS-001"]
+        }
+      ]
+    },
+    {
+      "stewardRole": "Claims Steward",
+      "agents": [
+        {
+          "agentId": "AG-CLM-01",
+          "name": "ClaimTriager",
+          "role": "claim complexity and urgency assessment",
+          "envelopeIds": ["ENV-INS-002"]
+        },
+        {
+          "agentId": "AG-CLM-02",
+          "name": "FraudDetector",
+          "role": "anomaly detection and pattern analysis",
+          "envelopeIds": ["ENV-INS-002"]
+        },
+        {
+          "agentId": "AG-CLM-03",
+          "name": "EvidenceLinker",
+          "role": "supporting documentation validation",
+          "envelopeIds": ["ENV-INS-002"]
+        }
+      ]
+    },
+    {
+      "stewardRole": "Pricing Steward",
+      "agents": [
+        {
+          "agentId": "AG-PRICE-01",
+          "name": "QuoteGenerator",
+          "role": "dynamic premium calculation",
+          "envelopeIds": ["ENV-INS-003"]
+        },
+        {
+          "agentId": "AG-PRICE-02",
+          "name": "DiscountEvaluator",
+          "role": "eligibility and bundle optimization",
+          "envelopeIds": ["ENV-INS-003"]
+        },
+        {
+          "agentId": "AG-PRICE-03",
+          "name": "CompetitivenessMonitor",
+          "role": "market rate comparison",
+          "envelopeIds": ["ENV-INS-003"]
+        }
+      ]
+    },
+    {
+      "stewardRole": "Compliance Steward",
+      "agents": [
+        {
+          "agentId": "AG-COMP-01",
+          "name": "RegulatoryChecker",
+          "role": "state and federal compliance validation",
+          "envelopeIds": ["ENV-INS-004"]
+        },
+        {
+          "agentId": "AG-COMP-02",
+          "name": "ModelAuditor",
+          "role": "fairness testing and disparate impact analysis",
+          "envelopeIds": ["ENV-INS-004"]
+        },
+        {
+          "agentId": "AG-COMP-03",
+          "name": "ExplainabilityEngine",
+          "role": "decision rationale documentation",
+          "envelopeIds": ["ENV-INS-004"]
+        }
+      ]
+    }
+  ],
+  "events": [
+    {
+      "eventId": "envelope_promoted:0:ENV-INS-001:0",
+      "hour": 0,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-INS-001",
+      "severity": "info",
+      "label": "Envelope promoted",
+      "detail": "Policy risk assessment envelope (REV-INS-001-D) activated with enhanced fairness constraints.",
+      "actorRole": "Underwriting Steward",
+      "actorName": "Rebecca Foster"
+    },
+    {
+      "eventId": "envelope_promoted:0:ENV-INS-002:1",
+      "hour": 0,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-INS-002",
+      "severity": "info",
+      "label": "Envelope promoted",
+      "detail": "Claims triage and fraud detection envelope (REV-INS-002-C) activated with updated pattern recognition.",
+      "actorRole": "Claims Steward",
+      "actorName": "Marcus Chen"
+    },
+    {
+      "eventId": "envelope_promoted:0:ENV-INS-004:2",
+      "hour": 0,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-INS-004",
+      "severity": "info",
+      "label": "Envelope promoted",
+      "detail": "Regulatory compliance and reporting envelope activated for Q1 audit cycle.",
+      "actorRole": "Compliance Steward",
+      "actorName": "Diana Patel"
+    },
+    {
+      "eventId": "decision:2_8:ENV-INS-001:3",
+      "hour": 2.8,
+      "type": "decision",
+      "envelopeId": "ENV-INS-001",
+      "severity": "info",
+      "label": "Auto insurance policy assessed",
+      "detail": "RiskScorer evaluated new auto policy application. Risk score: 72/100 (standard risk). Recommended rate: $1,240/year.",
+      "actorRole": "Underwriting Steward",
+      "actorName": "RiskScorer"
+    },
+    {
+      "eventId": "boundary_interaction:5_3:ENV-INS-001:4",
+      "hour": 5.3,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-INS-001",
+      "severity": "warning",
+      "label": "High-risk application escalated",
+      "detail": "ThresholdEscalator flagged homeowner's policy with risk score 89/100 (elevated flood risk + prior claims). Routed to senior underwriter.",
+      "actorRole": "Underwriting Steward",
+      "actorName": "ThresholdEscalator",
+      "boundaryType": "manual_review_required"
+    },
+    {
+      "eventId": "decision:5_7:ENV-INS-001:5",
+      "hour": 5.7,
+      "type": "decision",
+      "envelopeId": "ENV-INS-001",
+      "severity": "allowed",
+      "label": "Underwriter approved with conditions",
+      "detail": "Senior underwriter accepted policy with flood mitigation requirement (sump pump installation). Premium adjusted to $2,850/year.",
+      "actorRole": "Underwriting Steward",
+      "actorName": "Senior Underwriter #12"
+    },
+    {
+      "eventId": "decision:8_1:ENV-INS-002:6",
+      "hour": 8.1,
+      "type": "decision",
+      "envelopeId": "ENV-INS-002",
+      "severity": "info",
+      "label": "Auto claim fast-tracked",
+      "detail": "ClaimTriager assessed minor fender-bender claim. Low complexity, clear liability. Approved for automated processing ($1,850 payout).",
+      "actorRole": "Claims Steward",
+      "actorName": "ClaimTriager"
+    },
+    {
+      "eventId": "boundary_interaction:12_4:ENV-INS-002:7",
+      "hour": 12.4,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-INS-002",
+      "severity": "warning",
+      "label": "Fraud indicators detected",
+      "detail": "FraudDetector flagged claim for further investigation: 3 prior claims in 18 months, inconsistent damage timeline, repair shop flagged in network.",
+      "actorRole": "Claims Steward",
+      "actorName": "FraudDetector",
+      "boundaryType": "investigation_required"
+    },
+    {
+      "eventId": "envelope_promoted:12:ENV-INS-003:8",
+      "hour": 12,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-INS-003",
+      "severity": "info",
+      "label": "Envelope promoted",
+      "detail": "Premium pricing and quote generation envelope (REV-INS-003-B) activated with market competitiveness tracking.",
+      "actorRole": "Pricing Steward",
+      "actorName": "Alicia Rodriguez"
+    },
+    {
+      "eventId": "decision:16_5:ENV-INS-003:9",
+      "hour": 16.5,
+      "type": "decision",
+      "envelopeId": "ENV-INS-003",
+      "severity": "info",
+      "label": "Bundle discount applied",
+      "detail": "DiscountEvaluator identified customer eligible for multi-policy discount (auto + home). Quote reduced from $3,200 to $2,720/year (15% savings).",
+      "actorRole": "Pricing Steward",
+      "actorName": "DiscountEvaluator"
+    },
+    {
+      "eventId": "decision:18_2:ENV-INS-002:10",
+      "hour": 18.2,
+      "type": "decision",
+      "envelopeId": "ENV-INS-002",
+      "severity": "info",
+      "label": "Claim investigation completed",
+      "detail": "Claims adjuster reviewed fraud-flagged case. Evidence validated claim legitimacy. Prior claims were different vehicles. Claim approved for $4,200 payout.",
+      "actorRole": "Claims Steward",
+      "actorName": "Claims Adjuster #47"
+    },
+    {
+      "eventId": "signal:24:ENV-INS-004:11",
+      "hour": 24,
+      "type": "signal",
+      "envelopeId": "ENV-INS-004",
+      "severity": "info",
+      "label": "Model fairness audit complete",
+      "detail": "ModelAuditor ran disparate impact analysis on risk scoring. No significant disparities detected across protected groups. Gini coefficient: 0.03 (threshold: 0.10).",
+      "actorRole": "Compliance Steward",
+      "actorName": "ModelAuditor",
+      "signalKey": "fairness_score",
+      "value": 0.97
+    },
+    {
+      "eventId": "boundary_interaction:28_7:ENV-INS-003:12",
+      "hour": 28.7,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-INS-003",
+      "severity": "warning",
+      "label": "Premium increase exceeds threshold",
+      "detail": "QuoteGenerator calculated 18% renewal increase due to claims history. Exceeds 15% limit — escalated to pricing review.",
+      "actorRole": "Pricing Steward",
+      "actorName": "QuoteGenerator",
+      "boundaryType": "approval_required"
+    },
+    {
+      "eventId": "decision:29_1:ENV-INS-003:13",
+      "hour": 29.1,
+      "type": "decision",
+      "envelopeId": "ENV-INS-003",
+      "severity": "allowed",
+      "label": "Exception approved",
+      "detail": "Pricing Steward approved 18% increase with customer notification and retention offer (accident forgiveness program).",
+      "actorRole": "Pricing Steward",
+      "actorName": "Alicia Rodriguez"
+    },
+    {
+      "eventId": "dsg_session:36:ENV-INS-001:14",
+      "hour": 36,
+      "type": "dsg_session",
+      "envelopeId": "ENV-INS-001",
+      "severity": "info",
+      "label": "DSG: Risk model calibration",
+      "detail": "Underwriting Stewardship Group reviewed 247 high-risk escalations. Adjusted risk score thresholds for coastal properties.",
+      "actorRole": "Underwriting Steward",
+      "actorName": "Rebecca Foster",
+      "sessionId": "DSG-UW-001-Q1"
+    },
+    {
+      "eventId": "revision:40:ENV-INS-001:15",
+      "hour": 40,
+      "type": "revision",
+      "envelopeId": "ENV-INS-001",
+      "severity": "info",
+      "label": "Risk threshold adjusted",
+      "detail": "Underwriting Steward updated high-risk escalation threshold from 85 to 88 after DSG review. Reduces false escalations while maintaining safety margins.",
+      "actorRole": "Underwriting Steward",
+      "actorName": "Rebecca Foster",
+      "revisionType": "boundary_adjustment",
+      "reason": "Refine escalation criteria to focus underwriter attention on truly complex cases."
+    },
+    {
+      "eventId": "boundary_interaction:48_3:ENV-INS-004:16",
+      "hour": 48.3,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-INS-004",
+      "severity": "warning",
+      "label": "Explainability gap identified",
+      "detail": "ExplainabilityEngine flagged 3 high-risk denials with insufficient justification documentation. Routed to compliance review.",
+      "actorRole": "Compliance Steward",
+      "actorName": "ExplainabilityEngine",
+      "boundaryType": "documentation_required"
+    },
+    {
+      "eventId": "signal:56:ENV-INS-002:17",
+      "hour": 56,
+      "type": "signal",
+      "envelopeId": "ENV-INS-002",
+      "severity": "info",
+      "label": "Claims processing metrics",
+      "detail": "Fast-track claims: 68% auto-processed. Fraud detection precision: 87%. Average investigation time: 4.2 days (target: <5 days).",
+      "actorRole": "Claims Steward",
+      "actorName": "ClaimTriager",
+      "signalKey": "claims_efficiency",
+      "value": 0.68
+    },
+    {
+      "eventId": "decision:72:ENV-INS-004:18",
+      "hour": 72,
+      "type": "decision",
+      "envelopeId": "ENV-INS-004",
+      "severity": "info",
+      "label": "Regulatory report submitted",
+      "detail": "RegulatoryChecker compiled quarterly compliance report for state insurance commission. 0 violations detected, 3 minor process improvements recommended.",
+      "actorRole": "Compliance Steward",
+      "actorName": "RegulatoryChecker"
+    },
+    {
+      "eventId": "embedding:6:ENV-INS-001:21",
+      "hour": 6,
+      "type": "embedding",
+      "envelopeId": "ENV-INS-001",
+      "severity": "info",
+      "label": "Risk assessment embedded",
+      "detail": "Underwriting decision with conditions stored for similar property risk profiles.",
+      "actorRole": "Underwriting Steward",
+      "actorName": "RiskScorer",
+      "embeddingId": "EMB-INS-001",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:5_7:ENV-INS-001:5",
+      "semanticContext": "homeowner policy approval with flood mitigation requirements"
+    },
+    {
+      "eventId": "embedding:13:ENV-INS-002:22",
+      "hour": 13,
+      "type": "embedding",
+      "envelopeId": "ENV-INS-002",
+      "severity": "info",
+      "label": "Fraud pattern embedded",
+      "detail": "Fraud indicator network pattern stored for future claim investigations.",
+      "actorRole": "Claims Steward",
+      "actorName": "FraudDetector",
+      "embeddingId": "EMB-INS-002",
+      "embeddingType": "boundary_interaction",
+      "vectorDimensions": 768,
+      "sourceEventId": "boundary_interaction:12_4:ENV-INS-002:7",
+      "semanticContext": "fraud detection patterns for multiple claims and repair shop networks"
+    },
+    {
+      "eventId": "embedding:37:ENV-INS-001:23",
+      "hour": 37,
+      "type": "embedding",
+      "envelopeId": "ENV-INS-001",
+      "severity": "info",
+      "label": "DSG calibration embedded",
+      "detail": "Risk model threshold adjustments from stewardship review stored for future reference.",
+      "actorRole": "Underwriting Steward",
+      "actorName": "Rebecca Foster",
+      "embeddingId": "EMB-INS-003",
+      "embeddingType": "session_artifact",
+      "vectorDimensions": 768,
+      "sourceEventId": "dsg_session:36:ENV-INS-001:14",
+      "semanticContext": "underwriting risk threshold calibration for coastal properties"
+    },
+    {
+      "eventId": "signal:96:ENV-INS-003:24",
+      "hour": 96,
+      "type": "signal",
+      "envelopeId": "ENV-INS-003",
+      "severity": "info",
+      "label": "Market competitiveness report",
+      "detail": "CompetitivenessMonitor: Company rates 8% below market average for standard risk, 12% above for high risk. Conversion rate: 34% (industry: 28%).",
+      "actorRole": "Pricing Steward",
+      "actorName": "CompetitivenessMonitor",
+      "signalKey": "market_position",
+      "value": 0.34
+    },
+    {
+      "eventId": "signal:120:ENV-INS-001:25",
+      "hour": 120,
+      "type": "signal",
+      "envelopeId": "ENV-INS-001",
+      "severity": "info",
+      "label": "Underwriting summary",
+      "detail": "Policies issued: 1,847. Auto-approved: 72%. Escalated: 28%. Average turnaround: 2.1 days. Loss ratio projection: 62% (target: <65%).",
+      "actorRole": "Underwriting Steward",
+      "actorName": "RiskScorer",
+      "signalKey": "underwriting_performance",
+      "value": 0.72
+    }
+  ]
+}

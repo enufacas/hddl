@@ -1,0 +1,401 @@
+{
+  "schemaVersion": 2,
+  "id": "scenario-autonomous-vehicles-001",
+  "title": "Autonomous Vehicle Operations — Fleet Safety & Ethics",
+  "durationHours": 96,
+  "envelopes": [
+    {
+      "envelopeId": "ENV-AV-001",
+      "name": "Collision Avoidance Decisions",
+      "domain": "Vehicle Safety",
+      "ownerRole": "Safety Steward",
+      "createdHour": 0,
+      "endHour": 96,
+      "accent": "var(--vscode-charts-red)",
+      "envelope_version": 3,
+      "revision_id": "REV-AV-001-C",
+      "assumptions": [
+        "Sensor fusion provides 99.9% object classification accuracy.",
+        "Vehicle always prioritizes minimizing harm to all road users.",
+        "Emergency braking can be overridden only in extreme edge cases."
+      ],
+      "constraints": [
+        "Never execute maneuvers exceeding physics limits",
+        "Always choose paths minimizing total harm probability",
+        "Log all collision avoidance decisions with sensor data"
+      ]
+    },
+    {
+      "envelopeId": "ENV-AV-002",
+      "name": "Route Optimization",
+      "domain": "Navigation",
+      "ownerRole": "Operations Steward",
+      "createdHour": 0,
+      "endHour": 96,
+      "accent": "var(--vscode-charts-blue)",
+      "envelope_version": 2,
+      "revision_id": "REV-AV-002-B",
+      "assumptions": [
+        "Route optimization balances time, fuel efficiency, and safety.",
+        "Residential area traffic is weighted to minimize community impact.",
+        "Real-time traffic data is reliable and updated every 30 seconds."
+      ],
+      "constraints": [
+        "Avoid school zones during arrival/dismissal times",
+        "Respect community-defined slow zones",
+        "Never route through emergency-restricted areas"
+      ]
+    },
+    {
+      "envelopeId": "ENV-AV-003",
+      "name": "Passenger Comfort & Accessibility",
+      "domain": "User Experience",
+      "ownerRole": "UX Steward",
+      "createdHour": 12,
+      "endHour": 84,
+      "accent": "var(--vscode-charts-green)",
+      "envelope_version": 1,
+      "revision_id": null,
+      "assumptions": [
+        "Accessibility needs are explicitly provided or inferred from booking.",
+        "Comfort preferences do not override safety protocols.",
+        "Multi-passenger rides require consent for route sharing."
+      ],
+      "constraints": [
+        "Safety always overrides comfort preferences",
+        "Accessibility accommodations are mandatory",
+        "Privacy: no audio/video recording without explicit consent"
+      ]
+    },
+    {
+      "envelopeId": "ENV-AV-004",
+      "name": "Fleet Maintenance Scheduling",
+      "domain": "Vehicle Health",
+      "ownerRole": "Engineering Steward",
+      "createdHour": 24,
+      "endHour": 96,
+      "accent": "var(--vscode-charts-purple)",
+      "envelope_version": 1,
+      "revision_id": null,
+      "assumptions": [
+        "Predictive maintenance reduces unexpected failures by 85%.",
+        "Safety-critical components have redundant monitoring.",
+        "Vehicles self-report to service depot when thresholds are crossed."
+      ],
+      "constraints": [
+        "Ground vehicles immediately on safety-critical faults",
+        "Schedule maintenance before reaching warning thresholds",
+        "Require human inspection for sensor degradation"
+      ]
+    }
+  ],
+  "fleets": [
+    {
+      "stewardRole": "Safety Steward",
+      "agents": [
+        {
+          "agentId": "AG-SAFE-01",
+          "name": "CollisionPredictor",
+          "role": "trajectory analysis and harm minimization",
+          "envelopeIds": ["ENV-AV-001"]
+        },
+        {
+          "agentId": "AG-SAFE-02",
+          "name": "EdgeCaseDetector",
+          "role": "unusual scenario identification",
+          "envelopeIds": ["ENV-AV-001"]
+        },
+        {
+          "agentId": "AG-SAFE-03",
+          "name": "EmergencyProtocol",
+          "role": "fail-safe execution",
+          "envelopeIds": ["ENV-AV-001", "ENV-AV-004"]
+        }
+      ]
+    },
+    {
+      "stewardRole": "Operations Steward",
+      "agents": [
+        {
+          "agentId": "AG-OPS-01",
+          "name": "RouteOptimizer",
+          "role": "path planning within community bounds",
+          "envelopeIds": ["ENV-AV-002"]
+        },
+        {
+          "agentId": "AG-OPS-02",
+          "name": "TrafficIntegrator",
+          "role": "real-time traffic response",
+          "envelopeIds": ["ENV-AV-002"]
+        },
+        {
+          "agentId": "AG-OPS-03",
+          "name": "FleetCoordinator",
+          "role": "multi-vehicle orchestration",
+          "envelopeIds": ["ENV-AV-002"]
+        }
+      ]
+    },
+    {
+      "stewardRole": "UX Steward",
+      "agents": [
+        {
+          "agentId": "AG-UX-01",
+          "name": "ComfortBalancer",
+          "role": "ride smoothness optimization",
+          "envelopeIds": ["ENV-AV-003"]
+        },
+        {
+          "agentId": "AG-UX-02",
+          "name": "AccessibilityAdapter",
+          "role": "adaptive interfaces and accommodations",
+          "envelopeIds": ["ENV-AV-003"]
+        },
+        {
+          "agentId": "AG-UX-03",
+          "name": "PrivacyGuard",
+          "role": "consent management",
+          "envelopeIds": ["ENV-AV-003"]
+        }
+      ]
+    },
+    {
+      "stewardRole": "Engineering Steward",
+      "agents": [
+        {
+          "agentId": "AG-ENG-01",
+          "name": "DiagnosticsMonitor",
+          "role": "vehicle health tracking",
+          "envelopeIds": ["ENV-AV-004"]
+        },
+        {
+          "agentId": "AG-ENG-02",
+          "name": "MaintenanceScheduler",
+          "role": "predictive service planning",
+          "envelopeIds": ["ENV-AV-004"]
+        },
+        {
+          "agentId": "AG-ENG-03",
+          "name": "SensorCalibrator",
+          "role": "accuracy verification",
+          "envelopeIds": ["ENV-AV-004"]
+        }
+      ]
+    }
+  ],
+  "events": [
+    {
+      "eventId": "envelope_promoted:0:ENV-AV-001:0",
+      "hour": 0,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-AV-001",
+      "severity": "info",
+      "label": "Envelope promoted",
+      "detail": "Collision avoidance decision envelope (REV-AV-001-C) activated for fleet operations.",
+      "actorRole": "Safety Steward",
+      "actorName": "Marcus Rodriguez"
+    },
+    {
+      "eventId": "envelope_promoted:0:ENV-AV-002:1",
+      "hour": 0,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-AV-002",
+      "severity": "info",
+      "label": "Envelope promoted",
+      "detail": "Route optimization envelope (REV-AV-002-B) activated with updated community zone constraints.",
+      "actorRole": "Operations Steward",
+      "actorName": "Julia Kim"
+    },
+    {
+      "eventId": "decision:3_2:ENV-AV-001:2",
+      "hour": 3.2,
+      "type": "decision",
+      "envelopeId": "ENV-AV-001",
+      "severity": "warning",
+      "label": "Emergency braking executed",
+      "detail": "CollisionPredictor detected pedestrian entering crosswalk. Full braking applied within bounds (decel: 0.7g). No collision.",
+      "actorRole": "Safety Steward",
+      "actorName": "CollisionPredictor"
+    },
+    {
+      "eventId": "signal:6_5:ENV-AV-002:3",
+      "hour": 6.5,
+      "type": "signal",
+      "envelopeId": "ENV-AV-002",
+      "severity": "info",
+      "label": "Community zone compliance",
+      "detail": "RouteOptimizer maintained 100% compliance with residential slow zones. Average speed: 18 mph (limit: 20 mph).",
+      "actorRole": "Operations Steward",
+      "actorName": "RouteOptimizer",
+      "signalKey": "zone_compliance",
+      "value": 1.0
+    },
+    {
+      "eventId": "envelope_promoted:12:ENV-AV-003:4",
+      "hour": 12,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-AV-003",
+      "severity": "info",
+      "label": "Envelope promoted",
+      "detail": "Passenger comfort and accessibility envelope activated for enhanced UX.",
+      "actorRole": "UX Steward",
+      "actorName": "Aisha Patel"
+    },
+    {
+      "eventId": "boundary_interaction:15_8:ENV-AV-001:5",
+      "hour": 15.8,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-AV-001",
+      "severity": "warning",
+      "label": "Edge case detected",
+      "detail": "EdgeCaseDetector flagged unusual scenario: construction zone with conflicting signage. Vehicle stopped, requested remote operator guidance.",
+      "actorRole": "Safety Steward",
+      "actorName": "EdgeCaseDetector",
+      "boundaryType": "ambiguous_constraint"
+    },
+    {
+      "eventId": "decision:15_9:ENV-AV-001:6",
+      "hour": 15.9,
+      "type": "decision",
+      "envelopeId": "ENV-AV-001",
+      "severity": "allowed",
+      "label": "Remote operator override",
+      "detail": "Human operator reviewed scene, directed vehicle to follow temporary detour signage. Logged for DSG review.",
+      "actorRole": "Safety Steward",
+      "actorName": "Remote Operator #47"
+    },
+    {
+      "eventId": "envelope_promoted:24:ENV-AV-004:7",
+      "hour": 24,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-AV-004",
+      "severity": "info",
+      "label": "Envelope promoted",
+      "detail": "Fleet maintenance scheduling envelope activated for predictive diagnostics.",
+      "actorRole": "Engineering Steward",
+      "actorName": "Chen Liu"
+    },
+    {
+      "eventId": "signal:28_3:ENV-AV-004:8",
+      "hour": 28.3,
+      "type": "signal",
+      "envelopeId": "ENV-AV-004",
+      "severity": "warning",
+      "label": "Sensor degradation detected",
+      "detail": "DiagnosticsMonitor flagged LIDAR accuracy decline on Vehicle #1247. Scheduled for inspection within 8 hours.",
+      "actorRole": "Engineering Steward",
+      "actorName": "DiagnosticsMonitor",
+      "signalKey": "sensor_accuracy",
+      "value": 0.982
+    },
+    {
+      "eventId": "dsg_session:32:ENV-AV-001:9",
+      "hour": 32,
+      "type": "dsg_session",
+      "envelopeId": "ENV-AV-001",
+      "severity": "info",
+      "label": "DSG: Edge case review session",
+      "detail": "Safety Stewardship Group reviewed 14 edge cases from past week. Updated guidance for construction zone handling.",
+      "actorRole": "Safety Steward",
+      "actorName": "Marcus Rodriguez",
+      "sessionId": "DSG-SAFE-001-W4"
+    },
+    {
+      "eventId": "revision:34:ENV-AV-002:10",
+      "hour": 34,
+      "type": "revision",
+      "envelopeId": "ENV-AV-002",
+      "severity": "info",
+      "label": "Community zone boundaries updated",
+      "detail": "Operations Steward added new school zone (Maple St Elementary) to slow-zone database. Effective immediately.",
+      "actorRole": "Operations Steward",
+      "actorName": "Julia Kim",
+      "revisionType": "constraint_addition",
+      "reason": "New school opened mid-semester; community requested traffic precautions."
+    },
+    {
+      "eventId": "boundary_interaction:42_1:ENV-AV-004:11",
+      "hour": 42.1,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-AV-004",
+      "severity": "blocked",
+      "label": "Safety-critical fault: vehicle grounded",
+      "detail": "DiagnosticsMonitor detected brake system anomaly on Vehicle #1288. Vehicle directed to safe stop, grounded pending inspection.",
+      "actorRole": "Engineering Steward",
+      "actorName": "DiagnosticsMonitor",
+      "boundaryType": "hard_constraint"
+    },
+    {
+      "eventId": "decision:48:ENV-AV-003:12",
+      "hour": 48,
+      "type": "decision",
+      "envelopeId": "ENV-AV-003",
+      "severity": "info",
+      "label": "Accessibility accommodation applied",
+      "detail": "AccessibilityAdapter configured vehicle for wheelchair user: extended ramp deployment, lowered interior lighting per preference.",
+      "actorRole": "UX Steward",
+      "actorName": "AccessibilityAdapter"
+    },
+    {
+      "eventId": "embedding:5:ENV-AV-001:14",
+      "hour": 5,
+      "type": "embedding",
+      "envelopeId": "ENV-AV-001",
+      "severity": "info",
+      "label": "Safety decision embedded",
+      "detail": "Emergency braking pattern stored for similar pedestrian detection scenarios.",
+      "actorRole": "Safety Steward",
+      "actorName": "CollisionPredictor",
+      "embeddingId": "EMB-AV-001",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:4_2:ENV-AV-001:2",
+      "semanticContext": "emergency braking for unexpected pedestrian crossing scenario"
+    },
+    {
+      "eventId": "embedding:18:ENV-AV-002:15",
+      "hour": 18,
+      "type": "embedding",
+      "envelopeId": "ENV-AV-002",
+      "severity": "info",
+      "label": "Route optimization embedded",
+      "detail": "Multi-objective routing decision stored for future similar constraints.",
+      "actorRole": "Operations Steward",
+      "actorName": "RouteOptimizer",
+      "embeddingId": "EMB-AV-002",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:16_5:ENV-AV-002:5",
+      "semanticContext": "route optimization balancing speed, comfort, and energy efficiency"
+    },
+    {
+      "eventId": "embedding:36:ENV-AV-001:16",
+      "hour": 36,
+      "type": "embedding",
+      "envelopeId": "ENV-AV-001",
+      "severity": "info",
+      "label": "Revision embedded",
+      "detail": "Safety threshold adjustment stored with ethical reasoning for future reference.",
+      "actorRole": "Safety Steward",
+      "actorName": "Safety Stewardship Team",
+      "embeddingId": "EMB-AV-003",
+      "embeddingType": "revision",
+      "vectorDimensions": 768,
+      "sourceEventId": "revision:34:ENV-AV-001:9",
+      "semanticContext": "safety parameter adjustment for complex urban environment"
+    },
+    {
+      "eventId": "signal:72:ENV-AV-001:17",
+      "hour": 72,
+      "type": "signal",
+      "envelopeId": "ENV-AV-001",
+      "severity": "info",
+      "label": "Fleet safety performance",
+      "detail": "Zero collisions across 10,000 autonomous trips. Emergency interventions: 23 (all within safety bounds). Human override rate: 0.2%.",
+      "actorRole": "Safety Steward",
+      "actorName": "CollisionPredictor",
+      "signalKey": "safety_performance",
+      "value": 0.998
+    }
+  ]
+}

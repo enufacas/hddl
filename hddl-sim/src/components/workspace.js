@@ -42,15 +42,15 @@ function setBottomCollapsed(collapsed) {
 // Activity bar icons (primary lenses)
 const activityBarItems = [
   { id: 'envelopes', icon: 'shield', label: 'Envelopes', route: '/' },
-  { id: 'evidence', icon: 'pulse', label: 'Evidence', route: '/decision-telemetry' },
-  { id: 'revision', icon: 'git-pull-request', label: 'Revision', route: '/stewardship' },
+  { id: 'dts', icon: 'pulse', label: 'Decision Telemetry System', route: '/decision-telemetry' },
+  { id: 'stewardship', icon: 'git-pull-request', label: 'Stewardship', route: '/stewardship' },
 ]
 
 const navItems = [
   // Primary
   { id: 'envelopes', label: 'Envelopes', icon: 'shield', route: '/', section: 'primary' },
-  { id: 'evidence', label: 'Evidence', icon: 'pulse', route: '/decision-telemetry', section: 'primary' },
-  { id: 'revision', label: 'Revision', icon: 'git-pull-request', route: '/stewardship', section: 'primary' },
+  { id: 'dts', label: 'Decision Telemetry System', icon: 'pulse', route: '/decision-telemetry', section: 'primary' },
+  { id: 'stewardship', label: 'Stewardship', icon: 'git-pull-request', route: '/stewardship', section: 'primary' },
 
   // Secondary
   { id: 'fleets', label: 'Fleets', icon: 'organization', route: '/steward-fleets', section: 'secondary' },
@@ -59,7 +59,7 @@ const navItems = [
 
   // Reference
   { id: 'docs', label: 'Docs', icon: 'book', route: '/docs', section: 'reference' },
-  { id: 'authority', label: 'Authority Map', icon: 'map', route: '/authority', section: 'reference' },
+  { id: 'authority', label: 'Authority Order', icon: 'law', route: '/authority', section: 'reference' },
 ]
 
 const sidebarSections = [
