@@ -44,3 +44,12 @@ For subtle background tints based on dynamic colors:
 - `hddl-sim/src/pages/` - Page layouts (home.js)
 - `hddl-sim/src/sim/` - Simulation logic and utilities
 - `hddl-sim/schemas/` - JSON schemas for scenarios
+
+## Communication Guidelines
+
+### Never Fabricate Project History
+- **DO NOT** make up timelines, development duration, or effort estimates
+- **DO NOT** add phrases like "months of work", "weeks of iteration", "extensive development"
+- **DO NOT** invent project history or milestones that didn't happen
+- Stick to observable facts: features present, tests passing, code structure
+- If asked about project history, only reference git commit history or explicitly documented facts
