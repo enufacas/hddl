@@ -418,7 +418,8 @@
       "embeddingType": "decision",
       "vectorDimensions": 768,
       "sourceEventId": "decision:5_7:ENV-INS-001:5",
-      "semanticContext": "homeowner policy approval with flood mitigation requirements"
+      "semanticContext": "homeowner policy approval with flood mitigation requirements",
+      "semanticVector": [0.65, 0.45]
     },
     {
       "eventId": "embedding:13:ENV-INS-002:22",
@@ -434,7 +435,8 @@
       "embeddingType": "boundary_interaction",
       "vectorDimensions": 768,
       "sourceEventId": "boundary_interaction:12_4:ENV-INS-002:7",
-      "semanticContext": "fraud detection patterns for multiple claims and repair shop networks"
+      "semanticContext": "fraud detection patterns for multiple claims and repair shop networks",
+      "semanticVector": [0.88, 0.82]
     },
     {
       "eventId": "embedding:37:ENV-INS-001:23",
@@ -450,7 +452,8 @@
       "embeddingType": "session_artifact",
       "vectorDimensions": 768,
       "sourceEventId": "dsg_session:36:ENV-INS-001:14",
-      "semanticContext": "underwriting risk threshold calibration for coastal properties"
+      "semanticContext": "underwriting risk threshold calibration for coastal properties",
+      "semanticVector": [0.15, 0.85]
     },
     {
       "eventId": "signal:96:ENV-INS-003:24",

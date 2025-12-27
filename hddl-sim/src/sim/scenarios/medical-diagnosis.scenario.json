@@ -284,7 +284,8 @@
       "embeddingType": "decision",
       "vectorDimensions": 768,
       "sourceEventId": "decision:2_5:ENV-MED-001:1",
-      "semanticContext": "differential diagnosis for chest pain with EKG abnormalities"
+      "semanticContext": "differential diagnosis for chest pain with EKG abnormalities",
+      "semanticVector": [0.68, 0.40]
     },
     {
       "eventId": "embedding:9:ENV-MED-002:12",
@@ -300,7 +301,8 @@
       "embeddingType": "boundary_interaction",
       "vectorDimensions": 768,
       "sourceEventId": "boundary_interaction:8_2:ENV-MED-002:3",
-      "semanticContext": "warfarin and aspirin moderate interaction with pharmacist override"
+      "semanticContext": "warfarin and aspirin moderate interaction with pharmacist override",
+      "semanticVector": [0.82, 0.78]
     },
     {
       "eventId": "embedding:10:ENV-MED-002:12b",
@@ -316,7 +318,8 @@
       "embeddingType": "decision",
       "vectorDimensions": 768,
       "sourceEventId": "decision:8_3:ENV-MED-002:4",
-      "semanticContext": "pharmacist override approval with patient monitoring plan for interaction"
+      "semanticContext": "pharmacist override approval with patient monitoring plan for interaction",
+      "semanticVector": [0.78, 0.72]
     },
     {
       "eventId": "embedding:16:ENV-MED-003:12c",
@@ -332,7 +335,8 @@
       "embeddingType": "signal",
       "vectorDimensions": 768,
       "sourceEventId": "signal:14_8:ENV-MED-003:6",
-      "semanticContext": "BP drop and O2 saturation decline deterioration pattern"
+      "semanticContext": "BP drop and O2 saturation decline deterioration pattern",
+      "semanticVector": [0.88, 0.90]
     },
     {
       "eventId": "embedding:18:ENV-MED-001:12d",
@@ -348,7 +352,8 @@
       "embeddingType": "revision",
       "vectorDimensions": 768,
       "sourceEventId": "revision:16_5:ENV-MED-001:7",
-      "semanticContext": "diagnostic confidence threshold increase from 75% to 80%"
+      "semanticContext": "diagnostic confidence threshold increase from 75% to 80%",
+      "semanticVector": [0.22, 0.75]
     },
     {
       "eventId": "embedding:20:ENV-MED-001:12e",
@@ -364,7 +369,8 @@
       "embeddingType": "session_artifact",
       "vectorDimensions": 768,
       "sourceEventId": "dsg_session:18:ENV-MED-001:8",
-      "semanticContext": "weekly diagnostic recommendation performance review session"
+      "semanticContext": "weekly diagnostic recommendation performance review session",
+      "semanticVector": [0.15, 0.88]
     },
     {
       "eventId": "embedding:24:ENV-MED-002:12f",
@@ -380,7 +386,8 @@
       "embeddingType": "boundary_interaction",
       "vectorDimensions": 768,
       "sourceEventId": "boundary_interaction:22_1:ENV-MED-002:9",
-      "semanticContext": "penicillin allergy prescription block requiring alternative medication"
+      "semanticContext": "penicillin allergy prescription block requiring alternative medication",
+      "semanticVector": [0.85, 0.85]
     },
     {
       "eventId": "embedding:25:ENV-MED-003:13",
@@ -396,7 +403,8 @@
       "embeddingType": "signal",
       "vectorDimensions": 768,
       "sourceEventId": "signal:24:ENV-MED-003:10",
-      "semanticContext": "emergency triage accuracy and clinical alignment patterns"
+      "semanticContext": "emergency triage accuracy and clinical alignment patterns",
+      "semanticVector": [0.35, 0.30]
     }
   ]
 }

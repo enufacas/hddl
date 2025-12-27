@@ -398,7 +398,8 @@
       "embeddingType": "decision",
       "vectorDimensions": 768,
       "sourceEventId": "decision:2_5:ENV-DB-001:2",
-      "semanticContext": "database index optimization for composite queries on user table"
+      "semanticContext": "database index optimization for composite queries on user table",
+      "semanticVector": [0.72, 0.35]
     },
     {
       "eventId": "embedding:5:ENV-DB-002:19",
@@ -414,7 +415,8 @@
       "embeddingType": "signal",
       "vectorDimensions": 768,
       "sourceEventId": "signal:4_2:ENV-DB-002:3",
-      "semanticContext": "connection pool saturation during API traffic spike"
+      "semanticContext": "connection pool saturation during API traffic spike",
+      "semanticVector": [0.85, 0.75]
     },
     {
       "eventId": "embedding:21:ENV-DB-002:20",
@@ -430,7 +432,8 @@
       "embeddingType": "revision",
       "vectorDimensions": 768,
       "sourceEventId": "revision:20:ENV-DB-002:8",
-      "semanticContext": "alert threshold tuning to reduce false positives"
+      "semanticContext": "alert threshold tuning to reduce false positives",
+      "semanticVector": [0.25, 0.70]
     },
     {
       "eventId": "embedding:33:ENV-DB-001:21",
@@ -446,7 +449,8 @@
       "embeddingType": "session_artifact",
       "vectorDimensions": 768,
       "sourceEventId": "dsg_session:32:ENV-DB-001:12",
-      "semanticContext": "query optimization review and approval patterns"
+      "semanticContext": "query optimization review and approval patterns",
+      "semanticVector": [0.18, 0.88]
     },
     {
       "eventId": "embedding:49:ENV-DB-002:22",
@@ -462,7 +466,8 @@
       "embeddingType": "signal",
       "vectorDimensions": 768,
       "sourceEventId": "signal:48:ENV-DB-002:14",
-      "semanticContext": "alert system quality metrics and performance indicators"
+      "semanticContext": "alert system quality metrics and performance indicators",
+      "semanticVector": [0.30, 0.30]
     },
     {
       "eventId": "embedding:8:ENV-DB-001:24",
@@ -478,7 +483,8 @@
       "embeddingType": "boundary_interaction",
       "vectorDimensions": 768,
       "sourceEventId": "boundary_interaction:6_8:ENV-DB-001:5",
-      "semanticContext": "PII table optimization security review escalation pattern"
+      "semanticContext": "PII table optimization security review escalation pattern",
+      "semanticVector": [0.80, 0.82]
     },
     {
       "eventId": "embedding:38:ENV-DB-001:25",
@@ -494,7 +500,8 @@
       "embeddingType": "session_artifact",
       "vectorDimensions": 768,
       "sourceEventId": "dsg_session:32:ENV-DB-001:12",
-      "semanticContext": "query optimization governance and approval workflows"
+      "semanticContext": "query optimization governance and approval workflows",
+      "semanticVector": [0.15, 0.85]
     },
     {
       "eventId": "embedding:53:ENV-DB-004:26",
@@ -510,7 +517,8 @@
       "embeddingType": "decision",
       "vectorDimensions": 768,
       "sourceEventId": "decision:52_1:ENV-DB-004:15",
-      "semanticContext": "monthly SLA compliance report generation for 127 customers"
+      "semanticContext": "monthly SLA compliance report generation for 127 customers",
+      "semanticVector": [0.65, 0.28]
     },
     {
       "eventId": "embedding:62:ENV-DB-003:27",
@@ -526,7 +534,8 @@
       "embeddingType": "revision",
       "vectorDimensions": 768,
       "sourceEventId": "revision:60:ENV-DB-003:16",
-      "semanticContext": "capacity forecast model recalibration for product launch growth"
+      "semanticContext": "capacity forecast model recalibration for product launch growth",
+      "semanticVector": [0.22, 0.75]
     },
     {
       "eventId": "signal:72:ENV-DB-001:23",

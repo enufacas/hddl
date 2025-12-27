@@ -685,7 +685,8 @@
       "embeddingType": "signal",
       "vectorDimensions": 768,
       "sourceEventId": "signal:11_2:ENV-001:4",
-      "semanticContext": "customer service response latency baseline for SLA monitoring"
+      "semanticContext": "customer service response latency baseline for SLA monitoring",
+      "semanticVector": [0.75, 0.25]
     },
     {
       "eventId": "embedding:13:ENV-001:26",
@@ -700,7 +701,8 @@
       "embeddingType": "decision",
       "vectorDimensions": 768,
       "sourceEventId": "decision:12_55:ENV-001:7",
-      "semanticContext": "refund over $100 blocked decision pattern with escalation trigger"
+      "semanticContext": "refund over $100 blocked decision pattern with escalation trigger",
+      "semanticVector": [0.85, 0.80]
     },
     {
       "eventId": "embedding:14:ENV-001:27",
@@ -715,7 +717,8 @@
       "embeddingType": "boundary_interaction",
       "vectorDimensions": 768,
       "sourceEventId": "BI-ENV-001-001",
-      "semanticContext": "customer refund human-review boundary trigger and escalation"
+      "semanticContext": "customer refund human-review boundary trigger and escalation",
+      "semanticVector": [0.90, 0.85]
     },
     {
       "eventId": "embedding:15:ENV-001:28",
@@ -730,7 +733,8 @@
       "embeddingType": "revision",
       "vectorDimensions": 768,
       "sourceEventId": "revision:13_1:ENV-001:9",
-      "semanticContext": "refund escalation evidence packet requirements policy update"
+      "semanticContext": "refund escalation evidence packet requirements policy update",
+      "semanticVector": [0.20, 0.75]
     },
     {
       "eventId": "embedding:17:ENV-003:29",
@@ -745,7 +749,8 @@
       "embeddingType": "signal",
       "vectorDimensions": 768,
       "sourceEventId": "signal:16_2:ENV-003:10",
-      "semanticContext": "sales discount pressure signal for pipeline risk assessment"
+      "semanticContext": "sales discount pressure signal for pipeline risk assessment",
+      "semanticVector": [0.70, 0.30]
     },
     {
       "eventId": "embedding:18:ENV-003:30",
@@ -760,7 +765,8 @@
       "embeddingType": "decision",
       "vectorDimensions": 768,
       "sourceEventId": "decision:16_35:ENV-003:11",
-      "semanticContext": "discount over 15% blocked decision pattern with steward escalation"
+      "semanticContext": "discount over 15% blocked decision pattern with steward escalation",
+      "semanticVector": [0.82, 0.78]
     },
     {
       "eventId": "embedding:19:ENV-003:31",
@@ -775,7 +781,8 @@
       "embeddingType": "boundary_interaction",
       "vectorDimensions": 768,
       "sourceEventId": "BI-ENV-003-001",
-      "semanticContext": "sales discount boundary touched and steward escalation workflow"
+      "semanticContext": "sales discount boundary touched and steward escalation workflow",
+      "semanticVector": [0.88, 0.82]
     },
     {
       "eventId": "embedding:21:ENV-004:32",
@@ -790,7 +797,8 @@
       "embeddingType": "signal",
       "vectorDimensions": 768,
       "sourceEventId": "signal:20:ENV-004:14",
-      "semanticContext": "database schema drift detection signal for contract validation"
+      "semanticContext": "database schema drift detection signal for contract validation",
+      "semanticVector": [0.30, 0.35]
     },
     {
       "eventId": "embedding:22:ENV-004:33",
@@ -805,7 +813,8 @@
       "embeddingType": "decision",
       "vectorDimensions": 768,
       "sourceEventId": "decision:20_25:ENV-004:15",
-      "semanticContext": "schema change validation against approved contract pattern"
+      "semanticContext": "schema change validation against approved contract pattern",
+      "semanticVector": [0.65, 0.40]
     },
     {
       "eventId": "embedding:23:ENV-004:34",
@@ -820,7 +829,8 @@
       "embeddingType": "revision",
       "vectorDimensions": 768,
       "sourceEventId": "revision:20_8:ENV-004:16",
-      "semanticContext": "schema contract update with versioned migration requirements"
+      "semanticContext": "schema contract update with versioned migration requirements",
+      "semanticVector": [0.25, 0.70]
     },
     {
       "eventId": "embedding:35:ENV-002:35",
@@ -835,7 +845,8 @@
       "embeddingType": "signal",
       "vectorDimensions": 768,
       "sourceEventId": "signal:34:ENV-002:17",
-      "semanticContext": "hiring candidate score drift detection for bias monitoring"
+      "semanticContext": "hiring candidate score drift detection for bias monitoring",
+      "semanticVector": [0.25, 0.30]
     },
     {
       "eventId": "embedding:36:ENV-002:36",
@@ -850,7 +861,8 @@
       "embeddingType": "decision",
       "vectorDimensions": 768,
       "sourceEventId": "decision:34_2:ENV-002:18",
-      "semanticContext": "hiring transparency packet compilation pattern for candidate review"
+      "semanticContext": "hiring transparency packet compilation pattern for candidate review",
+      "semanticVector": [0.60, 0.35]
     },
     {
       "eventId": "embedding:40:ENV-002:37",
@@ -865,7 +877,8 @@
       "embeddingType": "session_artifact",
       "vectorDimensions": 768,
       "sourceEventId": "dsg_session:39:ENV-002:20",
-      "semanticContext": "DSG cross-domain fairness review session decisions and precedents"
+      "semanticContext": "DSG cross-domain fairness review session decisions and precedents",
+      "semanticVector": [0.15, 0.90]
     },
     {
       "eventId": "embedding:41:ENV-002:38",
@@ -880,7 +893,8 @@
       "embeddingType": "revision",
       "vectorDimensions": 768,
       "sourceEventId": "revision:39_6:ENV-002:22",
-      "semanticContext": "hiring feature allow-list tightening for proxy inference prevention"
+      "semanticContext": "hiring feature allow-list tightening for proxy inference prevention",
+      "semanticVector": [0.18, 0.85]
     },
     {
       "eventId": "signal:40:ENV-002:24",

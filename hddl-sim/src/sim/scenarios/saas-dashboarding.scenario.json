@@ -408,7 +408,8 @@
       "embeddingType": "decision",
       "vectorDimensions": 768,
       "sourceEventId": "decision:8_4:ENV-DASH-001:7",
-      "semanticContext": "stacked area chart recommendation for time-series with multiple categories"
+      "semanticContext": "stacked area chart recommendation for time-series with multiple categories",
+      "semanticVector": [0.70, 0.30]
     },
     {
       "eventId": "embedding:19:ENV-DASH-002:21",
@@ -424,7 +425,8 @@
       "embeddingType": "boundary_interaction",
       "vectorDimensions": 768,
       "sourceEventId": "boundary_interaction:18_2:ENV-DASH-002:11",
-      "semanticContext": "PII field blocking in auto-generated customer queries"
+      "semanticContext": "PII field blocking in auto-generated customer queries",
+      "semanticVector": [0.82, 0.78]
     },
     {
       "eventId": "embedding:29:ENV-DASH-002:22",
@@ -440,7 +442,8 @@
       "embeddingType": "session_artifact",
       "vectorDimensions": 768,
       "sourceEventId": "dsg_session:28:ENV-DASH-002:13",
-      "semanticContext": "query performance review and common slow pattern optimizations"
+      "semanticContext": "query performance review and common slow pattern optimizations",
+      "semanticVector": [0.18, 0.85]
     },
     {
       "eventId": "signal:72:ENV-DASH-001:23",

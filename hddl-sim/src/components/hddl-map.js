@@ -1977,25 +1977,25 @@ export function createHDDLMap(container, options = {}) {
     .attr('font-size', '9px')
     .attr('font-style', 'italic')
     .attr('transform', `rotate(-90, ${frontLeft - 5}, ${(backY + frontY) / 2})`)
-    .text('← archived ─ recent →')
+    .text('← policy ─ operational →')
 
-  // Back label (older patterns)
+  // Back label (routine patterns)
   axisLabelGroup.append('text')
     .attr('x', (backLeft + backRight) / 2)
     .attr('y', backY - 4)
     .attr('text-anchor', 'middle')
     .attr('fill', 'rgba(100, 140, 180, 0.35)')
     .attr('font-size', '8px')
-    .text('foundational patterns')
+    .text('routine patterns')
 
-  // Front label (hot patterns)
+  // Front label (exceptional patterns)
   axisLabelGroup.append('text')
     .attr('x', (frontLeft + frontRight) / 2)
     .attr('y', frontY + 12)
     .attr('text-anchor', 'middle')
     .attr('fill', 'rgba(100, 140, 180, 0.5)')
     .attr('font-size', '8px')
-    .text('active retrieval zone')
+    .text('exceptional patterns')
 
   // Store bounds for chip positioning
   const floorTop = backY
@@ -2091,62 +2091,65 @@ export function createHDDLMap(container, options = {}) {
     // ═══════════════════════════════════════════════════════════════════════════
     // CANONICAL VECTOR SPACE CLUSTERING
     // ═══════════════════════════════════════════════════════════════════════════
-    // In a real vector embedding database, position represents semantic similarity.
-    // For HDDL, we model this with meaningful axes:
+    // Position is determined by semanticVector [x, y] where:
+    //   X-AXIS: policy(0) ↔ operational(1)
+    //   Y-AXIS: routine(0) ↔ exceptional(1)
     //
-    // X-AXIS (horizontal): Domain clustering by envelope
-    //   - Embeddings from the same envelope cluster together
-    //   - Cross-domain patterns (boundary_interaction) span multiple regions
+    // Quadrants:
+    //   Top-left:     Exceptional policy (revisions, DSG sessions, governance)
+    //   Top-right:    Exceptional operational (escalations, boundary violations)
+    //   Bottom-left:  Routine policy (baseline signals, drift monitoring)
+    //   Bottom-right: Routine operational (normal decisions, approvals)
     //
-    // Y-AXIS (depth/perspective): Recency & retrieval likelihood
-    //   - Back = older patterns (archived, less frequently retrieved)
-    //   - Front = recent patterns (hot, actively used for similarity matching)
-    //
-    // SEMANTIC CLUSTERING: Items with similar semanticContext text cluster together
-    //   - Simple heuristic: hash the semanticContext to create consistent position offsets
+    // Similar patterns cluster together based on semantic meaning, not envelope.
     // ═══════════════════════════════════════════════════════════════════════════
 
-    // Get scenario for envelope-based positioning
-    const scenario = getScenario()
-    const envelopeIds = [...new Set(scenario.envelopes.map(e => e.envelopeId))]
-    const envelopeIndex = envelopeIds.indexOf(event.envelopeId)
-    const envelopeCount = Math.max(envelopeIds.length, 1)
+    // Use pre-computed semanticVector if available, otherwise fall back to heuristics
+    let normalizedX, depthT
     
-    // X-axis: Domain clustering by envelope (with padding from edges)
-    const envelopeBaseX = envelopeIndex >= 0 
-      ? 0.15 + (envelopeIndex / Math.max(envelopeCount - 1, 1)) * 0.7
-      : 0.5
-    
-    // Semantic clustering: hash semanticContext to get consistent sub-position
-    const semanticHash = (event.semanticContext || event.label || '').split('').reduce(
-      (acc, char, i) => acc + char.charCodeAt(0) * (i + 1), 0
-    )
-    const semanticOffsetX = ((semanticHash % 100) / 100 - 0.5) * 0.12
-    const semanticOffsetY = (((semanticHash * 7) % 100) / 100 - 0.5) * 0.15
-    
-    // Y-axis (depth): Recency-based positioning
-    // Older embeddings at back (depth=0), newer at front (depth=1)
-    const scenarioDuration = scenario.durationHours || 24
-    const normalizedTime = Math.min(1, event.hour / scenarioDuration)
-    
-    // Embedding type affects depth band (decisions are more "foundational" = deeper)
-    const typeDepthBias = {
-      'decision': -0.15,           // Decisions are foundational patterns - pushed back
-      'revision': -0.05,           // Revisions are policy updates - slightly back
-      'boundary_interaction': 0,   // Boundary interactions are neutral
-      'signal': 0.1,               // Signals are operational - pushed forward
-      'session_artifact': 0.15     // Session artifacts are recent context - front
+    if (event.semanticVector && Array.isArray(event.semanticVector) && event.semanticVector.length === 2) {
+      // Use pre-computed semantic position
+      normalizedX = 0.1 + event.semanticVector[0] * 0.8  // Map to 0.1-0.9 range with padding
+      depthT = 0.1 + event.semanticVector[1] * 0.8      // Y maps to depth (routine=back, exceptional=front)
+    } else {
+      // Fallback: envelope-based positioning (legacy behavior)
+      const scenario = getScenario()
+      const envelopeIds = [...new Set(scenario.envelopes.map(e => e.envelopeId))]
+      const envelopeIndex = envelopeIds.indexOf(event.envelopeId)
+      const envelopeCount = Math.max(envelopeIds.length, 1)
+      
+      const envelopeBaseX = envelopeIndex >= 0 
+        ? 0.15 + (envelopeIndex / Math.max(envelopeCount - 1, 1)) * 0.7
+        : 0.5
+      
+      // Semantic clustering fallback: hash semanticContext
+      const semanticHash = (event.semanticContext || event.label || '').split('').reduce(
+        (acc, char, i) => acc + char.charCodeAt(0) * (i + 1), 0
+      )
+      const semanticOffsetX = ((semanticHash % 100) / 100 - 0.5) * 0.12
+      const semanticOffsetY = (((semanticHash * 7) % 100) / 100 - 0.5) * 0.15
+      
+      normalizedX = Math.max(0.08, Math.min(0.92, envelopeBaseX + semanticOffsetX))
+      
+      // Y-axis (depth): Recency + type bias
+      const scenarioDuration = scenario.durationHours || 24
+      const normalizedTime = Math.min(1, event.hour / scenarioDuration)
+      
+      const typeDepthBias = {
+        'decision': -0.15,
+        'revision': -0.05,
+        'boundary_interaction': 0,
+        'signal': 0.1,
+        'session_artifact': 0.15
+      }
+      
+      const baseDepthT = normalizedTime * 0.7 + 0.15
+      const typeBias = typeDepthBias[event.embeddingType] || 0
+      depthT = Math.max(0.05, Math.min(0.95, baseDepthT + typeBias + semanticOffsetY))
     }
-    
-    const baseDepthT = normalizedTime * 0.7 + 0.15  // 0.15 to 0.85 range
-    const typeBias = typeDepthBias[event.embeddingType] || 0
-    
-    // Final positions with semantic clustering
-    const depthT = Math.max(0.05, Math.min(0.95, baseDepthT + typeBias + semanticOffsetY))
-    const stewardOffset = Math.max(0.08, Math.min(0.92, envelopeBaseX + semanticOffsetX))
 
     // Perspective-aware positioning using the helper function
-    const targetX = box3DBounds.getXAtDepth(stewardOffset, depthT)
+    const targetX = box3DBounds.getXAtDepth(normalizedX, depthT)
     const targetY = box3DBounds.backY + depthT * floorDepthRange
     const depthZ = depthT * 100
     

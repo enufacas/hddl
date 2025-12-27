@@ -350,7 +350,8 @@
       "embeddingType": "decision",
       "vectorDimensions": 768,
       "sourceEventId": "decision:3_2:ENV-AV-001:2",
-      "semanticContext": "emergency braking for unexpected pedestrian crossing scenario"
+      "semanticContext": "emergency braking for unexpected pedestrian crossing scenario",
+      "semanticVector": [0.90, 0.95]
     },
     {
       "eventId": "embedding:8:ENV-AV-002:14b",
@@ -366,7 +367,8 @@
       "embeddingType": "signal",
       "vectorDimensions": 768,
       "sourceEventId": "signal:6_5:ENV-AV-002:3",
-      "semanticContext": "residential slow zone speed compliance baseline"
+      "semanticContext": "residential slow zone speed compliance baseline",
+      "semanticVector": [0.65, 0.25]
     },
     {
       "eventId": "embedding:17:ENV-AV-001:15",
@@ -382,7 +384,8 @@
       "embeddingType": "boundary_interaction",
       "vectorDimensions": 768,
       "sourceEventId": "boundary_interaction:15_8:ENV-AV-001:5",
-      "semanticContext": "construction zone with conflicting signage requiring remote operator"
+      "semanticContext": "construction zone with conflicting signage requiring remote operator",
+      "semanticVector": [0.85, 0.88]
     },
     {
       "eventId": "embedding:18:ENV-AV-001:15b",
@@ -398,7 +401,8 @@
       "embeddingType": "decision",
       "vectorDimensions": 768,
       "sourceEventId": "decision:15_9:ENV-AV-001:6",
-      "semanticContext": "remote operator guidance for temporary construction detour"
+      "semanticContext": "remote operator guidance for temporary construction detour",
+      "semanticVector": [0.80, 0.75]
     },
     {
       "eventId": "embedding:30:ENV-AV-004:16",
@@ -414,7 +418,8 @@
       "embeddingType": "signal",
       "vectorDimensions": 768,
       "sourceEventId": "signal:28_3:ENV-AV-004:8",
-      "semanticContext": "LIDAR accuracy degradation pattern for predictive sensor maintenance"
+      "semanticContext": "LIDAR accuracy degradation pattern for predictive sensor maintenance",
+      "semanticVector": [0.40, 0.35]
     },
     {
       "eventId": "embedding:34:ENV-AV-001:16b",
@@ -430,7 +435,8 @@
       "embeddingType": "session_artifact",
       "vectorDimensions": 768,
       "sourceEventId": "dsg_session:32:ENV-AV-001:9",
-      "semanticContext": "safety stewardship edge case review and construction zone guidance update"
+      "semanticContext": "safety stewardship edge case review and construction zone guidance update",
+      "semanticVector": [0.15, 0.92]
     },
     {
       "eventId": "embedding:36:ENV-AV-002:16c",
@@ -446,7 +452,8 @@
       "embeddingType": "revision",
       "vectorDimensions": 768,
       "sourceEventId": "revision:34:ENV-AV-002:10",
-      "semanticContext": "new school zone addition for Maple St Elementary slow-zone"
+      "semanticContext": "new school zone addition for Maple St Elementary slow-zone",
+      "semanticVector": [0.25, 0.70]
     },
     {
       "eventId": "embedding:44:ENV-AV-004:16d",
@@ -462,7 +469,8 @@
       "embeddingType": "boundary_interaction",
       "vectorDimensions": 768,
       "sourceEventId": "boundary_interaction:42_1:ENV-AV-004:11",
-      "semanticContext": "safety-critical brake fault grounding decision with vehicle #1288"
+      "semanticContext": "safety-critical brake fault grounding decision with vehicle #1288",
+      "semanticVector": [0.92, 0.90]
     },
     {
       "eventId": "embedding:50:ENV-AV-003:16e",
@@ -478,7 +486,8 @@
       "embeddingType": "decision",
       "vectorDimensions": 768,
       "sourceEventId": "decision:48:ENV-AV-003:12",
-      "semanticContext": "wheelchair user vehicle configuration with ramp and lighting preferences"
+      "semanticContext": "wheelchair user vehicle configuration with ramp and lighting preferences",
+      "semanticVector": [0.60, 0.40]
     },
     {
       "eventId": "signal:72:ENV-AV-001:17",

@@ -139,6 +139,13 @@
         "vectorDimensions": { "type": "integer", "minimum": 1 },
         "sourceEventId": { "type": "string" },
         "semanticContext": { "type": "string" },
+        "semanticVector": {
+          "type": "array",
+          "items": { "type": "number", "minimum": 0, "maximum": 1 },
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "2D position in semantic space: [x, y] where x=policy(0)↔operational(1), y=routine(0)↔exceptional(1). Similar patterns cluster together."
+        },
         "similarityThreshold": { "type": "number", "minimum": 0, "maximum": 1 }
       }
     }

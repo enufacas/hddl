@@ -396,7 +396,8 @@
       "embeddingType": "decision",
       "vectorDimensions": 768,
       "sourceEventId": "decision:6_1:ENV-FIN-001:5",
-      "semanticContext": "manual credit approval with income verification for borderline applicants"
+      "semanticContext": "manual credit approval with income verification for borderline applicants",
+      "semanticVector": [0.70, 0.45]
     },
     {
       "eventId": "embedding:8:ENV-FIN-001:18b",
@@ -412,7 +413,8 @@
       "embeddingType": "boundary_interaction",
       "vectorDimensions": 768,
       "sourceEventId": "boundary_interaction:5_8:ENV-FIN-001:4",
-      "semanticContext": "borderline credit score escalation for human underwriter review"
+      "semanticContext": "borderline credit score escalation for human underwriter review",
+      "semanticVector": [0.85, 0.80]
     },
     {
       "eventId": "embedding:10:ENV-FIN-002:19",
@@ -428,7 +430,8 @@
       "embeddingType": "signal",
       "vectorDimensions": 768,
       "sourceEventId": "signal:8_3:ENV-FIN-002:6",
-      "semanticContext": "fraud ring detection pattern with multiple SSNs from same device"
+      "semanticContext": "fraud ring detection pattern with multiple SSNs from same device",
+      "semanticVector": [0.35, 0.55]
     },
     {
       "eventId": "embedding:14:ENV-FIN-001:19b",
@@ -444,7 +447,8 @@
       "embeddingType": "boundary_interaction",
       "vectorDimensions": 768,
       "sourceEventId": "boundary_interaction:12_5:ENV-FIN-001:7",
-      "semanticContext": "credit denial due to high debt-to-income ratio constraint"
+      "semanticContext": "credit denial due to high debt-to-income ratio constraint",
+      "semanticVector": [0.80, 0.75]
     },
     {
       "eventId": "embedding:15:ENV-FIN-001:19c",
@@ -460,7 +464,8 @@
       "embeddingType": "decision",
       "vectorDimensions": 768,
       "sourceEventId": "decision:12_6:ENV-FIN-001:8",
-      "semanticContext": "adverse action notice with denial reasons for regulatory compliance"
+      "semanticContext": "adverse action notice with denial reasons for regulatory compliance",
+      "semanticVector": [0.30, 0.40]
     },
     {
       "eventId": "embedding:32:ENV-FIN-003:19d",
@@ -476,7 +481,8 @@
       "embeddingType": "decision",
       "vectorDimensions": 768,
       "sourceEventId": "decision:30_2:ENV-FIN-003:10",
-      "semanticContext": "hardship program eligibility for delinquent customer with documented job loss"
+      "semanticContext": "hardship program eligibility for delinquent customer with documented job loss",
+      "semanticVector": [0.55, 0.70]
     },
     {
       "eventId": "embedding:40:ENV-FIN-002:19e",
@@ -492,7 +498,8 @@
       "embeddingType": "decision",
       "vectorDimensions": 768,
       "sourceEventId": "decision:38_1:ENV-FIN-002:12",
-      "semanticContext": "fraud flag reversal after travel documentation validation"
+      "semanticContext": "fraud flag reversal after travel documentation validation",
+      "semanticVector": [0.75, 0.65]
     },
     {
       "eventId": "embedding:50:ENV-FIN-001:20",
@@ -508,7 +515,8 @@
       "embeddingType": "session_artifact",
       "vectorDimensions": 768,
       "sourceEventId": "dsg_session:48:ENV-FIN-001:13",
-      "semanticContext": "quarterly fairness review with disparate impact analysis results"
+      "semanticContext": "quarterly fairness review with disparate impact analysis results",
+      "semanticVector": [0.15, 0.90]
     },
     {
       "eventId": "embedding:74:ENV-FIN-004:20b",
@@ -524,7 +532,8 @@
       "embeddingType": "signal",
       "vectorDimensions": 768,
       "sourceEventId": "signal:72:ENV-FIN-004:14",
-      "semanticContext": "compliance metrics showing approval rate variance and audit trail completeness"
+      "semanticContext": "compliance metrics showing approval rate variance and audit trail completeness",
+      "semanticVector": [0.20, 0.25]
     },
     {
       "eventId": "embedding:86:ENV-FIN-001:20c",
@@ -540,7 +549,8 @@
       "embeddingType": "revision",
       "vectorDimensions": 768,
       "sourceEventId": "revision:84:ENV-FIN-001:15",
-      "semanticContext": "borderline review threshold expansion from 5% to 7% for improved fairness"
+      "semanticContext": "borderline review threshold expansion from 5% to 7% for improved fairness",
+      "semanticVector": [0.20, 0.78]
     },
     {
       "eventId": "embedding:98:ENV-FIN-003:20d",
@@ -556,7 +566,8 @@
       "embeddingType": "boundary_interaction",
       "vectorDimensions": 768,
       "sourceEventId": "boundary_interaction:96_5:ENV-FIN-003:16",
-      "semanticContext": "FDCPA contact time constraint enforcement to prevent regulatory violation"
+      "semanticContext": "FDCPA contact time constraint enforcement to prevent regulatory violation",
+      "semanticVector": [0.25, 0.85]
     },
     {
       "eventId": "signal:120:ENV-FIN-001:21",
