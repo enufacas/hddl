@@ -1394,7 +1394,8 @@ export function createWorkspace() {
   workbench.appendChild(sash3);
   workbench.appendChild(bottomPanel);
 
-  // Add mobile components (hamburger is now in titlebar via main.js)
+  // Add mobile components
+  // NOTE: Mobile hamburger menu is now created in titlebar (main.js) for improved layout consistency
   const mobileNavDrawer = createMobileNavDrawer()
   const mobileNavOverlay = createMobileNavOverlay()
   const mobileSidebarOverlay = createMobileSidebarOverlay()

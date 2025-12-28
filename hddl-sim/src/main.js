@@ -27,8 +27,16 @@ const mobileHamburger = document.createElement('button')
 mobileHamburger.className = 'mobile-hamburger'
 mobileHamburger.setAttribute('aria-label', 'Open navigation menu')
 mobileHamburger.innerHTML = '<span class="codicon codicon-menu"></span>'
+
+// Click and keyboard event handlers for accessibility
 mobileHamburger.addEventListener('click', () => {
   document.body.classList.toggle('mobile-nav-open')
+})
+mobileHamburger.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault()
+    document.body.classList.toggle('mobile-nav-open')
+  }
 })
 
 const titleLeft = document.createElement('div')
