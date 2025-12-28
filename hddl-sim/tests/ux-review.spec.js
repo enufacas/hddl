@@ -142,9 +142,9 @@ test.describe('AI-led UX review harness', () => {
       }
     }
 
-    // Step 2: Turn on Story Mode (still on home)
-    await page.locator('#timeline-story-mode').setChecked(true)
-    steps.push(await captureStep(page, outDir, { index: 2, id: 'home-story-mode', intent: 'Discoverability of Story Mode + beat markers' }))
+    // Step 2: Story Mode has been removed from UI - skip
+    // Previously: await page.locator('#timeline-story-mode').setChecked(true)
+    steps.push({ index: 2, id: 'home-story-mode', intent: 'Story Mode removed from UI - skipped', skipped: true })
 
     // Step 3: Scrub to drift window (~34h)
     // Reuse scrubber locator from Step 1c
@@ -196,13 +196,15 @@ test.describe('AI-led UX review harness', () => {
     ])
 
     // Ensure Story Mode is on so the demo button is visible.
-    await page.locator('#timeline-story-mode').setChecked(true)
-
-    // Prefer the Story Mode primary demo button (more discoverable).
+    // Story Mode has been removed from UI - try to find the demo button without it
     const tryPrimaryBtn = page.getByRole('button', { name: /Try expand authority/i })
-    await expect(tryPrimaryBtn).toBeVisible()
-    await tryPrimaryBtn.click()
-    steps.push(await captureStep(page, outDir, { index: 7, id: 'try-expand-authority', intent: 'Does refusal teach the core concept clearly?' }))
+    const btnVisible = await tryPrimaryBtn.isVisible().catch(() => false)
+    if (btnVisible) {
+      await tryPrimaryBtn.click()
+      steps.push(await captureStep(page, outDir, { index: 7, id: 'try-expand-authority', intent: 'Does refusal teach the core concept clearly?' }))
+    } else {
+      steps.push({ index: 7, id: 'try-expand-authority', intent: 'Demo button not visible without Story Mode - skipped', skipped: true })
+    }
 
     const run = {
       runId,

@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test'
 
 test.describe('Embedding Vector Space Visual Verification', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:5173')
+    await page.goto('/')
     // Wait for the map to load
     await page.waitForSelector('svg', { timeout: 5000 })
   })

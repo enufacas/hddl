@@ -3,6 +3,7 @@ import { navigateTo } from '../router';
 import { formatSimTime, getBoundaryInteractionCounts, getEnvelopeStatus, getScenario, getTimeHour, onScenarioChange, onTimeChange, getStewardFilter, onFilterChange, getEnvelopeAtTime, getRevisionDiffAtTime } from '../sim/sim-state'
 import { initGlossaryInline } from './glossary'
 import { getStewardColor, toSemver } from '../sim/steward-colors'
+import { ResizablePanel, initPanelKeyboardShortcuts, PANEL_DEFAULTS, loadPanelWidth, savePanelWidth } from './resizable-panel'
 
 const STORAGE_KEY = 'hddl:layout'
 
@@ -1335,7 +1336,7 @@ export function createWorkspace() {
   if (typeof persisted.panelHeight === 'number') setCssVar('--panel-height', `${persisted.panelHeight}px`)
 
   // Default-collapsed per spec.
-  setAuxCollapsed(persisted.auxCollapsed !== undefined ? persisted.auxCollapsed : false)
+  setAuxCollapsed(persisted.auxCollapsed !== undefined ? persisted.auxCollapsed : true)
   // Always start with bottom panel collapsed (ignore persisted state).
   setBottomCollapsed(true)
 
@@ -1392,12 +1393,36 @@ export function createWorkspace() {
   workbench.appendChild(sash3);
   workbench.appendChild(bottomPanel);
 
+  // Add mobile components
+  const mobileHamburger = createMobileHamburger()
+  const mobileNavDrawer = createMobileNavDrawer()
+  const mobileNavOverlay = createMobileNavOverlay()
+  const mobileSidebarOverlay = createMobileSidebarOverlay()
+  const mobileBottomSheet = createMobileBottomSheet()
+  const mobilePanelFAB = createMobilePanelFAB()
+  const mobilePanelModal = createMobilePanelModal()
+  
+  document.body.appendChild(mobileHamburger)
+  document.body.appendChild(mobileNavDrawer)
+  document.body.appendChild(mobileNavOverlay)
+  document.body.appendChild(mobileSidebarOverlay)
+  document.body.appendChild(mobileBottomSheet)
+  document.body.appendChild(mobilePanelFAB)
+  document.body.appendChild(mobilePanelModal)
+
   // Route-aware auto-open: Aux opens on Evidence + DSG routes.
   window.addEventListener('hddl:navigate', (e) => {
     const path = e?.detail?.path || window.location.pathname || '/'
-    if (path === '/' || path === '/decision-telemetry' || path === '/dsg-event') {
+    // Only auto-open if we are NOT in focus mode
+    const activeLayout = localStorage.getItem('hddl:layout:active') || 'focus'
+    const isFocusMode = activeLayout === 'focus'
+    
+    if (!isFocusMode && (path === '/' || path === '/decision-telemetry' || path === '/dsg-event')) {
       setAuxCollapsed(false)
     }
+    // Close mobile nav on navigation
+    document.body.classList.remove('mobile-nav-open')
+    document.body.classList.remove('mobile-sidebar-open')
   })
 
   // Auto-open bottom panel during log-heavy flows (import/generation).
@@ -1405,6 +1430,33 @@ export function createWorkspace() {
   window.addEventListener('hddl:log-heavy', () => {
     setBottomCollapsed(false)
   })
+  
+  // Initialize keyboard shortcuts for panel management
+  initPanelKeyboardShortcuts({
+    sidebar: {
+      toggle: () => {
+        const sidebar = document.querySelector('.sidebar');
+        if (!sidebar) return;
+        const currentWidth = parseInt(getComputedStyle(sidebar).width);
+        const config = PANEL_DEFAULTS.sidebar || { min: 180, default: 300 };
+        const newWidth = currentWidth <= config.min + 20 ? config.default : config.min;
+        sidebar.style.width = `${newWidth}px`;
+        document.documentElement.style.setProperty('--sidebar-width', `${newWidth}px`);
+      }
+    },
+    auxiliary: {
+      toggle: () => {
+        const isCollapsed = document.body.classList.contains('aux-hidden');
+        setAuxCollapsed(!isCollapsed);
+      }
+    },
+    bottom: {
+      toggle: () => {
+        const isCollapsed = document.body.classList.contains('panel-hidden');
+        setBottomCollapsed(!isCollapsed);
+      }
+    }
+  });
   
   return workbench;
 }
@@ -1725,108 +1777,633 @@ function createBottomPanel() {
   return panel
 }
 
-// Create resize handle (sash)
+// Create mobile hamburger menu
+function createMobileHamburger() {
+  const hamburger = document.createElement('button')
+  hamburger.className = 'mobile-hamburger'
+  hamburger.setAttribute('aria-label', 'Open navigation menu')
+  hamburger.innerHTML = '<span class="codicon codicon-menu"></span>'
+  
+  hamburger.addEventListener('click', () => {
+    document.body.classList.toggle('mobile-nav-open')
+  })
+  
+  return hamburger
+}
+
+// Create mobile navigation drawer (Google-style)
+function createMobileNavDrawer() {
+  const drawer = document.createElement('nav')
+  drawer.className = 'mobile-nav-drawer'
+  drawer.setAttribute('role', 'navigation')
+  drawer.setAttribute('aria-label', 'Main navigation')
+  
+  // Header with logo and close button
+  const header = document.createElement('div')
+  header.className = 'mobile-nav-header'
+  header.innerHTML = `
+    <div class="mobile-nav-brand">
+      <span class="codicon codicon-pulse" style="font-size: 20px; color: var(--status-info);"></span>
+      <span class="mobile-nav-title">HDDL Simulation</span>
+    </div>
+    <button class="mobile-nav-close" aria-label="Close navigation">
+      <span class="codicon codicon-close"></span>
+    </button>
+  `
+  
+  header.querySelector('.mobile-nav-close').addEventListener('click', () => {
+    document.body.classList.remove('mobile-nav-open')
+  })
+  
+  // Navigation sections
+  const navContent = document.createElement('div')
+  navContent.className = 'mobile-nav-content'
+  
+  // Group items by section
+  const sections = {
+    primary: { title: 'Primary Views', items: [] },
+    secondary: { title: 'Secondary', items: [] },
+    reference: { title: 'Reference', items: [] }
+  }
+  
+  navItems.forEach(item => {
+    if (sections[item.section]) {
+      sections[item.section].items.push(item)
+    }
+  })
+  
+  // Render sections
+  Object.entries(sections).forEach(([sectionId, section]) => {
+    if (section.items.length === 0) return
+    
+    const sectionEl = document.createElement('div')
+    sectionEl.className = 'mobile-nav-section'
+    
+    const sectionTitle = document.createElement('div')
+    sectionTitle.className = 'mobile-nav-section-title'
+    sectionTitle.textContent = section.title
+    sectionEl.appendChild(sectionTitle)
+    
+    const itemsList = document.createElement('ul')
+    itemsList.className = 'mobile-nav-items'
+    
+    section.items.forEach(item => {
+      const li = document.createElement('li')
+      const link = document.createElement('a')
+      link.className = 'mobile-nav-item'
+      link.href = item.route
+      link.dataset.route = item.route
+      if (item.disabled) link.classList.add('disabled')
+      if (item.experimental) link.classList.add('experimental')
+      
+      link.innerHTML = `
+        <span class="codicon codicon-${item.icon}" aria-hidden="true"></span>
+        <span class="mobile-nav-item-label">${item.label}</span>
+        ${item.experimental ? '<span class="mobile-nav-badge">Beta</span>' : ''}
+      `
+      
+      link.addEventListener('click', (e) => {
+        e.preventDefault()
+        if (item.disabled) return
+        navigateTo(item.route)
+        document.body.classList.remove('mobile-nav-open')
+      })
+      
+      li.appendChild(link)
+      itemsList.appendChild(li)
+    })
+    
+    sectionEl.appendChild(itemsList)
+    navContent.appendChild(sectionEl)
+  })
+  
+  // Footer with version info
+  const footer = document.createElement('div')
+  footer.className = 'mobile-nav-footer'
+  footer.innerHTML = `
+    <div class="mobile-nav-version">Simulation v1.0</div>
+  `
+  
+  drawer.appendChild(header)
+  drawer.appendChild(navContent)
+  drawer.appendChild(footer)
+  
+  return drawer
+}
+
+// Create mobile nav overlay
+function createMobileNavOverlay() {
+  const overlay = document.createElement('div')
+  overlay.className = 'mobile-nav-overlay'
+  overlay.setAttribute('aria-hidden', 'true')
+  
+  overlay.addEventListener('click', () => {
+    document.body.classList.remove('mobile-nav-open')
+  })
+  
+  return overlay
+}
+
+// Create mobile sidebar overlay (legacy - kept for compatibility)
+function createMobileSidebarOverlay() {
+  const overlay = document.createElement('div')
+  overlay.className = 'mobile-sidebar-overlay'
+  overlay.setAttribute('aria-hidden', 'true')
+  
+  overlay.addEventListener('click', () => {
+    document.body.classList.remove('mobile-sidebar-open')
+  })
+  
+  return overlay
+}
+
+// Create mobile bottom sheet for telemetry
+function createMobileBottomSheet() {
+  const sheet = document.createElement('div')
+  sheet.className = 'mobile-bottom-sheet'
+  sheet.setAttribute('role', 'region')
+  sheet.setAttribute('aria-label', 'Telemetry')
+  
+  const handle = document.createElement('div')
+  handle.className = 'mobile-bottom-sheet-handle'
+  handle.setAttribute('aria-label', 'Drag to expand')
+  
+  const tabs = [
+    { id: 'envelope', label: 'Envelope' },
+    { id: 'metrics', label: 'Metrics' },
+    { id: 'quality', label: 'Quality' },
+    { id: 'stewardship', label: 'Stewardship' },
+  ]
+  
+  const tabsContainer = document.createElement('div')
+  tabsContainer.className = 'mobile-bottom-sheet-tabs'
+  tabsContainer.setAttribute('role', 'tablist')
+  
+  let activeTab = 'envelope'
+  
+  tabs.forEach(tab => {
+    const button = document.createElement('button')
+    button.className = 'mobile-bottom-sheet-tab'
+    button.textContent = tab.label
+    button.setAttribute('role', 'tab')
+    button.setAttribute('aria-selected', tab.id === activeTab ? 'true' : 'false')
+    button.dataset.tab = tab.id
+    if (tab.id === activeTab) button.classList.add('active')
+    
+    button.addEventListener('click', () => {
+      activeTab = tab.id
+      tabsContainer.querySelectorAll('.mobile-bottom-sheet-tab').forEach(btn => {
+        const isActive = btn.dataset.tab === tab.id
+        btn.classList.toggle('active', isActive)
+        btn.setAttribute('aria-selected', isActive ? 'true' : 'false')
+      })
+      updateBottomSheetContent(content, tab.id)
+    })
+    
+    tabsContainer.appendChild(button)
+  })
+  
+  const content = document.createElement('div')
+  content.className = 'mobile-bottom-sheet-content'
+  content.setAttribute('role', 'tabpanel')
+  
+  updateBottomSheetContent(content, activeTab)
+  
+  // Swipe gesture handling
+  let startY = 0
+  let currentY = 0
+  let isDragging = false
+  
+  const handleStart = (y) => {
+    startY = y
+    currentY = y
+    isDragging = true
+    handle.style.cursor = 'grabbing'
+  }
+  
+  const handleMove = (y) => {
+    if (!isDragging) return
+    currentY = y
+    const deltaY = currentY - startY
+    
+    if (deltaY > 0) {
+      // Dragging down
+      sheet.style.transform = `translateY(calc(100% - 48px + ${Math.min(deltaY, 200)}px))`
+    } else {
+      // Dragging up
+      sheet.style.transform = `translateY(${Math.max(deltaY, -50)}px)`
+    }
+  }
+  
+  const handleEnd = () => {
+    if (!isDragging) return
+    isDragging = false
+    handle.style.cursor = 'grab'
+    
+    const deltaY = currentY - startY
+    
+    if (Math.abs(deltaY) > 50) {
+      if (deltaY > 0) {
+        // Swipe down - collapse
+        sheet.classList.remove('expanded')
+        sheet.style.transform = ''
+      } else {
+        // Swipe up - expand
+        sheet.classList.add('expanded')
+        sheet.style.transform = ''
+      }
+    } else {
+      // Snap back
+      sheet.style.transform = ''
+    }
+  }
+  
+  handle.addEventListener('mousedown', (e) => handleStart(e.clientY))
+  document.addEventListener('mousemove', (e) => handleMove(e.clientY))
+  document.addEventListener('mouseup', handleEnd)
+  
+  handle.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 1) {
+      handleStart(e.touches[0].clientY)
+      e.preventDefault()
+    }
+  })
+  document.addEventListener('touchmove', (e) => {
+    if (e.touches.length === 1 && isDragging) {
+      handleMove(e.touches[0].clientY)
+      e.preventDefault()
+    }
+  }, { passive: false })
+  document.addEventListener('touchend', handleEnd)
+  
+  // Click handle to toggle
+  handle.addEventListener('click', () => {
+    sheet.classList.toggle('expanded')
+  })
+  
+  sheet.appendChild(handle)
+  sheet.appendChild(tabsContainer)
+  sheet.appendChild(content)
+  
+  // Update content when time or scenario changes
+  onTimeChange(() => updateBottomSheetContent(content, activeTab))
+  onScenarioChange(() => updateBottomSheetContent(content, activeTab))
+  
+  return sheet
+}
+
+function updateBottomSheetContent(container, tabId) {
+  const scenario = getScenario()
+  const timeHour = getTimeHour()
+  const envelopes = scenario?.envelopes ?? []
+  const activeEnvelopes = envelopes.filter(e => getEnvelopeStatus(e, timeHour) === 'active')
+  
+  if (tabId === 'envelope') {
+    if (activeEnvelopes.length === 0) {
+      container.innerHTML = '<div style="color: var(--vscode-statusBar-foreground); text-align: center; padding: 20px;">No active envelopes</div>'
+      return
+    }
+    
+    container.innerHTML = activeEnvelopes.map(env => {
+      const stewardColor = getStewardColor(env.ownerRole)
+      return `
+        <div style="margin-bottom: 12px; padding: 12px; background: color-mix(in srgb, ${stewardColor} 8%, var(--vscode-sideBar-background)); border-left: 3px solid ${stewardColor}; border-radius: 4px;">
+          <div style="font-weight: 600; margin-bottom: 4px;">${env.name}</div>
+          <div style="font-size: 11px; color: var(--vscode-statusBar-foreground);">${env.ownerRole}</div>
+        </div>
+      `
+    }).join('')
+  } else if (tabId === 'metrics') {
+    container.innerHTML = `
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div style="padding: 12px; background: var(--vscode-sideBar-background); border-radius: 4px;">
+          <div style="font-size: 11px; color: var(--vscode-statusBar-foreground); margin-bottom: 4px;">ACTIVE</div>
+          <div style="font-size: 20px; font-weight: 600;">${activeEnvelopes.length}</div>
+        </div>
+        <div style="padding: 12px; background: var(--vscode-sideBar-background); border-radius: 4px;">
+          <div style="font-size: 11px; color: var(--vscode-statusBar-foreground); margin-bottom: 4px;">TOTAL</div>
+          <div style="font-size: 20px; font-weight: 600;">${envelopes.length}</div>
+        </div>
+      </div>
+    `
+  } else {
+    container.innerHTML = `<div style="color: var(--vscode-statusBar-foreground); text-align: center; padding: 20px;">Coming soon</div>`
+  }
+}
+
+// Create mobile panel FAB
+function createMobilePanelFAB() {
+  const fab = document.createElement('button')
+  fab.className = 'mobile-panel-fab'
+  fab.setAttribute('aria-label', 'Open panel')
+  fab.innerHTML = '<span class="codicon codicon-terminal"></span>'
+  
+  fab.addEventListener('click', () => {
+    const modal = document.querySelector('.mobile-panel-modal')
+    if (modal) {
+      modal.classList.add('active')
+      modal.style.display = 'flex'
+    }
+  })
+  
+  return fab
+}
+
+// Create mobile panel modal
+function createMobilePanelModal() {
+  const modal = document.createElement('div')
+  modal.className = 'mobile-panel-modal'
+  
+  const content = document.createElement('div')
+  content.className = 'mobile-panel-modal-content'
+  
+  const header = document.createElement('div')
+  header.className = 'mobile-panel-modal-header'
+  header.innerHTML = `
+    <h3 style="margin: 0;">Terminal</h3>
+    <button class="codicon codicon-close" aria-label="Close" style="background: none; border: none; color: var(--vscode-editor-foreground); font-size: 20px; cursor: pointer; padding: 4px;"></button>
+  `
+  
+  const body = document.createElement('div')
+  body.className = 'mobile-panel-modal-body'
+  body.innerHTML = '<div style="font-family: monospace; color: var(--vscode-statusBar-foreground);">Terminal output will appear here...</div>'
+  
+  content.appendChild(header)
+  content.appendChild(body)
+  modal.appendChild(content)
+  
+  // Close on backdrop click
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      modal.classList.remove('active')
+      setTimeout(() => modal.style.display = 'none', 300)
+    }
+  })
+  
+  // Close on button click
+  header.querySelector('.codicon-close').addEventListener('click', () => {
+    modal.classList.remove('active')
+    setTimeout(() => modal.style.display = 'none', 300)
+  })
+  
+  // Close on Escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.classList.contains('active')) {
+      modal.classList.remove('active')
+      setTimeout(() => modal.style.display = 'none', 300)
+    }
+  })
+  
+  return modal
+}
+
+// Create resize handle (sash) with improved functionality
 function createSash(orientation, id) {
   const sash = document.createElement('div');
   sash.className = `monaco-sash ${orientation}`;
   sash.id = id;
-  sash.style.cssText = orientation === 'vertical' 
-    ? 'position: absolute; top: 0; width: 4px; height: 100%; cursor: ew-resize; z-index: 35;'
-    : 'position: absolute; left: 0; width: 100%; height: 4px; cursor: ns-resize; z-index: 35;';
+  sash.setAttribute('role', 'separator');
+  sash.setAttribute('aria-orientation', orientation);
+  sash.setAttribute('tabindex', '0');
   
-  // Basic drag functionality
+  // No inline styles - let CSS handle positioning
+  
+  // State
   let isDragging = false;
   let startX = 0;
   let startY = 0;
+  let ghostLine = null;
   
-  sash.addEventListener('mousedown', (e) => {
+  function createGhostLine() {
+    ghostLine = document.createElement('div');
+    ghostLine.className = 'sash-ghost-line';
+    ghostLine.style.cssText = orientation === 'vertical'
+      ? 'position: fixed; top: 0; bottom: 0; width: 2px; background: var(--vscode-focusBorder, #1f6feb); z-index: 10000; pointer-events: none;'
+      : 'position: fixed; left: 0; right: 0; height: 2px; background: var(--vscode-focusBorder, #1f6feb); z-index: 10000; pointer-events: none;';
+    document.body.appendChild(ghostLine);
+  }
+  
+  function updateGhostLine(pos) {
+    if (!ghostLine) return;
+    if (orientation === 'vertical') {
+      ghostLine.style.left = `${pos}px`;
+    } else {
+      ghostLine.style.top = `${pos}px`;
+    }
+  }
+  
+  function removeGhostLine() {
+    if (ghostLine) {
+      ghostLine.remove();
+      ghostLine = null;
+    }
+  }
+  
+  const handleMouseDown = (e) => {
     isDragging = true;
     startX = e.clientX;
     startY = e.clientY;
     sash.classList.add('active');
-    document.body.style.cursor = orientation === 'vertical' ? 'ew-resize' : 'ns-resize';
+    document.body.classList.add('sash-dragging');
+    if (orientation === 'horizontal') {
+      document.body.classList.add('sash-horizontal-dragging');
+    }
+    createGhostLine();
+    updateGhostLine(orientation === 'vertical' ? e.clientX : e.clientY);
     e.preventDefault();
-  });
+  };
   
-  document.addEventListener('mousemove', (e) => {
+  const handleMouseMove = (e) => {
     if (!isDragging) return;
     e.preventDefault();
     
+    const deltaX = e.clientX - startX;
+    const deltaY = e.clientY - startY;
+    
     if (orientation === 'vertical') {
-      const delta = e.clientX - startX;
+      updateGhostLine(e.clientX);
+      
       if (id === 'sidebar-resize') {
         const sidebar = document.querySelector('.sidebar');
-        const currentWidth = parseInt(getComputedStyle(sidebar).width);
-        const newWidth = Math.max(200, Math.min(600, currentWidth + delta));
+        if (!sidebar) return;
+        const config = PANEL_DEFAULTS.sidebar || { min: 180, max: 500 };
+        // Get width from CSS variable for accuracy
+        const currentWidth = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sidebar-width')) || config.default || 300;
+        const newWidth = Math.max(config.min, Math.min(config.max, currentWidth + deltaX));
         sidebar.style.width = `${newWidth}px`;
-        
-        // Update CSS variable for consistent layout
         document.documentElement.style.setProperty('--sidebar-width', `${newWidth}px`);
 
-        const state = loadLayoutState()
-        saveLayoutState({ ...state, sidebarWidth: newWidth })
+        const state = loadLayoutState();
+        saveLayoutState({ ...state, sidebarWidth: newWidth });
+        savePanelWidth('sidebar', newWidth);
       } else if (id === 'auxiliary-resize') {
-        // Dragging the aux sash is an implicit intent to open it.
-        setAuxCollapsed(false)
+        setAuxCollapsed(false);
         const auxiliary = document.querySelector('.auxiliarybar');
-        if (!auxiliary) return
-        const currentWidth = parseInt(getComputedStyle(auxiliary).width);
-        const newWidth = Math.max(200, Math.min(600, currentWidth - delta));
+        if (!auxiliary) return;
+        const config = PANEL_DEFAULTS.auxiliary || { min: 200, max: 600 };
+        // Get width from CSS variable for accuracy
+        const currentWidth = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--auxiliarybar-width')) || config.default || 350;
+        const newWidth = Math.max(config.min, Math.min(config.max, currentWidth - deltaX));
         auxiliary.style.width = `${newWidth}px`;
-        
-        // Update CSS variable for consistent layout
         document.documentElement.style.setProperty('--auxiliarybar-width', `${newWidth}px`);
 
-        const state = loadLayoutState()
-        saveLayoutState({ ...state, auxWidth: newWidth, auxCollapsed: false })
+        const state = loadLayoutState();
+        saveLayoutState({ ...state, auxWidth: newWidth, auxCollapsed: false });
+        savePanelWidth('auxiliary', newWidth);
       }
       startX = e.clientX;
       
-      // Force layout recalculation and repaint
-      window.requestAnimationFrame(() => {
-        const workbench = document.querySelector('.workbench');
-        if (workbench) {
-          workbench.style.transform = 'translateZ(0)';
-          setTimeout(() => {
-            workbench.style.transform = '';
-          }, 0);
-        }
-      });
+      // Dispatch resize event for other components to react
+      window.dispatchEvent(new CustomEvent('hddl:panel:resize', {
+        detail: { panel: id.replace('-resize', ''), orientation }
+      }));
     } else if (orientation === 'horizontal') {
-      const delta = e.clientY - startY
+      updateGhostLine(e.clientY);
+      
       if (id === 'panel-resize') {
-        // Dragging the panel sash is an implicit intent to open it.
-        setBottomCollapsed(false)
-        const root = document.documentElement
-        const currentRaw = getComputedStyle(root).getPropertyValue('--panel-height').trim()
-        const current = Number.parseInt(currentRaw || '240', 10)
-        // Dragging up should increase panel height; dragging down should decrease it.
-        const next = Math.max(120, Math.min(520, current - delta))
-        root.style.setProperty('--panel-height', `${next}px`)
+        setBottomCollapsed(false);
+        const root = document.documentElement;
+        const currentRaw = getComputedStyle(root).getPropertyValue('--panel-height').trim();
+        const current = Number.parseInt(currentRaw || '240', 10);
+        const config = PANEL_DEFAULTS.bottom || { min: 100, max: 400 };
+        const next = Math.max(config.min, Math.min(config.max, current - deltaY));
+        root.style.setProperty('--panel-height', `${next}px`);
 
-        const state = loadLayoutState()
-        saveLayoutState({ ...state, panelHeight: next, bottomCollapsed: false })
+        const state = loadLayoutState();
+        saveLayoutState({ ...state, panelHeight: next, bottomCollapsed: false });
+        savePanelWidth('bottom', next);
       }
-      startY = e.clientY
+      startY = e.clientY;
+      
+      window.dispatchEvent(new CustomEvent('hddl:panel:resize', {
+        detail: { panel: 'bottom', orientation }
+      }));
     }
-  });
+  };
   
-  document.addEventListener('mouseup', () => {
+  const handleMouseUp = () => {
     if (isDragging) {
       isDragging = false;
       sash.classList.remove('active');
-      document.body.style.cursor = '';
+      document.body.classList.remove('sash-dragging');
+      document.body.classList.remove('sash-horizontal-dragging');
+      removeGhostLine();
     }
-  });
+  };
   
-  sash.addEventListener('mouseenter', () => {
-    sash.classList.add('hover');
-  });
+  // Double-click to collapse/expand
+  const handleDoubleClick = (e) => {
+    e.preventDefault();
+    if (id === 'sidebar-resize') {
+      const sidebar = document.querySelector('.sidebar');
+      if (!sidebar) return;
+      const currentWidth = parseInt(getComputedStyle(sidebar).width);
+      const config = PANEL_DEFAULTS.sidebar || { min: 180, max: 500, default: 300 };
+      // If close to min, expand to default; otherwise collapse to min
+      const newWidth = currentWidth <= config.min + 20 ? config.default : config.min;
+      sidebar.style.width = `${newWidth}px`;
+      document.documentElement.style.setProperty('--sidebar-width', `${newWidth}px`);
+      const state = loadLayoutState();
+      saveLayoutState({ ...state, sidebarWidth: newWidth });
+    } else if (id === 'auxiliary-resize') {
+      const auxiliary = document.querySelector('.auxiliarybar');
+      if (!auxiliary) return;
+      const isCollapsed = document.body.classList.contains('aux-hidden');
+      if (isCollapsed) {
+        setAuxCollapsed(false);
+      } else {
+        setAuxCollapsed(true);
+      }
+    } else if (id === 'panel-resize') {
+      const isCollapsed = document.body.classList.contains('panel-hidden');
+      setBottomCollapsed(!isCollapsed);
+    }
+  };
   
+  // Keyboard support
+  const handleKeyDown = (e) => {
+    const step = e.shiftKey ? 50 : 10;
+    let delta = 0;
+    
+    if (orientation === 'vertical') {
+      if (e.key === 'ArrowLeft') delta = -step;
+      else if (e.key === 'ArrowRight') delta = step;
+    } else {
+      if (e.key === 'ArrowUp') delta = -step;
+      else if (e.key === 'ArrowDown') delta = step;
+    }
+    
+    if (delta !== 0) {
+      e.preventDefault();
+      if (id === 'sidebar-resize') {
+        const sidebar = document.querySelector('.sidebar');
+        if (!sidebar) return;
+        const currentWidth = parseInt(getComputedStyle(sidebar).width);
+        const config = PANEL_DEFAULTS.sidebar || { min: 180, max: 500 };
+        const newWidth = Math.max(config.min, Math.min(config.max, currentWidth + delta));
+        sidebar.style.width = `${newWidth}px`;
+        document.documentElement.style.setProperty('--sidebar-width', `${newWidth}px`);
+      } else if (id === 'auxiliary-resize') {
+        const auxiliary = document.querySelector('.auxiliarybar');
+        if (!auxiliary) return;
+        setAuxCollapsed(false);
+        const currentWidth = parseInt(getComputedStyle(auxiliary).width);
+        const config = PANEL_DEFAULTS.auxiliary || { min: 200, max: 600 };
+        const newWidth = Math.max(config.min, Math.min(config.max, currentWidth - delta));
+        auxiliary.style.width = `${newWidth}px`;
+        document.documentElement.style.setProperty('--auxiliarybar-width', `${newWidth}px`);
+      } else if (id === 'panel-resize') {
+        setBottomCollapsed(false);
+        const root = document.documentElement;
+        const currentRaw = getComputedStyle(root).getPropertyValue('--panel-height').trim();
+        const current = Number.parseInt(currentRaw || '240', 10);
+        const config = PANEL_DEFAULTS.bottom || { min: 100, max: 400 };
+        const next = Math.max(config.min, Math.min(config.max, current - delta));
+        root.style.setProperty('--panel-height', `${next}px`);
+      }
+    }
+    
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleDoubleClick(e);
+    }
+  };
+  
+  sash.addEventListener('mousedown', handleMouseDown);
+  document.addEventListener('mousemove', handleMouseMove);
+  document.addEventListener('mouseup', handleMouseUp);
+  sash.addEventListener('dblclick', handleDoubleClick);
+  sash.addEventListener('keydown', handleKeyDown);
+  
+  // Touch support
+  sash.addEventListener('touchstart', (e) => {
+    if (e.touches.length !== 1) return;
+    e.preventDefault();
+    const touch = e.touches[0];
+    isDragging = true;
+    startX = touch.clientX;
+    startY = touch.clientY;
+    sash.classList.add('active');
+    document.body.classList.add('sash-dragging');
+    createGhostLine();
+    updateGhostLine(orientation === 'vertical' ? touch.clientX : touch.clientY);
+  }, { passive: false });
+  
+  document.addEventListener('touchmove', (e) => {
+    if (!isDragging || e.touches.length !== 1) return;
+    e.preventDefault();
+    const touch = e.touches[0];
+    // Simulate mouse move
+    handleMouseMove({ clientX: touch.clientX, clientY: touch.clientY, preventDefault: () => {} });
+    updateGhostLine(orientation === 'vertical' ? touch.clientX : touch.clientY);
+  }, { passive: false });
+  
+  document.addEventListener('touchend', handleMouseUp);
+  document.addEventListener('touchcancel', handleMouseUp);
+  
+  sash.addEventListener('mouseenter', () => sash.classList.add('hover'));
   sash.addEventListener('mouseleave', () => {
-    if (!isDragging) {
-      sash.classList.remove('hover');
-    }
+    if (!isDragging) sash.classList.remove('hover');
   });
   
   return sash;

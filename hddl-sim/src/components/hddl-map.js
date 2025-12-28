@@ -2,12 +2,256 @@ import * as d3 from 'd3'
 import { getScenario, getEnvelopeAtTime, getEventsNearTime, getTimeHour, onTimeChange, onScenarioChange, getEnvelopeStatus } from '../sim/sim-state'
 import { getStewardColor, STEWARD_PALETTE, toSemver, getEventColor } from '../sim/steward-colors'
 
+/**
+ * Detail levels for responsive SVG rendering
+ * Determines what level of detail to show based on available width
+ */
+const DETAIL_LEVELS = {
+  FULL: 'full',       // >1000px - Full names, all labels, complete info
+  STANDARD: 'standard', // 600-1000px - First names, abbreviated labels
+  COMPACT: 'compact',  // 400-600px - Initials, icons only
+  MINIMAL: 'minimal'   // <400px - Hide text, minimal icons
+}
+
+/**
+ * Get the appropriate detail level based on container width
+ * @param {number} width - Container width in pixels
+ * @returns {string} Detail level constant
+ */
+function getDetailLevel(width) {
+  if (width > 1000) return DETAIL_LEVELS.FULL
+  if (width > 600) return DETAIL_LEVELS.STANDARD
+  if (width > 400) return DETAIL_LEVELS.COMPACT
+  return DETAIL_LEVELS.MINIMAL
+}
+
+/**
+ * Get adaptive agent display name based on detail level
+ * @param {string} name - Full agent name
+ * @param {string} level - Detail level
+ * @returns {string} Formatted name for display
+ */
+function getAdaptiveAgentName(name, level) {
+  if (!name) return ''
+  switch (level) {
+    case DETAIL_LEVELS.FULL:
+      return name
+    case DETAIL_LEVELS.STANDARD:
+      // First name or first part before space/hyphen
+      return name.split(/[\s-]/)[0]
+    case DETAIL_LEVELS.COMPACT:
+      // Initials (first letters of each word)
+      return name.split(/[\s-]/).map(w => w[0]).join('').toUpperCase()
+    case DETAIL_LEVELS.MINIMAL:
+      return '' // Hide on minimal
+    default:
+      return name
+  }
+}
+
+/**
+ * Get adaptive envelope label based on detail level
+ * @param {string} label - Full envelope label (e.g., "DE-001")
+ * @param {string} name - Envelope name
+ * @param {string} level - Detail level
+ * @returns {{ label: string, showName: boolean }}
+ */
+function getAdaptiveEnvelopeLabel(label, name, level) {
+  switch (level) {
+    case DETAIL_LEVELS.FULL:
+      return { label, showName: true }
+    case DETAIL_LEVELS.STANDARD:
+      return { label, showName: false }
+    case DETAIL_LEVELS.COMPACT:
+      // Shorter label
+      return { label: label.replace('DE-', ''), showName: false }
+    case DETAIL_LEVELS.MINIMAL:
+      return { label: '', showName: false }
+    default:
+      return { label, showName: true }
+  }
+}
+
+/**
+ * Get adaptive steward label based on detail level
+ * @param {string} name - Steward role name
+ * @param {string} version - Version string
+ * @param {string} level - Detail level
+ * @returns {{ name: string, showVersion: boolean }}
+ */
+function getAdaptiveStewardLabel(name, version, level) {
+  switch (level) {
+    case DETAIL_LEVELS.FULL:
+      return { name, showVersion: true }
+    case DETAIL_LEVELS.STANDARD:
+      // Abbreviated name
+      return { name: name.replace(' Steward', '').replace('Steward', ''), showVersion: false }
+    case DETAIL_LEVELS.COMPACT:
+      // First word only
+      return { name: name.split(/[\s]/)[0], showVersion: false }
+    case DETAIL_LEVELS.MINIMAL:
+      return { name: '', showVersion: false }
+    default:
+      return { name, showVersion: true }
+  }
+}
+
+/**
+ * Check if agent roles should be shown at this detail level
+ * @param {string} level - Detail level
+ * @returns {boolean}
+ */
+function shouldShowAgentRole(level) {
+  return level === DETAIL_LEVELS.FULL || level === DETAIL_LEVELS.STANDARD
+}
+
+/**
+ * Get column header text based on detail level
+ * @param {string} header - Full header text
+ * @param {string} level - Detail level
+ * @returns {string}
+ */
+function getAdaptiveHeader(header, level) {
+  if (level === DETAIL_LEVELS.MINIMAL) return ''
+  if (level === DETAIL_LEVELS.COMPACT) {
+    // Abbreviated headers
+    const abbrevs = {
+      'AGENT FLEETS': 'AGENTS',
+      'DECISION ENVELOPES': 'ENVELOPES',
+      'STEWARDS': 'STEWARDS'
+    }
+    return abbrevs[header] || header
+  }
+  return header
+}
+
+/**
+ * Envelope density modes mapped to detail levels
+ * - detailed: Full envelope with all visual elements
+ * - normal: Standard envelope with basic visual elements  
+ * - compact: Simplified envelope outline
+ * - icon: Status circle only
+ */
+const ENVELOPE_DENSITY = {
+  [DETAIL_LEVELS.FULL]: 'detailed',
+  [DETAIL_LEVELS.STANDARD]: 'normal',
+  [DETAIL_LEVELS.COMPACT]: 'compact',
+  [DETAIL_LEVELS.MINIMAL]: 'icon'
+}
+
+/**
+ * Envelope dimensions by density mode
+ * baseWidth: envelope body width
+ * baseHeight: envelope body height  
+ * radius: radius for icon mode circle
+ */
+const ENVELOPE_SIZES = {
+  detailed: { baseWidth: 120, baseHeight: 75, scale: 1.0 },
+  normal: { baseWidth: 90, baseHeight: 56, scale: 0.75 },
+  compact: { baseWidth: 65, baseHeight: 40, scale: 0.55 },
+  icon: { baseWidth: 40, baseHeight: 40, scale: 0.35, radius: 18 }
+}
+
+/**
+ * Get envelope dimensions based on detail level
+ * @param {string} level - Detail level from DETAIL_LEVELS
+ * @param {number} baseR - Base radius from layout calculations
+ * @returns {object} - { width, height, scale, isIcon, radius }
+ */
+function getEnvelopeDimensions(level, baseR) {
+  const density = ENVELOPE_DENSITY[level] || 'normal'
+  const sizes = ENVELOPE_SIZES[density]
+  
+  // Scale based on available space (baseR) but cap to size limits
+  const scaledWidth = Math.max(sizes.baseWidth * 0.7, Math.min(sizes.baseWidth, baseR * 3.2))
+  const scaledHeight = Math.max(sizes.baseHeight * 0.7, Math.min(sizes.baseHeight, baseR * 2.05))
+  
+  return {
+    width: scaledWidth,
+    height: scaledHeight,
+    scale: sizes.scale,
+    isIcon: density === 'icon',
+    radius: sizes.radius || 18,
+    density
+  }
+}
+
+/**
+ * Check if envelope element should render at this density
+ * @param {string} element - Element name (glow, flap, fold, status, version)
+ * @param {string} density - Density mode
+ * @returns {boolean}
+ */
+function shouldRenderEnvelopeElement(element, density) {
+  const rules = {
+    glow: ['detailed'],
+    revisionBurst: ['detailed', 'normal'],
+    flap: ['detailed', 'normal'],
+    fold: ['detailed'],
+    status: ['detailed', 'normal'],
+    version: ['detailed', 'normal', 'compact'],
+    constraintBadges: ['detailed']
+  }
+  return (rules[element] || []).includes(density)
+}
+
+/**
+ * Agent density modes mapped to detail levels
+ * - full: Full bot glyph with name, role, activity halo
+ * - standard: Bot glyph with name (truncated), fleet grouping
+ * - compact: Small dot with fleet count badge, no individual names
+ * - minimal: Fleet indicator bar only (colored rectangle)
+ */
+const AGENT_DENSITY = {
+  [DETAIL_LEVELS.FULL]: 'full',
+  [DETAIL_LEVELS.STANDARD]: 'standard',
+  [DETAIL_LEVELS.COMPACT]: 'compact',
+  [DETAIL_LEVELS.MINIMAL]: 'minimal'
+}
+
+/**
+ * Agent dimensions by density mode
+ */
+const AGENT_SIZES = {
+  full: { botScale: 1.0, showName: true, showRole: true, showHalo: true },
+  standard: { botScale: 0.9, showName: true, showRole: false, showHalo: true },
+  compact: { botScale: 0.6, showName: false, showRole: false, showHalo: false, showCount: true },
+  minimal: { botScale: 0, showName: false, showRole: false, showHalo: false, showFleetBar: true }
+}
+
+/**
+ * Get agent display properties based on detail level
+ * @param {string} level - Detail level from DETAIL_LEVELS
+ * @returns {object} - Agent display configuration
+ */
+function getAgentDensity(level) {
+  const density = AGENT_DENSITY[level] || 'standard'
+  return { density, ...AGENT_SIZES[density] }
+}
+
+/**
+ * Check if individual agents should be rendered vs fleet summary
+ * @param {string} level - Detail level
+ * @returns {boolean}
+ */
+function shouldRenderIndividualAgents(level) {
+  return level === DETAIL_LEVELS.FULL || level === DETAIL_LEVELS.STANDARD
+}
+
 export function createHDDLMap(container, options = {}) {
   // 1. Setup SVG and Dimensions
-  const width = container.clientWidth || 800
+  const width = options.width || container.clientWidth || 800
   const mapHeight = 480
-  const embeddingHeight = 200
-  const height = mapHeight + embeddingHeight  // Total: 680px
+  
+  // Determine detail level based on container width
+  let detailLevel = getDetailLevel(width)
+  
+  // Dynamic embedding height based on detail level
+  const embeddingHeight = detailLevel === DETAIL_LEVELS.FULL ? 200 
+    : detailLevel === DETAIL_LEVELS.STANDARD ? 120 
+    : 0  // Hide entirely on COMPACT and MINIMAL
+  
+  const height = mapHeight + embeddingHeight  // Total height varies by detail
   
   // Filter state
   let currentFilter = options.initialFilter || 'all'
@@ -122,23 +366,54 @@ export function createHDDLMap(container, options = {}) {
   const col1Right = col1Width
   const col3Left = col1Width + col2Width
 
-  headerLayer.append('text').attr('x', col1Center).attr('y', 18).attr('text-anchor', 'middle').text('AGENT FLEETS').attr('fill', 'var(--vscode-editor-foreground)').style('font-size', '8px').style('font-weight', '800').style('letter-spacing', '0.6px').style('paint-order', 'stroke').style('stroke', 'var(--vscode-editor-background)').style('stroke-width', '3px').style('opacity', 0.85)
-  headerLayer.append('text').attr('x', col2Center).attr('y', 18).attr('text-anchor', 'middle').text('DECISION ENVELOPES').attr('fill', 'var(--vscode-editor-foreground)').style('font-size', '8px').style('font-weight', '800').style('letter-spacing', '0.6px').style('paint-order', 'stroke').style('stroke', 'var(--vscode-editor-background)').style('stroke-width', '3px').style('opacity', 0.85)
-  headerLayer.append('text').attr('x', col3Center).attr('y', 18).attr('text-anchor', 'middle').text('STEWARDS').attr('fill', 'var(--vscode-editor-foreground)').style('font-size', '8px').style('font-weight', '800').style('letter-spacing', '0.6px').style('paint-order', 'stroke').style('stroke', 'var(--vscode-editor-background)').style('stroke-width', '3px').style('opacity', 0.85)
+  // Headers with adaptive text based on detail level
+  headerLayer.append('text')
+    .attr('class', 'header-agents')
+    .attr('x', col1Center).attr('y', 18).attr('text-anchor', 'middle')
+    .text(getAdaptiveHeader('AGENT FLEETS', detailLevel))
+    .attr('fill', 'var(--vscode-editor-foreground)')
+    .style('font-size', detailLevel === DETAIL_LEVELS.MINIMAL ? '6px' : '8px')
+    .style('font-weight', '800').style('letter-spacing', '0.6px')
+    .style('paint-order', 'stroke').style('stroke', 'var(--vscode-editor-background)')
+    .style('stroke-width', '3px').style('opacity', 0.85)
+  
+  headerLayer.append('text')
+    .attr('class', 'header-envelopes')
+    .attr('x', col2Center).attr('y', 18).attr('text-anchor', 'middle')
+    .text(getAdaptiveHeader('DECISION ENVELOPES', detailLevel))
+    .attr('fill', 'var(--vscode-editor-foreground)')
+    .style('font-size', detailLevel === DETAIL_LEVELS.MINIMAL ? '6px' : '8px')
+    .style('font-weight', '800').style('letter-spacing', '0.6px')
+    .style('paint-order', 'stroke').style('stroke', 'var(--vscode-editor-background)')
+    .style('stroke-width', '3px').style('opacity', 0.85)
+  
+  headerLayer.append('text')
+    .attr('class', 'header-stewards')
+    .attr('x', col3Center).attr('y', 18).attr('text-anchor', 'middle')
+    .text(getAdaptiveHeader('STEWARDS', detailLevel))
+    .attr('fill', 'var(--vscode-editor-foreground)')
+    .style('font-size', detailLevel === DETAIL_LEVELS.MINIMAL ? '6px' : '8px')
+    .style('font-weight', '800').style('letter-spacing', '0.6px')
+    .style('paint-order', 'stroke').style('stroke', 'var(--vscode-editor-background)')
+    .style('stroke-width', '3px').style('opacity', 0.85)
 
   // Source-of-truth cue for signals so the flow reads as "world -> envelope".
-  headerLayer.append('text')
-    .attr('x', col2Center)
-    .attr('y', 8)
-    .attr('text-anchor', 'middle')
-    .text('WORLD (Telemetry) ↓')
-    .attr('fill', 'var(--vscode-statusBar-foreground)')
-    .style('font-size', '7px')
-    .style('font-weight', '700')
-    .style('opacity', 0.65)
-    .style('paint-order', 'stroke')
-    .style('stroke', 'var(--vscode-editor-background)')
-    .style('stroke-width', '3px')
+  // Only show on FULL and STANDARD detail levels
+  if (detailLevel === DETAIL_LEVELS.FULL || detailLevel === DETAIL_LEVELS.STANDARD) {
+    headerLayer.append('text')
+      .attr('class', 'header-telemetry')
+      .attr('x', col2Center)
+      .attr('y', 8)
+      .attr('text-anchor', 'middle')
+      .text('WORLD (Telemetry) ↓')
+      .attr('fill', 'var(--vscode-statusBar-foreground)')
+      .style('font-size', '7px')
+      .style('font-weight', '700')
+      .style('opacity', 0.65)
+      .style('paint-order', 'stroke')
+      .style('stroke', 'var(--vscode-editor-background)')
+      .style('stroke-width', '3px')
+  }
 
   // State
   let nodes = []
@@ -148,6 +423,45 @@ export function createHDDLMap(container, options = {}) {
   let fleetBounds = []
 
   const displayEnvelopeId = (id) => String(id || '').replace(/^ENV-/, 'DE-')
+
+  function showAgentTooltip(agentNode, element) {
+    // Remove any existing tooltip
+    d3.select('.agent-tooltip').remove()
+    
+    const tooltip = d3.select('body')
+      .append('div')
+      .attr('class', 'agent-tooltip')
+      .style('position', 'fixed')
+      .style('background', 'rgba(30, 30, 30, 0.98)')
+      .style('color', 'var(--vscode-editor-foreground)')
+      .style('border', '1px solid var(--vscode-widget-border)')
+      .style('padding', '10px 14px')
+      .style('border-radius', '6px')
+      .style('pointer-events', 'none')
+      .style('z-index', '10000')
+      .style('font-size', '13px')
+      .style('box-shadow', '0 6px 16px rgba(0,0,0,0.5)')
+      .style('backdrop-filter', 'blur(8px)')
+      .html(`
+        <div style="font-weight: 600; margin-bottom: 6px; font-size: 14px;">${agentNode.name}</div>
+        <div style="font-size: 11px; opacity: 0.85; margin-bottom: 8px;">${agentNode.role || ''}</div>
+        <div style="font-size: 11px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.1);">
+          <span style="color: ${agentNode.isRecentlyActive ? '#4ec9b0' : '#cccccc'};">
+            ${agentNode.isRecentlyActive ? '● Active' : '○ Idle'}
+          </span>
+        </div>
+      `)
+    
+    // Position tooltip near mouse
+    const rect = element.getBoundingClientRect()
+    tooltip
+      .style('left', `${rect.left + rect.width / 2}px`)
+      .style('top', `${rect.top - 80}px`)
+      .style('transform', 'translateX(-50%)')
+    
+    // Auto-remove after 3 seconds
+    setTimeout(() => tooltip.remove(), 3000)
+  }
 
   function showEnvelopeAuthority(envelopeNode, scenario, hour) {
     // Create modal overlay to show envelope decision authority details
@@ -365,11 +679,15 @@ export function createHDDLMap(container, options = {}) {
     const usableHeight = Math.max(160, mapHeight - topMargin - bottomMargin)  // Use mapHeight, not total height
     const rowCount = Math.max(1, activeEnvelopes.length)
     const rowHeight = usableHeight / rowCount
-    const envelopeR = Math.max(22, Math.min(40, (rowHeight - 18) / 2))
+    const baseEnvelopeR = Math.max(22, Math.min(40, (rowHeight - 18) / 2))
+    
+    // Get envelope dimensions based on current detail level
+    const envDims = getEnvelopeDimensions(detailLevel, baseEnvelopeR)
+    const envelopeR = envDims.isIcon ? envDims.radius : baseEnvelopeR * envDims.scale
 
     // --- Nodes (Envelopes) ---
     // Map envelopes to nodes, preserving existing nodes to keep position
-    const newNodes = activeEnvelopes.map((envelope, index) => {
+    let newNodes = activeEnvelopes.map((envelope, index) => {
       const existing = nodes.find(n => n.id === envelope.envelopeId)
       
       // Status already computed earlier
@@ -395,6 +713,7 @@ export function createHDDLMap(container, options = {}) {
         existing.isVersionBumped = isVersionBumped
         existing.targetX = targetX
         existing.targetY = targetY
+        existing.envDims = envDims  // Update dimensions on existing nodes
         return existing
       }
 
@@ -406,6 +725,7 @@ export function createHDDLMap(container, options = {}) {
         ownerRole: envelope.ownerRole,
         ownerColor: undefined,
         r: envelopeR,
+        envDims: envDims,  // Store envelope dimensions on node
         isActive: isActive,
         status: status,
         isRecentlyRevised: recentlyRevisedEnvelopeIds.has(envelope.envelopeId),
@@ -523,8 +843,8 @@ export function createHDDLMap(container, options = {}) {
 
       const span = Math.max(0, maxY - minY)
       // Agent name + role occupy ~30px vertical space (name at y=-2, role at y=12, plus margins)
-      // Need at least 28px between agent centers to prevent text overlap (reduced for compactness)
-      const safeMinStep = 28
+      // Increased to 36px for better text separation
+      const safeMinStep = 36
       const ideal = span / Math.max(1, (count - 1))
       const step = Math.max(safeMinStep, Math.min(agentStep, ideal))
       
@@ -536,6 +856,75 @@ export function createHDDLMap(container, options = {}) {
       const ys = []
       for (let i = 0; i < count; i++) ys.push(start + i * step)
       return ys
+    }
+    
+    // Smart text positioning to avoid overlaps
+    function adjustAgentTextPositions(agentNodes) {
+      if (!agentNodes || !agentNodes.length) return []
+      
+      const textBoxes = new Map()
+      const adjusted = []
+      
+      // Group by fleet to check collisions within each fleet
+      const byFleet = d3.group(agentNodes, d => d.fleetRole || 'default')
+      
+      byFleet.forEach((fleetAgents, fleetRole) => {
+        // Sort by y position within fleet
+        const sorted = [...fleetAgents].sort((a, b) => a.targetY - b.targetY)
+        
+        sorted.forEach((agent, index) => {
+          const baseTextY = -3
+          const estimatedTextWidth = (agent.name?.length || 10) * 5.5
+          const textHeight = 24 // Increased for name + role
+          
+          let textYOffset = 0
+          let useLeftSide = false
+          
+          // Check for overlaps with previously placed text in this fleet
+          let hasOverlap = true
+          let attempts = 0
+          
+          while (hasOverlap && attempts < 4) {
+            hasOverlap = false
+            const candidateY = agent.targetY + baseTextY + textYOffset
+            
+            for (const [otherId, box] of textBoxes.entries()) {
+              if (otherId.startsWith(`${fleetRole}:`)) {
+                const yDist = Math.abs(candidateY - box.y)
+                const xOverlap = Math.abs(agent.targetX - box.x) < estimatedTextWidth + 20
+                
+                if (yDist < textHeight && xOverlap) {
+                  hasOverlap = true
+                  // Alternate: try shifting down or flipping to left side
+                  if (attempts < 2) {
+                    textYOffset += 14
+                  } else {
+                    useLeftSide = true
+                  }
+                  break
+                }
+              }
+            }
+            
+            attempts++
+          }
+          
+          textBoxes.set(`${fleetRole}:${agent.id}`, {
+            x: agent.targetX,
+            y: agent.targetY + baseTextY + textYOffset,
+            width: estimatedTextWidth,
+            height: textHeight
+          })
+          
+          adjusted.push({
+            ...agent,
+            textYOffset,
+            useLeftSide
+          })
+        })
+      })
+      
+      return adjusted
     }
 
     for (const fleet of fleetOrder) {
@@ -573,15 +962,70 @@ export function createHDDLMap(container, options = {}) {
 
       const slotTop = slot?.top ?? (fleetY - fleetBand / 2)
       const slotBottom = slot?.bottom ?? (fleetY + fleetBand / 2)
-      const workingYs = stackYsInSlot(fleetY - (fleetBand * 0.18), working.length, slotTop, slotBottom)
-      const idleYs = stackYsInSlot(fleetY + (fleetBand * 0.18), idle.length, slotTop, slotBottom)
+      
+      // Scalable grid layout for N agents with progressive detail reduction
+      const allFleetAgents = [...working, ...idle]
+      const agentCount = allFleetAgents.length
+      
+      // Progressive grid configuration based on fleet size
+      let cols, iconScale, showNames, cellPadding
+      if (agentCount <= 2) {
+        cols = 1
+        iconScale = 1.0
+        showNames = true
+        cellPadding = 8
+      } else if (agentCount <= 4) {
+        cols = 2
+        iconScale = 0.9
+        showNames = true
+        cellPadding = 6
+      } else if (agentCount <= 6) {
+        cols = 3
+        iconScale = 0.75
+        showNames = true
+        cellPadding = 4
+      } else if (agentCount <= 9) {
+        cols = 3
+        iconScale = 0.6
+        showNames = false  // Hide names, show on hover/click
+        cellPadding = 3
+      } else if (agentCount <= 12) {
+        cols = 4
+        iconScale = 0.5
+        showNames = false
+        cellPadding = 2
+      } else {
+        cols = 5
+        iconScale = 0.4
+        showNames = false
+        cellPadding = 2
+      }
+      
+      const rows = Math.ceil(agentCount / cols)
+      const availableWidth = col1Right - col1Left - leftPadding - rightPadding
+      const cellWidth = availableWidth / cols
+      const cellHeight = Math.min(52, (slotBottom - slotTop - 16) / Math.max(1, rows))
+      
+      const gridPositions = allFleetAgents.map((agent, i) => {
+        const col = i % cols
+        const row = Math.floor(i / cols)
+        const xOffset = col1Left + leftPadding + (col * cellWidth) + (cellWidth / 2)
+        const yOffset = slotTop + 12 + (row * cellHeight) + (cellHeight / 2)
+        return { 
+          x: xOffset, 
+          y: yOffset, 
+          isWorking: agent.isWorking,
+          iconScale,
+          showName: showNames
+        }
+      })
 
       working.forEach((agent, i) => {
-        const baseW = 110 + Math.min(140, Math.max(0, String(agent.name || '').length - 8) * 7)
-        const targetX = workingX
-        const avail = Math.max(120, (col1Right - rightPadding) - targetX)
-        const agentW = Math.max(110, Math.min(220, Math.min(baseW, avail)))
-        const targetY = workingYs[i] ?? fleetY
+        const gridPos = gridPositions[i]
+        const targetX = gridPos.x
+        const targetY = gridPos.y
+        const agentW = Math.min(cellWidth - cellPadding * 2, 180)
+        const agentR = 12 * gridPos.iconScale
 
         const existing = nodes.find(n => n.id === agent.agentId)
         if (existing) {
@@ -595,6 +1039,9 @@ export function createHDDLMap(container, options = {}) {
           existing.lastActiveHour = agent.lastActiveHour
           existing.fleetRole = fleet.stewardRole
           existing.fleetColor = agent.fleetColor
+          existing.r = agentR
+          existing.gridScale = gridPos.iconScale
+          existing.showName = gridPos.showName
           newNodes.push(existing)
         } else if (!newNodes.find(n => n.id === agent.agentId)) {
           newNodes.push({
@@ -608,6 +1055,9 @@ export function createHDDLMap(container, options = {}) {
             fleetColor: agent.fleetColor,
             w: agentW,
             h: agentH,
+            r: agentR,
+            gridScale: gridPos.iconScale,
+            showName: gridPos.showName,
             x: targetX,
             y: targetY,
             targetX,
@@ -617,11 +1067,12 @@ export function createHDDLMap(container, options = {}) {
       })
 
       idle.forEach((agent, i) => {
-        const baseW = 110 + Math.min(140, Math.max(0, String(agent.name || '').length - 8) * 7)
-        const targetX = idleX
-        const avail = Math.max(120, (col1Right - rightPadding) - targetX)
-        const agentW = Math.max(92, Math.min(180, Math.min(baseW, avail)))
-        const targetY = idleYs[i] ?? fleetY
+        const gridIdx = working.length + i
+        const gridPos = gridPositions[gridIdx]
+        const targetX = gridPos.x
+        const targetY = gridPos.y
+        const agentW = Math.min(cellWidth - cellPadding * 2, 180)
+        const agentR = 12 * gridPos.iconScale
 
         const existing = nodes.find(n => n.id === agent.agentId)
         if (existing) {
@@ -635,6 +1086,9 @@ export function createHDDLMap(container, options = {}) {
           existing.lastActiveHour = agent.lastActiveHour
           existing.fleetRole = fleet.stewardRole
           existing.fleetColor = agent.fleetColor
+          existing.r = agentR
+          existing.gridScale = gridPos.iconScale
+          existing.showName = gridPos.showName
           newNodes.push(existing)
         } else if (!newNodes.find(n => n.id === agent.agentId)) {
           newNodes.push({
@@ -648,6 +1102,9 @@ export function createHDDLMap(container, options = {}) {
             fleetColor: agent.fleetColor,
             w: agentW,
             h: agentH,
+            r: agentR,
+            gridScale: gridPos.iconScale,
+            showName: gridPos.showName,
             x: targetX,
             y: targetY,
             targetX,
@@ -656,6 +1113,20 @@ export function createHDDLMap(container, options = {}) {
         }
       })
     }
+
+    // Apply smart text positioning to prevent overlaps
+    const agentNodesForAdjustment = newNodes.filter(n => n.type === 'agent')
+    const adjustedAgents = adjustAgentTextPositions(agentNodesForAdjustment)
+    const agentAdjustmentMap = new Map(adjustedAgents.map(a => [a.id, a]))
+    
+    // Merge adjustments back into nodes
+    newNodes = newNodes.map(n => {
+      if (n.type === 'agent' && agentAdjustmentMap.has(n.id)) {
+        const adj = agentAdjustmentMap.get(n.id)
+        return { ...n, textYOffset: adj.textYOffset, useLeftSide: adj.useLeftSide }
+      }
+      return n
+    })
 
     // --- Fleet boundaries ---
     // Visual cue: each steward owns a fleet; boundaries + agent tint use the steward's color.
@@ -683,7 +1154,7 @@ export function createHDDLMap(container, options = {}) {
         h: Math.max(48, bottom - top),
       }
     })
-
+    
     nodes = newNodes
 
     // --- Links ---
@@ -922,6 +1393,9 @@ export function createHDDLMap(container, options = {}) {
 
   // 4. Render Function (D3 Enter/Update/Exit)
   function render() {
+    // Get agent density for this render
+    const currentAgentDensity = getAgentDensity(detailLevel)
+    
     // --- Fleet boundaries (behind links/nodes) ---
     const fleetSel = fleetLayer.selectAll('g.fleet')
       .data(fleetBounds, d => d.id)
@@ -939,6 +1413,26 @@ export function createHDDLMap(container, options = {}) {
       .attr('stroke-dasharray', '6 6')
       .attr('opacity', 0.65)
 
+    // Fleet count badge (shown in compact/minimal modes)
+    fleetEnter.append('g')
+      .attr('class', 'fleet-count-badge')
+      .style('pointer-events', 'none')
+
+    fleetEnter.select('.fleet-count-badge')
+      .append('rect')
+      .attr('class', 'fleet-count-bg')
+      .attr('rx', 8)
+      .attr('ry', 8)
+
+    fleetEnter.select('.fleet-count-badge')
+      .append('text')
+      .attr('class', 'fleet-count-text')
+      .attr('text-anchor', 'middle')
+      .attr('dominant-baseline', 'middle')
+      .style('font-size', '10px')
+      .style('font-weight', '700')
+
+    // Update fleet boundary
     fleetSel.merge(fleetEnter).select('rect.fleet-boundary')
       .attr('x', d => d.x)
       .attr('y', d => d.y)
@@ -946,6 +1440,30 @@ export function createHDDLMap(container, options = {}) {
       .attr('height', d => d.h)
       .attr('stroke', d => d.color)
       .attr('opacity', 0.65)
+
+    // Update fleet count badge (visible in compact/minimal modes)
+    const fleetMerged = fleetSel.merge(fleetEnter)
+    
+    fleetMerged.select('.fleet-count-badge')
+      .attr('transform', d => `translate(${d.x + d.w / 2}, ${d.y + d.h / 2})`)
+      .attr('opacity', () => currentAgentDensity.density === 'compact' || currentAgentDensity.density === 'minimal' ? 1 : 0)
+
+    fleetMerged.select('.fleet-count-bg')
+      .attr('x', -20)
+      .attr('y', -12)
+      .attr('width', 40)
+      .attr('height', 24)
+      .attr('fill', d => d.color)
+      .attr('opacity', 0.15)
+
+    fleetMerged.select('.fleet-count-text')
+      .attr('fill', d => d.color)
+      .text(d => {
+        // Count agents in this fleet
+        const count = nodes.filter(n => n.type === 'agent' && n.fleetRole === d.role).length
+        const active = nodes.filter(n => n.type === 'agent' && n.fleetRole === d.role && n.isRecentlyActive).length
+        return `${active}/${count}`
+      })
 
     fleetSel.exit().remove()
 
@@ -1013,10 +1531,13 @@ export function createHDDLMap(container, options = {}) {
         .on('drag', dragged)
         .on('end', dragended))
 
-    // Envelope shape (larger, clearly an envelope — not a circle)
+    // Envelope shape (density-aware rendering)
+    // At detailed/normal: full envelope shape with body, flap, fold
+    // At compact: simplified outline only
+    // At icon: status circle only
     const envShape = nodeEnter.filter(d => d.type === 'envelope')
       .append('g')
-      .attr('class', 'envelope-shape')
+      .attr('class', d => `envelope-shape envelope-density-${d.envDims?.density || 'normal'}`)
       .style('cursor', 'pointer')
       .style('pointer-events', 'all')
       .on('click', function(event, d) {
@@ -1024,21 +1545,44 @@ export function createHDDLMap(container, options = {}) {
         showEnvelopeAuthority(d, scenario, hour)
       })
 
-    // Outer glow ring for active envelopes (pulsing animation)
-    envShape.append('rect')
+    // Icon mode: render a simple status circle
+    envShape.filter(d => d.envDims?.isIcon)
+      .append('circle')
+      .attr('class', 'envelope-icon-circle')
+      .attr('cx', 0)
+      .attr('cy', 0)
+      .attr('r', d => d.envDims?.radius || 18)
+      .attr('fill', 'var(--vscode-editor-background)')
+      .attr('stroke', 'var(--vscode-focusBorder)')
+      .attr('stroke-width', 3)
+
+    // Icon mode: inner status indicator
+    envShape.filter(d => d.envDims?.isIcon)
+      .append('circle')
+      .attr('class', 'envelope-icon-status')
+      .attr('cx', 0)
+      .attr('cy', 0)
+      .attr('r', d => (d.envDims?.radius || 18) * 0.5)
+      .attr('fill', d => d.status === 'active' ? 'var(--status-success)' : 'var(--vscode-input-border)')
+      .attr('opacity', 0.8)
+
+    // Non-icon modes: render envelope shape elements
+    const envBodyShape = envShape.filter(d => !d.envDims?.isIcon)
+
+    // Outer glow ring for active envelopes (pulsing animation) - detailed only
+    envBodyShape.filter(d => shouldRenderEnvelopeElement('glow', d.envDims?.density))
+      .append('rect')
       .attr('class', 'envelope-glow')
       .attr('x', d => {
-        const rr = d.r
-        const w = Math.max(84, Math.round(rr * 3.2)) + 16
-        return -w / 2
+        const dims = d.envDims || { width: 84, height: 52 }
+        return -(dims.width + 16) / 2
       })
       .attr('y', d => {
-        const rr = d.r
-        const h = Math.max(52, Math.round(rr * 2.05)) + 16
-        return -h / 2
+        const dims = d.envDims || { width: 84, height: 52 }
+        return -(dims.height + 16) / 2
       })
-      .attr('width', d => Math.max(84, Math.round(d.r * 3.2)) + 16)
-      .attr('height', d => Math.max(52, Math.round(d.r * 2.05)) + 16)
+      .attr('width', d => (d.envDims?.width || 84) + 16)
+      .attr('height', d => (d.envDims?.height || 52) + 16)
       .attr('rx', 8)
       .attr('ry', 8)
       .attr('fill', 'none')
@@ -1047,21 +1591,14 @@ export function createHDDLMap(container, options = {}) {
       .attr('opacity', 0)
       .style('filter', 'blur(4px)')
 
-    // Revision burst ring (expands outward when envelope is revised)
-    envShape.append('rect')
+    // Revision burst ring - detailed and normal only
+    envBodyShape.filter(d => shouldRenderEnvelopeElement('revisionBurst', d.envDims?.density))
+      .append('rect')
       .attr('class', 'envelope-revision-burst')
-      .attr('x', d => {
-        const rr = d.r
-        const w = Math.max(84, Math.round(rr * 3.2))
-        return -w / 2
-      })
-      .attr('y', d => {
-        const rr = d.r
-        const h = Math.max(52, Math.round(rr * 2.05))
-        return -h / 2
-      })
-      .attr('width', d => Math.max(84, Math.round(d.r * 3.2)))
-      .attr('height', d => Math.max(52, Math.round(d.r * 2.05)))
+      .attr('x', d => -(d.envDims?.width || 84) / 2)
+      .attr('y', d => -(d.envDims?.height || 52) / 2)
+      .attr('width', d => d.envDims?.width || 84)
+      .attr('height', d => d.envDims?.height || 52)
       .attr('rx', 6)
       .attr('ry', 6)
       .attr('fill', 'none')
@@ -1069,28 +1606,22 @@ export function createHDDLMap(container, options = {}) {
       .attr('stroke-width', 3)
       .attr('opacity', 0)
 
-    envShape.append('rect')
+    // Envelope body - all non-icon modes
+    envBodyShape.append('rect')
       .attr('class', 'envelope-body')
-      .attr('x', d => {
-        const rr = d.r
-        const w = Math.max(84, Math.round(rr * 3.2))
-        return -w / 2
-      })
-      .attr('y', d => {
-        const rr = d.r
-        const h = Math.max(52, Math.round(rr * 2.05))
-        return -h / 2
-      })
-      .attr('width', d => Math.max(84, Math.round(d.r * 3.2)))
-      .attr('height', d => Math.max(52, Math.round(d.r * 2.05)))
-      .attr('rx', 6)
-      .attr('ry', 6)
+      .attr('x', d => -(d.envDims?.width || 84) / 2)
+      .attr('y', d => -(d.envDims?.height || 52) / 2)
+      .attr('width', d => d.envDims?.width || 84)
+      .attr('height', d => d.envDims?.height || 52)
+      .attr('rx', d => d.envDims?.density === 'compact' ? 4 : 6)
+      .attr('ry', d => d.envDims?.density === 'compact' ? 4 : 6)
       .attr('fill', 'var(--vscode-editor-background)')
       .attr('stroke', 'var(--vscode-focusBorder)')
-      .attr('stroke-width', 3)
+      .attr('stroke-width', d => d.envDims?.density === 'compact' ? 2 : 3)
 
-    // Envelope flap - triangular top that opens/closes
-    envShape.append('path')
+    // Envelope flap - triangular top (detailed and normal only)
+    envBodyShape.filter(d => shouldRenderEnvelopeElement('flap', d.envDims?.density))
+      .append('path')
       .attr('class', 'envelope-flap')
       .attr('fill', 'var(--vscode-editor-background)')
       .attr('stroke-width', 2.5)
@@ -1098,9 +1629,8 @@ export function createHDDLMap(container, options = {}) {
       .style('transform-origin', 'center top')
       .style('transition', 'transform 0.4s ease-out')
       .attr('d', d => {
-        const rr = d.r
-        const w = Math.max(84, Math.round(rr * 3.2))
-        const h = Math.max(52, Math.round(rr * 2.05))
+        const w = d.envDims?.width || 84
+        const h = d.envDims?.height || 52
         const left = -w / 2
         const top = -h / 2
         const right = w / 2
@@ -1108,16 +1638,16 @@ export function createHDDLMap(container, options = {}) {
         return `M ${left + 4} ${top + 4} L 0 ${top + h * 0.45} L ${right - 4} ${top + 4} Z`
       })
 
-    // Inner fold line (gives depth to envelope)
-    envShape.append('path')
+    // Inner fold line (detailed only - gives depth)
+    envBodyShape.filter(d => shouldRenderEnvelopeElement('fold', d.envDims?.density))
+      .append('path')
       .attr('class', 'envelope-fold')
       .attr('fill', 'none')
       .attr('stroke-width', 1.5)
       .attr('stroke-opacity', 0.4)
       .attr('d', d => {
-        const rr = d.r
-        const w = Math.max(84, Math.round(rr * 3.2))
-        const h = Math.max(52, Math.round(rr * 2.05))
+        const w = d.envDims?.width || 84
+        const h = d.envDims?.height || 52
         const left = -w / 2
         const bottom = h / 2
         const right = w / 2
@@ -1125,8 +1655,8 @@ export function createHDDLMap(container, options = {}) {
         return `M ${left + 8} ${bottom - 8} L 0 ${bottom - h * 0.25} L ${right - 8} ${bottom - 8}`
       })
 
-    // Envelope status label (OPEN vs CLOSED)
-    nodeEnter.filter(d => d.type === 'envelope')
+    // Envelope status label (OPEN vs CLOSED) - detailed and normal only
+    nodeEnter.filter(d => d.type === 'envelope' && shouldRenderEnvelopeElement('status', d.envDims?.density))
       .append('text')
       .attr('class', 'envelope-status')
       .attr('text-anchor', 'middle')
@@ -1134,12 +1664,12 @@ export function createHDDLMap(container, options = {}) {
       .style('paint-order', 'stroke')
       .style('stroke', 'var(--vscode-editor-background)')
       .style('stroke-width', '4px')
-      .style('font-size', '9px')
+      .style('font-size', d => d.envDims?.density === 'detailed' ? '9px' : '8px')
       .style('font-weight', '800')
       .attr('fill', 'var(--vscode-statusBar-foreground)')
 
-    // Version badge (semver format with bump indicator)
-    const versionBadge = nodeEnter.filter(d => d.type === 'envelope')
+    // Version badge (semver format) - detailed, normal, compact
+    const versionBadge = nodeEnter.filter(d => d.type === 'envelope' && shouldRenderEnvelopeElement('version', d.envDims?.density))
       .append('g')
       .attr('class', 'envelope-version-badge')
       .style('pointer-events', 'none')
@@ -1190,24 +1720,61 @@ export function createHDDLMap(container, options = {}) {
       .attr('stroke-width', 2)
       .attr('d', 'M -14 14 Q 0 2 14 14')
 
-    // Agents (bot glyph + text; no card/box)
+    // Agents (density-aware rendering)
+    // Full/Standard: Bot glyph with name/role
+    // Compact: Small bot icon, fleet count badge visible
+    // Minimal: Just a colored dot
+    const agentDensityConfig = getAgentDensity(detailLevel)
     const agentEnter = nodeEnter.filter(d => d.type === 'agent')
 
-    // Activity halo (used to emphasize working agents)
-    agentEnter.append('circle')
+    // Activity halo (only on full/standard - shows working state with glow)
+    agentEnter.filter(() => agentDensityConfig.showHalo)
+      .append('circle')
       .attr('class', 'agent-activity-halo')
       .attr('cx', 0)
       .attr('cy', -1)
-      .attr('r', 16)
+      .attr('r', 16 * agentDensityConfig.botScale)
       .attr('fill', 'none')
-      .attr('stroke-width', 2)
+      .attr('stroke-width', 3)
+      .style('filter', 'blur(3px)')
       .attr('opacity', 0)
 
-    // Bot glyph (head + antenna + eyes)
-    const bot = agentEnter.append('g')
+    // Minimal mode: just a colored dot indicator
+    agentEnter.filter(() => agentDensityConfig.density === 'minimal')
+      .append('circle')
+      .attr('class', 'agent-minimal-dot')
+      .attr('cx', 0)
+      .attr('cy', 0)
+      .attr('r', 6)
+      .attr('fill', d => d.fleetColor || 'var(--vscode-sideBar-border)')
+      .attr('stroke', 'var(--vscode-editor-background)')
+      .attr('stroke-width', 1)
+      .attr('opacity', d => d.isRecentlyActive ? 0.9 : 0.4)
+
+    // Compact mode: small dot with count (count rendered at fleet level)
+    agentEnter.filter(() => agentDensityConfig.density === 'compact')
+      .append('circle')
+      .attr('class', 'agent-compact-dot')
+      .attr('cx', 0)
+      .attr('cy', 0)
+      .attr('r', 8)
+      .attr('fill', d => d.isRecentlyActive ? d.fleetColor || 'var(--vscode-textLink-foreground)' : 'var(--vscode-editor-background)')
+      .attr('stroke', d => d.fleetColor || 'var(--vscode-sideBar-border)')
+      .attr('stroke-width', 2)
+      .attr('opacity', d => d.isRecentlyActive ? 1 : 0.5)
+
+    // Bot glyph (head + antenna + eyes) - full and standard modes, scaled by grid
+    const bot = agentEnter.filter(() => agentDensityConfig.density === 'full' || agentDensityConfig.density === 'standard')
+      .append('g')
       .attr('class', 'agent-bot')
-      .style('pointer-events', 'none')
+      .style('pointer-events', 'all')
+      .style('cursor', 'pointer')
       .attr('opacity', 0.95)
+      .attr('transform', d => `scale(${(d.gridScale || 1.0) * agentDensityConfig.botScale})`)
+      .on('click', (event, d) => {
+        event.stopPropagation()
+        showAgentTooltip(d, event.currentTarget)
+      })
 
     bot.append('rect')
       .attr('class', 'agent-bot-head')
@@ -1240,51 +1807,151 @@ export function createHDDLMap(container, options = {}) {
       .attr('cy', -1)
       .attr('r', 1.7)
 
-    agentEnter
-      .append('text')
+    // Agent name - shown based on per-agent showName property (with collision avoidance)
+    agentEnter.append('text')
       .attr('class', 'agent-name')
-      .attr('text-anchor', 'start')
-      .attr('x', 16)
-      .attr('y', -3)
+      .attr('text-anchor', d => d.useLeftSide ? 'end' : 'start')
+      .attr('x', d => {
+        const scale = (d.gridScale || 1.0) * agentDensityConfig.botScale
+        return d.useLeftSide ? -16 * scale : 16 * scale
+      })
+      .attr('y', d => -3 + (d.textYOffset || 0))
       .style('pointer-events', 'none')
-      .style('font-size', '9px')
+      .style('font-size', d => {
+        const baseSize = detailLevel === DETAIL_LEVELS.STANDARD ? 8 : 9
+        return `${Math.max(7, baseSize * (d.gridScale || 1.0))}px`
+      })
       .style('font-weight', '700')
       .style('paint-order', 'stroke')
       .style('stroke', 'var(--vscode-editor-background)')
-      .style('stroke-width', '3px')
+      .style('stroke-width', '4px')
       .attr('fill', 'var(--vscode-editor-foreground)')
-      .text(d => d.name)
+      .style('opacity', 0)  // Start at 0, will be set correctly in update phase
+      .attr('opacity', 0)  // Start at 0, will be set correctly in update phase
+      .text(d => {
+        const shouldShowName = agentDensityConfig.showName && d.showName !== false
+        return shouldShowName ? getAdaptiveAgentName(d.name, detailLevel) : ''
+      })
 
-    agentEnter
+    // Agent role - only shown in full mode (with collision avoidance)
+    // Note: also respect per-agent showName gating so large fleets don't render label text.
+    agentEnter.filter(d => agentDensityConfig.showRole && d.showName !== false)
       .append('text')
       .attr('class', 'agent-role')
-      .attr('text-anchor', 'start')
-      .attr('x', 16)
-      .attr('y', 10)
+      .attr('text-anchor', d => d.useLeftSide ? 'end' : 'start')
+      .attr('x', d => d.useLeftSide ? -16 : 16)
+      .attr('y', d => 10 + (d.textYOffset || 0))
       .style('pointer-events', 'none')
       .style('font-size', '8px')
       .style('paint-order', 'stroke')
       .style('stroke', 'var(--vscode-editor-background)')
-      .style('stroke-width', '3px')
+      .style('stroke-width', '4px')
       .attr('fill', 'var(--vscode-editor-foreground)')
-      .attr('opacity', 0.75)
+      .attr('opacity', 0.65)
       .text(d => {
         if (!d.role) return ''
         const maxLen = 26
         return d.role.substring(0, maxLen) + (d.role.length > maxLen ? '...' : '')
       })
 
-    nodeUpdate.select('.agent-name')
-      .attr('x', 16)
-      .text(d => d.name)
+    // Update agent text elements (visibility controlled by per-node showName property)
+    const agentNameSelection = nodeUpdate.filter(d => d.type === 'agent').select('.agent-name')
+    
+    // Interrupt transitions on both the parent node AND the text element
+    nodeUpdate.filter(d => d.type === 'agent' && d.showName === false).interrupt()
+    
+    agentNameSelection
+      .interrupt()  // Cancel any ongoing transitions
+      .attr('text-anchor', d => d.useLeftSide ? 'end' : 'start')
+      .attr('x', d => {
+        const scale = (d.gridScale || 1.0) * agentDensityConfig.botScale
+        return d.useLeftSide ? -16 * scale : 16 * scale
+      })
+      .attr('y', d => -3 + (d.textYOffset || 0))
+      .style('visibility', d => {
+        const shouldShowName = agentDensityConfig.showName && d.showName !== false
+        return shouldShowName ? 'visible' : 'hidden'
+      })
+      .style('opacity', d => {
+        const shouldShowName = agentDensityConfig.showName && d.showName !== false
+        if (!shouldShowName) return 0
+        return d.isRecentlyActive ? 1 : 0.55
+      })
+      .attr('opacity', d => {
+        const shouldShowName = agentDensityConfig.showName && d.showName !== false
+        if (!shouldShowName) return 0
+        return d.isRecentlyActive ? 1 : 0.55
+      })
+      .style('font-size', d => {
+        const baseSize = detailLevel === DETAIL_LEVELS.STANDARD ? 8 : 9
+        return `${Math.max(7, baseSize * (d.gridScale || 1.0))}px`
+      })
+      .text(d => {
+        const shouldShowName = agentDensityConfig.showName && d.showName !== false
+        return shouldShowName ? getAdaptiveAgentName(d.name, detailLevel) : ''
+      })
 
     nodeUpdate.select('.agent-role')
-      .attr('x', 16)
+      .attr('text-anchor', d => d.useLeftSide ? 'end' : 'start')
+      .attr('x', d => d.useLeftSide ? -16 : 16)
+      .attr('y', d => 10 + (d.textYOffset || 0))
+      .style('visibility', d => {
+        const shouldShowRole = agentDensityConfig.showRole && d.showName !== false
+        return shouldShowRole ? 'visible' : 'hidden'
+      })
+      .attr('opacity', d => {
+        const shouldShowRole = agentDensityConfig.showRole && d.showName !== false
+        return shouldShowRole ? 0.65 : 0
+      })
       .text(d => {
-        if (!d.role) return ''
+        const shouldShowRole = agentDensityConfig.showRole && d.showName !== false
+        if (!shouldShowRole || !d.role) return ''
         const maxLen = 26
         return d.role.substring(0, maxLen) + (d.role.length > maxLen ? '...' : '')
       })
+
+    // Update agent activity halo with pulsing glow for active agents
+    nodeUpdate.select('circle.agent-activity-halo')
+      .transition()
+      .duration(800)
+      .attr('stroke', d => d.isRecentlyActive ? d.fleetColor || 'var(--vscode-textLink-foreground)' : 'transparent')
+      .attr('opacity', d => d.isRecentlyActive ? 0.7 : 0)
+      .attr('r', d => d.isRecentlyActive ? 18 * agentDensityConfig.botScale : 16 * agentDensityConfig.botScale)
+      .on('end', function(event, d) {
+        if (!d || !d.isRecentlyActive) return
+
+        const halo = d3.select(this)
+        halo.interrupt()
+
+        function repeatPulse() {
+          const current = halo.datum()
+          if (!current || !current.isRecentlyActive) return
+
+          halo
+            .transition()
+            .duration(1200)
+            .attr('opacity', 0.4)
+            .attr('r', 16 * agentDensityConfig.botScale)
+            .transition()
+            .duration(800)
+            .attr('opacity', 0.7)
+            .attr('r', 18 * agentDensityConfig.botScale)
+            .on('end', repeatPulse)
+        }
+
+        repeatPulse()
+      })
+
+    // Update compact and minimal agent indicators with glow
+    nodeUpdate.select('circle.agent-compact-dot')
+      .attr('fill', d => d.isRecentlyActive ? d.fleetColor || 'var(--vscode-textLink-foreground)' : 'var(--vscode-editor-background)')
+      .attr('opacity', d => d.isRecentlyActive ? 1 : 0.5)
+      .style('filter', d => d.isRecentlyActive ? `drop-shadow(0 0 4px ${d.fleetColor || 'var(--vscode-textLink-foreground)'})` : 'none')
+
+    nodeUpdate.select('circle.agent-minimal-dot')
+      .attr('fill', d => d.fleetColor || 'var(--vscode-sideBar-border)')
+      .attr('opacity', d => d.isRecentlyActive ? 0.9 : 0.4)
+      .style('filter', d => d.isRecentlyActive ? `drop-shadow(0 0 3px ${d.fleetColor || 'var(--vscode-sideBar-border)'})` : 'none')
 
     // Envelope group scale animation based on status
     nodeUpdate.filter(d => d.type === 'envelope')
@@ -1334,20 +2001,32 @@ export function createHDDLMap(container, options = {}) {
         return 1
       })
 
-    // Animate envelope glow for active envelopes (pulsing effect)
+    // Update icon mode status indicator
+    nodeUpdate.selectAll('g.envelope-shape').select('circle.envelope-icon-status')
+      .attr('fill', d => {
+        if (d.status === 'active') return d.ownerColor || 'var(--status-success)'
+        if (d.status === 'ended') return 'var(--vscode-input-border)'
+        return 'var(--status-warning)'
+      })
+      .attr('opacity', d => d.status === 'active' ? 0.9 : 0.6)
+
+    // Update icon mode outer circle
+    nodeUpdate.selectAll('g.envelope-shape').select('circle.envelope-icon-circle')
+      .attr('stroke', d => d.ownerColor || 'var(--vscode-focusBorder)')
+      .attr('stroke-width', d => d.status === 'active' ? 3 : 2)
+
+    // Animate envelope glow for active envelopes (pulsing effect) - only if element exists
     nodeUpdate.selectAll('g.envelope-shape').select('rect.envelope-glow')
       .attr('x', d => {
-        const rr = d.r + (d.isRecentlyRevised ? 6 : 0)
-        const w = Math.max(84, Math.round(rr * 3.2)) + 16
+        const w = (d.envDims?.width || 84) + 16
         return -w / 2
       })
       .attr('y', d => {
-        const rr = d.r + (d.isRecentlyRevised ? 6 : 0)
-        const h = Math.max(52, Math.round(rr * 2.05)) + 16
+        const h = (d.envDims?.height || 52) + 16
         return -h / 2
       })
-      .attr('width', d => Math.max(84, Math.round((d.r + (d.isRecentlyRevised ? 6 : 0)) * 3.2)) + 16)
-      .attr('height', d => Math.max(52, Math.round((d.r + (d.isRecentlyRevised ? 6 : 0)) * 2.05)) + 16)
+      .attr('width', d => (d.envDims?.width || 84) + 16)
+      .attr('height', d => (d.envDims?.height || 52) + 16)
       .attr('stroke', d => d.ownerColor || 'var(--vscode-focusBorder)')
       .transition()
       .duration(800)
@@ -1378,9 +2057,8 @@ export function createHDDLMap(container, options = {}) {
       .each(function(d) {
         const burst = d3.select(this)
         if (d.isRecentlyRevised) {
-          const rr = d.r + 6
-          const baseW = Math.max(84, Math.round(rr * 3.2))
-          const baseH = Math.max(52, Math.round(rr * 2.05))
+          const baseW = d.envDims?.width || 84
+          const baseH = d.envDims?.height || 52
           burst
             .attr('x', -baseW / 2)
             .attr('y', -baseH / 2)
@@ -1404,8 +2082,7 @@ export function createHDDLMap(container, options = {}) {
 
     nodeUpdate.select('.envelope-status')
       .attr('y', d => {
-        const rr = d.r + (d.isRecentlyRevised ? 6 : 0)
-        const h = Math.max(52, Math.round(rr * 2.05))
+        const h = d.envDims?.height || 52
         return -(h / 2) + 14
       })
       .attr('opacity', d => (d.status === 'active' ? 0.85 : 0.65))
@@ -1418,17 +2095,17 @@ export function createHDDLMap(container, options = {}) {
     // Update version badge position and content
     nodeUpdate.select('.envelope-version-badge')
       .attr('transform', d => {
-        const rr = d.r + (d.isRecentlyRevised ? 6 : 0)
-        const w = Math.max(84, Math.round(rr * 3.2))
-        const h = Math.max(52, Math.round(rr * 2.05))
-        // Position at bottom right of envelope
-        return `translate(${w / 2 - 20}, ${h / 2 + 8})`
+        const w = d.envDims?.width || 84
+        const h = d.envDims?.height || 52
+        // Position at bottom right of envelope (adjust for compact mode)
+        const xOffset = d.envDims?.density === 'compact' ? w / 2 - 14 : w / 2 - 20
+        return `translate(${xOffset}, ${h / 2 + 8})`
       })
 
     nodeUpdate.select('.version-badge-bg')
-      .attr('x', -18)
+      .attr('x', d => d.envDims?.density === 'compact' ? -14 : -18)
       .attr('y', -7)
-      .attr('width', 36)
+      .attr('width', d => d.envDims?.density === 'compact' ? 28 : 36)
       .attr('height', 14)
       .attr('fill', d => d.isVersionBumped ? 'var(--status-warning)' : 'var(--vscode-editor-background)')
       .attr('stroke', d => d.isVersionBumped ? 'none' : 'var(--vscode-sideBar-border)')
@@ -1437,7 +2114,13 @@ export function createHDDLMap(container, options = {}) {
 
     nodeUpdate.select('.version-badge-text')
       .attr('fill', d => d.isVersionBumped ? 'var(--vscode-editor-background)' : 'var(--vscode-editor-foreground)')
-      .text(d => d.isVersionBumped ? `↑ v${d.semver}` : `v${d.semver}`)
+      .style('font-size', d => d.envDims?.density === 'compact' ? '7px' : '8px')
+      .text(d => {
+        if (d.envDims?.density === 'compact') {
+          return `v${d.semver}`  // Shorter in compact mode
+        }
+        return d.isVersionBumped ? `↑ v${d.semver}` : `v${d.semver}`
+      })
 
     // Envelope linework (flap/fold) follows envelope status.
     // Flap opens (rotates back) when envelope is active
@@ -1453,9 +2136,8 @@ export function createHDDLMap(container, options = {}) {
       })
       .attr('opacity', d => (d.status === 'ended' ? 0.5 : 0.9))
       .attr('d', d => {
-        const rr = d.r + (d.isRecentlyRevised ? 6 : 0)
-        const w = Math.max(84, Math.round(rr * 3.2))
-        const h = Math.max(52, Math.round(rr * 2.05))
+        const w = d.envDims?.width || 84
+        const h = d.envDims?.height || 52
         const left = -w / 2
         const top = -h / 2
         const right = w / 2
@@ -1479,9 +2161,8 @@ export function createHDDLMap(container, options = {}) {
       })
       .attr('opacity', d => (d.status === 'ended' ? 0.3 : d.status === 'active' ? 0.6 : 0.4))
       .attr('d', d => {
-        const rr = d.r + (d.isRecentlyRevised ? 6 : 0)
-        const w = Math.max(84, Math.round(rr * 3.2))
-        const h = Math.max(52, Math.round(rr * 2.05))
+        const w = d.envDims?.width || 84
+        const h = d.envDims?.height || 52
         const left = -w / 2
         const bottom = h / 2
         const right = w / 2
@@ -1506,10 +2187,6 @@ export function createHDDLMap(container, options = {}) {
       .attr('stroke', d => d.fleetColor || 'var(--vscode-textLink-foreground)')
       .attr('opacity', d => d.isRecentlyActive ? 0.55 : 0)
 
-    // Dim idle labels to make "working" pop in each fleet.
-    nodeUpdate.selectAll('text.agent-name')
-      .attr('opacity', d => d.isRecentlyActive ? 1 : 0.55)
-
     nodeUpdate.selectAll('text.agent-role')
       .attr('opacity', d => d.isRecentlyActive ? 0.75 : 0.25)
 
@@ -1529,20 +2206,36 @@ export function createHDDLMap(container, options = {}) {
       .style('stroke', 'var(--vscode-editor-background)')
       .style('stroke-width', '4px')
 
-    // Update Labels
+    // Update Labels - adaptive based on detail level
     nodeUpdate.select('.label-main')
       .attr('dy', d => d.type === 'envelope' ? 5 : 4)
       .attr('text-anchor', d => d.type === 'agent' ? 'end' : (d.type === 'steward' ? 'start' : 'middle'))
       .attr('x', d => d.type === 'agent' ? -d.r - 5 : (d.type === 'steward' ? d.r + 5 : 0))
       .attr('fill', 'var(--vscode-editor-foreground)')
-      .attr('opacity', d => (d.status === 'pending' ? 0.6 : d.status === 'ended' ? 0.75 : 1))
-        .style('font-size', d => d.type === 'envelope' ? '12px' : '10px')
+      .attr('opacity', d => {
+        if (detailLevel === DETAIL_LEVELS.MINIMAL) return 0
+        if (d.status === 'pending') return 0.6
+        if (d.status === 'ended') return 0.75
+        return 1
+      })
+      .style('font-size', d => {
+        if (d.type === 'envelope') {
+          return detailLevel === DETAIL_LEVELS.COMPACT ? '10px' : '12px'
+        }
+        return detailLevel === DETAIL_LEVELS.COMPACT ? '8px' : '10px'
+      })
       .style('font-weight', d => d.type === 'envelope' ? 'bold' : 'normal')
       .text(d => {
-      if (d.type === 'envelope') return d.label
-      if (d.type === 'steward') return d.name
-      if (d.type === 'agent') return d.name
-      return ''
+        if (d.type === 'envelope') {
+          const adaptive = getAdaptiveEnvelopeLabel(d.label, d.name, detailLevel)
+          return adaptive.label
+        }
+        if (d.type === 'steward') {
+          const adaptive = getAdaptiveStewardLabel(d.name, '', detailLevel)
+          return adaptive.name
+        }
+        if (d.type === 'agent') return getAdaptiveAgentName(d.name, detailLevel)
+        return ''
       })
 
     nodeUpdate.select('.label-sub')
@@ -1550,17 +2243,25 @@ export function createHDDLMap(container, options = {}) {
       .attr('text-anchor', d => d.type === 'agent' ? 'end' : (d.type === 'steward' ? 'start' : 'middle'))
       .attr('x', d => d.type === 'agent' ? -d.r - 5 : (d.type === 'steward' ? d.r + 5 : 0))
       .attr('fill', 'var(--vscode-editor-foreground)')
-      .attr('opacity', d => (d.status === 'pending' ? 0.5 : d.status === 'ended' ? 0.6 : 0.7))
+      .attr('opacity', d => {
+        // Hide sub-labels on COMPACT and MINIMAL
+        if (detailLevel === DETAIL_LEVELS.COMPACT || detailLevel === DETAIL_LEVELS.MINIMAL) return 0
+        if (d.status === 'pending') return 0.5
+        if (d.status === 'ended') return 0.6
+        return 0.7
+      })
       .style('font-size', '9px')
       .text(d => {
+        // Skip sub-labels on COMPACT and MINIMAL
+        if (detailLevel === DETAIL_LEVELS.COMPACT || detailLevel === DETAIL_LEVELS.MINIMAL) return ''
         if (d.type === 'agent') {
           if (!d.role) return ''
-          const maxLen = 20
+          const maxLen = detailLevel === DETAIL_LEVELS.STANDARD ? 16 : 20
           return d.role.substring(0, maxLen) + (d.role.length > maxLen ? '...' : '')
         }
         if (d.type === 'steward') return 'Steward'
         // Let envelopes carry their name clearly; other types remain compact.
-        const maxLen = d.type === 'envelope' ? 24 : 18
+        const maxLen = d.type === 'envelope' ? (detailLevel === DETAIL_LEVELS.STANDARD ? 18 : 24) : 18
         return d.name.substring(0, maxLen) + (d.name.length > maxLen ? '...' : '')
       })
 
@@ -1764,75 +2465,109 @@ export function createHDDLMap(container, options = {}) {
     update()
   })
 
+  // Define subscription variables at top level so cleanup always works
+  let scenarioUnsubscribe = () => {}
+  let embeddingUnsubscribe = () => {}
+  let embeddingTooltip = null  // Will be set in FULL/STANDARD modes
+
   // ============================================================================
   // EMBEDDING VECTOR SPACE (3D Memory Store)
+  // Only rendered on FULL and STANDARD detail levels
   // ============================================================================
   
-  const embeddingStoreHeight = embeddingHeight
-  const embeddingStoreLayer = svg.append('g')
-    .attr('class', 'embedding-store')
-    .attr('transform', `translate(0, ${mapHeight})`)
-
-  // 3D box background with TRUE perspective (back narrow, front wide)
-  const box3D = embeddingStoreLayer.append('g')
-    .attr('class', 'embedding-box-3d')
-
-  // Perspective dimensions - back is NARROW, front is WIDE
-  const backY = embeddingStoreHeight * 0.25      // Top edge (back of floor)
-  const frontY = embeddingStoreHeight - 8         // Bottom edge (front of floor)
-  const floorDepthRange = frontY - backY
-  
-  // Back edge (narrow) - centered
-  const backLeft = width * 0.25
-  const backRight = width * 0.75
-  
-  // Front edge (wide) - spans more
-  const frontLeft = width * 0.08
-  const frontRight = width * 0.92
-
-  // Gradients for 3D depth
-  const boxDefs = svg.append('defs')
-  
-  const floorGradient = boxDefs.append('linearGradient')
-    .attr('id', 'embedding-floor')
-    .attr('x1', '0%')
-    .attr('y1', '0%')
-    .attr('x2', '0%')
-    .attr('y2', '100%')
-  floorGradient.append('stop')
-    .attr('offset', '0%')
-    .attr('stop-color', 'rgba(8, 12, 20, 0.95)')
-  floorGradient.append('stop')
-    .attr('offset', '100%')
-    .attr('stop-color', 'rgba(15, 20, 30, 0.98)')
-
-  // Main floor polygon (trapezoid with perspective)
-  box3D.append('polygon')
-    .attr('points', `
-      ${backLeft},${backY}
-      ${backRight},${backY}
-      ${frontRight},${frontY}
-      ${frontLeft},${frontY}
-    `)
-    .attr('fill', 'url(#embedding-floor)')
-    .attr('stroke', 'rgba(100, 120, 150, 0.4)')
-    .attr('stroke-width', 1.5)
-
-  // Perspective grid with proper convergence
-  const gridLayer = embeddingStoreLayer.append('g')
-    .attr('class', 'perspective-grid')
-
-  // Helper: interpolate X position at a given depth (0=back, 1=front)
-  function getXAtDepth(normalizedX, depth) {
-    // normalizedX: 0=left edge, 1=right edge
-    // depth: 0=back, 1=front
-    const leftAtDepth = backLeft + depth * (frontLeft - backLeft)
-    const rightAtDepth = backRight + depth * (frontRight - backRight)
-    return leftAtDepth + normalizedX * (rightAtDepth - leftAtDepth)
+  // Skip embedding section on COMPACT and MINIMAL
+  if (detailLevel === DETAIL_LEVELS.COMPACT || detailLevel === DETAIL_LEVELS.MINIMAL) {
+    // Add a simple memory count badge instead
+    const memoryBadge = svg.append('g')
+      .attr('class', 'memory-badge-compact')
+      .attr('transform', `translate(${width / 2}, ${mapHeight - 10})`)
+    
+    memoryBadge.append('rect')
+      .attr('x', -50)
+      .attr('y', -10)
+      .attr('width', 100)
+      .attr('height', 20)
+      .attr('rx', 10)
+      .attr('fill', 'rgba(30, 40, 60, 0.9)')
+      .attr('stroke', 'rgba(100, 120, 150, 0.4)')
+      .attr('stroke-width', 1)
+    
+    memoryBadge.append('text')
+      .attr('class', 'memory-badge-text')
+      .attr('text-anchor', 'middle')
+      .attr('dominant-baseline', 'middle')
+      .attr('fill', 'var(--vscode-statusBar-foreground)')
+      .style('font-size', '10px')
+      .text('💾 Memories')
   }
+  
+  // Full embedding store only on FULL and STANDARD
+  if (detailLevel === DETAIL_LEVELS.FULL || detailLevel === DETAIL_LEVELS.STANDARD) {
+    const embeddingStoreHeight = embeddingHeight
+    const embeddingStoreLayer = svg.append('g')
+      .attr('class', 'embedding-store')
+      .attr('transform', `translate(0, ${mapHeight})`)
 
-  // Gradient for vertical lines (atmospheric perspective - fade toward back)
-  const vertLineGradient = boxDefs.append('linearGradient')
+    // 3D box background with TRUE perspective (back narrow, front wide)
+    const box3D = embeddingStoreLayer.append('g')
+      .attr('class', 'embedding-box-3d')
+
+    // Perspective dimensions - back is NARROW, front is WIDE
+    const backY = embeddingStoreHeight * 0.25      // Top edge (back of floor)
+    const frontY = embeddingStoreHeight - 8         // Bottom edge (front of floor)
+    const floorDepthRange = frontY - backY
+    
+    // Back edge (narrow) - centered
+    const backLeft = width * 0.25
+    const backRight = width * 0.75
+    
+    // Front edge (wide) - spans more
+    const frontLeft = width * 0.08
+    const frontRight = width * 0.92
+
+    // Gradients for 3D depth
+    const boxDefs = svg.append('defs')
+    
+    const floorGradient = boxDefs.append('linearGradient')
+      .attr('id', 'embedding-floor')
+      .attr('x1', '0%')
+      .attr('y1', '0%')
+      .attr('x2', '0%')
+      .attr('y2', '100%')
+    floorGradient.append('stop')
+      .attr('offset', '0%')
+      .attr('stop-color', 'rgba(8, 12, 20, 0.95)')
+    floorGradient.append('stop')
+      .attr('offset', '100%')
+      .attr('stop-color', 'rgba(15, 20, 30, 0.98)')
+
+    // Main floor polygon (trapezoid with perspective)
+    box3D.append('polygon')
+      .attr('points', `
+        ${backLeft},${backY}
+        ${backRight},${backY}
+        ${frontRight},${frontY}
+        ${frontLeft},${frontY}
+      `)
+      .attr('fill', 'url(#embedding-floor)')
+      .attr('stroke', 'rgba(100, 120, 150, 0.4)')
+      .attr('stroke-width', 1.5)
+
+    // Perspective grid with proper convergence
+    const gridLayer = embeddingStoreLayer.append('g')
+      .attr('class', 'perspective-grid')
+
+    // Helper: interpolate X position at a given depth (0=back, 1=front)
+    function getXAtDepth(normalizedX, depth) {
+      // normalizedX: 0=left edge, 1=right edge
+      // depth: 0=back, 1=front
+      const leftAtDepth = backLeft + depth * (frontLeft - backLeft)
+      const rightAtDepth = backRight + depth * (frontRight - backRight)
+      return leftAtDepth + normalizedX * (rightAtDepth - leftAtDepth)
+    }
+
+    // Gradient for vertical lines (atmospheric perspective - fade toward back)
+    const vertLineGradient = boxDefs.append('linearGradient')
     .attr('id', 'vert-line-fade')
     .attr('x1', '0%')
     .attr('y1', '0%')
@@ -2065,6 +2800,9 @@ export function createHDDLMap(container, options = {}) {
     .style('box-shadow', '0 4px 12px rgba(0,0,0,0.5)')
     .style('backdrop-filter', 'blur(8px)')
     .style('max-width', '320px')
+  
+  // Store reference at top level for cleanup
+  embeddingTooltip = tooltip
 
   // Define 3D box bounds for embedding positioning (uses perspective variables from above)
   const box3DBounds = {
@@ -2470,7 +3208,7 @@ export function createHDDLMap(container, options = {}) {
   renderEmbeddings()
 
   // Subscribe to scenario changes
-  const scenarioUnsubscribe = onScenarioChange(() => {
+  scenarioUnsubscribe = onScenarioChange(() => {
     embeddingIconsLayer.selectAll('*').remove()
     embeddingElements = []
     embeddingCount = 0
@@ -2479,10 +3217,13 @@ export function createHDDLMap(container, options = {}) {
     renderEmbeddings()
   })
 
-  // Subscribe to time changes for embeddings
-  const embeddingUnsubscribe = onTimeChange(() => {
-    renderEmbeddings()
-  })
+  // Subscribe to time changes for embeddings (only when embedding is visible)
+  if (detailLevel === DETAIL_LEVELS.FULL || detailLevel === DETAIL_LEVELS.STANDARD) {
+    embeddingUnsubscribe = onTimeChange(() => {
+      renderEmbeddings()
+    })
+  }
+  } // End of embedding detail level conditional
 
   // ============================================================================
   // END EMBEDDING VECTOR SPACE
@@ -2493,7 +3234,10 @@ export function createHDDLMap(container, options = {}) {
       unsubscribe()
       scenarioUnsubscribe()
       embeddingUnsubscribe()
-      tooltip.remove()
+      // Only remove tooltip if it was created (FULL/STANDARD modes)
+      if (embeddingTooltip) {
+        embeddingTooltip.remove()
+      }
       simulation.stop()
     },
     setFilter: (filter) => {
