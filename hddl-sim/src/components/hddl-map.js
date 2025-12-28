@@ -1,6 +1,7 @@
 import * as d3 from 'd3'
-import { getScenario, getEnvelopeAtTime, getEventsNearTime, getTimeHour, onTimeChange, onScenarioChange, getEnvelopeStatus } from '../sim/sim-state'
+import { getScenario, getEnvelopeAtTime, getEventsNearTime, getTimeHour, onTimeChange, onScenarioChange, getEnvelopeStatus, setStewardFilter } from '../sim/sim-state'
 import { getStewardColor, STEWARD_PALETTE, toSemver, getEventColor } from '../sim/steward-colors'
+import { navigateTo } from '../router'
 
 /**
  * Detail levels for responsive SVG rendering
@@ -424,11 +425,33 @@ export function createHDDLMap(container, options = {}) {
 
   const displayEnvelopeId = (id) => String(id || '').replace(/^ENV-/, 'DE-')
 
-  function showAgentTooltip(agentNode, element) {
-    // Remove any existing tooltip
-    d3.select('.agent-tooltip').remove()
-    
-    const tooltip = d3.select('body')
+  let agentTooltip = null
+  let agentTooltipHideTimeout = null
+
+  let envelopeTooltip = null
+  let envelopeTooltipHideTimeout = null
+
+  let stewardTooltip = null
+  let stewardTooltipHideTimeout = null
+
+  const canHoverTooltip = () => {
+    try {
+      return window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches
+    } catch {
+      return false
+    }
+  }
+
+  const shouldShowHoverTooltip = (evt) => {
+    if (canHoverTooltip()) return true
+    const pt = evt?.pointerType
+    return pt === 'mouse' || pt === 'pen'
+  }
+
+  function ensureAgentTooltip() {
+    if (agentTooltip && !agentTooltip.empty()) return agentTooltip
+
+    agentTooltip = d3.select('body')
       .append('div')
       .attr('class', 'agent-tooltip')
       .style('position', 'fixed')
@@ -442,25 +465,247 @@ export function createHDDLMap(container, options = {}) {
       .style('font-size', '13px')
       .style('box-shadow', '0 6px 16px rgba(0,0,0,0.5)')
       .style('backdrop-filter', 'blur(8px)')
+      .style('display', 'none')
+
+    return agentTooltip
+  }
+
+  function hideAgentTooltip() {
+    if (agentTooltipHideTimeout) {
+      clearTimeout(agentTooltipHideTimeout)
+      agentTooltipHideTimeout = null
+    }
+    if (agentTooltip && !agentTooltip.empty()) {
+      agentTooltip.style('display', 'none')
+    }
+  }
+
+  function ensureEnvelopeTooltip() {
+    if (envelopeTooltip && !envelopeTooltip.empty()) return envelopeTooltip
+
+    envelopeTooltip = d3.select('body')
+      .append('div')
+      .attr('class', 'envelope-tooltip')
+      .style('position', 'fixed')
+      .style('background', 'rgba(30, 30, 30, 0.98)')
+      .style('color', 'var(--vscode-editor-foreground)')
+      .style('border', '1px solid var(--vscode-widget-border)')
+      .style('padding', '10px 14px')
+      .style('border-radius', '6px')
+      .style('pointer-events', 'none')
+      .style('z-index', '10000')
+      .style('font-size', '13px')
+      .style('box-shadow', '0 6px 16px rgba(0,0,0,0.5)')
+      .style('backdrop-filter', 'blur(8px)')
+      .style('display', 'none')
+      .style('max-width', '360px')
+
+    return envelopeTooltip
+  }
+
+  function hideEnvelopeTooltip() {
+    if (envelopeTooltipHideTimeout) {
+      clearTimeout(envelopeTooltipHideTimeout)
+      envelopeTooltipHideTimeout = null
+    }
+    if (envelopeTooltip && !envelopeTooltip.empty()) {
+      envelopeTooltip.style('display', 'none')
+    }
+  }
+
+  function ensureStewardTooltip() {
+    if (stewardTooltip && !stewardTooltip.empty()) return stewardTooltip
+
+    stewardTooltip = d3.select('body')
+      .append('div')
+      .attr('class', 'steward-tooltip')
+      .style('position', 'fixed')
+      .style('background', 'rgba(30, 30, 30, 0.98)')
+      .style('color', 'var(--vscode-editor-foreground)')
+      .style('border', '1px solid var(--vscode-widget-border)')
+      .style('padding', '10px 14px')
+      .style('border-radius', '6px')
+      .style('pointer-events', 'none')
+      .style('z-index', '10000')
+      .style('font-size', '13px')
+      .style('box-shadow', '0 6px 16px rgba(0,0,0,0.5)')
+      .style('backdrop-filter', 'blur(8px)')
+      .style('display', 'none')
+      .style('max-width', '300px')
+
+    return stewardTooltip
+  }
+
+  function hideStewardTooltip() {
+    if (stewardTooltipHideTimeout) {
+      clearTimeout(stewardTooltipHideTimeout)
+      stewardTooltipHideTimeout = null
+    }
+    if (stewardTooltip && !stewardTooltip.empty()) {
+      stewardTooltip.style('display', 'none')
+    }
+  }
+
+  function showStewardTooltip(stewardNode, mouseEvent, element, { scenario = null, hour = null } = {}) {
+    const tooltipNode = ensureStewardTooltip()
+
+    tooltipNode.style('display', 'block')
+
+    const stewardKey = String(stewardNode?.id || stewardNode?.name || '')
+    const stewardRole = stewardNode?.name || ''
+    const stewardColor = stewardNode?.color || 'var(--vscode-textLink-foreground)'
+
+    // Count envelopes owned by this steward
+    const allEnvelopes = scenario?.envelopes || []
+    const ownedEnvelopes = allEnvelopes.filter(e => e && e.ownerRole === stewardRole)
+    const usedHour = typeof hour === 'number' ? hour : getTimeHour()
+    const activeEnvelopes = ownedEnvelopes.filter(e => {
+      const status = getEnvelopeStatus(e, usedHour)
+      return status === 'active'
+    })
+
+    // Count agents in this steward's fleet
+    const fleets = scenario?.fleets || []
+    const fleet = fleets.find(f => f && f.stewardRole === stewardRole)
+    const agentCount = fleet?.agents?.length || 0
+    const activeAgentCount = (fleet?.agents || []).filter(a => {
+      const agentEvents = (scenario?.events || []).filter(e => 
+        e && e.agentId === a.agentId && typeof e.hour === 'number' && e.hour <= usedHour && e.hour > (usedHour - 6)
+      )
+      return agentEvents.length > 0
+    }).length
+
+    tooltipNode
+      .attr('data-steward-key', stewardKey)
       .html(`
-        <div style="font-weight: 600; margin-bottom: 6px; font-size: 14px;">${agentNode.name}</div>
-        <div style="font-size: 11px; opacity: 0.85; margin-bottom: 8px;">${agentNode.role || ''}</div>
-        <div style="font-size: 11px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.1);">
-          <span style="color: ${agentNode.isRecentlyActive ? '#4ec9b0' : '#cccccc'};">
-            ${agentNode.isRecentlyActive ? '● Active' : '○ Idle'}
-          </span>
+        <div style="font-weight: 800; font-size: 14px; margin-bottom: 6px; color: ${stewardColor};">${stewardRole}</div>
+        <div style="font-size: 11px; opacity: 0.85; margin-bottom: 8px;">Human Decision Authority</div>
+        
+        <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 11px;">
+          <div style="display:flex; justify-content: space-between; gap: 12px; margin-bottom: 6px;">
+            <div style="opacity: 0.75;">Envelopes</div>
+            <div>${activeEnvelopes.length} active / ${ownedEnvelopes.length} total</div>
+          </div>
+          <div style="display:flex; justify-content: space-between; gap: 12px;">
+            <div style="opacity: 0.75;">Fleet</div>
+            <div>${activeAgentCount} working / ${agentCount} agents</div>
+          </div>
         </div>
       `)
-    
-    // Position tooltip near mouse
-    const rect = element.getBoundingClientRect()
-    tooltip
-      .style('left', `${rect.left + rect.width / 2}px`)
-      .style('top', `${rect.top - 80}px`)
-      .style('transform', 'translateX(-50%)')
-    
-    // Auto-remove after 3 seconds
-    setTimeout(() => tooltip.remove(), 3000)
+
+    positionAgentTooltip(tooltipNode, mouseEvent, element)
+  }
+
+  function showEnvelopeTooltip(envelopeNode, mouseEvent, element, { scenario = null, hour = null, autoHideMs = null } = {}) {
+    const tooltipNode = ensureEnvelopeTooltip()
+
+    tooltipNode
+      .html(`
+        <div style="font-weight: 600; margin-bottom: 6px; font-size: 14px;">${envelopeNode?.label || envelopeNode?.id || 'Envelope'}</div>
+        <div style="font-size: 11px; opacity: 0.85; margin-bottom: 8px;">${envelopeNode?.name || ''}</div>
+        <div style="font-size: 11px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.1);">
+          <span style="opacity:0.75;">Steward:</span>
+          <span style="font-weight: 700;">${envelopeNode?.ownerRole || 'Unknown'}</span>
+        </div>
+      `)
+      .style('display', 'block')
+
+    positionAgentTooltip(tooltipNode, mouseEvent, element)
+
+    if (envelopeTooltipHideTimeout) {
+      clearTimeout(envelopeTooltipHideTimeout)
+      envelopeTooltipHideTimeout = null
+    }
+    if (typeof autoHideMs === 'number' && autoHideMs > 0) {
+      envelopeTooltipHideTimeout = setTimeout(() => hideEnvelopeTooltip(), autoHideMs)
+    }
+  }
+
+  function positionAgentTooltip(tooltipNode, mouseEvent, anchorEl) {
+    const padding = 10
+    const offsetX = 12
+    const offsetY = 10
+
+    let x = null
+    let y = null
+
+    if (mouseEvent && typeof mouseEvent.clientX === 'number' && typeof mouseEvent.clientY === 'number') {
+      x = mouseEvent.clientX + offsetX
+      y = mouseEvent.clientY - offsetY
+    } else if (anchorEl && typeof anchorEl.getBoundingClientRect === 'function') {
+      const rect = anchorEl.getBoundingClientRect()
+      x = rect.left + rect.width / 2
+      y = rect.top
+    } else {
+      x = padding
+      y = padding
+    }
+
+    // Measure after content is set and display is enabled
+    const node = tooltipNode.node()
+    const tooltipWidth = node?.offsetWidth || 0
+    const tooltipHeight = node?.offsetHeight || 0
+    const vw = window.innerWidth || 0
+    const vh = window.innerHeight || 0
+
+    // Prefer above-cursor placement when we have a pointer event
+    if (mouseEvent && tooltipHeight) {
+      y = mouseEvent.clientY - tooltipHeight - 12
+    } else if (anchorEl && tooltipHeight) {
+      y = y - tooltipHeight - 10
+    }
+
+    if (tooltipWidth && vw) {
+      x = Math.max(padding, Math.min(x, vw - tooltipWidth - padding))
+    }
+    if (tooltipHeight && vh) {
+      y = Math.max(padding, Math.min(y, vh - tooltipHeight - padding))
+    }
+
+    tooltipNode
+      .style('left', `${x}px`)
+      .style('top', `${y}px`)
+      .style('transform', null)
+  }
+
+  function showAgentTooltip(agentNode, mouseEvent, element, { autoHideMs = null } = {}) {
+    const tooltipNode = ensureAgentTooltip()
+
+    const agentKey = String(agentNode?.id || agentNode?.name || '')
+    const prevKey = tooltipNode.attr('data-agent-key')
+    const wasHidden = tooltipNode.style('display') === 'none'
+
+    tooltipNode.style('display', 'block')
+
+    if (wasHidden || prevKey !== agentKey) {
+      const fleetRole = agentNode?.fleetRole || ''
+      const fleetColor = agentNode?.fleetColor || 'var(--vscode-textLink-foreground)'
+      tooltipNode
+        .attr('data-agent-key', agentKey)
+        .html(`
+          <div style="font-weight: 600; margin-bottom: 6px; font-size: 14px;">${agentNode.name}</div>
+          <div style="font-size: 11px; opacity: 0.85; margin-bottom: 8px;">${agentNode.role || ''}</div>
+          <div style="font-size: 11px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.1);">
+            <span style="color: ${agentNode.isRecentlyActive ? '#4ec9b0' : '#cccccc'};">
+              ${agentNode.isRecentlyActive ? '● Active' : '○ Idle'}
+            </span>
+          </div>
+          ${fleetRole ? `<div style="margin-top: 8px; font-size: 11px; opacity: 0.85;">
+            <span style="opacity:0.75;">Steward:</span>
+            <span style="font-weight: 700; color: ${fleetColor};">${fleetRole}</span>
+          </div>` : ''}
+        `)
+    }
+
+    positionAgentTooltip(tooltipNode, mouseEvent, element)
+
+    if (agentTooltipHideTimeout) {
+      clearTimeout(agentTooltipHideTimeout)
+      agentTooltipHideTimeout = null
+    }
+    if (typeof autoHideMs === 'number' && autoHideMs > 0) {
+      agentTooltipHideTimeout = setTimeout(() => hideAgentTooltip(), autoHideMs)
+    }
   }
 
   function showEnvelopeAuthority(envelopeNode, scenario, hour) {
@@ -1526,10 +1771,6 @@ export function createHDDLMap(container, options = {}) {
     const nodeEnter = nodeSelection.enter()
       .append('g')
       .attr('class', 'node')
-      .call(d3.drag()
-        .on('start', dragstarted)
-        .on('drag', dragged)
-        .on('end', dragended))
 
     // Envelope shape (density-aware rendering)
     // At detailed/normal: full envelope shape with body, flap, fold
@@ -1538,12 +1779,44 @@ export function createHDDLMap(container, options = {}) {
     const envShape = nodeEnter.filter(d => d.type === 'envelope')
       .append('g')
       .attr('class', d => `envelope-shape envelope-density-${d.envDims?.density || 'normal'}`)
+      .attr('tabindex', 0)
+
+    // Apply handlers to ALL envelope shapes (both new and existing)
+    // These handlers are on the envelope-shape child, not the draggable parent node
+    const allEnvShapes = nodeSelection.merge(nodeEnter).filter(d => d.type === 'envelope').select('g.envelope-shape')
+    
+    allEnvShapes
       .style('cursor', 'pointer')
       .style('pointer-events', 'all')
+      .on('pointerenter', (event, d) => {
+        showEnvelopeTooltip(d, event, event.currentTarget, { scenario: getScenario(), hour: getTimeHour() })
+      })
+      .on('pointermove', (event, d) => {
+        showEnvelopeTooltip(d, event, event.currentTarget, { scenario: getScenario(), hour: getTimeHour() })
+      })
+      .on('pointerleave', () => {
+        hideEnvelopeTooltip()
+      })
+      .on('focus', (event, d) => {
+        showEnvelopeTooltip(d, null, event.currentTarget, { scenario: getScenario(), hour: getTimeHour() })
+      })
+      .on('blur', () => {
+        hideEnvelopeTooltip()
+      })
       .on('click', function(event, d) {
         event.stopPropagation()
-        showEnvelopeAuthority(d, scenario, hour)
+        // Touch / coarse pointers: use click-to-peek tooltip, but still open the modal.
+        if (!canHoverTooltip()) showEnvelopeTooltip(d, event, event.currentTarget, { scenario: getScenario(), hour: getTimeHour(), autoHideMs: 1500 })
+        showEnvelopeAuthority(d, getScenario(), getTimeHour())
       })
+    
+    // Don't set pointer-events: none on children - let them receive events normally
+
+    // NOW add drag to parent nodes AFTER envelope handlers are set
+    nodeSelection.merge(nodeEnter).call(d3.drag()
+      .on('start', dragstarted)
+      .on('drag', dragged)
+      .on('end', dragended))
 
     // Icon mode: render a simple status circle
     envShape.filter(d => d.envDims?.isIcon)
@@ -1698,6 +1971,23 @@ export function createHDDLMap(container, options = {}) {
       .attr('stroke', d => d.color || 'var(--status-warning)')
       .attr('stroke-width', 2)
       .attr('stroke-dasharray', '2 2')
+      .style('cursor', 'pointer')
+      .style('pointer-events', 'all')
+      .on('pointerenter', (event, d) => {
+        showStewardTooltip(d, event, event.currentTarget, { scenario: getScenario(), hour: getTimeHour() })
+      })
+      .on('pointermove', (event, d) => {
+        showStewardTooltip(d, event, event.currentTarget, { scenario: getScenario(), hour: getTimeHour() })
+      })
+      .on('pointerleave', () => {
+        hideStewardTooltip()
+      })
+      .on('focus', (event, d) => {
+        showStewardTooltip(d, null, event.currentTarget, { scenario: getScenario(), hour: getTimeHour() })
+      })
+      .on('blur', () => {
+        hideStewardTooltip()
+      })
 
     // Steward persona glyph (head + shoulders)
     const stewardIcon = nodeEnter.filter(d => d.type === 'steward')
@@ -1767,13 +2057,31 @@ export function createHDDLMap(container, options = {}) {
     const bot = agentEnter.filter(() => agentDensityConfig.density === 'full' || agentDensityConfig.density === 'standard')
       .append('g')
       .attr('class', 'agent-bot')
+      .attr('tabindex', 0)
       .style('pointer-events', 'all')
       .style('cursor', 'pointer')
       .attr('opacity', 0.95)
       .attr('transform', d => `scale(${(d.gridScale || 1.0) * agentDensityConfig.botScale})`)
+      .on('pointerenter', (event, d) => {
+        showAgentTooltip(d, event, event.currentTarget)
+      })
+      .on('pointermove', (event, d) => {
+        showAgentTooltip(d, event, event.currentTarget)
+      })
+      .on('pointerleave', () => {
+        hideAgentTooltip()
+      })
+      .on('focus', (event, d) => {
+        showAgentTooltip(d, null, event.currentTarget)
+      })
+      .on('blur', () => {
+        hideAgentTooltip()
+      })
       .on('click', (event, d) => {
+        // Touch / coarse pointers: use click-to-peek with short auto-hide.
+        if (canHoverTooltip()) return
         event.stopPropagation()
-        showAgentTooltip(d, event.currentTarget)
+        showAgentTooltip(d, event, event.currentTarget, { autoHideMs: 3000 })
       })
 
     bot.append('rect')

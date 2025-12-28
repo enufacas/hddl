@@ -42,19 +42,19 @@ function setBottomCollapsed(collapsed) {
 
 // Activity bar icons (primary lenses)
 const activityBarItems = [
-  { id: 'envelopes', icon: 'shield', label: 'Envelopes', route: '/' },
+  { id: 'envelopes', icon: 'shield', label: 'Decision Envelopes', route: '/' },
   { id: 'dts', icon: 'pulse', label: 'Decision Telemetry System', route: '/decision-telemetry' },
-  { id: 'stewardship', icon: 'law', label: 'Stewardship', route: '/stewardship' },
+  { id: 'stewardship', icon: 'law', label: 'Stewards', route: '/stewardship' },
 ]
 
 const navItems = [
   // Primary
-  { id: 'envelopes', label: 'Envelopes', icon: 'shield', route: '/', section: 'primary' },
+  { id: 'envelopes', label: 'Decision Envelopes', icon: 'shield', route: '/', section: 'primary' },
   { id: 'dts', label: 'Decision Telemetry System', icon: 'pulse', route: '/decision-telemetry', section: 'primary' },
-  { id: 'stewardship', label: 'Stewardship', icon: 'law', route: '/stewardship', section: 'primary' },
+  { id: 'stewardship', label: 'Stewards', icon: 'law', route: '/stewardship', section: 'primary' },
 
   // Secondary
-  { id: 'fleets', label: 'Fleets', icon: 'organization', route: '/steward-fleets', section: 'secondary' },
+  { id: 'fleets', label: 'Agent Fleets', icon: 'organization', route: '/steward-fleets', section: 'secondary' },
   { id: 'dsg-artifact', label: 'DSG Artifact', icon: 'file-binary', route: '/dsg-event', section: 'secondary' },
   { id: 'interactive', label: 'Interactive', icon: 'debug-start', route: '/interactive', section: 'secondary', experimental: true },
 
@@ -1932,7 +1932,7 @@ function createMobileBottomSheet() {
     { id: 'envelope', label: 'Envelope' },
     { id: 'metrics', label: 'Metrics' },
     { id: 'quality', label: 'Quality' },
-    { id: 'stewardship', label: 'Stewardship' },
+    { id: 'stewardship', label: 'Stewards' },
   ]
   
   const tabsContainer = document.createElement('div')
