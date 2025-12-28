@@ -234,6 +234,30 @@ The SIM's UI patterns (colors, layouts, selectors) are **non-normative guidance*
 
 **A:** `escalation` is **legacy** (deprecated). Use `boundary_interaction` with `boundary_kind: "escalated"`. The SIM normalizer converts legacy events automatically.
 
+### Q: What is `boundary_reason` and when should I use it?
+
+**A:** `boundary_reason` is an **optional** structured field that provides domain-specific escalation context:
+
+```json
+{
+  "type": "boundary_interaction",
+  "boundary_kind": "escalated",        // Required: canonical taxonomy
+  "boundary_reason": "fraud_suspected", // Optional: domain-specific code
+  "label": "Fraud indicators detected" // Human-readable description
+}
+```
+
+**Use cases:**
+- Analytics queries (count escalations by reason)
+- Richer visualizations (show structured context)
+- Domain-specific vocabularies (insurance: fraud_suspected, high_risk_threshold)
+
+**Guidance:**
+- `boundary_kind` is **required** for interoperability (escalated/deferred/overridden)
+- `boundary_reason` is **optional** for domain richness
+- Define vocabulary in your domain documentation
+- See [Schema Enhancement Proposal](docs/spec/Schema_Enhancement_Boundary_Reason.md) for details
+
 ### Q: What if I find a gap in the spec?
 
 **A:** File an issue or propose an ADR:
@@ -259,6 +283,224 @@ See [Drift + Gap Analysis § DTS Compatibility](docs/spec/Drift_Gap_Analysis.md#
 - Migration warnings will be added in Phase 2
 
 See [Drift + Gap Analysis § Migration + Versioning](docs/spec/Drift_Gap_Analysis.md#migration--versioning-strategy-step-7).
+
+### Q: How do agents learn from envelope revisions?
+
+**A:** Through the **feedback loop** of embeddings:
+
+1. **Agent encounters boundary** → `boundary_interaction` event
+2. **Human makes judgment** → `decision` event  
+3. **Decision stored in memory** → `embedding` event (type: "decision")
+4. **Steward revises envelope** → `revision` event
+5. **Revision stored in memory** → `embedding` event (type: "revision")
+6. **Agent retrieves context** → `retrieval` event (queries embedding store)
+
+**Key insight:** Agents don't receive "push notifications" of revisions. Instead, they **query decision memory** via semantic retrieval before making decisions. This allows them to discover:
+- **Case examples** (what humans decided in similar situations)
+- **Policy rationale** (why boundaries changed, with context)
+
+**Example:**
+```json
+// Agent queries before deciding
+{
+  "type": "retrieval",
+  "actorName": "RiskScorer",
+  "queryText": "coastal flood risk high score",
+  "retrievedEmbeddings": ["EMB-INS-001", "EMB-INS-011"],
+  "relevanceScores": [0.92, 0.78]
+}
+
+// Retrieved embedding includes revision context
+{
+  "embeddingId": "EMB-INS-011",
+  "embeddingType": "revision",
+  "sourceEventId": "revision:40:ENV-INS-001:15",
+  "semanticContext": "high-risk escalation threshold increased from 85 to 88 for efficiency"
+}
+```
+
+See [Agent_Learning_Feedback_Loop.md](Agent_Learning_Feedback_Loop.md) for the complete feedback loop architecture.
+
+### Q: What's the difference between denied decisions and boundary interactions?
+
+**A:** Both involve limits, but represent different scenarios:
+
+- **Denied Decision:** Agent made a decision, envelope blocked it (enforcement)
+  - `type: "decision"` + `status: "denied"`
+  - "I tried to do X, but the envelope stopped me"
+  - Envelope exercises veto authority
+  
+- **Boundary Interaction:** Agent recognizes its limit before deciding (recognition)
+  - `type: "boundary_interaction"` + `boundary_kind: "escalated"`
+  - "I can't do X, I need human help"
+  - Agent proactively requests escalation
+
+See [Denied_Decisions_vs_Boundary_Interactions.md](Denied_Decisions_vs_Boundary_Interactions.md) for detailed comparison.
+
+### Q: When are embeddings required vs optional?
+
+**A:** Embeddings create the feedback loop that enables agent learning. Requirements:
+
+**REQUIRED:**
+- **Every revision** MUST have an embedding
+  - `embeddingType: "revision"` with `sourceEventId` pointing to revision
+  - Why: Policy changes must be retrievable for agents to understand governance evolution
+  
+- **Every boundary interaction** MUST have an embedding
+  - `embeddingType: "boundary_interaction"` with `sourceEventId` pointing to boundary
+  - Why: Escalation patterns teach agents their authority boundaries
+
+**RECOMMENDED:**
+- **Steward decisions** (especially resolving boundaries) SHOULD have embeddings
+  - `embeddingType: "decision"` with `sourceEventId` pointing to decision
+  - Why: Human judgment examples help agents improve decision-making
+
+**OPTIONAL:**
+- Simple rule-based agent decisions MAY have embeddings
+- Novel signal patterns MAY have embeddings if they represent learning opportunities
+
+**Example showing required pattern:**
+```json
+// Hour 28.7: Boundary Interaction
+{
+  "type": "boundary_interaction",
+  "eventId": "boundary:28_7:ENV-003:12",
+  "actorName": "QuoteGenerator",
+  "boundary_kind": "escalated"
+}
+
+// Hour 29: Boundary Embedding (REQUIRED!)
+{
+  "type": "embedding",
+  "hour": 29,
+  "embeddingId": "EMB-009",
+  "embeddingType": "boundary_interaction",
+  "sourceEventId": "boundary:28_7:ENV-003:12",
+  "semanticContext": "premium increase threshold escalation pattern"
+}
+
+// Hour 30.5: Revision
+{
+  "type": "revision",
+  "eventId": "revision:30_5:ENV-003:13a",
+  "revisionType": "constraint_relaxation",
+  "resolvesEventId": "boundary:28_7:ENV-003:12"
+}
+
+// Hour 31: Revision Embedding (REQUIRED!)
+{
+  "type": "embedding",
+  "hour": 31,
+  "embeddingId": "EMB-011",
+  "embeddingType": "revision",
+  "sourceEventId": "revision:30_5:ENV-003:13a",
+  "semanticContext": "threshold increased to 20% with retention incentives"
+}
+```
+
+See [Canonical_Event_Patterns.md](Canonical_Event_Patterns.md) for complete feedback loop patterns.
+
+### Q: How do I model a complete feedback loop?
+
+**A:** Follow the 6-event canonical pattern for boundary interactions:
+
+```
+1. Retrieval (recommended) - Agent queries historical patterns
+2. Boundary Interaction - Agent escalates
+3. Boundary Embedding (REQUIRED) - Escalation pattern stored
+4. Steward Decision - Human judgment
+5. Decision Embedding (recommended) - Resolution pattern stored
+6. Revision - Policy updated
+7. Revision Embedding (REQUIRED) - Policy rationale stored
+```
+
+**Minimal working example:**
+```json
+// 1. Retrieval (hour 28.65)
+{
+  "type": "retrieval",
+  "actorName": "QuoteGenerator",
+  "queryText": "premium increase threshold",
+  "retrievedEmbeddings": ["EMB-HIST-004", "EMB-001"],
+  "relevanceScores": [0.93, 0.81]
+}
+
+// 2. Boundary (hour 28.7)
+{
+  "type": "boundary_interaction",
+  "eventId": "boundary:28_7",
+  "boundary_kind": "escalated"
+}
+
+// 3. Boundary Embedding (hour 29) - REQUIRED
+{
+  "type": "embedding",
+  "embeddingType": "boundary_interaction",
+  "sourceEventId": "boundary:28_7"
+}
+
+// 4. Decision (hour 29.1)
+{
+  "type": "decision",
+  "eventId": "decision:29_1",
+  "status": "allowed"
+}
+
+// 5. Decision Embedding (hour 29.5) - recommended
+{
+  "type": "embedding",
+  "embeddingType": "decision",
+  "sourceEventId": "decision:29_1"
+}
+
+// 6. Revision (hour 30.5)
+{
+  "type": "revision",
+  "eventId": "revision:30_5",
+  "resolvesEventId": "boundary:28_7"
+}
+
+// 7. Revision Embedding (hour 31) - REQUIRED
+{
+  "type": "embedding",
+  "embeddingType": "revision",
+  "sourceEventId": "revision:30_5"
+}
+```
+
+**Why this matters:** Without closed loops, agents can't learn. The embedding chain creates retrievable memory that improves future decisions.
+
+See [Canonical_Event_Patterns.md](Canonical_Event_Patterns.md) for detailed examples and [Agent_Learning_Feedback_Loop.md](Agent_Learning_Feedback_Loop.md) for the architecture.
+
+### Q: What makes HDDL different from traditional audit logs?
+
+**A:** Traditional audit logs record "what happened." HDDL scenarios with closed loops demonstrate:
+
+- **Agent learning:** Retrieval events show agents "thinking with memory"
+- **Policy evolution:** Revision embeddings store WHY rules changed
+- **Feedback mechanism:** Complete cycles from boundary → decision → revision → embedding
+- **Chronological consistency:** Time-aware retrieval (can't retrieve future knowledge)
+- **Historical baseline:** Agents start with pre-existing knowledge (hour < 0 embeddings)
+
+**Traditional audit log:**
+```
+10:23 - User submitted request
+10:24 - Manager approved
+10:25 - System processed
+```
+
+**HDDL scenario with closed loops:**
+```
+Hour 28.65 - Agent retrieved similar cases (EMB-HIST-004: 93% relevance)
+Hour 28.7 - Agent escalated (recognized authority limit)
+Hour 29 - Escalation pattern embedded (future agents learn when to escalate)
+Hour 29.1 - Steward approved with conditions
+Hour 29.5 - Resolution pattern embedded (how to handle with retention offers)
+Hour 30.5 - Policy updated (threshold 15%→20% with incentives)
+Hour 31 - Policy rationale embedded (why relaxation + retention strategy)
+```
+
+The second example shows a learning system, not just a log.
 
 ---
 

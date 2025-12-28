@@ -38,23 +38,49 @@ These documents define **what HDDL is** and **what implementations MUST comply w
    - Normative interchange format for HDDL scenarios (timeline replay)
    - Machine-readable schema: `hddl-sim/schemas/hddl-scenario.schema.json`
    - MUST/SHOULD/MAY language applies
+   - **Includes:** Closed loop requirements (embeddings for revisions/boundaries)
 
-5. **Scenario Interaction Format** (`docs/spec/Scenario_Interaction_Format.md`)
+5. **Canonical Event Patterns** (`docs/spec/Canonical_Event_Patterns.md`)
+   - Normative patterns for feedback loops in scenarios
+   - Defines REQUIRED embeddings (revisions, boundary interactions)
+   - Defines RECOMMENDED patterns (retrieval before boundaries, historical baseline)
+   - Specifies chronological consistency requirements
+   - MUST/SHOULD/MAY language applies
+
+6. **Agent Learning Feedback Loop** (`docs/spec/Agent_Learning_Feedback_Loop.md`)
+   - Normative architecture for how agents learn from decisions and revisions
+   - Defines embeddings as the agent interface to decision memory
+   - Specifies decision embeddings (operational learning) vs revision embeddings (policy learning)
+   - Referenced by Canonical Event Patterns and Implementers Guide
+
+7. **Denied Decisions vs Boundary Interactions** (`docs/spec/Denied_Decisions_vs_Boundary_Interactions.md`)
+   - Normative distinction between enforcement (denied) and recognition (boundary) models
+   - Clarifies when to use `type: "decision"` + `status: "denied"` vs `type: "boundary_interaction"`
+   - Referenced by Implementers Guide
+
+8. **Scenario Interaction Format** (`docs/spec/Scenario_Interaction_Format.md`)
    - Normative interchange format for action-driven scenarios
    - Machine-readable schema: `hddl-sim/schemas/hddl-interaction.schema.json`
    - MUST/SHOULD/MAY language applies
    - **Note:** Semantics are Phase 2 (not yet stable)
 
-6. **Drift + Gap Analysis** (`docs/spec/Drift_Gap_Analysis.md`)
+9. **Drift + Gap Analysis** (`docs/spec/Drift_Gap_Analysis.md`)
    - Normative catalog of spec vs SIM differences
    - Classifies what is portable vs SIM-specific
    - Updated whenever SIM proposes changes
 
-7. **Conformance Scripts** (`hddl-sim/scripts/`)
-   - `validate-canon-registry.mjs`: Validates Canon Registry entries exist
-   - `validate-scenarios.mjs`: Validates scenario packs conform to schema
-   - `conformance.mjs`: Runs all conformance checks
-   - These scripts enforce normative requirements
+10. **Implementers Guide** (`docs/spec/Implementers_Guide.md`)
+    - Normative guide for building HDDL-compatible implementations
+    - Includes FAQs on closed loops, embeddings, and event patterns
+    - Provides code examples and conformance checklist
+    - Links to all specification documents
+
+11. **Conformance Scripts** (`hddl-sim/scripts/`)
+    - `validate-canon-registry.mjs`: Validates Canon Registry entries exist
+    - `validate-scenarios.mjs`: Validates scenario packs conform to schema
+    - `validate-closed-loops.mjs`: Validates closed loop requirements (embeddings, chronology)
+    - `conformance.mjs`: Runs all conformance checks
+    - These scripts enforce normative requirements
 
 ---
 

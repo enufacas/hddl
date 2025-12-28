@@ -84,7 +84,8 @@
             "dsg_session",
             "dsg_message",
             "annotation",
-            "embedding"
+            "embedding",
+            "retrieval"
           ]
         },
         "hour": { "type": "number" },
@@ -111,7 +112,15 @@
         "nextConstraints": { "type": "array", "items": { "type": "string" } },
         "resolvesEventId": { "type": "string" },
 
-        "boundary_kind": { "type": "string" },
+        "boundary_kind": { 
+          "type": "string",
+          "enum": ["escalated", "deferred", "overridden"],
+          "description": "Canonical category of boundary interaction"
+        },
+        "boundary_reason": { 
+          "type": "string",
+          "description": "Structured reason code for escalation (domain-specific, e.g., fraud_detected, high_risk_threshold, regulatory_exception)"
+        },
         "boundary_refs": { "type": "array", "items": { "type": "string" } },
 
         "decision_id": { "type": "string" },
@@ -146,7 +155,22 @@
           "maxItems": 2,
           "description": "2D position in semantic space: [x, y] where x=policy(0)↔operational(1), y=routine(0)↔exceptional(1). Similar patterns cluster together."
         },
-        "similarityThreshold": { "type": "number", "minimum": 0, "maximum": 1 }
+        "similarityThreshold": { "type": "number", "minimum": 0, "maximum": 1 },
+
+        "queryText": { 
+          "type": "string",
+          "description": "Human-readable description of what the agent is searching for in decision memory"
+        },
+        "retrievedEmbeddings": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Array of embeddingIds that were retrieved and used as context"
+        },
+        "relevanceScores": {
+          "type": "array",
+          "items": { "type": "number", "minimum": 0, "maximum": 1 },
+          "description": "Similarity scores for each retrieved embedding (parallel to retrievedEmbeddings array)"
+        }
       }
     }
   }
