@@ -21,8 +21,28 @@ setTimeHour(0)
 // Create titlebar with proper icons
 const titlebar = document.createElement('div')
 titlebar.className = 'titlebar'
+
+// Create mobile hamburger menu button
+const mobileHamburger = document.createElement('button')
+mobileHamburger.className = 'mobile-hamburger'
+mobileHamburger.setAttribute('aria-label', 'Open navigation menu')
+mobileHamburger.innerHTML = '<span class="codicon codicon-menu"></span>'
+
+// Click and keyboard event handlers for accessibility
+mobileHamburger.addEventListener('click', () => {
+  document.body.classList.toggle('mobile-nav-open')
+})
+mobileHamburger.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault()
+    document.body.classList.toggle('mobile-nav-open')
+  }
+})
+
 const titleLeft = document.createElement('div')
 titleLeft.style.cssText = 'display: flex; align-items: center; gap: 8px;'
+titleLeft.appendChild(mobileHamburger)
+
 const titleIcon = document.createElement('span')
 titleIcon.className = 'codicon codicon-pulse'
 const titleText = document.createElement('span')
