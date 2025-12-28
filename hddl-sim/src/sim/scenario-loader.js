@@ -10,6 +10,7 @@ import insuranceUnderwritingScenario from './scenarios/insurance-underwriting.sc
 import baseballAnalyticsScenario from './scenarios/baseball-analytics.scenario.json'
 import airforceAvionicsScenario from './scenarios/airforce-avionics-maintenance.scenario.json'
 import verticalHydroponicsScenario from './scenarios/vertical-hydroponics-farm.scenario.json'
+import desktopSupportScenario from './scenarios/desktop-support.scenario.json'
 
 export const SCENARIOS = {
   'default': {
@@ -81,6 +82,13 @@ export const SCENARIOS = {
     description: 'Crop growth optimization, environmental controls, water/nutrient management, harvest quality, energy efficiency, and food safety compliance across 240 hours.',
     data: verticalHydroponicsScenario,
     tags: ['agriculture', 'sustainability', 'food-safety']
+  },
+  'desktop-support': {
+    id: 'desktop-support',
+    title: 'Desktop Support — Hybrid Work Environment',
+    description: 'IT support operations: incident triage, password management, hardware provisioning, VPN support, and offshore team monitoring for hybrid workforce across 168 hours.',
+    data: desktopSupportScenario,
+    tags: ['it-operations', 'hybrid-work', 'global-teams', 'user-support']
   }
 }
 

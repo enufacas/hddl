@@ -1,0 +1,1081 @@
+{
+  "schemaVersion": 2,
+  "id": "scenario-desktop-support-001",
+  "title": "Desktop Support — Hybrid Work Environment",
+  "durationHours": 168,
+  "envelopes": [
+    {
+      "envelopeId": "ENV-DESK-001",
+      "name": "Incident Triage & Classification",
+      "domain": "Service Desk Operations",
+      "ownerRole": "Support Operations Steward",
+      "createdHour": 0,
+      "endHour": 72,
+      "accent": "var(--vscode-charts-blue)",
+      "envelope_version": 3,
+      "revision_id": "REV-DESK-001-C",
+      "assumptions": [
+        "Agents can infer user intent from vague descriptions using historical patterns.",
+        "Automated triage reduces initial response time by routing to appropriate teams.",
+        "Low-tech users benefit from simplified language and proactive clarification.",
+        "Offshore support handles priority 3-4 tickets during business hours (time-shifted)."
+      ],
+      "constraints": [
+        "Never close tickets without user confirmation of resolution",
+        "Priority 1 incidents escalated to onshore team within 5 minutes",
+        "All user communications use plain language (no technical jargon for low-tech users)",
+        "Offshore team maximum caseload: 15 active tickets per agent"
+      ]
+    },
+    {
+      "envelopeId": "ENV-DESK-002",
+      "name": "Password & Access Management",
+      "domain": "Identity & Access",
+      "ownerRole": "Security Operations Steward",
+      "createdHour": 0,
+      "endHour": 84,
+      "accent": "var(--vscode-charts-red)",
+      "envelope_version": 2,
+      "revision_id": "REV-DESK-002-B",
+      "assumptions": [
+        "Identity verification via automated questions before password resets.",
+        "Multi-factor authentication reduces unauthorized access attempts.",
+        "Remote workers require expedited access restoration for business continuity.",
+        "Offshore agents follow same security protocols with regional compliance considerations."
+      ],
+      "constraints": [
+        "MFA required for all password reset approvals",
+        "Privileged account access requires manager approval",
+        "Password resets logged and audited within 24 hours",
+        "Cross-border data transfer follows GDPR and local privacy regulations"
+      ]
+    },
+    {
+      "envelopeId": "ENV-DESK-003",
+      "name": "Hardware & Software Provisioning",
+      "domain": "Asset Management",
+      "ownerRole": "IT Asset Steward",
+      "createdHour": 0,
+      "endHour": 96,
+      "accent": "var(--vscode-charts-green)",
+      "envelope_version": 2,
+      "revision_id": "REV-DESK-003-B",
+      "assumptions": [
+        "Hybrid workers need flexible device options (laptop, monitors, peripherals).",
+        "Automated eligibility checks based on role and business justification.",
+        "Home office equipment requests processed within 3-5 business days.",
+        "Offshore team monitors asset lifecycle and initiates refresh recommendations."
+      ],
+      "constraints": [
+        "Equipment requests >$2,000 require manager approval",
+        "Home office reimbursements capped at $500/year without exceptions",
+        "Software licenses tracked to prevent over-provisioning",
+        "Asset tracking maintains 98%+ inventory accuracy"
+      ]
+    },
+    {
+      "envelopeId": "ENV-DESK-004",
+      "name": "Remote Connectivity & VPN Support",
+      "domain": "Network Services",
+      "ownerRole": "Network Operations Steward",
+      "createdHour": 12,
+      "endHour": 84,
+      "accent": "var(--vscode-charts-purple)",
+      "envelope_version": 1,
+      "revision_id": null,
+      "assumptions": [
+        "VPN troubleshooting prioritizes business-critical users (sales, customer support).",
+        "Automated diagnostics identify 70% of connectivity issues without human intervention.",
+        "Home network variability requires adaptive troubleshooting workflows.",
+        "24/7 offshore coverage ensures round-the-clock support for remote workforce."
+      ],
+      "constraints": [
+        "VPN issues for remote-only employees treated as priority 1",
+        "Network diagnostics must not expose user location data without consent",
+        "Escalation to ISP support only after internal troubleshooting exhausted",
+        "SLA: 95% of VPN issues resolved within 4 hours"
+      ]
+    },
+    {
+      "envelopeId": "ENV-DESK-005",
+      "name": "Knowledge Base & Self-Service",
+      "domain": "User Enablement",
+      "ownerRole": "Knowledge Management Steward",
+      "createdHour": 0,
+      "endHour": 168,
+      "accent": "var(--vscode-charts-yellow)",
+      "envelope_version": 4,
+      "revision_id": "REV-DESK-005-D",
+      "assumptions": [
+        "AI-powered search surfaces relevant articles for low-tech users with vague queries.",
+        "Automated recommendations reduce repeat tickets by 30%.",
+        "Articles written at 6th-grade reading level for accessibility.",
+        "Offshore agents contribute localized troubleshooting content."
+      ],
+      "constraints": [
+        "Knowledge base articles must include step-by-step screenshots",
+        "Search results prioritize recently validated solutions (updated <90 days)",
+        "Articles never assume technical prerequisites without explanation",
+        "Feedback mechanism tracks article helpfulness (>80% satisfaction target)"
+      ]
+    },
+    {
+      "envelopeId": "ENV-DESK-006",
+      "name": "Offshore Team Performance Monitoring",
+      "domain": "Quality Assurance",
+      "ownerRole": "Global Support Operations Steward",
+      "createdHour": 24,
+      "endHour": 168,
+      "accent": "var(--vscode-charts-orange)",
+      "envelope_version": 2,
+      "revision_id": "REV-DESK-006-B",
+      "assumptions": [
+        "Performance metrics balanced across onshore and offshore teams.",
+        "Cultural and language differences considered in quality scoring.",
+        "Real-time coaching improves offshore agent effectiveness.",
+        "Escalation patterns analyzed to identify training opportunities."
+      ],
+      "constraints": [
+        "Quality audits sample 5% of offshore-handled tickets weekly",
+        "Customer satisfaction scores must exceed 4.2/5.0 average",
+        "Training interventions triggered if quality drops below 85%",
+        "Escalation rates >15% indicate need for process refinement"
+      ]
+    },
+    {
+      "envelopeId": "ENV-DESK-001",
+      "name": "Incident Triage & Classification",
+      "domain": "Service Desk Operations",
+      "ownerRole": "Support Operations Steward",
+      "createdHour": 84,
+      "endHour": 168,
+      "accent": "var(--vscode-charts-blue)",
+      "envelope_version": 4,
+      "revision_id": "ENV-DESK-001-v4",
+      "assumptions": [
+        "Agents can infer user intent from vague descriptions using historical patterns.",
+        "Automated triage reduces initial response time by routing to appropriate teams.",
+        "Low-tech users benefit from simplified language and proactive clarification.",
+        "Offshore support handles priority 3-4 tickets during business hours (time-shifted).",
+        "Pattern recognition identifies users needing extra hand-holding."
+      ],
+      "constraints": [
+        "Never close tickets without user confirmation of resolution",
+        "Priority 1 incidents escalated to onshore team within 5 minutes",
+        "All user communications use plain language (no technical jargon for low-tech users)",
+        "Offshore team maximum caseload: 15 active tickets per agent",
+        "Low-tech user flag triggers simplified communication templates"
+      ]
+    },
+    {
+      "envelopeId": "ENV-DESK-003",
+      "name": "Hardware & Software Provisioning",
+      "domain": "Asset Management",
+      "ownerRole": "IT Asset Steward",
+      "createdHour": 108,
+      "endHour": 168,
+      "accent": "var(--vscode-charts-green)",
+      "envelope_version": 3,
+      "revision_id": "ENV-DESK-003-v3",
+      "assumptions": [
+        "Hybrid workers need flexible device options (laptop, monitors, peripherals).",
+        "Automated eligibility checks based on role and business justification.",
+        "Home office equipment requests processed within 3-5 business days.",
+        "Offshore team monitors asset lifecycle and initiates refresh recommendations.",
+        "Ergonomic equipment reduces long-term health issues for remote workers."
+      ],
+      "constraints": [
+        "Equipment requests >$2,000 require manager approval",
+        "Home office reimbursements capped at $750/year (increased from $500)",
+        "Software licenses tracked to prevent over-provisioning",
+        "Asset tracking maintains 98%+ inventory accuracy",
+        "Ergonomic assessments required for employees reporting discomfort"
+      ]
+    }
+  ],
+  "fleets": [
+    {
+      "stewardRole": "Support Operations Steward",
+      "agents": [
+        {
+          "agentId": "AG-TRIAGE-01",
+          "name": "TicketClassifier",
+          "role": "incident categorization and priority assignment",
+          "envelopeIds": ["ENV-DESK-001"]
+        },
+        {
+          "agentId": "AG-TRIAGE-02",
+          "name": "IntentParser",
+          "role": "extract technical needs from vague user descriptions",
+          "envelopeIds": ["ENV-DESK-001"]
+        },
+        {
+          "agentId": "AG-TRIAGE-03",
+          "name": "UserProfiler",
+          "role": "identify user tech proficiency and communication preferences",
+          "envelopeIds": ["ENV-DESK-001"]
+        }
+      ]
+    },
+    {
+      "stewardRole": "Security Operations Steward",
+      "agents": [
+        {
+          "agentId": "AG-SEC-01",
+          "name": "IdentityVerifier",
+          "role": "automated user authentication for password resets",
+          "envelopeIds": ["ENV-DESK-002"]
+        },
+        {
+          "agentId": "AG-SEC-02",
+          "name": "AccessAuditor",
+          "role": "privileged access request validation",
+          "envelopeIds": ["ENV-DESK-002"]
+        },
+        {
+          "agentId": "AG-SEC-03",
+          "name": "ComplianceMonitor",
+          "role": "cross-border data handling and privacy compliance",
+          "envelopeIds": ["ENV-DESK-002"]
+        }
+      ]
+    },
+    {
+      "stewardRole": "IT Asset Steward",
+      "agents": [
+        {
+          "agentId": "AG-ASSET-01",
+          "name": "ProvisioningRouter",
+          "role": "hardware and software request evaluation",
+          "envelopeIds": ["ENV-DESK-003"]
+        },
+        {
+          "agentId": "AG-ASSET-02",
+          "name": "LifecycleTracker",
+          "role": "asset refresh and retirement recommendations",
+          "envelopeIds": ["ENV-DESK-003"]
+        },
+        {
+          "agentId": "AG-ASSET-03",
+          "name": "BudgetGuard",
+          "role": "cost optimization and approval routing",
+          "envelopeIds": ["ENV-DESK-003"]
+        }
+      ]
+    },
+    {
+      "stewardRole": "Network Operations Steward",
+      "agents": [
+        {
+          "agentId": "AG-NET-01",
+          "name": "VPNDiagnostics",
+          "role": "automated connectivity troubleshooting",
+          "envelopeIds": ["ENV-DESK-004"]
+        },
+        {
+          "agentId": "AG-NET-02",
+          "name": "PriorityRouter",
+          "role": "business criticality assessment for VPN issues",
+          "envelopeIds": ["ENV-DESK-004"]
+        },
+        {
+          "agentId": "AG-NET-03",
+          "name": "NetworkOptimizer",
+          "role": "home network configuration recommendations",
+          "envelopeIds": ["ENV-DESK-004"]
+        }
+      ]
+    },
+    {
+      "stewardRole": "Knowledge Management Steward",
+      "agents": [
+        {
+          "agentId": "AG-KB-01",
+          "name": "SmartSearcher",
+          "role": "semantic search for vague user queries",
+          "envelopeIds": ["ENV-DESK-005"]
+        },
+        {
+          "agentId": "AG-KB-02",
+          "name": "ArticleRecommender",
+          "role": "proactive solution suggestions based on ticket patterns",
+          "envelopeIds": ["ENV-DESK-005"]
+        },
+        {
+          "agentId": "AG-KB-03",
+          "name": "ContentSimplifier",
+          "role": "ensure articles match user technical literacy",
+          "envelopeIds": ["ENV-DESK-005"]
+        }
+      ]
+    },
+    {
+      "stewardRole": "Global Support Operations Steward",
+      "agents": [
+        {
+          "agentId": "AG-QA-01",
+          "name": "PerformanceMonitor",
+          "role": "offshore team metrics tracking",
+          "envelopeIds": ["ENV-DESK-006"]
+        },
+        {
+          "agentId": "AG-QA-02",
+          "name": "QualityScorer",
+          "role": "ticket resolution quality assessment",
+          "envelopeIds": ["ENV-DESK-006"]
+        },
+        {
+          "agentId": "AG-QA-03",
+          "name": "EscalationAnalyzer",
+          "role": "identify patterns requiring training or process changes",
+          "envelopeIds": ["ENV-DESK-006"]
+        }
+      ]
+    }
+  ],
+  "events": [
+    {
+      "eventId": "embedding:-72:ENV-DESK-001:HIST-1",
+      "hour": -72,
+      "type": "embedding",
+      "envelopeId": "ENV-DESK-001",
+      "severity": "info",
+      "label": "Historical baseline: Password reset patterns",
+      "detail": "Pre-existing decision memory: Common password reset requests and standard resolution workflows.",
+      "actorRole": "Support Operations Steward",
+      "actorName": "TicketClassifier",
+      "embeddingId": "EMB-DESK-HIST-001",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "historical",
+      "semanticContext": "password reset user locked account standard procedure",
+      "semanticVector": [0.75, 0.20]
+    },
+    {
+      "eventId": "embedding:-72:ENV-DESK-001:HIST-2",
+      "hour": -72,
+      "type": "embedding",
+      "envelopeId": "ENV-DESK-001",
+      "severity": "info",
+      "label": "Historical baseline: Low-tech user patterns",
+      "detail": "Pre-existing decision memory: Recognition of vague descriptions requiring clarification and simplified guidance.",
+      "actorRole": "Support Operations Steward",
+      "actorName": "IntentParser",
+      "embeddingId": "EMB-DESK-HIST-002",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "historical",
+      "semanticContext": "vague description low tech user clarification questions simple language",
+      "semanticVector": [0.65, 0.45]
+    },
+    {
+      "eventId": "embedding:-72:ENV-DESK-003:HIST-3",
+      "hour": -72,
+      "type": "embedding",
+      "envelopeId": "ENV-DESK-003",
+      "severity": "info",
+      "label": "Historical baseline: Home office provisioning",
+      "detail": "Pre-existing decision memory: Standard home office equipment requests for hybrid workers.",
+      "actorRole": "IT Asset Steward",
+      "actorName": "ProvisioningRouter",
+      "embeddingId": "EMB-DESK-HIST-003",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "historical",
+      "semanticContext": "home office equipment monitor keyboard hybrid worker",
+      "semanticVector": [0.70, 0.30]
+    },
+    {
+      "eventId": "embedding:-72:ENV-DESK-006:HIST-4",
+      "hour": -72,
+      "type": "embedding",
+      "envelopeId": "ENV-DESK-006",
+      "severity": "info",
+      "label": "Historical baseline: Offshore performance metrics",
+      "detail": "Pre-existing decision memory: Offshore team handling patterns and quality benchmarks.",
+      "actorRole": "Global Support Operations Steward",
+      "actorName": "PerformanceMonitor",
+      "embeddingId": "EMB-DESK-HIST-004",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "historical",
+      "semanticContext": "offshore support team performance quality satisfaction metrics",
+      "semanticVector": [0.55, 0.35]
+    },
+    {
+      "eventId": "envelope_promoted:0:ENV-DESK-001:0",
+      "hour": 0,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-DESK-001",
+      "severity": "info",
+      "label": "Envelope promoted",
+      "detail": "Incident triage envelope (REV-DESK-001-C) activated with enhanced intent parsing for low-tech users.",
+      "actorRole": "Support Operations Steward",
+      "actorName": "Sarah Martinez"
+    },
+    {
+      "eventId": "envelope_promoted:0:ENV-DESK-002:1",
+      "hour": 0,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-DESK-002",
+      "severity": "info",
+      "label": "Envelope promoted",
+      "detail": "Password and access management envelope (REV-DESK-002-B) activated with MFA requirements.",
+      "actorRole": "Security Operations Steward",
+      "actorName": "David Kim"
+    },
+    {
+      "eventId": "envelope_promoted:0:ENV-DESK-003:2",
+      "hour": 0,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-DESK-003",
+      "severity": "info",
+      "label": "Envelope promoted",
+      "detail": "Hardware provisioning envelope (REV-DESK-003-B) activated for hybrid work equipment requests.",
+      "actorRole": "IT Asset Steward",
+      "actorName": "Rachel Wong"
+    },
+    {
+      "eventId": "envelope_promoted:0:ENV-DESK-005:3",
+      "hour": 0,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-DESK-005",
+      "severity": "info",
+      "label": "Envelope promoted",
+      "detail": "Knowledge base and self-service envelope (REV-DESK-005-D) activated with simplified content guidelines.",
+      "actorRole": "Knowledge Management Steward",
+      "actorName": "James Thompson"
+    },
+    {
+      "eventId": "retrieval:2_25:ENV-DESK-001:3a",
+      "hour": 2.25,
+      "type": "retrieval",
+      "envelopeId": "ENV-DESK-001",
+      "severity": "info",
+      "label": "Queried password reset patterns",
+      "detail": "IntentParser retrieved baseline password reset patterns to classify vague ticket description.",
+      "actorRole": "Support Operations Steward",
+      "actorName": "IntentParser",
+      "agentId": "AG-TRIAGE-02",
+      "queryText": "can't log in email not working",
+      "retrievedEmbeddings": ["EMB-DESK-HIST-001"],
+      "relevanceScores": [0.91]
+    },
+    {
+      "eventId": "decision:2_3:ENV-DESK-001:4",
+      "hour": 2.3,
+      "type": "decision",
+      "envelopeId": "ENV-DESK-001",
+      "severity": "info",
+      "status": "allowed",
+      "label": "Ticket classified: Password reset",
+      "detail": "IntentParser identified user description 'can't log in' as password reset request. Routed to Security Operations team. Assigned offshore agent (Bangalore team, Priority 3).",
+      "actorRole": "Support Operations Steward",
+      "actorName": "IntentParser",
+      "agentId": "AG-TRIAGE-02"
+    },
+    {
+      "eventId": "embedding:2_8:ENV-DESK-001:4a",
+      "hour": 2.8,
+      "type": "embedding",
+      "envelopeId": "ENV-DESK-001",
+      "severity": "info",
+      "label": "Vague description classified successfully",
+      "detail": "Stored classification pattern for vague login description mapping to password reset.",
+      "actorRole": "Support Operations Steward",
+      "actorName": "IntentParser",
+      "embeddingId": "EMB-DESK-001",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:2_3:ENV-DESK-001:4",
+      "semanticContext": "vague login description password reset intent parsing offshore routing",
+      "semanticVector": [0.72, 0.38]
+    },
+    {
+      "eventId": "decision:4_5:ENV-DESK-002:5",
+      "hour": 4.5,
+      "type": "decision",
+      "envelopeId": "ENV-DESK-002",
+      "severity": "info",
+      "status": "allowed",
+      "label": "Password reset completed",
+      "detail": "IdentityVerifier authenticated user via security questions. Offshore agent (Mumbai team) reset password and sent temporary credentials via SMS. User confirmed successful login.",
+      "actorRole": "Security Operations Steward",
+      "actorName": "IdentityVerifier",
+      "agentId": "AG-SEC-01"
+    },
+    {
+      "eventId": "retrieval:8_15:ENV-DESK-001:5a",
+      "hour": 8.15,
+      "type": "retrieval",
+      "envelopeId": "ENV-DESK-001",
+      "severity": "info",
+      "label": "Queried low-tech user patterns",
+      "detail": "UserProfiler retrieved patterns for users with history of vague descriptions needing extra guidance.",
+      "actorRole": "Support Operations Steward",
+      "actorName": "UserProfiler",
+      "agentId": "AG-TRIAGE-03",
+      "queryText": "user repeat tickets vague descriptions needs clarification",
+      "retrievedEmbeddings": ["EMB-DESK-HIST-002"],
+      "relevanceScores": [0.88]
+    },
+    {
+      "eventId": "boundary_interaction:8_2:ENV-DESK-001:6",
+      "hour": 8.2,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-DESK-001",
+      "severity": "warning",
+      "label": "Low-tech user needs clarification",
+      "detail": "IntentParser received ticket: 'Computer broken, can't do work.' UserProfiler identified user (Margaret Chen, Accounting) with low tech proficiency. Requires human follow-up to understand actual issue.",
+      "actorRole": "Support Operations Steward",
+      "actorName": "IntentParser",
+      "agentId": "AG-TRIAGE-02",
+      "boundary_kind": "escalated",
+      "boundary_reason": "insufficient_information_low_tech_user"
+    },
+    {
+      "eventId": "embedding:8_7:ENV-DESK-001:6a",
+      "hour": 8.7,
+      "type": "embedding",
+      "envelopeId": "ENV-DESK-001",
+      "severity": "warning",
+      "label": "Escalation: Vague description needs clarification",
+      "detail": "Stored boundary interaction for extremely vague description from low-tech user requiring human clarification.",
+      "actorRole": "Support Operations Steward",
+      "actorName": "IntentParser",
+      "embeddingId": "EMB-DESK-002",
+      "embeddingType": "boundary_interaction",
+      "vectorDimensions": 768,
+      "sourceEventId": "boundary_interaction:8_2:ENV-DESK-001:6",
+      "semanticContext": "extremely vague description low tech user human clarification escalation",
+      "semanticVector": [0.82, 0.78]
+    },
+    {
+      "eventId": "decision:9_1:ENV-DESK-001:7",
+      "hour": 9.1,
+      "type": "decision",
+      "envelopeId": "ENV-DESK-001",
+      "severity": "info",
+      "status": "allowed",
+      "label": "Support agent clarified issue",
+      "detail": "Onshore agent (Sarah Martinez) called user and discovered: Microsoft Outlook not opening after Windows update. Recategorized as software issue, assigned to desktop support team. Used simple language: 'Your email program needs a quick fix after the computer update.'",
+      "actorRole": "Support Operations Steward",
+      "actorName": "Sarah Martinez"
+    },
+    {
+      "eventId": "embedding:9_6:ENV-DESK-001:7a",
+      "hour": 9.6,
+      "type": "embedding",
+      "envelopeId": "ENV-DESK-001",
+      "severity": "info",
+      "label": "Low-tech user resolution pattern",
+      "detail": "Stored resolution showing value of phone follow-up for vague descriptions from low-tech users.",
+      "actorRole": "Support Operations Steward",
+      "actorName": "Sarah Martinez",
+      "embeddingId": "EMB-DESK-003",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:9_1:ENV-DESK-001:7",
+      "semanticContext": "phone follow-up vague description low tech user outlook windows update",
+      "semanticVector": [0.68, 0.55]
+    },
+    {
+      "eventId": "revision:10_5:ENV-DESK-001:7b",
+      "hour": 10.5,
+      "type": "revision",
+      "envelopeId": "ENV-DESK-001",
+      "severity": "info",
+      "label": "Low-tech user workflow enhancement",
+      "detail": "Support Operations Steward added assumption: Pattern recognition identifies users needing extra hand-holding. Added constraint: Low-tech user flag triggers simplified communication templates.",
+      "actorRole": "Support Operations Steward",
+      "actorName": "Sarah Martinez",
+      "revisionType": "assumption_expansion",
+      "resolvesEventId": "boundary_interaction:8_2:ENV-DESK-001:6",
+      "reason": "Improve triage efficiency by proactively identifying users who need direct phone contact instead of email troubleshooting."
+    },
+    {
+      "eventId": "embedding:11:ENV-DESK-001:7c",
+      "hour": 11,
+      "type": "embedding",
+      "envelopeId": "ENV-DESK-001",
+      "severity": "info",
+      "label": "Policy update: Low-tech user handling",
+      "detail": "Stored policy revision adding proactive identification of low-tech users for simplified support workflow.",
+      "actorRole": "Support Operations Steward",
+      "actorName": "Sarah Martinez",
+      "embeddingId": "EMB-DESK-004",
+      "embeddingType": "revision",
+      "vectorDimensions": 768,
+      "sourceEventId": "revision:10_5:ENV-DESK-001:7b",
+      "semanticContext": "low tech user proactive identification simplified communication phone support",
+      "semanticVector": [0.28, 0.65]
+    },
+    {
+      "eventId": "envelope_promoted:12:ENV-DESK-004:8",
+      "hour": 12,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-DESK-004",
+      "severity": "info",
+      "label": "Envelope promoted",
+      "detail": "Remote connectivity and VPN support envelope activated for hybrid workforce.",
+      "actorRole": "Network Operations Steward",
+      "actorName": "Michael O'Brien"
+    },
+    {
+      "eventId": "retrieval:18_35:ENV-DESK-004:8a",
+      "hour": 18.35,
+      "type": "retrieval",
+      "envelopeId": "ENV-DESK-004",
+      "severity": "info",
+      "label": "Queried VPN troubleshooting patterns",
+      "detail": "VPNDiagnostics retrieved standard connectivity troubleshooting workflows before diagnosing remote worker issue.",
+      "actorRole": "Network Operations Steward",
+      "actorName": "VPNDiagnostics",
+      "agentId": "AG-NET-01",
+      "queryText": "vpn connection failed remote worker business critical",
+      "retrievedEmbeddings": ["EMB-DESK-HIST-001"],
+      "relevanceScores": [0.85]
+    },
+    {
+      "eventId": "boundary_interaction:18_4:ENV-DESK-004:9",
+      "hour": 18.4,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-DESK-004",
+      "severity": "error",
+      "label": "Priority 1: Sales VP cannot access VPN",
+      "detail": "VPNDiagnostics detected VPN connection failure for remote-only employee (VP of Sales). Automated diagnostics passed. Home ISP issue suspected. Meets Priority 1 criteria: business-critical user, remote-only, cannot work without VPN.",
+      "actorRole": "Network Operations Steward",
+      "actorName": "VPNDiagnostics",
+      "agentId": "AG-NET-01",
+      "boundary_kind": "escalated",
+      "boundary_reason": "business_critical_remote_access_failure"
+    },
+    {
+      "eventId": "embedding:18_9:ENV-DESK-004:9a",
+      "hour": 18.9,
+      "type": "embedding",
+      "envelopeId": "ENV-DESK-004",
+      "severity": "error",
+      "label": "Escalation: Business-critical VPN failure",
+      "detail": "Stored boundary escalation for VPN failure of remote-only business-critical employee.",
+      "actorRole": "Network Operations Steward",
+      "actorName": "VPNDiagnostics",
+      "embeddingId": "EMB-DESK-005",
+      "embeddingType": "boundary_interaction",
+      "vectorDimensions": 768,
+      "sourceEventId": "boundary_interaction:18_4:ENV-DESK-004:9",
+      "semanticContext": "vpn failure remote only business critical sales priority one escalation",
+      "semanticVector": [0.85, 0.88]
+    },
+    {
+      "eventId": "decision:19_2:ENV-DESK-004:10",
+      "hour": 19.2,
+      "type": "decision",
+      "envelopeId": "ENV-DESK-004",
+      "severity": "info",
+      "status": "allowed",
+      "label": "Emergency mobile hotspot deployed",
+      "detail": "Network Operations Steward authorized overnight courier delivery of enterprise mobile hotspot to VP's home. Temporary workaround while ISP issue investigated. VP operational within 12 hours.",
+      "actorRole": "Network Operations Steward",
+      "actorName": "Michael O'Brien"
+    },
+    {
+      "eventId": "embedding:19_7:ENV-DESK-004:10a",
+      "hour": 19.7,
+      "type": "embedding",
+      "envelopeId": "ENV-DESK-004",
+      "severity": "info",
+      "label": "Emergency response pattern",
+      "detail": "Stored decision pattern: mobile hotspot deployment for business-critical remote workers with ISP failures.",
+      "actorRole": "Network Operations Steward",
+      "actorName": "Michael O'Brien",
+      "embeddingId": "EMB-DESK-006",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:19_2:ENV-DESK-004:10",
+      "semanticContext": "emergency mobile hotspot business critical vpn failure courier overnight",
+      "semanticVector": [0.70, 0.75]
+    },
+    {
+      "eventId": "envelope_promoted:24:ENV-DESK-006:11",
+      "hour": 24,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-DESK-006",
+      "severity": "info",
+      "label": "Envelope promoted",
+      "detail": "Offshore team performance monitoring envelope (REV-DESK-006-B) activated for quality assurance.",
+      "actorRole": "Global Support Operations Steward",
+      "actorName": "Patricia Okafor"
+    },
+    {
+      "eventId": "signal:36:ENV-DESK-006:12",
+      "hour": 36,
+      "type": "signal",
+      "envelopeId": "ENV-DESK-006",
+      "severity": "info",
+      "label": "Offshore performance weekly report",
+      "detail": "PerformanceMonitor: Bangalore team - 142 tickets resolved, 4.3/5.0 satisfaction, 12% escalation rate. Mumbai team - 156 tickets resolved, 4.4/5.0 satisfaction, 9% escalation rate. Both teams meeting targets.",
+      "actorRole": "Global Support Operations Steward",
+      "actorName": "PerformanceMonitor",
+      "agentId": "AG-QA-01",
+      "signalKey": "offshore_performance",
+      "value": 0.91
+    },
+    {
+      "eventId": "retrieval:42_25:ENV-DESK-003:12a",
+      "hour": 42.25,
+      "type": "retrieval",
+      "envelopeId": "ENV-DESK-003",
+      "severity": "info",
+      "label": "Queried equipment provisioning patterns",
+      "detail": "BudgetGuard retrieved historical home office equipment approval patterns for cost threshold decisions.",
+      "actorRole": "IT Asset Steward",
+      "actorName": "BudgetGuard",
+      "agentId": "AG-ASSET-03",
+      "queryText": "home office equipment budget threshold approval",
+      "retrievedEmbeddings": ["EMB-DESK-HIST-003"],
+      "relevanceScores": [0.93]
+    },
+    {
+      "eventId": "boundary_interaction:42_3:ENV-DESK-003:13",
+      "hour": 42.3,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-DESK-003",
+      "severity": "warning",
+      "label": "Equipment request exceeds budget cap",
+      "detail": "ProvisioningRouter received request from hybrid employee (Software Engineer): ergonomic chair ($450), standing desk ($650), dual monitors ($500) = $1,600 total. Exceeds $500 cap but within manager approval threshold ($2,000). User reporting back pain from home setup.",
+      "actorRole": "IT Asset Steward",
+      "actorName": "ProvisioningRouter",
+      "agentId": "AG-ASSET-01",
+      "boundary_kind": "escalated",
+      "boundary_reason": "budget_threshold_exceeded_ergonomic_need"
+    },
+    {
+      "eventId": "embedding:42_8:ENV-DESK-003:13a",
+      "hour": 42.8,
+      "type": "embedding",
+      "envelopeId": "ENV-DESK-003",
+      "severity": "warning",
+      "label": "Escalation: Ergonomic equipment over budget",
+      "detail": "Stored boundary escalation for ergonomic equipment request exceeding standard cap with health justification.",
+      "actorRole": "IT Asset Steward",
+      "actorName": "ProvisioningRouter",
+      "embeddingId": "EMB-DESK-007",
+      "embeddingType": "boundary_interaction",
+      "vectorDimensions": 768,
+      "sourceEventId": "boundary_interaction:42_3:ENV-DESK-003:13",
+      "semanticContext": "ergonomic equipment budget exceeded back pain health hybrid worker",
+      "semanticVector": [0.78, 0.72]
+    },
+    {
+      "eventId": "decision:43_5:ENV-DESK-003:14",
+      "hour": 43.5,
+      "type": "decision",
+      "envelopeId": "ENV-DESK-003",
+      "severity": "allowed",
+      "status": "allowed",
+      "label": "Ergonomic equipment approved",
+      "detail": "IT Asset Steward approved full $1,600 request with manager co-sign. Justification: Health and productivity investment for full-time remote engineer. Requires ergonomic assessment to validate proper setup.",
+      "actorRole": "IT Asset Steward",
+      "actorName": "Rachel Wong"
+    },
+    {
+      "eventId": "embedding:44:ENV-DESK-003:14a",
+      "hour": 44,
+      "type": "embedding",
+      "envelopeId": "ENV-DESK-003",
+      "severity": "info",
+      "label": "Ergonomic approval decision pattern",
+      "detail": "Stored decision pattern: health-related ergonomic requests approved above standard cap with assessment requirement.",
+      "actorRole": "IT Asset Steward",
+      "actorName": "Rachel Wong",
+      "embeddingId": "EMB-DESK-008",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:43_5:ENV-DESK-003:14",
+      "semanticContext": "ergonomic approval health productivity remote worker assessment validation",
+      "semanticVector": [0.65, 0.60]
+    },
+    {
+      "eventId": "retrieval:48_15:ENV-DESK-005:14a",
+      "hour": 48.15,
+      "type": "retrieval",
+      "envelopeId": "ENV-DESK-005",
+      "severity": "info",
+      "label": "Queried knowledge base patterns",
+      "detail": "ArticleRecommender retrieved patterns for proactively suggesting solutions to users with vague queries.",
+      "actorRole": "Knowledge Management Steward",
+      "actorName": "ArticleRecommender",
+      "agentId": "AG-KB-02",
+      "queryText": "self service vague query knowledge base recommendations",
+      "retrievedEmbeddings": ["EMB-DESK-HIST-002", "EMB-DESK-001"],
+      "relevanceScores": [0.89, 0.83]
+    },
+    {
+      "eventId": "decision:48_2:ENV-DESK-005:15",
+      "hour": 48.2,
+      "type": "decision",
+      "envelopeId": "ENV-DESK-005",
+      "severity": "info",
+      "status": "allowed",
+      "label": "Self-service article deflected ticket",
+      "detail": "SmartSearcher identified user searching 'wifi not working home.' Proactively suggested 'Simple Steps to Fix Home WiFi Issues' (6th-grade reading level, step-by-step screenshots). User resolved without opening ticket.",
+      "actorRole": "Knowledge Management Steward",
+      "actorName": "SmartSearcher",
+      "agentId": "AG-KB-01"
+    },
+    {
+      "eventId": "embedding:48_7:ENV-DESK-005:15a",
+      "hour": 48.7,
+      "type": "embedding",
+      "envelopeId": "ENV-DESK-005",
+      "severity": "info",
+      "label": "Self-service deflection pattern",
+      "detail": "Stored successful self-service resolution for common home office connectivity issue using simplified article.",
+      "actorRole": "Knowledge Management Steward",
+      "actorName": "SmartSearcher",
+      "embeddingId": "EMB-DESK-009",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:48_2:ENV-DESK-005:15",
+      "semanticContext": "self service knowledge base wifi home office simple language screenshot",
+      "semanticVector": [0.73, 0.35]
+    },
+    {
+      "eventId": "signal:60:ENV-DESK-001:16",
+      "hour": 60,
+      "type": "signal",
+      "envelopeId": "ENV-DESK-001",
+      "severity": "info",
+      "label": "Triage efficiency metrics",
+      "detail": "TicketClassifier: Week 1 summary - 847 tickets processed. 78% auto-classified, 22% required human clarification. Average classification time: 47 seconds. Low-tech user identification accuracy: 84%.",
+      "actorRole": "Support Operations Steward",
+      "actorName": "TicketClassifier",
+      "agentId": "AG-TRIAGE-01",
+      "signalKey": "triage_automation",
+      "value": 0.78
+    },
+    {
+      "eventId": "retrieval:72_25:ENV-DESK-006:16a",
+      "hour": 72.25,
+      "type": "retrieval",
+      "envelopeId": "ENV-DESK-006",
+      "severity": "info",
+      "label": "Queried offshore quality patterns",
+      "detail": "QualityScorer retrieved historical offshore performance patterns before analyzing escalation trends.",
+      "actorRole": "Global Support Operations Steward",
+      "actorName": "QualityScorer",
+      "agentId": "AG-QA-02",
+      "queryText": "offshore team quality satisfaction escalation patterns training",
+      "retrievedEmbeddings": ["EMB-DESK-HIST-004"],
+      "relevanceScores": [0.90]
+    },
+    {
+      "eventId": "boundary_interaction:72_3:ENV-DESK-006:17",
+      "hour": 72.3,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-DESK-006",
+      "severity": "warning",
+      "label": "Offshore team escalation rate spike",
+      "detail": "EscalationAnalyzer detected Bangalore team escalation rate increased to 18% (threshold: 15%). Pattern analysis shows: 60% of escalations involve low-tech users with vague descriptions. Suggests training gap in clarification questioning techniques.",
+      "actorRole": "Global Support Operations Steward",
+      "actorName": "EscalationAnalyzer",
+      "agentId": "AG-QA-03",
+      "boundary_kind": "escalated",
+      "boundary_reason": "escalation_threshold_exceeded_training_needed"
+    },
+    {
+      "eventId": "embedding:72_8:ENV-DESK-006:17a",
+      "hour": 72.8,
+      "type": "embedding",
+      "envelopeId": "ENV-DESK-006",
+      "severity": "warning",
+      "label": "Escalation: Offshore training opportunity",
+      "detail": "Stored boundary interaction showing offshore escalation spike with identified training need for low-tech user handling.",
+      "actorRole": "Global Support Operations Steward",
+      "actorName": "EscalationAnalyzer",
+      "embeddingId": "EMB-DESK-010",
+      "embeddingType": "boundary_interaction",
+      "vectorDimensions": 768,
+      "sourceEventId": "boundary_interaction:72_3:ENV-DESK-006:17",
+      "semanticContext": "offshore escalation spike low tech user clarification training gap bangalore",
+      "semanticVector": [0.80, 0.76]
+    },
+    {
+      "eventId": "decision:74_5:ENV-DESK-006:18",
+      "hour": 74.5,
+      "type": "decision",
+      "envelopeId": "ENV-DESK-006",
+      "severity": "info",
+      "status": "allowed",
+      "label": "Offshore training intervention scheduled",
+      "detail": "Global Support Operations Steward approved targeted training: 'Effective Clarification Questions for Low-Tech Users.' Scheduled for Bangalore team (4-hour workshop). Mumbai team invited to attend for knowledge sharing. Training includes: non-technical language, patience techniques, common vague descriptions.",
+      "actorRole": "Global Support Operations Steward",
+      "actorName": "Patricia Okafor"
+    },
+    {
+      "eventId": "embedding:75:ENV-DESK-006:18a",
+      "hour": 75,
+      "type": "embedding",
+      "envelopeId": "ENV-DESK-006",
+      "severity": "info",
+      "label": "Training intervention decision",
+      "detail": "Stored decision pattern: targeted training for offshore team when escalation analysis reveals skill gap.",
+      "actorRole": "Global Support Operations Steward",
+      "actorName": "Patricia Okafor",
+      "embeddingId": "EMB-DESK-011",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:74_5:ENV-DESK-006:18",
+      "semanticContext": "offshore training low tech user clarification questions escalation reduction",
+      "semanticVector": [0.58, 0.68]
+    },
+    {
+      "eventId": "dsg_session:84:ENV-DESK-001:19",
+      "hour": 84,
+      "type": "dsg_session",
+      "envelopeId": "ENV-DESK-001",
+      "severity": "info",
+      "label": "DSG: Support Operations Review",
+      "detail": "Support Operations Stewardship Group reviewed 312 low-tech user interactions. Identified patterns: 72% resolved with phone call, 18% needed in-person support (office visits), 10% successfully self-served with simplified articles. Discussed updating triage workflow to prioritize phone contact for flagged users.",
+      "actorRole": "Support Operations Steward",
+      "actorName": "Sarah Martinez",
+      "sessionId": "DSG-SUPPORT-Q1-W12"
+    },
+    {
+      "eventId": "embedding:85:ENV-DESK-001:19a",
+      "hour": 85,
+      "type": "embedding",
+      "envelopeId": "ENV-DESK-001",
+      "severity": "info",
+      "label": "DSG insights: Low-tech user patterns",
+      "detail": "Stored DSG session artifact capturing analysis of low-tech user resolution patterns and phone-first approach effectiveness.",
+      "actorRole": "Support Operations Steward",
+      "actorName": "Sarah Martinez",
+      "embeddingId": "EMB-DESK-012",
+      "embeddingType": "session_artifact",
+      "vectorDimensions": 768,
+      "sourceEventId": "dsg_session:84:ENV-DESK-001:19",
+      "semanticContext": "dsg low tech user phone support office visit self service patterns",
+      "semanticVector": [0.18, 0.82]
+    },
+    {
+      "eventId": "decision:96_2:ENV-DESK-004:20",
+      "hour": 96.2,
+      "type": "decision",
+      "envelopeId": "ENV-DESK-004",
+      "severity": "info",
+      "status": "allowed",
+      "label": "VPN optimization deployed",
+      "detail": "NetworkOptimizer analyzed 50 home network setups for remote workers. Deployed automated configuration tool: optimizes router settings, suggests equipment upgrades for poor performance. 35 users reported improved connection stability. Offshore team (Manila) handles deployment and follow-up.",
+      "actorRole": "Network Operations Steward",
+      "actorName": "NetworkOptimizer",
+      "agentId": "AG-NET-03"
+    },
+    {
+      "eventId": "embedding:96_7:ENV-DESK-004:20a",
+      "hour": 96.7,
+      "type": "embedding",
+      "envelopeId": "ENV-DESK-004",
+      "severity": "info",
+      "label": "Proactive VPN optimization pattern",
+      "detail": "Stored proactive optimization decision: automated home network assessment and configuration improvements.",
+      "actorRole": "Network Operations Steward",
+      "actorName": "NetworkOptimizer",
+      "embeddingId": "EMB-DESK-013",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:96_2:ENV-DESK-004:20",
+      "semanticContext": "vpn optimization home network automated configuration remote worker offshore",
+      "semanticVector": [0.72, 0.42]
+    },
+    {
+      "eventId": "retrieval:105_15:ENV-DESK-003:20a",
+      "hour": 105.15,
+      "type": "retrieval",
+      "envelopeId": "ENV-DESK-003",
+      "severity": "info",
+      "label": "Queried ergonomic patterns",
+      "detail": "BudgetGuard retrieved previous ergonomic approval decision to inform budget cap revision discussion.",
+      "actorRole": "IT Asset Steward",
+      "actorName": "BudgetGuard",
+      "agentId": "AG-ASSET-03",
+      "queryText": "ergonomic equipment budget health justification approval",
+      "retrievedEmbeddings": ["EMB-DESK-007", "EMB-DESK-008"],
+      "relevanceScores": [0.95, 0.91]
+    },
+    {
+      "eventId": "revision:105_2:ENV-DESK-003:21",
+      "hour": 105.2,
+      "type": "revision",
+      "envelopeId": "ENV-DESK-003",
+      "severity": "info",
+      "label": "Budget cap increased for ergonomics",
+      "detail": "IT Asset Steward increased home office reimbursement cap from $500 to $750 per year. Added assumption: Ergonomic equipment reduces long-term health issues for remote workers. Added constraint: Ergonomic assessments required for employees reporting discomfort.",
+      "actorRole": "IT Asset Steward",
+      "actorName": "Rachel Wong",
+      "revisionType": "constraint_relaxation",
+      "resolvesEventId": "boundary_interaction:42_3:ENV-DESK-003:13",
+      "reason": "Recognize health and productivity value of proper ergonomic setup for hybrid workforce. Prevents escalations for legitimate health-related requests."
+    },
+    {
+      "eventId": "embedding:105_7:ENV-DESK-003:21a",
+      "hour": 105.7,
+      "type": "embedding",
+      "envelopeId": "ENV-DESK-003",
+      "severity": "info",
+      "label": "Policy update: Ergonomic budget increase",
+      "detail": "Stored policy revision increasing home office budget cap with ergonomic assessment requirement.",
+      "actorRole": "IT Asset Steward",
+      "actorName": "Rachel Wong",
+      "embeddingId": "EMB-DESK-014",
+      "embeddingType": "revision",
+      "vectorDimensions": 768,
+      "sourceEventId": "revision:105_2:ENV-DESK-003:21",
+      "semanticContext": "budget increase ergonomic health assessment remote worker policy revision",
+      "semanticVector": [0.30, 0.62]
+    },
+    {
+      "eventId": "signal:120:ENV-DESK-006:22",
+      "hour": 120,
+      "type": "signal",
+      "envelopeId": "ENV-DESK-006",
+      "severity": "info",
+      "label": "Offshore performance post-training",
+      "detail": "PerformanceMonitor: Post-training results (Week 2) - Bangalore team escalation rate reduced to 13% (down from 18%). Low-tech user satisfaction improved to 4.5/5.0. Training effectiveness confirmed.",
+      "actorRole": "Global Support Operations Steward",
+      "actorName": "PerformanceMonitor",
+      "agentId": "AG-QA-01",
+      "signalKey": "training_effectiveness",
+      "value": 0.87
+    },
+    {
+      "eventId": "signal:144:ENV-DESK-005:23",
+      "hour": 144,
+      "type": "signal",
+      "envelopeId": "ENV-DESK-005",
+      "severity": "info",
+      "label": "Knowledge base impact metrics",
+      "detail": "ArticleRecommender: Self-service deflection rate: 38% (target: 30%). Average article satisfaction: 4.4/5.0. Most helpful articles: WiFi troubleshooting, password resets, Outlook configuration. Low-tech user engagement: 45% successfully self-served (up from 32% baseline).",
+      "actorRole": "Knowledge Management Steward",
+      "actorName": "ArticleRecommender",
+      "agentId": "AG-KB-02",
+      "signalKey": "self_service_effectiveness",
+      "value": 0.38
+    },
+    {
+      "eventId": "signal:168:ENV-DESK-001:24",
+      "hour": 168,
+      "type": "signal",
+      "envelopeId": "ENV-DESK-001",
+      "severity": "info",
+      "label": "Support operations summary",
+      "detail": "Week 1 summary: 1,847 tickets processed. Auto-classification: 78%. Low-tech user identification: 88% accuracy. Offshore ticket handling: 52% of total volume. Average resolution time: 4.2 hours (target: <6 hours). Customer satisfaction: 4.3/5.0.",
+      "actorRole": "Support Operations Steward",
+      "actorName": "TicketClassifier",
+      "agentId": "AG-TRIAGE-01",
+      "signalKey": "overall_performance",
+      "value": 0.86
+    }
+  ]
+}
