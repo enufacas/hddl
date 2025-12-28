@@ -1,3 +1,4 @@
+import './design-tokens.css'
 import './style-workspace.css'
 import 'intro.js/introjs.css'
 import { initRouter, navigateTo } from './router'
@@ -7,6 +8,8 @@ import { formatSimTime, getEnvelopeAtTime, getScenario, getTimeHour, onScenarioC
 import { getStewardColor } from './sim/steward-colors'
 import { getStoryModeEnabled, onStoryModeChange, setStoryModeEnabled } from './story-mode'
 import { initReviewHarness, isReviewModeEnabled, setReviewModeEnabled } from './review-harness'
+import { layoutManager, createLayoutSelector } from './components/layout-manager'
+import { layoutOrchestrator, initLayoutOrchestrator } from './components/layout-orchestrator'
 
 // Initialize app
 const app = document.querySelector('#app')
@@ -23,6 +26,7 @@ titleLeft.style.cssText = 'display: flex; align-items: center; gap: 8px;'
 const titleIcon = document.createElement('span')
 titleIcon.className = 'codicon codicon-pulse'
 const titleText = document.createElement('span')
+titleText.className = 'title-text'
 titleText.textContent = 'Human-Derived Decision Layer (HDDL) Simulation Platform'
 titleLeft.appendChild(titleIcon)
 titleLeft.appendChild(titleText)
@@ -52,6 +56,7 @@ timelineBar.setAttribute('data-testid', 'timeline-bar')
 timelineBar.style.cssText = 'background: var(--vscode-editor-background); border-bottom: 1px solid var(--vscode-sideBar-border); padding: 8px 16px; display: flex; align-items: center; gap: 16px;'
 
 const timelineControls = document.createElement('div')
+timelineControls.className = 'timeline-controls'
 timelineControls.style.cssText = 'display: flex; align-items: center; gap: 8px;'
 
 const playBtn = document.createElement('button')
@@ -515,6 +520,10 @@ setInterval(() => {
 
 statusRight.appendChild(timeItem)
 
+// Layout selector (desktop only)
+const layoutSelector = createLayoutSelector(layoutManager)
+statusRight.appendChild(layoutSelector)
+
 statusbar.appendChild(statusLeft)
 statusbar.appendChild(statusRight)
 
@@ -523,6 +532,35 @@ app.appendChild(titlebar)
 app.appendChild(timelineBar)
 app.appendChild(workbench)
 app.appendChild(statusbar)
+
+// Initialize layout manager after DOM is mounted
+layoutManager.init({
+  sidebar: document.querySelector('.sidebar'),
+  auxiliary: document.querySelector('.auxiliarybar'),
+  bottom: document.querySelector('.panel'),
+  setAuxCollapsed: (collapsed) => {
+    document.body.classList.toggle('aux-hidden', Boolean(collapsed))
+  },
+  setBottomCollapsed: (collapsed) => {
+    document.body.classList.toggle('panel-hidden', Boolean(collapsed))
+  }
+})
+
+// Initialize layout orchestrator for responsive breakpoint handling
+initLayoutOrchestrator(app, {
+  debounceDelay: 100,
+  onModeChange: (newMode, oldMode) => {
+    console.log(`Layout mode changed: ${oldMode} → ${newMode}`)
+  }
+})
+
+// Listen for layout changes to sync with other components
+document.addEventListener('hddl:layout:resize', (e) => {
+  // The HDDL map will automatically recalculate on next render
+  // based on its container width
+  const { width, mode } = e.detail
+  console.log(`Layout resize: ${width}px (${mode})`)
+})
 
 // UX review harness (optional)
 initReviewHarness()

@@ -1,0 +1,216 @@
+/* HDDL Design Tokens - Unified Design Language */
+/* ============================================= */
+
+:root {
+  /* ===== SEMANTIC SURFACE COLORS ===== */
+  /* Layer hierarchy from deepest to topmost */
+  --surface-0: #010409;           /* Deepest background (activity bar, sidebars) */
+  --surface-1: #0d1117;           /* Primary background (editor, main content) */
+  --surface-2: #161b22;           /* Elevated surfaces (cards, widgets) */
+  --surface-3: #21262d;           /* Highest elevation (modals, dropdowns) */
+  --surface-border: #30363d;      /* Borders between surfaces */
+  --surface-border-subtle: rgba(48, 54, 61, 0.5);  /* Subtle separators */
+  
+  /* ===== INTERACTIVE STATES ===== */
+  --interactive-hover: #1c2128;
+  --interactive-active: #21262d;
+  --interactive-selected: rgba(31, 111, 235, 0.15);
+  --interactive-focus: #1f6feb;
+  
+  /* ===== TEXT HIERARCHY ===== */
+  --text-primary: #e6edf3;
+  --text-secondary: #7d8590;
+  --text-tertiary: #57606a;
+  --text-muted: #484f58;
+  --text-link: #58a6ff;
+  --text-inverse: #0d1117;
+  
+  /* ===== STATUS COLORS ===== */
+  --status-success: #3fb950;
+  --status-success-subtle: rgba(63, 185, 80, 0.15);
+  --status-warning: #d29922;
+  --status-warning-subtle: rgba(210, 153, 34, 0.15);
+  --status-error: #f85149;
+  --status-error-subtle: rgba(248, 81, 73, 0.15);
+  --status-info: #58a6ff;
+  --status-info-subtle: rgba(88, 166, 255, 0.15);
+  
+  /* ===== SPACING SCALE ===== */
+  /* 4px base unit, following powers of 2 */
+  --space-0: 0;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  
+  /* ===== TYPOGRAPHY SCALE ===== */
+  --text-2xs: 9px;
+  --text-xs: 10px;
+  --text-sm: 11px;
+  --text-base: 13px;
+  --text-md: 14px;
+  --text-lg: 16px;
+  --text-xl: 18px;
+  --text-2xl: 24px;
+  --text-3xl: 32px;
+  
+  /* Line heights */
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.75;
+  
+  /* Font weights */
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+  --font-extrabold: 800;
+  
+  /* Font stacks */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  
+  /* ===== BORDER RADIUS ===== */
+  --radius-none: 0;
+  --radius-sm: 3px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-full: 9999px;
+  
+  /* ===== SHADOWS ===== */
+  --shadow-sm: 0 1px 2px rgba(1, 4, 9, 0.3);
+  --shadow-md: 0 4px 8px rgba(1, 4, 9, 0.4);
+  --shadow-lg: 0 8px 24px rgba(1, 4, 9, 0.5);
+  --shadow-xl: 0 16px 48px rgba(1, 4, 9, 0.6);
+  --shadow-inset: inset 0 1px 2px rgba(1, 4, 9, 0.3);
+  
+  /* ===== TRANSITIONS ===== */
+  --transition-fast: 100ms ease-out;
+  --transition-normal: 200ms ease-out;
+  --transition-slow: 300ms ease-out;
+  --transition-spring: 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  
+  /* Transition properties */
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* ===== Z-INDEX SCALE ===== */
+  --z-base: 0;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-fixed: 300;
+  --z-modal-backdrop: 400;
+  --z-modal: 500;
+  --z-popover: 600;
+  --z-tooltip: 700;
+  --z-toast: 800;
+  
+  /* ===== RESPONSIVE BREAKPOINTS (as custom properties for JS) ===== */
+  --breakpoint-mobile: 480px;
+  --breakpoint-tablet: 768px;
+  --breakpoint-desktop: 1024px;
+  --breakpoint-wide: 1280px;
+  
+  /* ===== SVG DETAIL LEVELS ===== */
+  /* These control what elements are shown at different widths */
+  --detail-level: 'full';  /* full | standard | compact | minimal */
+  
+  /* ===== LAYOUT CONSTANTS ===== */
+  --mobile-tap-target: 44px;
+  --mobile-padding: 12px;
+  --sidebar-min-width: 200px;
+  --sidebar-max-width: 500px;
+  --auxiliary-min-width: 250px;
+  --auxiliary-max-width: 600px;
+  
+  /* ===== PANEL SASH (resize handles) ===== */
+  --sash-size: 4px;
+  --sash-hover-size: 8px;
+  --sash-color: transparent;
+  --sash-hover-color: var(--interactive-focus);
+}
+
+/* ===== DETAIL LEVEL MEDIA QUERIES ===== */
+/* These set CSS custom properties that JS can read */
+
+@media (max-width: 400px) {
+  :root {
+    --detail-level: 'minimal';
+  }
+}
+
+@media (min-width: 401px) and (max-width: 600px) {
+  :root {
+    --detail-level: 'compact';
+  }
+}
+
+@media (min-width: 601px) and (max-width: 1000px) {
+  :root {
+    --detail-level: 'standard';
+  }
+}
+
+@media (min-width: 1001px) {
+  :root {
+    --detail-level: 'full';
+  }
+}
+
+/* ===== UTILITY CLASSES ===== */
+
+/* Hide at different breakpoints */
+.hide-mobile {
+  display: none !important;
+}
+
+@media (min-width: 481px) {
+  .hide-mobile {
+    display: initial !important;
+  }
+}
+
+.hide-tablet-down {
+  display: none !important;
+}
+
+@media (min-width: 769px) {
+  .hide-tablet-down {
+    display: initial !important;
+  }
+}
+
+.show-mobile-only {
+  display: initial !important;
+}
+
+@media (min-width: 481px) {
+  .show-mobile-only {
+    display: none !important;
+  }
+}
+
+/* Touch-friendly targets */
+.tap-target {
+  min-width: var(--mobile-tap-target);
+  min-height: var(--mobile-tap-target);
+}
+
+/* Surface levels */
+.surface-0 { background: var(--surface-0); }
+.surface-1 { background: var(--surface-1); }
+.surface-2 { background: var(--surface-2); }
+.surface-3 { background: var(--surface-3); }
+
+/* Text hierarchy */
+.text-primary { color: var(--text-primary); }
+.text-secondary { color: var(--text-secondary); }
+.text-tertiary { color: var(--text-tertiary); }
+.text-muted { color: var(--text-muted); }

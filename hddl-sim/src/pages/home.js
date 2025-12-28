@@ -9,10 +9,10 @@ import { createTourButton } from '../components/tour'
 // Track active map cleanup to prevent leaks
 let activeMapCleanup = null
 let activeMapInstance = null
+let activeMapResizeObserver = null
+let activeMapMountRaf = null
 
 export function renderHome(container) {
-  const ORIENTATION_KEY = 'hddl:orientation:dismissed'
-
   // Cleanup previous map if it exists
   if (activeMapCleanup) {
     activeMapCleanup()
@@ -20,16 +20,25 @@ export function renderHome(container) {
     activeMapInstance = null
   }
 
+  if (activeMapResizeObserver) {
+    activeMapResizeObserver.disconnect()
+    activeMapResizeObserver = null
+  }
+
+  if (activeMapMountRaf != null) {
+    cancelAnimationFrame(activeMapMountRaf)
+    activeMapMountRaf = null
+  }
+
   let disposeGlossary = () => {}
 
   container.innerHTML = `
-    <div class="page-container">
+    <div class="page-container" data-testid="home-page">
       <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
         <div style="display: flex; align-items: center; gap: 12px;">
           <span class="codicon codicon-shield" style="font-size: 20px;"></span>
           <div>
             <h1 style="margin: 0; font-size: 16px;">Decision Envelopes</h1>
-            <p style="margin: 0; color: var(--vscode-statusBar-foreground); font-size: 11px;">What authority exists right now?</p>
           </div>
           <div id="tour-button-container" style="display: flex; align-items: center;"></div>
         </div>
@@ -49,32 +58,7 @@ export function renderHome(container) {
 
       <div id="hddl-map-container" style="margin-bottom: 24px;"></div>
 
-      <div id="first-run-orientation" style="display:none; background: var(--vscode-editorWidget-background); border: 1px solid var(--vscode-sideBar-border); padding: 12px; border-radius: 6px; margin-bottom: 14px;">
-        <div style="display:flex; align-items: start; gap: 12px;">
-          <span class="codicon codicon-compass" style="font-size: 18px; color: var(--status-info); margin-top: 2px;"></span>
-          <div style="flex:1; min-width: 0;">
-            <div style="font-weight: 700;">First time here?</div>
-            <div style="font-size: 13px; color: var(--vscode-statusBar-foreground); margin-top: 2px;">You’re looking at decision authority over time. Use the timeline scrubber above to see how envelopes (authority) change through revisions and boundary interactions.</div>
-            <div style="font-size: 12px; color: var(--vscode-statusBar-foreground); margin-top: 10px;">
-              Key terms:
-              <a class="glossary-term" href="#" data-glossary-term="Decision Envelope">Decision Envelope</a>,
-              <a class="glossary-term" href="#" data-glossary-term="DSG (Decision Stewardship Group)">DSG</a>,
-              <a class="glossary-term" href="#" data-glossary-term="Boundary Interaction">Boundary Interaction</a>,
-              <a class="glossary-term" href="#" data-glossary-term="Decision Memory">Decision Memory</a>
-            </div>
-          </div>
-          <button class="monaco-button monaco-text-button" type="button" id="dismiss-orientation" style="padding: 4px 8px; min-width: unset;">Got it</button>
-        </div>
-      </div>
-
-      <div id="glossary-inline" style="display:none; background: var(--vscode-sideBar-background); border: 1px solid var(--vscode-sideBar-border); padding: 10px; border-radius: 4px; margin-bottom: 10px;"></div>
-
-      <div style="background: var(--vscode-notifications-background); border: 1px solid var(--vscode-notifications-border); padding: 10px; border-radius: 4px; margin-bottom: 12px; display: flex; align-items: start; gap: 10px;">
-        <span class="codicon codicon-info" style="font-size: 16px; color: var(--status-info); flex-shrink: 0;"></span>
-        <div style="font-size: 12px;">
-          <strong>How to use this simulation:</strong> Use the timeline scrubber above to replay events. Filter by steward type using the dropdown above to see specific authority. Click any envelope to inspect details.
-        </div>
-      </div>
+            <div id="glossary-inline" style="display:none; background: var(--vscode-sideBar-background); border: 1px solid var(--vscode-sideBar-border); padding: 10px; border-radius: 4px; margin-bottom: 10px;"></div>
 
       <h2 style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
         <span class="codicon codicon-layers"></span>
@@ -88,14 +72,81 @@ export function renderHome(container) {
   // Initialize HDDL Map
   const mapContainer = container.querySelector('#hddl-map-container')
   if (mapContainer) {
-    try {
-      const mapResult = createHDDLMap(mapContainer)
-      activeMapInstance = mapResult
-      activeMapCleanup = mapResult.cleanup
-    } catch (e) {
-      console.error('HDDL Map Error:', e)
-      mapContainer.innerHTML = `<div style="color:var(--status-error); padding: 10px;">Error loading map: ${e.message}</div>`
+    const getDetailBreakpoint = (width) => {
+      if (width > 1000) return 'full'
+      if (width > 600) return 'standard'
+      if (width > 400) return 'compact'
+      return 'minimal'
     }
+
+    let lastBreakpoint = null
+    let destroyed = false
+
+    const mountMap = () => {
+      if (destroyed || !container.isConnected) return
+
+      const measuredWidth = Math.round(mapContainer.getBoundingClientRect().width || 0)
+      if (measuredWidth < 10) {
+        activeMapMountRaf = requestAnimationFrame(mountMap)
+        return
+      }
+
+      const nextBreakpoint = getDetailBreakpoint(measuredWidth)
+      if (lastBreakpoint === nextBreakpoint && activeMapInstance) return
+      lastBreakpoint = nextBreakpoint
+
+      if (activeMapCleanup) {
+        activeMapCleanup()
+        activeMapCleanup = null
+        activeMapInstance = null
+      }
+
+      try {
+        const mapResult = createHDDLMap(mapContainer, { 
+          initialFilter: currentFilter,
+          width: measuredWidth 
+        })
+        activeMapInstance = mapResult
+        activeMapCleanup = mapResult.cleanup
+
+        if (activeMapInstance && activeMapInstance.setFilter) {
+          activeMapInstance.setFilter(currentFilter)
+        }
+      } catch (e) {
+        console.error('HDDL Map Error:', e)
+        mapContainer.innerHTML = `<div style="color:var(--status-error); padding: 10px;">Error loading map: ${e.message}</div>`
+      }
+    }
+
+    // Mount once layout is stable (prevents 0px width fallback → stuck downgraded mode)
+    activeMapMountRaf = requestAnimationFrame(mountMap)
+
+    // Re-mount only when available width crosses detail breakpoints
+    activeMapResizeObserver = new ResizeObserver((entries) => {
+      if (destroyed || !entries?.length) return
+      const width = entries[0].contentRect?.width || 0
+      const bp = getDetailBreakpoint(width)
+      if (bp !== lastBreakpoint) {
+        if (activeMapMountRaf != null) cancelAnimationFrame(activeMapMountRaf)
+        activeMapMountRaf = requestAnimationFrame(mountMap)
+      }
+    })
+    activeMapResizeObserver.observe(mapContainer)
+
+    // Ensure we stop recreating if this page gets disconnected
+    queueMicrotask(() => {
+      if (!container.isConnected) {
+        destroyed = true
+        if (activeMapResizeObserver) {
+          activeMapResizeObserver.disconnect()
+          activeMapResizeObserver = null
+        }
+        if (activeMapMountRaf != null) {
+          cancelAnimationFrame(activeMapMountRaf)
+          activeMapMountRaf = null
+        }
+      }
+    })
   }
 
   // Add tour button
@@ -106,24 +157,6 @@ export function renderHome(container) {
   }
 
   const grid = container.querySelector('#envelope-grid')
-
-  // First-run orientation (inline, dismissible)
-  try {
-    const dismissed = localStorage.getItem(ORIENTATION_KEY) === 'true'
-    const box = container.querySelector('#first-run-orientation')
-    const btn = container.querySelector('#dismiss-orientation')
-    if (box && !dismissed) {
-      box.style.display = 'block'
-    }
-    if (btn && box) {
-      btn.addEventListener('click', () => {
-        try { localStorage.setItem(ORIENTATION_KEY, 'true') } catch { /* ignore */ }
-        box.style.display = 'none'
-      })
-    }
-  } catch {
-    // ignore
-  }
 
   // Glossary inline definitions (click a term above)
   const bindGlossary = () => {

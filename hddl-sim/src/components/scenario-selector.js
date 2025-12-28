@@ -32,18 +32,18 @@ export function createScenarioSelector() {
     .scenario-selector select {
       background: color-mix(in srgb, var(--vscode-titleBar-activeForeground) 12%, transparent);
       color: var(--vscode-titleBar-activeForeground);
-      border: 1px solid color-mix(in srgb, var(--vscode-titleBar-activeForeground) 25%, transparent);
+      border: 2px solid var(--vscode-statusBar-foreground, #ffffff);
       border-radius: 3px;
       padding: 4px 26px 4px 10px;
       font-family: var(--vscode-font-family);
       font-size: 11px;
-      font-weight: 500;
+      font-weight: 600;
       cursor: pointer;
       outline: none;
       min-width: 260px;
       appearance: none;
       color-scheme: dark;
-      background-image: url("data:image/svg+xml,%3Csvg width='10' height='10' viewBox='0 0 10 10' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M2 3L5 6L8 3' stroke='%23ffffff' stroke-width='1.3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-image: url("data:image/svg+xml,%3Csvg width='10' height='10' viewBox='0 0 10 10' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M2 3L5 6L8 3' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
       background-position: right 8px center;
     }

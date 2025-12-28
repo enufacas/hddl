@@ -234,6 +234,13 @@ export function renderDocs(container) {
               </div>
               <span class="doc-arrow">→</span>
             </a>
+            <a href="/specification" class="doc-link" data-route>
+              <div class="doc-content">
+                <div class="doc-title">Interactive Specification Explorer</div>
+                <div class="doc-desc">Explore HDDL scenarios and decision telemetry</div>
+              </div>
+              <span class="doc-arrow">→</span>
+            </a>
           </div>
         </div>
 

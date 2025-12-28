@@ -4,8 +4,8 @@ export function createTourButton(tourFunction = startTour) {
   const button = document.createElement('button')
   button.className = 'monaco-button tour-button'
   button.innerHTML = `
-    <span class="codicon codicon-lightbulb"></span>
-    Explain this to me
+    <span class="codicon codicon-question"></span>
+    <span class="tour-button-text">Explain this to me</span>
   `
   button.style.cssText = `
     background: #e5c300;
