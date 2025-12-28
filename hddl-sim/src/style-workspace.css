@@ -3119,30 +3119,41 @@ body.mobile-nav-open .mobile-nav-overlay {
     
     /* Map header row - Decision Envelopes header with View As dropdown */
     .page-container > div:first-child {
-        flex-direction: column !important;
-        align-items: flex-start !important;
-        gap: 12px !important;
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        gap: 8px !important;
         margin-bottom: 16px !important;
+        flex-wrap: wrap !important;
     }
     
     /* Left section with icon, title, and tour button */
     .page-container > div:first-child > div:first-child {
         display: flex !important;
         align-items: center !important;
-        gap: 10px !important;
-        width: 100% !important;
+        gap: 8px !important;
+        flex: 1 !important;
+        min-width: 0 !important;
     }
     
     /* Icon size */
     .page-container > div:first-child > div:first-child .codicon {
-        font-size: 18px !important;
+        font-size: 16px !important;
         flex-shrink: 0 !important;
     }
     
     /* Title container */
     .page-container > div:first-child > div:first-child > div {
-        flex: 1 !important;
+        flex: 0 1 auto !important;
         min-width: 0 !important;
+    }
+    
+    /* Title text */
+    .page-container > div:first-child > div:first-child > div h1 {
+        font-size: 13px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
     }
     
     /* Tour button container */
@@ -3152,32 +3163,35 @@ body.mobile-nav-open .mobile-nav-overlay {
     
     /* Tour button itself */
     #tour-button-container button {
-        padding: 6px 10px !important;
-        font-size: 12px !important;
-        min-height: 32px !important;
+        padding: 4px 8px !important;
+        font-size: 11px !important;
+        min-height: 28px !important;
         white-space: nowrap !important;
     }
     
-    /* View As section - full width on mobile */
+    /* View As section - compact on same row */
     .page-container > div:first-child > div:last-child {
-        width: 100% !important;
-        min-width: 100% !important;
-        max-width: 100% !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        flex-shrink: 0 !important;
     }
     
     /* View As label */
     .page-container > div:first-child > div:last-child > div:first-child {
-        font-size: 10px !important;
-        margin-bottom: 6px !important;
+        font-size: 9px !important;
+        margin-bottom: 0 !important;
+        white-space: nowrap !important;
+        color: var(--vscode-statusBar-foreground) !important;
     }
     
     /* View As dropdown */
     #steward-filter {
-        width: 100% !important;
-        padding: 8px 10px !important;
-        font-size: 13px !important;
-        min-height: 36px !important;
-        height: 36px !important;
+        min-width: 140px !important;
+        padding: 6px 8px !important;
+        font-size: 12px !important;
+        min-height: 32px !important;
+        height: 32px !important;
     }
     
     .page-header {
