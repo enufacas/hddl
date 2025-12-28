@@ -23,6 +23,9 @@ Any document not listed here is non-canonical.
 ## Portable Spec (Wire Format + Schemas)
 - spec/Authority_Order.md
 - spec/Scenario_Replay_Wire_Format.md
+- spec/Canonical_Event_Patterns.md
+- spec/Agent_Learning_Feedback_Loop.md
+- spec/Denied_Decisions_vs_Boundary_Interactions.md
 - spec/Scenario_Interaction_Format.md
 - spec/Drift_Gap_Analysis.md
 - spec/Implementers_Guide.md

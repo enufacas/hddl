@@ -264,7 +264,39 @@ npm run validate:scenarios
   "revision_id": "rev-abc123",
   "envelope_version": 2,
   "nextConstraints": ["Max response time: 3min"],
+  "resolvesEventId": "boundary_interaction:12_0:ENV-001:5",
   "label": "Revised constraint"
+}
+```
+
+**Embedding:** Stores decision/revision in memory for agent retrieval
+```json
+{
+  "type": "embedding",
+  "hour": 13.5,
+  "envelopeId": "ENV-001",
+  "embeddingId": "EMB-001",
+  "embeddingType": "revision",
+  "sourceEventId": "rev-abc123",
+  "actorRole": "Customer Steward",
+  "semanticContext": "response time constraint relaxed from 2min to 3min to reduce escalations",
+  "semanticVector": [0.35, 0.55],
+  "label": "Policy change embedded"
+}
+```
+
+**Retrieval:** Agent queries decision memory before making decision
+```json
+{
+  "type": "retrieval",
+  "hour": 14.8,
+  "envelopeId": "ENV-001",
+  "actorName": "ResponseTimeMonitor",
+  "actorRole": "Customer Steward",
+  "queryText": "response time constraint escalation patterns",
+  "retrievedEmbeddings": ["EMB-HIST-001", "EMB-001"],
+  "relevanceScores": [0.89, 0.94],
+  "label": "Queried historical patterns"
 }
 ```
 
@@ -281,26 +313,267 @@ npm run validate:scenarios
 }
 ```
 
+---
+
+## Closed Loop Requirements (CRITICAL)
+
+**Last Updated:** 2025-12-28
+
+### ⚠️ REQUIRED Embeddings
+
+HDDL scenarios MUST demonstrate complete feedback loops. The following are **normative requirements**:
+
+#### 1. Every Revision MUST Have an Embedding
+
+```json
+// Hour 30.5: Revision
+{
+  "type": "revision",
+  "eventId": "revision:30_5:ENV-003:13a",
+  "hour": 30.5,
+  "envelopeId": "ENV-003",
+  "revisionType": "constraint_relaxation",
+  "resolvesEventId": "boundary_interaction:28_7:ENV-003:12"
+}
+
+// Hour 31: Revision Embedding (REQUIRED!)
+{
+  "type": "embedding",
+  "hour": 31,
+  "embeddingId": "EMB-011",
+  "embeddingType": "revision",
+  "sourceEventId": "revision:30_5:ENV-003:13a",
+  "envelopeId": "ENV-003",
+  "actorRole": "Pricing Steward",
+  "semanticContext": "premium threshold increased to 20% when paired with retention incentives",
+  "semanticVector": [0.30, 0.65],
+  "label": "Policy change stored"
+}
+```
+
+**Why:** Policy changes must be retrievable for agents to understand governance evolution.
+
+#### 2. Every Boundary Interaction MUST Have an Embedding
+
+```json
+// Hour 28.7: Boundary Interaction
+{
+  "type": "boundary_interaction",
+  "eventId": "boundary:28_7:ENV-003:12",
+  "hour": 28.7,
+  "envelopeId": "ENV-003",
+  "actorName": "QuoteGenerator",
+  "boundary_kind": "escalated",
+  "boundary_reason": "price_threshold_exceeded"
+}
+
+// Hour 29: Boundary Embedding (REQUIRED!)
+{
+  "type": "embedding",
+  "hour": 29,
+  "embeddingId": "EMB-009",
+  "embeddingType": "boundary_interaction",
+  "sourceEventId": "boundary:28_7:ENV-003:12",
+  "envelopeId": "ENV-003",
+  "actorRole": "Pricing Steward",
+  "actorName": "QuoteGenerator",
+  "semanticContext": "renewal premium increase exceeding 15% threshold requiring approval",
+  "semanticVector": [0.80, 0.75],
+  "label": "Escalation pattern stored"
+}
+```
+
+**Why:** Escalation patterns teach agents their authority boundaries.
+
+### 🎯 RECOMMENDED Patterns
+
+#### 3. Retrieval Before Boundary Interactions
+
+Show agents "thinking with memory" before escalating:
+
+```json
+// Hour 78.35: Retrieval
+{
+  "type": "retrieval",
+  "hour": 78.35,
+  "actorName": "QuoteGenerator",
+  "queryText": "premium increase threshold escalation approval",
+  "retrievedEmbeddings": ["EMB-009", "EMB-010", "EMB-HIST-004"],
+  "relevanceScores": [0.94, 0.88, 0.72]
+}
+
+// Hour 78.4: Boundary (shows agent consulted memory)
+{
+  "type": "boundary_interaction",
+  "hour": 78.4,
+  "actorName": "QuoteGenerator",
+  "boundary_kind": "escalated"
+}
+```
+
+#### 4. Historical Baseline Embeddings
+
+Agents should start with pre-existing knowledge (hour < 0):
+
+```json
+{
+  "type": "embedding",
+  "hour": -48,
+  "embeddingId": "EMB-HIST-001",
+  "embeddingType": "decision",
+  "sourceEventId": "historical",
+  "envelopeId": "ENV-001",
+  "actorRole": "Customer Steward",
+  "label": "Historical baseline: Standard refund patterns",
+  "detail": "Pre-existing decision memory: Common refund scenarios and resolution patterns.",
+  "semanticContext": "customer refund approval patterns with documentation requirements",
+  "semanticVector": [0.65, 0.35]
+}
+```
+
+**Why:** Makes agent behavior realistic (not starting with blank memory).
+
+#### 5. Steward Decisions Should Have Embeddings
+
+Especially decisions resolving boundary interactions:
+
+```json
+// Hour 29.1: Steward Decision
+{
+  "type": "decision",
+  "eventId": "decision:29_1:ENV-003:13",
+  "hour": 29.1,
+  "status": "allowed",
+  "actorName": "Alicia Rodriguez",
+  "actorRole": "Pricing Steward"
+}
+
+// Hour 29.5: Decision Embedding (recommended)
+{
+  "type": "embedding",
+  "hour": 29.5,
+  "embeddingId": "EMB-010",
+  "embeddingType": "decision",
+  "sourceEventId": "decision:29_1:ENV-003:13",
+  "semanticContext": "18% premium increase approved with accident forgiveness retention program",
+  "semanticVector": [0.65, 0.65]
+}
+```
+
+---
+
+## The 6-Event Feedback Cycle
+
+Complete pattern for boundary → approval → policy evolution:
+
+```json
+// 1. Retrieval (hour X-0.5) - recommended
+{
+  "type": "retrieval",
+  "hour": 28.65,
+  "queryText": "similar situations + resolution",
+  "retrievedEmbeddings": ["EMB-HIST-004", "EMB-001"],
+  "relevanceScores": [0.93, 0.81]
+}
+
+// 2. Boundary Interaction (hour X)
+{
+  "type": "boundary_interaction",
+  "eventId": "boundary:28_7",
+  "hour": 28.7,
+  "boundary_kind": "escalated"
+}
+
+// 3. Boundary Embedding (hour X+0.5) - REQUIRED
+{
+  "type": "embedding",
+  "hour": 29,
+  "embeddingType": "boundary_interaction",
+  "sourceEventId": "boundary:28_7"
+}
+
+// 4. Steward Decision (hour X+1)
+{
+  "type": "decision",
+  "eventId": "decision:29_1",
+  "hour": 29.1,
+  "status": "allowed"
+}
+
+// 5. Decision Embedding (hour X+1.5) - recommended
+{
+  "type": "embedding",
+  "hour": 29.5,
+  "embeddingType": "decision",
+  "sourceEventId": "decision:29_1"
+}
+
+// 6. Revision (hour X+2)
+{
+  "type": "revision",
+  "eventId": "revision:30_5",
+  "hour": 30.5,
+  "resolvesEventId": "boundary:28_7"
+}
+
+// 7. Revision Embedding (hour X+2.5) - REQUIRED
+{
+  "type": "embedding",
+  "hour": 31,
+  "embeddingType": "revision",
+  "sourceEventId": "revision:30_5"
+}
+```
+
+See [Canonical_Event_Patterns.md](Canonical_Event_Patterns.md) for complete details.
+
+---
+
+## Semantic Vector Space
+
+The `semanticVector: [x, y]` field positions embeddings in 2D space where similar patterns cluster:
+
+- **X-axis**: `policy (0) ↔ operational (1)`
+  - 0.0-0.3: High-level governance, policy definitions
+  - 0.7-1.0: Day-to-day operational decisions
+
+- **Y-axis**: `routine (0) ↔ exceptional (1)`
+  - 0.0-0.3: Standard procedures, common patterns
+  - 0.7-1.0: Unusual cases, edge conditions, escalations
+
+**Examples:**
+- Standard approval: `[0.65, 0.25]` - operational + routine
+- Threshold escalation: `[0.80, 0.75]` - very operational + exceptional
+- Policy revision: `[0.30, 0.65]` - policy-level + exceptional
+
+---
+
 #### 4. Temporal Coherence Rules
 
 1. **Envelope Timing**
    - Events must occur within envelope window (`createdHour` ≤ `event.hour` ≤ `endHour`)
    - Revisions should precede version-bumped events
 
-2. **Agent Assignment**
+2. **Chronological Consistency (CRITICAL)**
+   - Retrievals MUST only reference embeddings with `hour < retrieval.hour`
+   - Time paradoxes (retrieving future knowledge) will fail validation
+
+3. **Agent Assignment**
    - Agents must be assigned to envelopes in fleet definitions
    - `agentId` in events must match fleet agent IDs
 
-3. **Causal Ordering**
+4. **Causal Ordering**
    - Boundary interactions → often trigger DSG sessions
    - DSG sessions → may result in revisions
    - Revisions → bump `envelope_version`
+   - Revisions → MUST have embeddings (+0.5 to +1 hour later)
+   - Boundary interactions → MUST have embeddings (+0.5 to +1 hour later)
 
-4. **Steward Consistency**
+5. **Steward Consistency**
    - `ownerRole` must match one of the steward roles in fleets
    - Supported roles: Customer Steward, HR Steward, Sales Steward, Data Steward, Domain Engineer, Engineering Steward, Resiliency Steward, Business Domain Steward
 
-#### 5. Sample AI Prompt
+#### 5. Sample AI Prompt (Updated for Closed Loops)
 
 ```
 Generate a valid HDDL scenario JSON file following these rules:
@@ -308,24 +581,37 @@ Generate a valid HDDL scenario JSON file following these rules:
 1. Use schema version 2
 2. Create 3-5 decision envelopes spanning 48 hours
 3. Define steward fleets with 2-4 agents each
-4. Generate 20-40 events including:
+4. Generate 30-50 events including:
+   - Historical baseline embeddings at hour -48 (2-4 per domain)
    - Signals (metric observations)
    - Decisions (agent actions)
+   - Retrieval events before boundary interactions
    - Boundary interactions (constraint warnings)
-   - At least 1 revision (steward updates envelope)
+   - Boundary embeddings (+0.5 hour after each boundary) - REQUIRED
+   - At least 2 revisions (steward updates envelope)
+   - Revision embeddings (+0.5 hour after each revision) - REQUIRED
    - Optional: 1 DSG session (multi-steward coordination)
-5. Ensure events occur within envelope time windows
+5. Ensure CLOSED LOOPS:
+   - Every revision has embedding with sourceEventId
+   - Every boundary_interaction has embedding with sourceEventId
+   - Retrievals only reference embeddings with hour < retrieval.hour
 6. Use realistic hour values (0.0 to 48.0)
 7. Make event labels human-readable narratives
-8. Follow naming conventions (ENV-XXX, AG-XXX-XX, etc.)
+8. Follow naming conventions (ENV-XXX, AG-XXX-XX, EMB-XXX)
+9. Position embeddings in semantic vector space [x, y]
+   - x: policy(0) ↔ operational(1)
+   - y: routine(0) ↔ exceptional(1)
 
-Output valid JSON matching hddl-scenario.schema.json.
+Output valid JSON matching hddl-scenario.schema.json with complete feedback loops.
 ```
 
 ### 📚 Reference Documentation
 
 - **Schema:** [hddl-scenario.schema.json](../../hddl-sim/schemas/hddl-scenario.schema.json)
 - **Format Spec:** [Scenario_Replay_Wire_Format.md](Scenario_Replay_Wire_Format.md)
+- **Canonical Patterns:** [Canonical_Event_Patterns.md](Canonical_Event_Patterns.md) ⭐ **Start here for closed loops**
+- **Feedback Loop Architecture:** [Agent_Learning_Feedback_Loop.md](Agent_Learning_Feedback_Loop.md)
+- **Implementers Guide:** [Implementers_Guide.md](Implementers_Guide.md)
 - **Interactive Format:** [Scenario_Interaction_Format.md](Scenario_Interaction_Format.md)
 - **Telemetry Spec:** [Decision_Telemetry_Specification.md](../foundations/Decision_Telemetry_Specification.md)
 - **Canon Registry:** [Canon_Registry.md](../Canon_Registry.md)
@@ -337,9 +623,13 @@ Output valid JSON matching hddl-scenario.schema.json.
 # 1. Generate scenario (AI or manual)
 # 2. Save as .scenario.json in hddl-sim/src/sim/scenarios/
 
-# 3. Validate schema compliance
+# 3. Validate schema compliance AND closed loops
 cd hddl-sim
-npm run validate:scenarios
+npm run conformance
+
+# This runs:
+# - validate-scenarios.mjs (schema validation)
+# - validate-closed-loops.mjs (embedding requirements)
 
 # 4. Load in simulator
 # The app auto-loads from scenarios/ directory
@@ -349,8 +639,43 @@ npm run dev
 # Open http://localhost:5173
 ```
 
+**📖 For detailed validation documentation, see [hddl-sim/VALIDATION.md](../../hddl-sim/VALIDATION.md)** - includes error explanations, fix examples, and integration patterns.
+
+### ✅ Conformance Checklist
+
+Your scenario MUST pass these validations:
+
+- ✅ **Schema valid** - Conforms to hddl-scenario.schema.json
+- ✅ **Every revision has embedding** - With matching sourceEventId
+- ✅ **Every boundary has embedding** - With matching sourceEventId
+- ✅ **Chronologically consistent** - Retrievals only reference existing embeddings
+- ⚠️ **Boundaries have retrieval** - Shows agent thinking (recommended)
+- ⚠️ **Historical baseline exists** - Pre-existing knowledge (recommended)
+- ⚠️ **Steward decisions have embeddings** - Judgment patterns (recommended)
+
+Run `npm run conformance` to see detailed validation results.
+
+## Living Reference: Insurance Underwriting Scenario
+
+The most complete example of a closed-loop scenario is:
+
+**[insurance-underwriting.scenario.json](../../hddl-sim/src/sim/scenarios/insurance-underwriting.scenario.json)**
+
+This scenario demonstrates:
+- 4 envelopes across insurance domains
+- 4 steward fleets with multiple agents
+- Historical baseline embeddings (hour -48)
+- Complete 6-event feedback cycles
+- Retrieval events before decisions
+- Semantic vector positioning
+- ~1050 lines of realistic event data
+
+**Use this as your reference when generating new scenarios.**
+
 ## Conclusion
 
-**The system is production-ready for AI-generated scenarios.** The combination of formal JSON schema, validation tools, clear event types, and comprehensive documentation makes it straightforward for AI systems to generate compliant, realistic timeline scenarios.
+**The system is production-ready for AI-generated scenarios.** The combination of formal JSON schema, validation tools, clear event types, comprehensive documentation, and **closed loop requirements** makes it straightforward for AI systems to generate compliant, realistic timeline scenarios that demonstrate genuine agent learning.
 
 The schema is intentionally **UI-agnostic** — generated scenarios are portable and can be consumed by any HDDL-compliant implementation, not just this simulation platform.
+
+**Key Insight:** Traditional audit logs record "what happened." HDDL scenarios with closed loops demonstrate **how agents learn from experience, how policy evolves with rationale, and how the feedback mechanism creates continuous improvement.**

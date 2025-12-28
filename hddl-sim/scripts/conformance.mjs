@@ -7,6 +7,7 @@ const scriptsDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)))
 const steps = [
   { name: 'validate:canon', script: 'validate-canon-registry.mjs' },
   { name: 'validate:scenarios', script: 'validate-scenarios.mjs' },
+  { name: 'validate:closed-loops', script: 'validate-closed-loops.mjs' },
 ]
 
 for (const step of steps) {

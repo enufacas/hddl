@@ -147,10 +147,10 @@ const ENVELOPE_DENSITY = {
  * radius: radius for icon mode circle
  */
 const ENVELOPE_SIZES = {
-  detailed: { baseWidth: 120, baseHeight: 75, scale: 1.0 },
-  normal: { baseWidth: 90, baseHeight: 56, scale: 0.75 },
-  compact: { baseWidth: 65, baseHeight: 40, scale: 0.55 },
-  icon: { baseWidth: 40, baseHeight: 40, scale: 0.35, radius: 18 }
+  detailed: { baseWidth: 140, baseHeight: 88, scale: 1.0 },
+  normal: { baseWidth: 110, baseHeight: 68, scale: 0.75 },
+  compact: { baseWidth: 80, baseHeight: 50, scale: 0.55 },
+  icon: { baseWidth: 48, baseHeight: 48, scale: 0.35, radius: 22 }
 }
 
 /**
@@ -373,7 +373,7 @@ export function createHDDLMap(container, options = {}) {
     .attr('x', col1Center).attr('y', 18).attr('text-anchor', 'middle')
     .text(getAdaptiveHeader('AGENT FLEETS', detailLevel))
     .attr('fill', 'var(--vscode-editor-foreground)')
-    .style('font-size', detailLevel === DETAIL_LEVELS.MINIMAL ? '6px' : '8px')
+    .style('font-size', detailLevel === DETAIL_LEVELS.MINIMAL ? '8px' : '10px')
     .style('font-weight', '800').style('letter-spacing', '0.6px')
     .style('paint-order', 'stroke').style('stroke', 'var(--vscode-editor-background)')
     .style('stroke-width', '3px').style('opacity', 0.85)
@@ -383,7 +383,7 @@ export function createHDDLMap(container, options = {}) {
     .attr('x', col2Center).attr('y', 18).attr('text-anchor', 'middle')
     .text(getAdaptiveHeader('DECISION ENVELOPES', detailLevel))
     .attr('fill', 'var(--vscode-editor-foreground)')
-    .style('font-size', detailLevel === DETAIL_LEVELS.MINIMAL ? '6px' : '8px')
+    .style('font-size', detailLevel === DETAIL_LEVELS.MINIMAL ? '8px' : '10px')
     .style('font-weight', '800').style('letter-spacing', '0.6px')
     .style('paint-order', 'stroke').style('stroke', 'var(--vscode-editor-background)')
     .style('stroke-width', '3px').style('opacity', 0.85)
@@ -393,7 +393,7 @@ export function createHDDLMap(container, options = {}) {
     .attr('x', col3Center).attr('y', 18).attr('text-anchor', 'middle')
     .text(getAdaptiveHeader('STEWARDS', detailLevel))
     .attr('fill', 'var(--vscode-editor-foreground)')
-    .style('font-size', detailLevel === DETAIL_LEVELS.MINIMAL ? '6px' : '8px')
+    .style('font-size', detailLevel === DETAIL_LEVELS.MINIMAL ? '8px' : '10px')
     .style('font-weight', '800').style('letter-spacing', '0.6px')
     .style('paint-order', 'stroke').style('stroke', 'var(--vscode-editor-background)')
     .style('stroke-width', '3px').style('opacity', 0.85)
@@ -408,7 +408,7 @@ export function createHDDLMap(container, options = {}) {
       .attr('text-anchor', 'middle')
       .text('WORLD (Telemetry) ↓')
       .attr('fill', 'var(--vscode-statusBar-foreground)')
-      .style('font-size', '7px')
+      .style('font-size', '9px')
       .style('font-weight', '700')
       .style('opacity', 0.65)
       .style('paint-order', 'stroke')
@@ -462,7 +462,7 @@ export function createHDDLMap(container, options = {}) {
       .style('border-radius', '6px')
       .style('pointer-events', 'none')
       .style('z-index', '10000')
-      .style('font-size', '13px')
+      .style('font-size', '14px')
       .style('box-shadow', '0 6px 16px rgba(0,0,0,0.5)')
       .style('backdrop-filter', 'blur(8px)')
       .style('display', 'none')
@@ -494,7 +494,7 @@ export function createHDDLMap(container, options = {}) {
       .style('border-radius', '6px')
       .style('pointer-events', 'none')
       .style('z-index', '10000')
-      .style('font-size', '13px')
+      .style('font-size', '14px')
       .style('box-shadow', '0 6px 16px rgba(0,0,0,0.5)')
       .style('backdrop-filter', 'blur(8px)')
       .style('display', 'none')
@@ -527,7 +527,7 @@ export function createHDDLMap(container, options = {}) {
       .style('border-radius', '6px')
       .style('pointer-events', 'none')
       .style('z-index', '10000')
-      .style('font-size', '13px')
+      .style('font-size', '14px')
       .style('box-shadow', '0 6px 16px rgba(0,0,0,0.5)')
       .style('backdrop-filter', 'blur(8px)')
       .style('display', 'none')
@@ -578,10 +578,10 @@ export function createHDDLMap(container, options = {}) {
     tooltipNode
       .attr('data-steward-key', stewardKey)
       .html(`
-        <div style="font-weight: 800; font-size: 14px; margin-bottom: 6px; color: ${stewardColor};">${stewardRole}</div>
-        <div style="font-size: 11px; opacity: 0.85; margin-bottom: 8px;">Human Decision Authority</div>
+        <div style="font-weight: 800; font-size: 16px; margin-bottom: 6px; color: ${stewardColor};">${stewardRole}</div>
+        <div style="font-size: 13px; opacity: 0.85; margin-bottom: 8px;">Human Decision Authority</div>
         
-        <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 11px;">
+        <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 13px;">
           <div style="display:flex; justify-content: space-between; gap: 12px; margin-bottom: 6px;">
             <div style="opacity: 0.75;">Envelopes</div>
             <div>${activeEnvelopes.length} active / ${ownedEnvelopes.length} total</div>
@@ -601,9 +601,9 @@ export function createHDDLMap(container, options = {}) {
 
     tooltipNode
       .html(`
-        <div style="font-weight: 600; margin-bottom: 6px; font-size: 14px;">${envelopeNode?.label || envelopeNode?.id || 'Envelope'}</div>
-        <div style="font-size: 11px; opacity: 0.85; margin-bottom: 8px;">${envelopeNode?.name || ''}</div>
-        <div style="font-size: 11px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.1);">
+        <div style="font-weight: 600; margin-bottom: 6px; font-size: 16px;">${envelopeNode?.label || envelopeNode?.id || 'Envelope'}</div>
+        <div style="font-size: 13px; opacity: 0.85; margin-bottom: 8px;">${envelopeNode?.name || ''}</div>
+        <div style="font-size: 13px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.1);">
           <span style="opacity:0.75;">Steward:</span>
           <span style="font-weight: 700;">${envelopeNode?.ownerRole || 'Unknown'}</span>
         </div>
@@ -683,14 +683,14 @@ export function createHDDLMap(container, options = {}) {
       tooltipNode
         .attr('data-agent-key', agentKey)
         .html(`
-          <div style="font-weight: 600; margin-bottom: 6px; font-size: 14px;">${agentNode.name}</div>
-          <div style="font-size: 11px; opacity: 0.85; margin-bottom: 8px;">${agentNode.role || ''}</div>
-          <div style="font-size: 11px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.1);">
+          <div style="font-weight: 600; margin-bottom: 6px; font-size: 16px;">${agentNode.name}</div>
+          <div style="font-size: 13px; opacity: 0.85; margin-bottom: 8px;">${agentNode.role || ''}</div>
+          <div style="font-size: 13px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.1);">
             <span style="color: ${agentNode.isRecentlyActive ? '#4ec9b0' : '#cccccc'};">
               ${agentNode.isRecentlyActive ? '● Active' : '○ Idle'}
             </span>
           </div>
-          ${fleetRole ? `<div style="margin-top: 8px; font-size: 11px; opacity: 0.85;">
+          ${fleetRole ? `<div style="margin-top: 8px; font-size: 13px; opacity: 0.85;">
             <span style="opacity:0.75;">Steward:</span>
             <span style="font-weight: 700; color: ${fleetColor};">${fleetRole}</span>
           </div>` : ''}
@@ -763,27 +763,27 @@ export function createHDDLMap(container, options = {}) {
       </div>
       
       <div style="display: flex; gap: 12px; margin-bottom: 20px;">
-        <span style="background: var(--vscode-badge-background); padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600;">
+        <span style="background: var(--vscode-badge-background); padding: 4px 10px; border-radius: 12px; font-size: 13px; font-weight: 600;">
           ${status.toUpperCase()}
         </span>
-        <span style="background: var(--vscode-input-background); padding: 4px 10px; border-radius: 12px; font-size: 11px; font-family: monospace;">
+        <span style="background: var(--vscode-input-background); padding: 4px 10px; border-radius: 12px; font-size: 13px; font-family: monospace;">
           v${semver}
         </span>
-        <span style="background: var(--vscode-input-background); padding: 4px 10px; border-radius: 12px; font-size: 11px;">
+        <span style="background: var(--vscode-input-background); padding: 4px 10px; border-radius: 12px; font-size: 13px;">
           ${envelopeNode.ownerRole}
         </span>
       </div>
       
       <div style="margin-bottom: 20px;">
-        <h3 style="font-size: 13px; font-weight: 600; text-transform: uppercase; color: var(--vscode-statusBar-foreground); margin-bottom: 8px; letter-spacing: 0.5px;">Domain</h3>
+        <h3 style="font-size: 15px; font-weight: 600; text-transform: uppercase; color: var(--vscode-statusBar-foreground); margin-bottom: 8px; letter-spacing: 0.5px;">Domain</h3>
         <div style="padding: 8px; background: var(--vscode-input-background); border-radius: 4px;">${envelope.domain || 'Not specified'}</div>
       </div>
       
       <div style="margin-bottom: 20px;">
-        <h3 style="font-size: 13px; font-weight: 600; text-transform: uppercase; color: var(--vscode-statusBar-foreground); margin-bottom: 8px; letter-spacing: 0.5px;">Decision Authority (Assumptions)</h3>
+        <h3 style="font-size: 15px; font-weight: 600; text-transform: uppercase; color: var(--vscode-statusBar-foreground); margin-bottom: 8px; letter-spacing: 0.5px;">Decision Authority (Assumptions)</h3>
         <div style="display: flex; flex-direction: column; gap: 8px;">
           ${(envelope.assumptions || []).map(a => `
-            <div style="padding: 10px; background: var(--vscode-input-background); border-left: 3px solid var(--vscode-focusBorder); border-radius: 3px; font-size: 13px;">
+            <div style="padding: 10px; background: var(--vscode-input-background); border-left: 3px solid var(--vscode-focusBorder); border-radius: 3px; font-size: 14px;">
               ${a}
             </div>
           `).join('') || '<div style="color: var(--vscode-statusBar-foreground); font-style: italic;">No assumptions defined</div>'}
@@ -791,10 +791,10 @@ export function createHDDLMap(container, options = {}) {
       </div>
       
       <div style="margin-bottom: 20px;">
-        <h3 style="font-size: 13px; font-weight: 600; text-transform: uppercase; color: var(--vscode-statusBar-foreground); margin-bottom: 8px; letter-spacing: 0.5px;">Constraints</h3>
+        <h3 style="font-size: 15px; font-weight: 600; text-transform: uppercase; color: var(--vscode-statusBar-foreground); margin-bottom: 8px; letter-spacing: 0.5px;">Constraints</h3>
         <div style="display: flex; flex-direction: column; gap: 8px;">
           ${(envelope.constraints || []).map(c => `
-            <div style="padding: 10px; background: var(--vscode-input-background); border-left: 3px solid var(--status-warning); border-radius: 3px; font-size: 13px;">
+            <div style="padding: 10px; background: var(--vscode-input-background); border-left: 3px solid var(--status-warning); border-radius: 3px; font-size: 14px;">
               ${c}
             </div>
           `).join('') || '<div style="color: var(--vscode-statusBar-foreground); font-style: italic;">No constraints defined</div>'}
@@ -802,8 +802,8 @@ export function createHDDLMap(container, options = {}) {
       </div>
       
       <div style="margin-bottom: 0;">
-        <h3 style="font-size: 13px; font-weight: 600; text-transform: uppercase; color: var(--vscode-statusBar-foreground); margin-bottom: 8px; letter-spacing: 0.5px;">Time Window</h3>
-        <div style="padding: 8px; background: var(--vscode-input-background); border-radius: 4px; font-family: monospace; font-size: 12px;">
+        <h3 style="font-size: 15px; font-weight: 600; text-transform: uppercase; color: var(--vscode-statusBar-foreground); margin-bottom: 8px; letter-spacing: 0.5px;">Time Window</h3>
+        <div style="padding: 8px; background: var(--vscode-input-background); border-radius: 4px; font-family: monospace; font-size: 14px;">
           Created: Day ${Math.floor((envelope.createdHour || 0) / 24)}, ${String(Math.floor((envelope.createdHour || 0) % 24)).padStart(2, '0')}:00<br>
           Ends: Day ${Math.floor((envelope.endHour || 48) / 24)}, ${String(Math.floor((envelope.endHour || 48) % 24)).padStart(2, '0')}:00
         </div>
@@ -997,7 +997,7 @@ export function createHDDLMap(container, options = {}) {
 
     const stewardCount = Math.max(1, fleets.length)
     const stewardStep = stewardCount > 1 ? usableHeight / (stewardCount - 1) : usableHeight
-    const stewardR = Math.max(14, Math.min(25, (stewardStep - 14) / 2))
+    const stewardR = Math.max(20, Math.min(36, (stewardStep - 14) / 2))
     const stewardScale = d3.scalePoint()
       .domain(fleets.map(f => f.stewardRole))
       .range([topMargin, topMargin + usableHeight])
@@ -1481,14 +1481,65 @@ export function createHDDLMap(container, options = {}) {
       })
       .filter(Boolean)
 
+    // Track steward processing state: boundary interaction received but no revision issued yet
+    // Find all boundary interactions up to current time
+    const boundaryInteractionsByRole = new Map()
+    allEvents
+      .filter(e => e && e.type === 'boundary_interaction')
+      .filter(e => typeof e.hour === 'number' && e.hour <= hour)
+      .forEach(e => {
+        const role = e.actorRole
+        if (!role) return
+        if (!boundaryInteractionsByRole.has(role)) {
+          boundaryInteractionsByRole.set(role, [])
+        }
+        boundaryInteractionsByRole.get(role).push({ eventId: e.eventId, hour: e.hour, envelopeId: e.envelopeId || e.envelope_id })
+      })
+    
+    // Find all revisions up to current time
+    const revisionsByRole = new Map()
+    allEvents
+      .filter(e => e && e.type === 'revision')
+      .filter(e => typeof e.hour === 'number' && e.hour <= hour)
+      .forEach(e => {
+        const role = e.actorRole
+        if (!role) return
+        if (!revisionsByRole.has(role)) {
+          revisionsByRole.set(role, [])
+        }
+        revisionsByRole.get(role).push({ eventId: e.eventId, hour: e.hour, resolvesEventId: e.resolvesEventId })
+      })
+    
+    // Update steward nodes with processing state
+    nodes.filter(n => n.type === 'steward').forEach(stewardNode => {
+      const role = stewardNode.name
+      const interactions = boundaryInteractionsByRole.get(role) || []
+      const revisions = revisionsByRole.get(role) || []
+      const resolvedEventIds = new Set(revisions.map(r => r.resolvesEventId).filter(Boolean))
+      
+      // Check if there are any unresolved interactions
+      const hasUnresolvedInteraction = interactions.some(i => i.eventId && !resolvedEventIds.has(i.eventId))
+      stewardNode.isProcessing = hasUnresolvedInteraction
+    })
+
     // --- Particles (Events) ---
     // Authority-first map story:
     // - signal: world -> envelope
-    // - boundary_interaction: envelope -> steward (actorRole)
+    // - boundary_interaction: agent -> envelope -> steward
     // - revision: steward (actorRole) -> envelope
+    // - retrieval: embedding store -> agent
     const flowEvents = recentEvents.filter(e =>
-      e.type === 'signal' || e.type === 'boundary_interaction' || e.type === 'revision' || e.type === 'decision'
+      e.type === 'signal' || e.type === 'boundary_interaction' || e.type === 'revision' || e.type === 'decision' || e.type === 'retrieval'
     )
+    
+    // Helper to find resolution time for boundary interactions (reuse allEvents from above)
+    function getResolutionTime(eventId) {
+      const resolving = allEvents.find(ev => 
+        (ev.type === 'revision' || ev.type === 'decision') && 
+        ev.resolvesEventId === eventId
+      )
+      return resolving?.hour || null
+    }
 
     flowEvents.forEach(e => {
       const pid = e.eventId || e.id || `${e.type}-${String(e.hour)}-${e.envelopeId || e.envelope_id || e.envelope_id}`
@@ -1521,31 +1572,35 @@ export function createHDDLMap(container, options = {}) {
       }
 
       if (e.type === 'decision') {
-        // agent -> envelope (allowed) OR agent -> steward (blocked)
+        // agent -> envelope (all decisions go to envelope first)
         if (agentNode) {
           sourceX = agentNode.x
           sourceY = agentNode.y
         }
-        if ((e.status === 'blocked' || e.status === 'denied') && (stewardNode || e.actorRole)) {
-          const t = stewardNode || nodes.find(n => n.type === 'steward' && n.name === (e.actorRole || ''))
-          if (t) {
-            targetX = t.x
-            targetY = t.y
-          }
-        } else {
-          targetX = envelopeNode.x
-          targetY = envelopeNode.y
-        }
+        // All decisions target envelope first
+        targetX = envelopeNode.x
+        targetY = envelopeNode.y
       }
 
       if (e.type === 'boundary_interaction') {
-        // envelope -> steward
-        sourceX = envelopeNode.x
-        sourceY = envelopeNode.y
-        if (stewardNode) {
-          targetX = stewardNode.x
-          targetY = stewardNode.y
+        // agent -> envelope (agent requests escalation, envelope forwards to steward)
+        // Look up agent by actorName since boundary_interaction events don't have agentId
+        const boundaryAgentNode = e.actorName 
+          ? nodes.find(n => n.type === 'agent' && n.name === e.actorName)
+          : null
+        
+        if (boundaryAgentNode) {
+          sourceX = boundaryAgentNode.x
+          sourceY = boundaryAgentNode.y
+        } else {
+          // Fallback to envelope if agent not found
+          sourceX = envelopeNode.x
+          sourceY = envelopeNode.y
         }
+        
+        // Target envelope first (boundary check), then forward to steward
+        targetX = envelopeNode.x
+        targetY = envelopeNode.y
       }
 
       if (e.type === 'revision') {
@@ -1558,6 +1613,49 @@ export function createHDDLMap(container, options = {}) {
         targetY = envelopeNode.y
       }
 
+      if (e.type === 'retrieval') {
+        // embedding store -> agent (agent queries decision memory)
+        // Source: embedding store at bottom of map (center of the 3D box)
+        sourceX = width * 0.5 + (Math.random() * 100 - 50) // Center with slight randomness
+        sourceY = mapHeight + 40 // Embedding store area (below the main map)
+        
+        // Target: agent that made the query (via actorName)
+        const retrievalAgentNode = e.actorName 
+          ? nodes.find(n => n.type === 'agent' && n.name === e.actorName)
+          : null
+        
+        if (retrievalAgentNode) {
+          targetX = retrievalAgentNode.x
+          targetY = retrievalAgentNode.y
+        } else {
+          // Fallback to envelope if agent not found
+          targetX = envelopeNode.x
+          targetY = envelopeNode.y
+        }
+      }
+
+      // Calculate orbit duration for boundary interactions based on resolution time
+      const resolutionHour = e.type === 'boundary_interaction' && e.eventId 
+        ? getResolutionTime(e.eventId) 
+        : null
+      const hoursDiff = resolutionHour ? (resolutionHour - e.hour) : 0
+      // Increase ticks per hour for more visible orbiting (25 ticks/hour)
+      // At 0.11 radians/tick, full circle = 57 ticks, so 25 ticks ≈ 0.4 circles
+      const orbitDuration = resolutionHour 
+        ? Math.max(25, Math.min(150, hoursDiff * 25)) // 25 ticks per hour, cap at 25-150 ticks
+        : 30 // Default if no resolution found
+      
+      // Debug logging for boundary interactions
+      if (e.type === 'boundary_interaction') {
+        console.log(`[Boundary Interaction] ${e.eventId}`, {
+          currentHour: e.hour,
+          resolutionHour,
+          hoursDiff,
+          orbitDuration,
+          orbitCircles: (orbitDuration * 0.11 / (2 * Math.PI)).toFixed(1)
+        })
+      }
+
       particles.push({
         id: pid,
         type: e.type,
@@ -1567,17 +1665,36 @@ export function createHDDLMap(container, options = {}) {
           const type = String(e.type || '').toLowerCase()
           const status = String(e.status || '').toLowerCase()
           const boundaryKind = String(e.boundary_kind || e.boundaryKind || '').toLowerCase()
+          const boundaryReason = String(e.boundary_reason || '').toLowerCase()
 
           let prefix = 'Event'
           if (type === 'signal') prefix = 'Signal'
           else if (type === 'revision') prefix = 'Revision'
-          else if (type === 'boundary_interaction') prefix = boundaryKind === 'escalated' ? 'Exception' : 'Boundary'
+          else if (type === 'retrieval') prefix = 'Query'
+          else if (type === 'boundary_interaction') {
+            // Use canonical boundary_kind for prefix
+            if (boundaryKind === 'escalated') prefix = 'Exception Request'
+            else if (boundaryKind === 'deferred') prefix = 'Deferred Request'
+            else if (boundaryKind === 'overridden') prefix = 'Override Request'
+            else prefix = 'Boundary'
+          }
           else if (type === 'decision') prefix = (status === 'blocked' || status === 'denied') ? 'Decision (blocked)' : 'Decision'
 
           let core = ''
           if (type === 'signal') core = String(e.label || e.signalKey || 'telemetry')
           else if (type === 'revision') core = String(e.label || e.revision_id || 'bounds updated')
-          else if (type === 'boundary_interaction') core = String(e.label || boundaryKind || 'interaction')
+          else if (type === 'retrieval') {
+            // Show number of retrieved embeddings and top relevance score
+            const count = (e.retrievedEmbeddings || []).length
+            const topScore = (e.relevanceScores || [])[0]
+            core = count > 0 
+              ? `${count} result${count !== 1 ? 's' : ''}${topScore ? ` (${(topScore * 100).toFixed(0)}%)` : ''}`
+              : 'decision memory'
+          }
+          else if (type === 'boundary_interaction') {
+            // Use boundary_reason for richer context if available
+            core = boundaryReason ? boundaryReason.replace(/_/g, ' ') : String(e.label || boundaryKind || 'interaction')
+          }
           else if (type === 'decision') core = String(e.label || (status ? status : 'executed'))
           else core = String(e.label || e.type || 'event')
 
@@ -1587,7 +1704,9 @@ export function createHDDLMap(container, options = {}) {
         sourceY,
         targetX,
         targetY,
-        targetNodeId: (e.type === 'boundary_interaction' && stewardNode)
+        targetNodeId: (e.type === 'revision' && stewardNode)
+          ? stewardNode.id
+          : (e.type === 'boundary_interaction' && stewardNode)
           ? stewardNode.id
           : envelopeNode.id,
         x: sourceX,
@@ -1606,13 +1725,22 @@ export function createHDDLMap(container, options = {}) {
           if (type === 'signal') return makeFlowCurve(sourceX, sourceY, targetX, targetY, -1)
           return makeFlowCurve(sourceX, sourceY, targetX, targetY, -1)
         })(),
-        life: 1.0,
+        life: e.type === 'boundary_interaction' ? 1.5 : 1.0, // Extra life for orbiting particles
         labelOpacity: 0.85,
 
-        // Canon cue: allowed decisions "operate within" envelope bounds.
+        // Canon cue: boundary interactions orbit steward while processing; allowed decisions orbit envelope.
         orbit: false,
+        orbitAfterTravel: false, // Boundary interactions orbit at steward, not at envelope
         orbitAngle: Math.random() * Math.PI * 2,
-        orbitTicksLeft: 0,
+        orbitTicksLeft: e.type === 'boundary_interaction' ? orbitDuration : (e.type === 'decision' && e.status !== 'blocked' && e.status !== 'denied' ? 18 : 0),
+        
+        // For boundary_interaction: pulse at envelope then continue to steward
+        hasWaypoint: e.type === 'boundary_interaction',
+        waypointPulseTicks: 0,
+        waypointPulseMax: e.type === 'boundary_interaction' ? 8 : 12, // Shorter pulse for boundary checks (8 ticks)
+        finalTargetX: (e.type === 'boundary_interaction' && stewardNode) ? stewardNode.x : (e.type === 'decision' && (e.status === 'blocked' || e.status === 'denied') && stewardNode) ? stewardNode.x : null,
+        finalTargetY: (e.type === 'boundary_interaction' && stewardNode) ? stewardNode.y : (e.type === 'decision' && (e.status === 'blocked' || e.status === 'denied') && stewardNode) ? stewardNode.y : null,
+        shouldOrbitAfterWaypoint: e.type === 'boundary_interaction', // Flag to orbit at steward after waypoint
       })
     })
 
@@ -1937,7 +2065,7 @@ export function createHDDLMap(container, options = {}) {
       .style('paint-order', 'stroke')
       .style('stroke', 'var(--vscode-editor-background)')
       .style('stroke-width', '4px')
-      .style('font-size', d => d.envDims?.density === 'detailed' ? '9px' : '8px')
+      .style('font-size', d => d.envDims?.density === 'detailed' ? '11px' : '10px')
       .style('font-weight', '800')
       .attr('fill', 'var(--vscode-statusBar-foreground)')
 
@@ -1956,7 +2084,7 @@ export function createHDDLMap(container, options = {}) {
       .attr('class', 'version-badge-text')
       .attr('text-anchor', 'middle')
       .attr('dominant-baseline', 'middle')
-      .style('font-size', '8px')
+      .style('font-size', '10px')
       .style('font-weight', '700')
       .style('font-family', 'ui-monospace, monospace')
 
@@ -1966,6 +2094,7 @@ export function createHDDLMap(container, options = {}) {
     // Steward Circle
     nodeEnter.filter(d => d.type === 'steward')
       .append('circle')
+      .attr('class', 'steward-circle')
       .attr('r', d => d.r)
       .attr('fill', 'var(--vscode-editor-background)')
       .attr('stroke', d => d.color || 'var(--status-warning)')
@@ -1973,6 +2102,7 @@ export function createHDDLMap(container, options = {}) {
       .attr('stroke-dasharray', '2 2')
       .style('cursor', 'pointer')
       .style('pointer-events', 'all')
+      .style('transform-origin', 'center')
       .on('pointerenter', (event, d) => {
         showStewardTooltip(d, event, event.currentTarget, { scenario: getScenario(), hour: getTimeHour() })
       })
@@ -1999,16 +2129,56 @@ export function createHDDLMap(container, options = {}) {
     stewardIcon.append('circle')
       .attr('class', 'steward-icon-head')
       .attr('cx', 0)
-      .attr('cy', -6)
-      .attr('r', 6)
+      .attr('cy', -8)
+      .attr('r', 8)
       .attr('fill', 'none')
-      .attr('stroke-width', 2)
+      .attr('stroke-width', 2.5)
 
     stewardIcon.append('path')
       .attr('class', 'steward-icon-shoulders')
       .attr('fill', 'none')
-      .attr('stroke-width', 2)
-      .attr('d', 'M -14 14 Q 0 2 14 14')
+      .attr('stroke-width', 2.5)
+      .attr('d', 'M -18 18 Q 0 3 18 18')
+
+    // Update steward circle rotation based on processing state
+    nodeUpdate.filter(d => d.type === 'steward').select('circle.steward-circle')
+      .each(function(d) {
+        const circle = d3.select(this)
+        if (d.isProcessing) {
+          // Start continuous rotation animation
+          if (!circle.classed('steward-processing')) {
+            circle.classed('steward-processing', true)
+            
+            function rotateCircle() {
+              const node = circle.datum()
+              if (!node || !node.isProcessing) {
+                circle.classed('steward-processing', false)
+                circle.interrupt()
+                return
+              }
+              
+              circle
+                .transition()
+                .duration(2000)
+                .ease(d3.easeLinear)
+                .attrTween('stroke-dashoffset', function() {
+                  const length = 2 * Math.PI * (node.r || 20)
+                  return d3.interpolate(0, -length)
+                })
+                .on('end', rotateCircle)
+            }
+            
+            rotateCircle()
+          }
+        } else {
+          // Stop rotation
+          if (circle.classed('steward-processing')) {
+            circle.classed('steward-processing', false)
+            circle.interrupt()
+            circle.attr('stroke-dashoffset', 0)
+          }
+        }
+      })
 
     // Agents (density-aware rendering)
     // Full/Standard: Bot glyph with name/role
@@ -2150,7 +2320,7 @@ export function createHDDLMap(container, options = {}) {
       .attr('x', d => d.useLeftSide ? -16 : 16)
       .attr('y', d => 10 + (d.textYOffset || 0))
       .style('pointer-events', 'none')
-      .style('font-size', '8px')
+      .style('font-size', '10px')
       .style('paint-order', 'stroke')
       .style('stroke', 'var(--vscode-editor-background)')
       .style('stroke-width', '4px')
@@ -2191,8 +2361,8 @@ export function createHDDLMap(container, options = {}) {
         return d.isRecentlyActive ? 1 : 0.55
       })
       .style('font-size', d => {
-        const baseSize = detailLevel === DETAIL_LEVELS.STANDARD ? 8 : 9
-        return `${Math.max(7, baseSize * (d.gridScale || 1.0))}px`
+        const baseSize = detailLevel === DETAIL_LEVELS.STANDARD ? 10 : 11
+        return `${Math.max(9, baseSize * (d.gridScale || 1.0))}px`
       })
       .text(d => {
         const shouldShowName = agentDensityConfig.showName && d.showName !== false
@@ -2624,7 +2794,8 @@ export function createHDDLMap(container, options = {}) {
         p.x = cx + Math.cos(p.orbitAngle) * r
         p.y = cy + Math.sin(p.orbitAngle) * r
         p.orbitTicksLeft -= 1
-        p.life -= 0.015
+        // Much slower decay during orbit - needs to survive 150 ticks max
+        p.life -= 0.003
         return
       }
 
@@ -2646,7 +2817,40 @@ export function createHDDLMap(container, options = {}) {
       }
 
       if (p.t >= 1) {
-        if (p.type === 'decision' && p.status !== 'blocked' && p.status !== 'denied') {
+        // Handle waypoint pulse for denied/blocked decisions and boundary_interactions at envelope
+        if (p.hasWaypoint && p.waypointPulseTicks < p.waypointPulseMax) {
+          // Pulse at envelope to show rejection or boundary check
+          p.waypointPulseTicks += 1
+          const pulsePhase = p.waypointPulseTicks / p.waypointPulseMax
+          // Pulse effect: scale particle up/down
+          p.pulseScale = 1.0 + Math.sin(pulsePhase * Math.PI * 3) * 0.5 // 3 pulses
+          p.life -= 0.005
+          
+          // After pulse completes, redirect to steward
+          if (p.waypointPulseTicks >= p.waypointPulseMax && p.finalTargetX && p.finalTargetY) {
+            p.hasWaypoint = false
+            p.sourceX = p.x
+            p.sourceY = p.y
+            p.targetX = p.finalTargetX
+            p.targetY = p.finalTargetY
+            p.t = 0
+            p.curve = makeFlowCurve(p.sourceX, p.sourceY, p.targetX, p.targetY, -1)
+            p.pulseScale = 1.0
+            
+            // If this is a boundary_interaction, prepare to orbit at steward
+            if (p.shouldOrbitAfterWaypoint && p.orbitTicksLeft > 0) {
+              p.orbitAfterTravel = true
+            }
+          }
+          return
+        }
+        
+        if (p.orbitAfterTravel && p.orbitTicksLeft > 0) {
+          // Boundary interactions orbit at steward after arrival
+          p.orbit = true
+          p.life -= 0.002
+        } else if (p.type === 'decision' && p.status !== 'blocked' && p.status !== 'denied') {
+          // Allowed decisions orbit at envelope
           p.orbit = true
           p.orbitTicksLeft = 18
           p.life -= 0.01
@@ -2674,7 +2878,7 @@ export function createHDDLMap(container, options = {}) {
       .attr('x', 8)
       .attr('y', 3)
       .style('pointer-events', 'none')
-      .style('font-size', '9px')
+      .style('font-size', '11px')
       .style('font-weight', '800')
       .style('paint-order', 'stroke')
       .style('stroke', 'var(--vscode-editor-background)')
@@ -2684,7 +2888,10 @@ export function createHDDLMap(container, options = {}) {
     pEnter.transition().duration(200).attr('opacity', 1)
 
     particleSelection
-      .attr('transform', d => `translate(${d.x},${d.y})`)
+      .attr('transform', d => {
+        const scale = d.pulseScale || 1.0
+        return `translate(${d.x},${d.y}) scale(${scale})`
+      })
       .attr('opacity', d => d.life)
 
     particleSelection.select('circle')
@@ -3239,7 +3446,10 @@ export function createHDDLMap(container, options = {}) {
       
       // Y-axis (depth): Recency + type bias
       const scenarioDuration = scenario.durationHours || 24
-      const normalizedTime = Math.min(1, event.hour / scenarioDuration)
+      // For historical embeddings (hour < 0), position them at the back
+      const normalizedTime = event.hour < 0 
+        ? 0 // Historical = far back
+        : Math.min(1, event.hour / scenarioDuration)
       
       const typeDepthBias = {
         'decision': -0.15,
@@ -3289,6 +3499,7 @@ export function createHDDLMap(container, options = {}) {
     }
     
     const embeddingTypeLabel = embeddingTypeLabels[event.embeddingType] || event.embeddingType || 'Unknown'
+    const isHistorical = event.hour < 0
     
     const tooltipData = {
       type: embeddingTypeLabel,
@@ -3297,7 +3508,8 @@ export function createHDDLMap(container, options = {}) {
       envelope: event.envelopeId || 'N/A',
       id: event.embeddingId || event.eventId || 'N/A',
       context: event.semanticContext || event.detail || 'No context available',
-      hour: event.hour
+      hour: event.hour,
+      isHistorical
     }
     
     // Add hover interaction with optimized tooltip
@@ -3310,6 +3522,7 @@ export function createHDDLMap(container, options = {}) {
         .style('display', 'block')
         .html(`
           <div style="border-bottom: 1px solid ${embeddingColor}; padding-bottom: 8px; margin-bottom: 8px;">
+            ${tooltipData.isHistorical ? `<div style="font-size: 10px; color: rgba(255,255,255,0.5); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">📚 Historical Baseline</div>` : ''}
             <div style="font-size: 11px; color: ${embeddingColor}; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">${tooltipData.type}</div>
             <div style="font-size: 15px; font-weight: 600; margin-top: 4px;">${tooltipData.label}</div>
           </div>
@@ -3326,7 +3539,7 @@ export function createHDDLMap(container, options = {}) {
             <div style="font-size: 12px; line-height: 1.5; color: rgba(255,255,255,0.9);">${tooltipData.context}</div>
           </div>
           <div style="margin-top: 12px; text-align: right; font-size: 11px; color: ${embeddingColor}; opacity: 0.8;">
-            ⏱️ Hour ${tooltipData.hour}
+            ⏱️ Hour ${tooltipData.hour}${tooltipData.isHistorical ? ' (before scenario window)' : ''}
           </div>
         `)
       
@@ -3393,11 +3606,11 @@ export function createHDDLMap(container, options = {}) {
     chipGradient.append('stop')
       .attr('offset', '0%')
       .attr('stop-color', embeddingColor)
-      .attr('stop-opacity', 1)
+      .attr('stop-opacity', event.hour < 0 ? 0.7 : 1) // Slightly faded for historical
     chipGradient.append('stop')
       .attr('offset', '100%')
       .attr('stop-color', `color-mix(in srgb, ${embeddingColor} 70%, black)`)
-      .attr('stop-opacity', 0.95)
+      .attr('stop-opacity', event.hour < 0 ? 0.65 : 0.95) // Slightly faded for historical
 
     chipGroup.append('rect')
       .attr('x', -chipSize / 2)
@@ -3407,8 +3620,9 @@ export function createHDDLMap(container, options = {}) {
       .attr('rx', 2)
       .attr('fill', `url(#chip-gradient-${event.eventId})`)
       .attr('stroke', embeddingColor)
-      .attr('stroke-width', 1.5)
-      .attr('filter', `drop-shadow(0 0 6px ${embeddingColor})`)
+      .attr('stroke-width', event.hour < 0 ? 1 : 1.5) // Thinner stroke for historical
+      .attr('filter', event.hour < 0 ? 'none' : `drop-shadow(0 0 6px ${embeddingColor})`) // No glow for historical
+      .attr('stroke-dasharray', event.hour < 0 ? '2 2' : null) // Dashed border for historical
 
     // Circuit pattern on chip
     const circuitGroup = chipGroup.append('g')
