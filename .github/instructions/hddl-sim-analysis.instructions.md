@@ -27,3 +27,8 @@ They **do not** write markdown reports directly.
 ## Reports
 - Reports are markdown documents that synthesize tool output.
 - Reports live under `hddl-sim/analysis/` (e.g., `<Scenario>_Analysis.md`).
+
+## Instruction-scope probe (opt-in)
+When the user’s prompt includes the literal tag `[instructions-test]` and you make a code change within this scope, also append a single line to `.github/instruction-probes/APPLIED.log`:
+
+`<ISO-8601 UTC timestamp> | scope=hddl-sim-analysis | target=<workspace-relative-path>`

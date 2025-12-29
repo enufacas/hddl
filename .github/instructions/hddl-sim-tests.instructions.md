@@ -31,3 +31,8 @@ applyTo: "hddl-sim/tests/**,hddl-sim/src/**/*.test.js"
 
 ## References
 - See `hddl-sim/tests/README.md` and `hddl-sim/tests/TEST-RESULTS.md` for the living test catalog/status.
+
+## Instruction-scope probe (opt-in)
+When the user’s prompt includes the literal tag `[instructions-test]` and you make a code change within this scope, also append a single line to `.github/instruction-probes/APPLIED.log`:
+
+`<ISO-8601 UTC timestamp> | scope=hddl-sim-tests | target=<workspace-relative-path>`

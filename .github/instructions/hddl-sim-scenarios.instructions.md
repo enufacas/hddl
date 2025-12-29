@@ -48,3 +48,8 @@ $${\text{Retrieval}}\ (X-0.5) \to {\text{Boundary}}\ (X) \to {\text{Boundary Emb
 ## When in doubt
 - Use `Canonical_Event_Patterns.md` as the authoritative pattern library.
 - Run conformance tooling early (not just at the end).
+
+## Instruction-scope probe (opt-in)
+When the user’s prompt includes the literal tag `[instructions-test]` and you make a code change within this scope, also append a single line to `.github/instruction-probes/APPLIED.log`:
+
+`<ISO-8601 UTC timestamp> | scope=hddl-sim-scenarios | target=<workspace-relative-path>`
