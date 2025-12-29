@@ -44,7 +44,102 @@ For subtle background tints based on dynamic colors:
 - `hddl-sim/src/pages/` - Page layouts (home.js)
 - `hddl-sim/src/sim/` - Simulation logic and utilities
 - `hddl-sim/schemas/` - JSON schemas for scenarios
+- `hddl-sim/analysis/` - Analysis tools and reports
+- `hddl-sim/tests/` - Playwright integration tests
 - `docs/spec/` - Canonical specifications and enhancement proposals
+
+## Testing
+
+### Quick Reference
+
+```bash
+npm test                    # All integration tests (includes conformance)
+npm run test:unit          # Vitest unit tests only
+npm run test:unit:watch    # Unit tests in watch mode
+npm run test:coverage      # Generate coverage report (opens browser)
+```
+
+### Test Infrastructure
+
+| Type | Location | Framework | Speed |
+|------|----------|-----------|-------|
+| Unit Tests | `src/**/*.test.js` | Vitest | Fast (<1s) |
+| Integration | `tests/*.spec.js` | Playwright | Slow (1-2min) |
+| Coverage | `tests/istanbul-coverage.spec.js` | Istanbul | ~30s |
+
+### Current Status
+
+- **254 tests** (230 passing, 91% pass rate)
+- **Coverage**: 45.89% statements, 47.91% lines
+- See `.github/instructions/hddl-sim-tests.instructions.md` for detailed testing guidelines
+
+### When to Run Which Tests
+
+| Situation | Command | Why |
+|-----------|---------|-----|
+| Developing UI | `npm run dev` + browser | HMR is faster than tests |
+| New pure function | `npm run test:unit:watch` | Instant feedback |
+| Before commit | `npm test` | Full validation |
+| Checking coverage | `npm run test:coverage` | Opens HTML report |
+| Specific feature | `npx playwright test tests/feature.spec.js` | Focused testing |
+
+## Analysis Workflow
+
+**Analysis tools are measurement instruments** - they output structured data to console, not files.
+
+### Available Analysis Tools
+
+1. **scenario-analysis.mjs** - Scenario validation
+   - Structure, temporal patterns, feedback loops
+   - Particle flow validation (visual requirements)
+   - Actor/envelope/event relationships
+   - Run: `node hddl-sim/analysis/scenario-analysis.mjs <scenario-name>`
+
+2. **cognitive-load-metrics.mjs** - UX information design
+   - Information density (element counts by detail level)
+   - Pattern complexity (feedback cycle visibility)
+   - Concurrent particle load (animation complexity)
+   - Interaction complexity (hover/click targets)
+   - Run: `npm run cognitive-load <scenario-name>`
+
+3. **performance-metrics.mjs** - Browser rendering performance
+   - FPS during animation
+   - SVG complexity (DOM nodes, path segments)
+   - Memory usage (heap size)
+   - Render times (initial load, first paint)
+   - Run: `npm run performance <scenario-name>` (requires dev server running)
+
+### Creating Analysis Reports
+
+**When user asks for "analysis" or "report":**
+
+1. **Run the appropriate tools** based on what's being analyzed:
+   - Scenario quality → `scenario-analysis.mjs`
+   - UX complexity → `cognitive-load-metrics.mjs`
+   - Performance → `performance-metrics.mjs`
+   - Complete analysis → all three
+
+2. **Capture tool output** and synthesize into markdown report
+
+3. **Structure the report:**
+   - Executive summary with key findings
+   - Metrics tables from tool outputs
+   - Analysis sections (structure, patterns, performance)
+   - Recommendations for improvement
+
+4. **Save to `hddl-sim/analysis/<Scenario>_Analysis.md`**
+
+**Updating existing reports:**
+- Re-run tools to get current metrics
+- Update metrics sections with new data
+- Preserve hand-written analysis/context where valuable
+- Note date of analysis refresh
+
+**Example prompt patterns:**
+- "Analyze the insurance scenario" → Run all 3 tools, create comprehensive report
+- "What's the cognitive load of this scenario?" → Run cognitive-load-metrics.mjs only
+- "Update the insurance deep dive" → Re-run tools, refresh existing markdown
+- "How's performance at FULL detail level?" → Run performance-metrics.mjs, report findings
 
 ## Spec Change Workflow
 
@@ -87,7 +182,7 @@ Update ALL of these:
 - Update relevant sections (Event Types, Key Concepts, etc.)
 
 **c) Particle Flow Rules** (if visualization changes)
-- **File:** `hddl-sim/PARTICLE_FLOW_RULES.md`
+- **File:** `hddl-sim/docs/PARTICLE_FLOW_RULES.md`
 - Update particle type definitions
 - Document visual behavior changes
 - Update scenario data requirements section
@@ -283,12 +378,15 @@ Run `npm run conformance` to validate:
 
 ## Communication Guidelines
 
-### Never Fabricate Project History
+### Never Fabricate Project History or Time Estimates
 - **DO NOT** make up timelines, development duration, or effort estimates
 - **DO NOT** add phrases like "months of work", "weeks of iteration", "extensive development"
 - **DO NOT** invent project history or milestones that didn't happen
+- **DO NOT** estimate task durations in hours/days/weeks - these guesses are always wrong and sound stupid
+- **DO NOT** write "Total time investment: X hours" or "This will take Y days" - you have no basis for these numbers
 - Stick to observable facts: features present, tests passing, code structure
 - If asked about project history, only reference git commit history or explicitly documented facts
+- If asked for time estimates, acknowledge you cannot reliably estimate development time
 
 ### CHANGELOG Maintenance
 

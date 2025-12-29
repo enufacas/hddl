@@ -1,0 +1,151 @@
+{
+  "schemaVersion": "1.0.0",
+  "metadata": {
+    "name": "Test Minimal",
+    "description": "Minimal scenario designed for fast, predictable test harness validation. Contains one of each key feature: decision, boundary, revision, with known timing.",
+    "domain": "testing",
+    "created": "2024-12-29",
+    "author": "HDDL Test Team"
+  },
+  "simulation": {
+    "durationHours": 6,
+    "focusHour": 2.5
+  },
+  "fleets": [
+    {
+      "role": "claim_processor",
+      "label": "Test Processors",
+      "agentIds": ["agent-test-1", "agent-test-2"]
+    }
+  ],
+  "agents": [
+    {
+      "id": "agent-test-1",
+      "name": "TestBot Alpha",
+      "role": "claim_processor"
+    },
+    {
+      "id": "agent-test-2",
+      "name": "TestBot Beta",
+      "role": "claim_processor"
+    }
+  ],
+  "envelopes": [
+    {
+      "envelopeId": "env-test-policy",
+      "id": "env-test-policy",
+      "name": "Test Policy",
+      "kind": "policy",
+      "status": "active",
+      "ownerSteward": "steward-test-policy"
+    },
+    {
+      "envelopeId": "env-test-queue",
+      "id": "env-test-queue",
+      "name": "Test Queue",
+      "kind": "queue",
+      "status": "evaluating",
+      "ownerSteward": "steward-test-ops"
+    }
+  ],
+  "stewards": [
+    {
+      "id": "steward-test-policy",
+      "name": "Policy Test Steward",
+      "role": "policy",
+      "color": "#3b82f6"
+    },
+    {
+      "id": "steward-test-ops",
+      "name": "Ops Test Steward",
+      "role": "operations",
+      "color": "#10b981"
+    }
+  ],
+  "timeline": [
+    {
+      "hour": 0,
+      "type": "embedding",
+      "eventId": "EMB-BASELINE-001",
+      "embeddingType": "revision",
+      "sourceEventId": "historical-baseline",
+      "vector": [0.25, 0.35],
+      "summary": "Historical baseline: standard test procedures"
+    },
+    {
+      "hour": 1.0,
+      "type": "decision",
+      "eventId": "decision-test-1",
+      "actorName": "agent-test-1",
+      "envelopeId": "env-test-policy",
+      "status": "allowed",
+      "summary": "Standard test case approved"
+    },
+    {
+      "hour": 2.0,
+      "type": "boundary_interaction",
+      "eventId": "boundary-test-1",
+      "actorName": "agent-test-1",
+      "envelopeId": "env-test-policy",
+      "boundary_kind": "escalated",
+      "boundary_reason": "threshold_exceeded",
+      "stewardId": "steward-test-policy",
+      "summary": "Test threshold exceeded, escalating to policy steward"
+    },
+    {
+      "hour": 2.5,
+      "type": "embedding",
+      "eventId": "EMB-001",
+      "embeddingType": "boundary_interaction",
+      "sourceEventId": "boundary-test-1",
+      "vector": [0.78, 0.72],
+      "summary": "Escalation pattern: threshold exceeded"
+    },
+    {
+      "hour": 3.0,
+      "type": "decision",
+      "eventId": "decision-test-2",
+      "actorName": "steward-test-policy",
+      "envelopeId": "env-test-policy",
+      "status": "allowed",
+      "resolvesEventId": "boundary-test-1",
+      "summary": "Steward approves exception after review"
+    },
+    {
+      "hour": 3.5,
+      "type": "embedding",
+      "eventId": "EMB-002",
+      "embeddingType": "decision",
+      "sourceEventId": "decision-test-2",
+      "vector": [0.32, 0.68],
+      "summary": "Steward judgment: exception approved"
+    },
+    {
+      "hour": 4.0,
+      "type": "revision",
+      "eventId": "revision-test-1",
+      "envelopeId": "env-test-policy",
+      "actorName": "steward-test-policy",
+      "resolvesEventId": "boundary-test-1",
+      "summary": "Updated test policy: raised threshold to prevent future escalations"
+    },
+    {
+      "hour": 4.5,
+      "type": "embedding",
+      "eventId": "EMB-003",
+      "embeddingType": "revision",
+      "sourceEventId": "revision-test-1",
+      "vector": [0.28, 0.62],
+      "summary": "Policy change: threshold adjustment"
+    },
+    {
+      "hour": 5.0,
+      "type": "decision",
+      "eventId": "decision-test-3",
+      "actorName": "agent-test-2",
+      "envelopeId": "env-test-policy",
+      "status": "denied",
+      "summary": "Test case denied under original policy"
+    }
+  ]
+}

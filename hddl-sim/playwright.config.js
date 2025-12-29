@@ -16,7 +16,10 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: { 
+        ...devices['Desktop Chrome'],
+        hasTouch: true, // Enable touch events for mobile tests
+      },
     },
   ],
 
@@ -24,5 +27,9 @@ export default defineConfig({
     command: 'npm run dev -- --port 5173 --strictPort',
     url: 'http://localhost:5173',
     reuseExistingServer: !process.env.CI,
+    env: {
+      // Pass coverage flag to the dev server
+      VITE_COVERAGE: process.env.VITE_COVERAGE || 'false',
+    },
   },
 });

@@ -1907,6 +1907,7 @@ export function createHDDLMap(container, options = {}) {
     const envShape = nodeEnter.filter(d => d.type === 'envelope')
       .append('g')
       .attr('class', d => `envelope-shape envelope-density-${d.envDims?.density || 'normal'}`)
+      .attr('data-testid', d => `envelope-${d.id}`)
       .attr('tabindex', 0)
 
     // Apply handlers to ALL envelope shapes (both new and existing)
@@ -2010,6 +2011,8 @@ export function createHDDLMap(container, options = {}) {
     // Envelope body - all non-icon modes
     envBodyShape.append('rect')
       .attr('class', 'envelope-body')
+      .attr('data-testid', d => `envelope-body-${d.id}`)
+      .attr('data-envelope-status', d => d.status || 'unknown')
       .attr('x', d => -(d.envDims?.width || 84) / 2)
       .attr('y', d => -(d.envDims?.height || 52) / 2)
       .attr('width', d => d.envDims?.width || 84)
@@ -2227,6 +2230,8 @@ export function createHDDLMap(container, options = {}) {
     const bot = agentEnter.filter(() => agentDensityConfig.density === 'full' || agentDensityConfig.density === 'standard')
       .append('g')
       .attr('class', 'agent-bot')
+      .attr('data-testid', d => `agent-${d.id}`)
+      .attr('data-agent-active', d => d.isRecentlyActive ? 'true' : 'false')
       .attr('tabindex', 0)
       .style('pointer-events', 'all')
       .style('cursor', 'pointer')
@@ -2867,6 +2872,9 @@ export function createHDDLMap(container, options = {}) {
     const pEnter = particleSelection.enter()
       .append('g')
       .attr('class', 'particle')
+      .attr('data-testid', d => `particle-${d.type}-${d.id || 'unknown'}`)
+      .attr('data-particle-type', d => d.type)
+      .attr('data-particle-status', d => d.status || 'none')
       .attr('opacity', 0)
 
     pEnter.append('circle')

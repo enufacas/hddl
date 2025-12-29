@@ -16,6 +16,10 @@ dist-ssr
 test-results
 playwright-report
 
+# Coverage
+.nyc_output
+coverage
+
 # UX review harness artifacts
 review/artifacts
 
