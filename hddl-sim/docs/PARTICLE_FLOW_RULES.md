@@ -35,7 +35,10 @@ This document defines the canonical particle flows in the HDDL visualization and
 **Meaning:** Agent decision rejected by envelope, forwarded to steward for review  
 **Visual:** 
 1. Curves from agent to envelope
-2. **Pulses at envelope** (3 pulses over 12 ticks, ~1 second) with scale animation
+2. **Pulses at envelope** (12 ticks total, ~1 second)
+   - Formula: `scale = 1.0 + sin(phase * 3π) * 0.5` creates 3 complete pulses
+   - Scale range: 0.5x to 1.5x
+   - Life decay: 0.005 per tick during pulse
 3. Continues curving from envelope to steward
 **Scenario Fields:**
 - `type: "decision"`
@@ -56,8 +59,12 @@ This document defines the canonical particle flows in the HDDL visualization and
 **Visual:** 
 1. Curves from agent to envelope
 2. **Pulses at envelope** (8 ticks, ~0.5 seconds) to show boundary check
+   - Formula: `scale = 1.0 + sin(phase * 3π) * 0.5`
+   - Life decay: 0.005 per tick during pulse
 3. Continues curving from envelope to steward
-4. **Orbits steward** (25-150 ticks based on resolution time)
+4. **Orbits steward** (variable duration based on resolution time)
+   - Formula: `(resolutionHour - eventHour) * 25 ticks/hour`
+   - Typical range: 25-150 ticks (≈0.4 to 2.6 circles at 57 ticks/circle)
 **Scenario Fields:**
 - `type: "boundary_interaction"`
 - `actorName: "AgentName"` (WHO: agent that triggered boundary)
@@ -65,7 +72,6 @@ This document defines the canonical particle flows in the HDDL visualization and
 - `actorRole: "Steward Name"` (REVIEW: steward that receives escalation)
 - `boundary_kind: "escalated"` (required: escalated/deferred/overridden)
 - `boundary_reason: "fraud_suspected"` (optional: structured reason code for domain context)
-- `eventId` (used to find resolution time)
 - `eventId` (used to find resolution time)
 
 **Boundary Reason Codes (Insurance Domain):**
@@ -78,7 +84,8 @@ This document defines the canonical particle flows in the HDDL visualization and
 **Post-arrival:** Orbits steward while under review, duration calculated from scenario timing:
 - Resolution time = next event with `resolvesEventId` matching this `eventId`
 - Orbit duration = `(resolutionHour - eventHour) * 25 ticks/hour`
-- Capped at 25-150 ticks (≈0.4 to 2.6 circles)
+- Typical range: 25-150 ticks (≈0.4 to 2.6 complete circles)
+- At 0.11 radians/tick, one full circle = 57 ticks (≈2.3 hours scenario time)
 
 **Lifecycle:** 
 - Fades slowly during orbit (`life -= 0.003` per tick)
@@ -213,7 +220,8 @@ Either include:
 
 ## Future Considerations
 
-- [ ] Add visual distinction between `boundary_kind: "escalated"`, `"overridden"`, `"deferred"`
+- [x] ~~Add visual distinction between `boundary_kind: "escalated"`, `"overridden"`, `"deferred"`~~ (**IMPLEMENTED**: Particle labels show "Exception Request", "Override Request", "Deferred Request" based on `boundary_kind`)
 - [ ] Consider showing "decision after review" as separate particle (steward → envelope after boundary resolution)
 - [ ] Add particle trails or persistence for key decisions
-- [ ] Color-code particles by severity/status consistently
+- [ ] Enhance envelope gap visualization when no events occur between versions
+- [ ] Add steward activity pulses to show human judgment moments

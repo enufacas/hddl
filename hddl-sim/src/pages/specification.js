@@ -2,23 +2,229 @@
 export function render(container) {
   container.innerHTML = ''
 
+  const escapeHtml = (text) => {
+    return String(text)
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#39;')
+  }
+
+  const highlightJsonString = (jsonText) => {
+    // Tokenize JSON string and wrap in spans.
+    // Keys are strings immediately followed by a colon.
+    const tokenRegex = /("(?:\\.|[^"\\])*"\s*:)|("(?:\\.|[^"\\])*?")|\b(true|false|null)\b|(-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)/g
+
+    let html = ''
+    let lastIndex = 0
+    let match
+
+    while ((match = tokenRegex.exec(jsonText)) !== null) {
+      if (match.index > lastIndex) {
+        html += escapeHtml(jsonText.slice(lastIndex, match.index))
+      }
+
+      if (match[1]) {
+        // Key (includes trailing colon)
+        const raw = match[1]
+        const colonIndex = raw.lastIndexOf(':')
+        const keyPart = raw.slice(0, colonIndex).trimEnd()
+        const spacing = raw.slice(keyPart.length, colonIndex)
+        html += `<span class="spec-json-key">${escapeHtml(keyPart)}</span>${escapeHtml(spacing)}:`
+      } else if (match[2]) {
+        html += `<span class="spec-json-string">${escapeHtml(match[2])}</span>`
+      } else if (match[3]) {
+        const literal = match[3]
+        const cls = literal === 'null' ? 'spec-json-null' : 'spec-json-boolean'
+        html += `<span class="${cls}">${escapeHtml(literal)}</span>`
+      } else if (match[4]) {
+        html += `<span class="spec-json-number">${escapeHtml(match[4])}</span>`
+      }
+
+      lastIndex = tokenRegex.lastIndex
+    }
+
+    if (lastIndex < jsonText.length) {
+      html += escapeHtml(jsonText.slice(lastIndex))
+    }
+
+    return html
+  }
+
+  const createJsonBlock = (title, value) => {
+    const wrapper = document.createElement('div')
+    wrapper.className = 'spec-json-section'
+
+    const heading = document.createElement('h3')
+    heading.className = 'spec-subtitle'
+    heading.textContent = title
+
+    const pre = document.createElement('pre')
+    pre.className = 'spec-json-pre'
+    const code = document.createElement('code')
+    code.className = 'spec-json-code'
+
+    const jsonText = JSON.stringify(value, null, 2)
+    code.innerHTML = highlightJsonString(jsonText)
+
+    pre.appendChild(code)
+    wrapper.appendChild(heading)
+    wrapper.appendChild(pre)
+    return wrapper
+  }
+
   const root = document.createElement('div')
   root.className = 'page-container'
   root.style.maxWidth = '1200px'
   root.style.margin = '0 auto'
 
   root.innerHTML = `
-    <div style="margin-bottom: 24px;">
-      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-        <span class="codicon codicon-json" style="font-size: 28px;"></span>
-        <div>
-          <h1 style="margin: 0;">Human-Derived Decision Layer (HDDL) Specification</h1>
-          <p style="margin: 0; font-size: 13px; color: var(--vscode-statusBar-foreground);">JSON schema definitions for HDDL system objects</p>
+    <style>
+      .spec-hero {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 16px;
+        border: 1px solid var(--vscode-sideBar-border);
+        border-radius: 10px;
+        background: color-mix(in srgb, var(--vscode-editor-background) 75%, var(--vscode-sideBar-background));
+        margin-bottom: 20px;
+      }
+
+      .spec-hero-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+      }
+
+      .spec-hero-icon {
+        width: 36px;
+        height: 36px;
+        display: grid;
+        place-items: center;
+        border-radius: 8px;
+        background: color-mix(in srgb, var(--vscode-button-background) 12%, var(--vscode-sideBar-background));
+        border: 1px solid var(--vscode-sideBar-border);
+        flex: 0 0 auto;
+      }
+
+      .spec-title {
+        margin: 0;
+        font-size: 22px;
+        line-height: 1.2;
+      }
+
+      .spec-subtitleline {
+        margin: 4px 0 0 0;
+        font-size: 13px;
+        color: var(--vscode-statusBar-foreground);
+      }
+
+      .spec-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .spec-card {
+        border: 1px solid var(--vscode-sideBar-border);
+        border-radius: 10px;
+        overflow: hidden;
+        background: color-mix(in srgb, var(--vscode-sideBar-background) 90%, var(--vscode-editor-background));
+      }
+
+      .spec-card-header {
+        padding: 14px 16px;
+        background: color-mix(in srgb, var(--vscode-button-background) 10%, var(--vscode-sideBar-background));
+        border-bottom: 1px solid var(--vscode-sideBar-border);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        user-select: none;
+      }
+
+      .spec-card-header:hover {
+        background: color-mix(in srgb, var(--vscode-button-background) 14%, var(--vscode-sideBar-background));
+      }
+
+      .spec-card-title {
+        margin: 0 0 4px 0;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .spec-card-desc {
+        margin: 0;
+        font-size: 13px;
+        color: var(--vscode-statusBar-foreground);
+      }
+
+      .spec-card-content {
+        padding: 16px;
+        display: none;
+      }
+
+      .spec-two-col {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      @media (max-width: 900px) {
+        .spec-two-col {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .spec-subtitle {
+        margin: 0 0 10px 0;
+        font-size: 12px;
+        color: var(--vscode-statusBar-foreground);
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+      }
+
+      .spec-json-pre {
+        background: var(--vscode-editor-background);
+        border: 1px solid var(--vscode-sideBar-border);
+        border-radius: 8px;
+        padding: 14px;
+        overflow-x: auto;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+        font-size: 13px;
+        line-height: 1.6;
+        margin: 0;
+      }
+
+      .spec-json-code {
+        color: var(--vscode-editor-foreground);
+      }
+
+      /* Use app-defined status tokens (guaranteed in style-workspace.css). */
+      .spec-json-key { color: var(--status-info); font-weight: 600; }
+      .spec-json-string { color: var(--status-success); }
+      .spec-json-number { color: var(--status-warning); }
+      .spec-json-boolean { color: var(--status-info); }
+      .spec-json-null { color: var(--status-error); }
+    </style>
+
+    <div class="spec-hero">
+      <div class="spec-hero-left">
+        <div class="spec-hero-icon"><span class="codicon codicon-json" style="font-size: 20px;"></span></div>
+        <div style="min-width: 0;">
+          <h1 class="spec-title">Human-Derived Decision Layer (HDDL) Specification</h1>
+          <p class="spec-subtitleline">JSON schema definitions for HDDL system objects</p>
         </div>
       </div>
     </div>
 
-    <div id="spec-content" style="display: flex; flex-direction: column; gap: 24px;"></div>
+    <div id="spec-content" class="spec-grid"></div>
   `
 
   container.appendChild(root)
@@ -192,32 +398,18 @@ export function render(container) {
   // Render each specification
   specifications.forEach(spec => {
     const section = document.createElement('div')
-    section.style.cssText = `
-      background: var(--vscode-sideBar-background);
-      border: 1px solid var(--vscode-sideBar-border);
-      border-radius: 8px;
-      overflow: hidden;
-    `
+    section.className = 'spec-card'
 
     const header = document.createElement('div')
-    header.style.cssText = `
-      padding: 16px;
-      background: color-mix(in srgb, var(--vscode-button-background) 10%, var(--vscode-sideBar-background));
-      border-bottom: 1px solid var(--vscode-sideBar-border);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      user-select: none;
-    `
+    header.className = 'spec-card-header'
     
     const headerContent = document.createElement('div')
     headerContent.innerHTML = `
-      <h2 style="margin: 0 0 4px 0; font-size: 18px; display: flex; align-items: center; gap: 8px;">
+      <h2 class="spec-card-title">
         <span class="codicon codicon-symbol-class"></span>
         ${spec.title}
       </h2>
-      <p style="margin: 0; font-size: 13px; color: var(--vscode-statusBar-foreground);">${spec.description}</p>
+      <p class="spec-card-desc">${spec.description}</p>
     `
     
     const chevron = document.createElement('span')
@@ -228,53 +420,13 @@ export function render(container) {
     header.appendChild(chevron)
 
     const content = document.createElement('div')
-    content.style.cssText = `
-      padding: 16px;
-      display: none;
-    `
+    content.className = 'spec-card-content'
 
-    // Schema section
-    const schemaSection = document.createElement('div')
-    schemaSection.style.marginBottom = '20px'
-    schemaSection.innerHTML = '<h3 style="margin: 0 0 12px 0; font-size: 14px; color: var(--vscode-statusBar-foreground); text-transform: uppercase; letter-spacing: 0.5px;">Schema</h3>'
-    
-    const schemaPre = document.createElement('pre')
-    schemaPre.style.cssText = `
-      background: var(--vscode-editor-background);
-      border: 1px solid var(--vscode-sideBar-border);
-      border-radius: 4px;
-      padding: 16px;
-      overflow-x: auto;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
-      font-size: 13px;
-      line-height: 1.6;
-      margin: 0;
-    `
-    schemaPre.textContent = JSON.stringify(spec.schema, null, 2)
-
-    schemaSection.appendChild(schemaPre)
-    content.appendChild(schemaSection)
-
-    // Example section
-    const exampleSection = document.createElement('div')
-    exampleSection.innerHTML = '<h3 style="margin: 0 0 12px 0; font-size: 14px; color: var(--vscode-statusBar-foreground); text-transform: uppercase; letter-spacing: 0.5px;">Example</h3>'
-    
-    const examplePre = document.createElement('pre')
-    examplePre.style.cssText = `
-      background: var(--vscode-editor-background);
-      border: 1px solid var(--vscode-sideBar-border);
-      border-radius: 4px;
-      padding: 16px;
-      overflow-x: auto;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
-      font-size: 13px;
-      line-height: 1.6;
-      margin: 0;
-    `
-    examplePre.textContent = JSON.stringify(spec.example, null, 2)
-
-    exampleSection.appendChild(examplePre)
-    content.appendChild(exampleSection)
+    const twoCol = document.createElement('div')
+    twoCol.className = 'spec-two-col'
+    twoCol.appendChild(createJsonBlock('Schema', spec.schema))
+    twoCol.appendChild(createJsonBlock('Example', spec.example))
+    content.appendChild(twoCol)
 
     // Toggle functionality
     let isExpanded = false

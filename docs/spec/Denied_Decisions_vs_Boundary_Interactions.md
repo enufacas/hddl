@@ -171,4 +171,4 @@ Both show the envelope as the **authority boundary**, but with different semanti
 - **Envelope Authority**: [Authority_Order.md](Authority_Order.md)
 - **Decision Memory**: [Decision_Memory_and_AI_Native_Operations.md](../foundations/Decision_Memory_and_AI_Native_Operations.md)
 - **Boundary Reason Codes**: [Schema_Enhancement_Boundary_Reason.md](Schema_Enhancement_Boundary_Reason.md)
-- **Particle Flow Rules**: [PARTICLE_FLOW_RULES.md](../../hddl-sim/PARTICLE_FLOW_RULES.md)
+- **Particle Flow Rules**: [PARTICLE_FLOW_RULES.md](../../hddl-sim/docs/PARTICLE_FLOW_RULES.md)

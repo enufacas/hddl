@@ -9,17 +9,28 @@
     "preview": "vite preview",
     "pretest": "npm run conformance",
     "test": "playwright test",
+    "test:unit": "vitest",
+    "test:unit:watch": "vitest --watch",
+    "test:coverage": "node scripts/run-coverage.mjs",
+    "test:coverage:verbose": "node scripts/run-coverage.mjs --verbose",
     "ux:review": "playwright test tests/ux-review.spec.js",
     "test:ui": "playwright test --ui",
     "test:report": "playwright show-report",
     "export:default-scenario": "node ./scripts/export-default-scenario.mjs",
     "validate:scenarios": "node ./scripts/validate-scenarios.mjs",
     "validate:canon": "node ./scripts/validate-canon-registry.mjs",
-    "conformance": "node ./scripts/conformance.mjs"
+    "conformance": "node ./scripts/conformance.mjs",
+    "cognitive-load": "node ./analysis/cognitive-load-metrics.mjs",
+    "performance": "node ./analysis/performance-metrics.mjs",
+    "performance:suite": "node ./scripts/run-perf-suite.mjs"
   },
   "devDependencies": {
+    "@istanbuljs/nyc-config-typescript": "^1.0.2",
     "@playwright/test": "^1.57.0",
-    "vite": "^7.2.4"
+    "cross-env": "^10.1.0",
+    "vite": "^7.2.4",
+    "vite-plugin-istanbul": "^7.2.1",
+    "vitest": "^4.0.16"
   },
   "dependencies": {
     "d3": "^7.9.0",

@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 2,
+  "id": "test-minimal",
+  "title": "Test Minimal — Fast Test Harness",
+  "durationHours": 6,
+  "envelopes": [
+    {
+      "envelopeId": "env-test-policy",
+      "name": "Test Policy",
+      "ownerRole": "policy",
+      "createdHour": 0,
+      "endHour": 6
+    },
+    {
+      "envelopeId": "env-test-queue",
+      "name": "Test Queue",
+      "ownerRole": "operations",
+      "createdHour": 0,
+      "endHour": 6
+    }
+  ],
+  "fleets": [
+    {
+      "stewardRole": "policy",
+      "agents": [
+        {
+          "agentId": "agent-test-1",
+          "name": "TestBot Alpha",
+          "envelopeIds": ["env-test-policy", "env-test-queue"]
+        },
+        {
+          "agentId": "agent-test-2",
+          "name": "TestBot Beta",
+          "envelopeIds": ["env-test-policy"]
+        }
+      ]
+    }
+  ],
+  "events": [
+    {
+      "hour": 0,
+      "type": "embedding",
+      "eventId": "EMB-BASELINE-001",
+      "embeddingType": "revision",
+      "sourceEventId": "historical-baseline",
+      "vector": [0.25, 0.35],
+      "summary": "Historical baseline: standard test procedures"
+    },
+    {
+      "hour": 1.0,
+      "type": "decision",
+      "eventId": "decision-test-1",
+      "actorRole": "policy",
+      "actorName": "TestBot Alpha",
+      "agentId": "agent-test-1",
+      "envelopeId": "env-test-policy",
+      "status": "allowed",
+      "summary": "Standard test case approved"
+    },
+    {
+      "hour": 2.0,
+      "type": "boundary_interaction",
+      "eventId": "boundary-test-1",
+      "actorRole": "policy",
+      "actorName": "TestBot Alpha",
+      "agentId": "agent-test-1",
+      "envelopeId": "env-test-policy",
+      "boundary_kind": "escalated",
+      "boundary_reason": "threshold_exceeded",
+      "stewardId": "steward-test-policy",
+      "summary": "Test threshold exceeded, escalating to policy steward"
+    },
+    {
+      "hour": 2.5,
+      "type": "embedding",
+      "eventId": "EMB-001",
+      "embeddingType": "boundary_interaction",
+      "sourceEventId": "boundary-test-1",
+      "vector": [0.78, 0.72],
+      "summary": "Escalation pattern: threshold exceeded"
+    },
+    {
+      "hour": 3.0,
+      "type": "decision",
+      "eventId": "decision-test-2",
+      "actorRole": "policy",
+      "actorName": "policy steward",
+      "envelopeId": "env-test-policy",
+      "status": "allowed",
+      "resolvesEventId": "boundary-test-1",
+      "summary": "Steward approves exception after review"
+    },
+    {
+      "hour": 3.5,
+      "type": "embedding",
+      "eventId": "EMB-002",
+      "embeddingType": "decision",
+      "sourceEventId": "decision-test-2",
+      "vector": [0.32, 0.68],
+      "summary": "Steward judgment: exception approved"
+    },
+    {
+      "hour": 4.0,
+      "type": "revision",
+      "eventId": "revision-test-1",
+      "envelopeId": "env-test-policy",
+      "actorRole": "policy",
+      "actorName": "policy steward",
+      "resolvesEventId": "boundary-test-1",
+      "summary": "Updated test policy: raised threshold to prevent future escalations"
+    },
+    {
+      "hour": 4.5,
+      "type": "embedding",
+      "eventId": "EMB-003",
+      "embeddingType": "revision",
+      "sourceEventId": "revision-test-1",
+      "vector": [0.28, 0.62],
+      "summary": "Policy change: threshold adjustment"
+    },
+    {
+      "hour": 5.0,
+      "type": "decision",
+      "eventId": "decision-test-3",
+      "actorRole": "policy",
+      "actorName": "TestBot Beta",
+      "agentId": "agent-test-2",
+      "envelopeId": "env-test-policy",
+      "status": "denied",
+      "summary": "Test case denied under original policy"
+    }
+  ]
+}

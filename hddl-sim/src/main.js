@@ -158,6 +158,29 @@ if (!isTestEnv) {
       playBtn.click()
     }
   }, 300)
+} else {
+  // Expose store functions to window for test automation
+  window.getScenario = getScenario
+  window.setTimeHour = setTimeHour
+  window.getTimeHour = getTimeHour
+  // Load scenario from URL query parameter if in test mode
+  const params = new URLSearchParams(window.location.search)
+  const scenarioParam = params.get('scenario')
+  if (scenarioParam) {
+    // Load from scenario catalog
+    Promise.all([
+      import('./sim/scenario-loader.js'),
+      import('./sim/store.js')
+    ]).then(([loaderModule, storeModule]) => {
+      const scenario = loaderModule.SCENARIOS[scenarioParam]
+      if (scenario) {
+        storeModule.setScenario(scenario.data)
+        console.log(`✓ Loaded test scenario: ${scenarioParam} (${scenario.title})`)
+      } else {
+        console.error(`Scenario '${scenarioParam}' not found in catalog`)
+      }
+    }).catch(err => console.error(`Failed to load scenario ${scenarioParam}:`, err))
+  }
 }
 
 const timeDisplay = document.createElement('div')
@@ -218,6 +241,61 @@ scrubberContainer.appendChild(mismatchMarkers)
 scrubberContainer.appendChild(scrubberFill)
 scrubberContainer.appendChild(scrubberHandle)
 
+// Create timeline tooltip
+const timelineTooltip = document.createElement('div')
+timelineTooltip.className = 'timeline-tooltip'
+timelineTooltip.style.cssText = `
+  position: fixed;
+  background: var(--vscode-editorHoverWidget-background);
+  border: 1px solid var(--vscode-editorHoverWidget-border);
+  color: var(--vscode-editorHoverWidget-foreground);
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  line-height: 1.4;
+  pointer-events: none;
+  z-index: 10000;
+  display: none;
+  max-width: 300px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+`
+document.body.appendChild(timelineTooltip)
+
+function showTooltip(html, x, y, color = null) {
+  timelineTooltip.innerHTML = html
+  
+  // Set background color if provided
+  if (color) {
+    timelineTooltip.style.background = `color-mix(in srgb, ${color} 25%, #1e1e1e)`
+    timelineTooltip.style.borderColor = color
+  } else {
+    // Reset to default
+    timelineTooltip.style.background = '#1e1e1e'
+    timelineTooltip.style.borderColor = 'var(--vscode-editorHoverWidget-border)'
+  }
+  
+  timelineTooltip.style.display = 'block'
+  
+  // Position tooltip, avoiding edges
+  const rect = timelineTooltip.getBoundingClientRect()
+  let finalX = x + 10
+  let finalY = y + 10
+  
+  if (finalX + rect.width > window.innerWidth - 10) {
+    finalX = x - rect.width - 10
+  }
+  if (finalY + rect.height > window.innerHeight - 10) {
+    finalY = y - rect.height - 10
+  }
+  
+  timelineTooltip.style.left = `${finalX}px`
+  timelineTooltip.style.top = `${finalY}px`
+}
+
+function hideTooltip() {
+  timelineTooltip.style.display = 'none'
+}
+
 function renderEnvelopeSpans() {
   const scenario = getScenario()
   const duration = scenario?.durationHours ?? 48
@@ -240,7 +318,25 @@ function renderEnvelopeSpans() {
     // Use shared steward color for consistency with map and panels
     const stewardColor = getStewardColor(env.ownerRole)
     span.style.background = stewardColor
-    span.title = `${env.envelopeId} (${env.ownerRole}): ${formatSimTime(start)} -> ${formatSimTime(end)}`
+    
+    // Enhanced tooltip on hover
+    span.addEventListener('mouseenter', (e) => {
+      const tooltipHtml = `
+        <div style="font-weight: 600; margin-bottom: 4px; color: ${stewardColor};">${env.envelopeId}</div>
+        <div style="font-size: 11px; opacity: 0.9;">
+          <div><strong>Steward:</strong> ${env.ownerRole}</div>
+          <div><strong>Status:</strong> ${env.status || 'active'}</div>
+          <div><strong>Version:</strong> v${env.envelope_version || '1.0.0'}</div>
+          <div><strong>Active:</strong> ${formatSimTime(start)} → ${formatSimTime(end)}</div>
+        </div>
+      `
+      showTooltip(tooltipHtml, e.clientX, e.clientY, stewardColor)
+    })
+    span.addEventListener('mouseleave', hideTooltip)
+    span.addEventListener('mousemove', (e) => {
+      showTooltip(timelineTooltip.innerHTML, e.clientX, e.clientY, stewardColor)
+    })
+    
     envelopeSpans.appendChild(span)
   })
 }
@@ -265,6 +361,9 @@ function renderEventMarkers() {
     return !envId || filteredEnvelopeIds.has(envId)
   })
   
+  // Create envelope index for color lookup
+  const envelopeIndex = new Map(envelopes.map(e => [e.envelopeId, e]))
+  
   filteredEvents.forEach((ev) => {
     const hour = typeof ev?.hour === 'number' ? ev.hour : null
     if (hour === null) return
@@ -275,7 +374,57 @@ function renderEventMarkers() {
     marker.style.left = `${(clamped / duration) * 100}%`
     marker.dataset.type = ev?.type || ''
     marker.dataset.severity = ev?.severity || ''
-    marker.title = `${ev?.type || 'event'} @ ${formatSimTime(clamped)}${ev?.label ? ` - ${ev.label}` : ''}`
+
+    // Get colors for tooltip background (steward) and title (event type)
+    const envId = ev?.envelopeId || ev?.envelope_id
+    const envelope = envId ? envelopeIndex.get(envId) : null
+    const eventType = ev?.type || 'event'
+    
+    // Background color: steward color if envelope exists, otherwise no special color
+    const tooltipBgColor = envelope ? getStewardColor(envelope.ownerRole) : null
+    
+    // Title color: CSS event-type colors
+    const eventTypeColors = {
+      'signal': '#7eb8da',
+      'revision': '#98d4a0',
+      'boundary_interaction': '#f0b866',
+      'decision': '#a8a8a8',
+      'envelope_promoted': '#c4a7e7',
+      'embedding': '#d4a8d4',
+      'retrieval': '#b8b8d8'
+    }
+    const titleColor = eventTypeColors[eventType] || '#a8a8a8'
+
+    // Enhanced tooltip with event details
+    const typeLabels = {
+      'signal': '📡 Signal',
+      'decision': '✓ Decision',
+      'boundary_interaction': '⚠ Boundary',
+      'revision': '📝 Revision',
+      'escalation': '⬆ Escalation',
+      'embedding': '🧠 Embedding',
+      'retrieval': '🔍 Retrieval'
+    }
+    const typeLabel = typeLabels[eventType] || eventType
+    
+    marker.addEventListener('mouseenter', (e) => {
+      const actor = ev?.agentId || ev?.actorStewardRole || 'system'
+      const tooltipHtml = `
+        <div style="font-weight: 600; margin-bottom: 4px; color: ${titleColor};">${typeLabel}</div>
+        <div style="font-size: 11px; opacity: 0.9;">
+          <div><strong>Time:</strong> ${formatSimTime(clamped)}</div>
+          ${actor ? `<div><strong>Actor:</strong> ${actor}</div>` : ''}
+          ${envId ? `<div><strong>Envelope:</strong> ${envId}</div>` : ''}
+          ${ev?.label ? `<div style="margin-top: 4px; font-style: italic;">${ev.label}</div>` : ''}
+          ${ev?.severity ? `<div><strong>Severity:</strong> ${ev.severity}</div>` : ''}
+        </div>
+      `
+      showTooltip(tooltipHtml, e.clientX, e.clientY, tooltipBgColor)
+    })
+    marker.addEventListener('mouseleave', hideTooltip)
+    marker.addEventListener('mousemove', (e) => {
+      showTooltip(timelineTooltip.innerHTML, e.clientX, e.clientY, tooltipBgColor)
+    })
 
     marker.addEventListener('click', (e) => {
       // Jump scrubber to the event time without triggering the container click handler
@@ -329,7 +478,26 @@ function renderMismatchMarkers() {
       marker.className = 'timeline-mismatch-marker'
       marker.style.left = `${(clamped / duration) * 100}%`
       marker.dataset.severity = ev?.severity || 'warning'
-      marker.title = `Assumption mismatch @ ${formatSimTime(clamped)} (${envelopeId}) - missing: ${missing.join(' | ')}`
+      
+      // Enhanced tooltip with mismatch details
+      marker.addEventListener('mouseenter', (e) => {
+        const tooltipHtml = `
+          <div style="font-weight: 600; margin-bottom: 4px; color: var(--status-warning);">⚠ Assumption Mismatch</div>
+          <div style="font-size: 11px; opacity: 0.9;">
+            <div><strong>Time:</strong> ${formatSimTime(clamped)}</div>
+            <div><strong>Envelope:</strong> ${envelopeId}</div>
+            <div style="margin-top: 4px;"><strong>Missing Assumptions:</strong></div>
+            <div style="margin-left: 8px; font-family: monospace; font-size: 10px;">
+              ${missing.map(r => `• ${r}`).join('<br>')}
+            </div>
+          </div>
+        `
+        showTooltip(tooltipHtml, e.clientX, e.clientY)
+      })
+      marker.addEventListener('mouseleave', hideTooltip)
+      marker.addEventListener('mousemove', (e) => {
+        showTooltip(timelineTooltip.innerHTML, e.clientX, e.clientY)
+      })
 
       // Make mismatch markers discoverable: hover/focus shows title; click jumps to the signal time.
       marker.tabIndex = 0
@@ -464,7 +632,7 @@ timelineLabel.textContent = '0h'
 
 const timelineEnd = document.createElement('div')
 timelineEnd.style.cssText = 'font-size: 11px; color: var(--vscode-statusBar-foreground);'
-timelineEnd.textContent = '48h'
+timelineEnd.textContent = '48h' // Will be updated when scenario loads
 
 timelineBar.appendChild(timelineControls)
 timelineBar.appendChild(timelineLabel)
@@ -476,6 +644,12 @@ renderEnvelopeSpans()
 renderEventMarkers()
 syncTimelineUI(getTimeHour())
 onScenarioChange(() => {
+  // Update timeline end label to match scenario duration
+  const scenario = getScenario()
+  if (scenario?.durationHours) {
+    timelineEnd.textContent = `${scenario.durationHours}h`
+  }
+  
   renderEnvelopeSpans()
   renderEventMarkers()
   syncTimelineUI(getTimeHour())

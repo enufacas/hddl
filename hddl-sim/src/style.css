@@ -898,3 +898,20 @@ body {
     padding: 1.5rem;
   }
 }
+
+/* HDDL Map Animations */
+@keyframes activity-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.6);
+    opacity: 1;
+  }
+}
+
+circle.agent-activity-halo.active {
+  transform-origin: center;
+  animation: activity-pulse 520ms ease-in-out infinite;
+}

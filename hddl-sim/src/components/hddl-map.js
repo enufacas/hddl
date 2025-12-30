@@ -1646,15 +1646,15 @@ export function createHDDLMap(container, options = {}) {
         : 30 // Default if no resolution found
       
       // Debug logging for boundary interactions
-      if (e.type === 'boundary_interaction') {
-        console.log(`[Boundary Interaction] ${e.eventId}`, {
-          currentHour: e.hour,
-          resolutionHour,
-          hoursDiff,
-          orbitDuration,
-          orbitCircles: (orbitDuration * 0.11 / (2 * Math.PI)).toFixed(1)
-        })
-      }
+      // if (e.type === 'boundary_interaction') {
+      //   console.log(`[Boundary Interaction] ${e.eventId}`, {
+      //     currentHour: e.hour,
+      //     resolutionHour,
+      //     hoursDiff,
+      //     orbitDuration,
+      //     orbitCircles: (orbitDuration * 0.11 / (2 * Math.PI)).toFixed(1)
+      //   })
+      // }
 
       particles.push({
         id: pid,
@@ -1879,15 +1879,15 @@ export function createHDDLMap(container, options = {}) {
 
     exceptionSel.enter()
       .append('line')
-      .attr('stroke', 'var(--status-warning)')
-      .attr('stroke-width', 3)
+      .attr('stroke', 'red')
+      .attr('stroke-width', 15)
       .attr('opacity', 0.0)
       .transition().duration(200)
       .attr('opacity', 0.85)
 
     exceptionSel
-      .attr('stroke', 'var(--status-warning)')
-      .attr('stroke-width', 3)
+      .attr('stroke', 'red')
+      .attr('stroke-width', 15)
       .attr('opacity', 0.85)
 
     exceptionSel.exit().transition().duration(200).attr('opacity', 0).remove()
@@ -1907,6 +1907,7 @@ export function createHDDLMap(container, options = {}) {
     const envShape = nodeEnter.filter(d => d.type === 'envelope')
       .append('g')
       .attr('class', d => `envelope-shape envelope-density-${d.envDims?.density || 'normal'}`)
+      .attr('data-testid', d => `envelope-${d.id}`)
       .attr('tabindex', 0)
 
     // Apply handlers to ALL envelope shapes (both new and existing)
@@ -2010,6 +2011,8 @@ export function createHDDLMap(container, options = {}) {
     // Envelope body - all non-icon modes
     envBodyShape.append('rect')
       .attr('class', 'envelope-body')
+      .attr('data-testid', d => `envelope-body-${d.id}`)
+      .attr('data-envelope-status', d => d.status || 'unknown')
       .attr('x', d => -(d.envDims?.width || 84) / 2)
       .attr('y', d => -(d.envDims?.height || 52) / 2)
       .attr('width', d => d.envDims?.width || 84)
@@ -2227,6 +2230,8 @@ export function createHDDLMap(container, options = {}) {
     const bot = agentEnter.filter(() => agentDensityConfig.density === 'full' || agentDensityConfig.density === 'standard')
       .append('g')
       .attr('class', 'agent-bot')
+      .attr('data-testid', d => `agent-${d.id}`)
+      .attr('data-agent-active', d => d.isRecentlyActive ? 'true' : 'false')
       .attr('tabindex', 0)
       .style('pointer-events', 'all')
       .style('cursor', 'pointer')
@@ -2751,15 +2756,14 @@ export function createHDDLMap(container, options = {}) {
 
   // 5. Tick Function (Animation Loop)
   function ticked() {
-    // Update Node Positions
+    // Update Node Positions - using CSS transforms for GPU acceleration
     nodeLayer.selectAll('g.node')
-      .attr('transform', d => `translate(${d.x},${d.y})`)
+      .style('transform', d => `translate(${d.x}px,${d.y}px)`)
+      .style('will-change', 'transform')
 
-    // Subtle activity pulse for working agents.
-    const now = Date.now()
-    const pulse = 0.5 + 0.5 * Math.sin(now / 260)
+    // Subtle activity pulse for working agents (CSS animation)
     nodeLayer.selectAll('circle.agent-activity-halo')
-      .attr('r', d => d?.isRecentlyActive ? (15 + pulse * 4) : 16)
+      .classed('active', d => d?.isRecentlyActive)
 
     linkLayer.selectAll('line')
       .attr('x1', d => d.source.x)
@@ -2805,8 +2809,29 @@ export function createHDDLMap(container, options = {}) {
 
       if (p.curve) {
         // Re-bake curve endpoints so the curve stays attached as nodes move.
+        // OPTIMIZATION #2: Only recalculate bezier curve when endpoints change significantly
+        const threshold = 2 // pixels
         const sign = (p.type === 'revision') ? +1 : -1
-        p.curve = makeFlowCurve(p.sourceX, p.sourceY, p.targetX, p.targetY, sign)
+        
+        const needsUpdate = !p.curveCache || 
+          Math.abs(p.sourceX - p.curveCache.sourceX) > threshold ||
+          Math.abs(p.sourceY - p.curveCache.sourceY) > threshold ||
+          Math.abs(p.targetX - p.curveCache.targetX) > threshold ||
+          Math.abs(p.targetY - p.curveCache.targetY) > threshold
+        
+        if (needsUpdate) {
+          p.curveCache = {
+            curve: makeFlowCurve(p.sourceX, p.sourceY, p.targetX, p.targetY, sign),
+            sourceX: p.sourceX,
+            sourceY: p.sourceY,
+            targetX: p.targetX,
+            targetY: p.targetY
+          }
+          p.curve = p.curveCache.curve
+        } else {
+          p.curve = p.curveCache.curve
+        }
+        
         const pt = bezierPoint(p.t, p.curve.p0, p.curve.p1, p.curve.p2, p.curve.p3)
         p.x = pt.x
         p.y = pt.y
@@ -2834,6 +2859,8 @@ export function createHDDLMap(container, options = {}) {
             p.targetX = p.finalTargetX
             p.targetY = p.finalTargetY
             p.t = 0
+            // Invalidate curve cache when redirecting
+            p.curveCache = null
             p.curve = makeFlowCurve(p.sourceX, p.sourceY, p.targetX, p.targetY, -1)
             p.pulseScale = 1.0
             
@@ -2867,6 +2894,9 @@ export function createHDDLMap(container, options = {}) {
     const pEnter = particleSelection.enter()
       .append('g')
       .attr('class', 'particle')
+      .attr('data-testid', d => `particle-${d.type}-${d.id || 'unknown'}`)
+      .attr('data-particle-type', d => d.type)
+      .attr('data-particle-status', d => d.status || 'none')
       .attr('opacity', 0)
 
     pEnter.append('circle')
@@ -3013,7 +3043,7 @@ export function createHDDLMap(container, options = {}) {
       .attr('dominant-baseline', 'middle')
       .attr('fill', 'var(--vscode-statusBar-foreground)')
       .style('font-size', '10px')
-      .text('💾 Memories')
+      .text('Memories')
   }
   
   // Full embedding store only on FULL and STANDARD
@@ -3268,18 +3298,44 @@ export function createHDDLMap(container, options = {}) {
   const headerGroup = embeddingStoreLayer.append('g')
     .attr('transform', 'translate(16, 20)')
 
-  headerGroup.append('text')
-    .attr('x', 20)
+  // Inline "vector DB" icon (simple database cylinder)
+  const headerIcon = headerGroup.append('g')
+    .attr('transform', 'translate(0, -12)')
+    .attr('opacity', 0.9)
+
+  headerIcon.append('ellipse')
+    .attr('cx', 8)
+    .attr('cy', 4)
+    .attr('rx', 7)
+    .attr('ry', 3)
+    .attr('fill', 'none')
+    .attr('stroke', 'rgba(255, 255, 255, 0.85)')
+    .attr('stroke-width', 1.5)
+
+  headerIcon.append('path')
+    .attr('d', 'M1,4 L1,14 C1,16.5 15,16.5 15,14 L15,4')
+    .attr('fill', 'none')
+    .attr('stroke', 'rgba(255, 255, 255, 0.85)')
+    .attr('stroke-width', 1.5)
+
+  headerIcon.append('path')
+    .attr('d', 'M1,14 C1,16.5 15,16.5 15,14')
+    .attr('fill', 'none')
+    .attr('stroke', 'rgba(255, 255, 255, 0.85)')
+    .attr('stroke-width', 1.5)
+
+  const headerTitleText = headerGroup.append('text')
+    .attr('x', 22)
     .attr('y', 0)
     .attr('fill', 'rgba(255, 255, 255, 0.9)')
     .attr('font-size', '13px')
     .attr('font-weight', '600')
-    .text('💾 Memories — Embedding Vector Space')
+    .text('Memories — Embedding Vector Space')
 
   const embeddingBadge = headerGroup.append('g')
     .attr('transform', 'translate(260, -8)')
 
-  embeddingBadge.append('rect')
+  const embeddingBadgeRect = embeddingBadge.append('rect')
     .attr('width', 70)
     .attr('height', 18)
     .attr('rx', 4)
@@ -3295,6 +3351,37 @@ export function createHDDLMap(container, options = {}) {
     .attr('font-size', '11px')
     .attr('font-weight', '500')
     .text('0 vectors')
+
+  const layoutEmbeddingHeader = () => {
+    const titleNode = headerTitleText.node()
+    const badgeTextNode = embeddingBadgeText.node()
+    if (!titleNode || !badgeTextNode) return
+
+    const titleWidth = titleNode.getComputedTextLength?.() ?? 0
+    const badgeTextWidth = badgeTextNode.getComputedTextLength?.() ?? 0
+    const badgePaddingX = 12
+    const badgeWidth = Math.max(70, Math.ceil(badgeTextWidth + badgePaddingX * 2))
+
+    embeddingBadgeRect.attr('width', badgeWidth)
+    embeddingBadgeText.attr('x', badgeWidth / 2)
+
+    const titleX = 22
+    const gap = 12
+    let badgeX = Math.ceil(titleX + titleWidth + gap)
+
+    // If the badge would overflow the embedding box, wrap it to the next line.
+    const maxBadgeX = Math.max(16, (width - 16) - badgeWidth)
+    const wrapped = badgeX > maxBadgeX
+    if (wrapped) {
+      badgeX = titleX
+      embeddingBadge.attr('transform', `translate(${badgeX}, 12)`)
+    } else {
+      embeddingBadge.attr('transform', `translate(${badgeX}, -8)`)
+    }
+  }
+
+  // Initial layout after nodes exist
+  layoutEmbeddingHeader()
 
   // Embedding icons layer
   const embeddingIconsLayer = embeddingStoreLayer.append('g')
@@ -3422,7 +3509,7 @@ export function createHDDLMap(container, options = {}) {
       // Use pre-computed semantic position
       normalizedX = 0.1 + event.semanticVector[0] * 0.8  // Map to 0.1-0.9 range with padding
       depthT = 0.1 + event.semanticVector[1] * 0.8      // Y maps to depth (routine=back, exceptional=front)
-      console.log(`Using semanticVector [${event.semanticVector[0]}, ${event.semanticVector[1]}] → normalizedX=${normalizedX.toFixed(2)}, depthT=${depthT.toFixed(2)} for ${event.embeddingId}`)
+      // console.log(`Using semanticVector [${event.semanticVector[0]}, ${event.semanticVector[1]}] → normalizedX=${normalizedX.toFixed(2)}, depthT=${depthT.toFixed(2)} for ${event.embeddingId}`)
     } else {
       console.log(`No semanticVector found for ${event.eventId}, using fallback positioning`)
       // Fallback: envelope-based positioning (legacy behavior)
@@ -3687,6 +3774,7 @@ export function createHDDLMap(container, options = {}) {
     embeddingElements.push({ element: chipGroup, event, timestamp: Date.now() })
     embeddingCount++
     embeddingBadgeText.text(`${embeddingCount} vector${embeddingCount !== 1 ? 's' : ''}`)
+    layoutEmbeddingHeader()
   }
 
   function renderEmbeddings() {
@@ -3705,20 +3793,21 @@ export function createHDDLMap(container, options = {}) {
       embeddingElements = []
       embeddingCount = 0
       embeddingBadgeText.text('0 vectors')
+      layoutEmbeddingHeader()
     }
 
     // Only add new embeddings
     const existingIds = new Set(embeddingElements.map(e => e.event.eventId))
     const newEvents = embeddingEvents.filter(e => !existingIds.has(e.eventId))
 
-    console.log(`renderEmbeddings at hour ${currentHour}: ${embeddingEvents.length} total, ${existingIds.size} existing, ${newEvents.length} new`)
+    // console.log(`renderEmbeddings at hour ${currentHour}: ${embeddingEvents.length} total, ${existingIds.size} existing, ${newEvents.length} new`)
     
-    if (newEvents.length > 0) {
-      console.log(`Adding ${newEvents.length} new embedding(s):`)
-      newEvents.forEach(e => {
-        console.log(`  - eventId: ${e.eventId}, embeddingId: ${e.embeddingId}, type: ${e.embeddingType}, steward: ${e.actorRole}`)
-      })
-    }
+    // if (newEvents.length > 0) {
+    //   console.log(`Adding ${newEvents.length} new embedding(s):`)
+    //   newEvents.forEach(e => {
+    //     console.log(`  - eventId: ${e.eventId}, embeddingId: ${e.embeddingId}, type: ${e.embeddingType}, steward: ${e.actorRole}`)
+    //   })
+    // }
 
     newEvents.forEach((event, index) => {
       setTimeout(() => {
@@ -3735,6 +3824,7 @@ export function createHDDLMap(container, options = {}) {
     embeddingElements = []
     embeddingCount = 0
     embeddingBadgeText.text('0 vectors')
+    layoutEmbeddingHeader()
     tooltip.style('display', 'none')
     renderEmbeddings()
   })

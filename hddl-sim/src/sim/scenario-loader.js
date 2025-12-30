@@ -10,6 +10,7 @@ import insuranceUnderwritingScenario from './scenarios/insurance-underwriting.sc
 import baseballAnalyticsScenario from './scenarios/baseball-analytics.scenario.json'
 import airforceAvionicsScenario from './scenarios/airforce-avionics-maintenance.scenario.json'
 import verticalHydroponicsScenario from './scenarios/vertical-hydroponics-farm.scenario.json'
+import testMinimalScenario from './scenarios/test-minimal.scenario.json'
 
 export const SCENARIOS = {
   'default': {
@@ -81,6 +82,13 @@ export const SCENARIOS = {
     description: 'Crop growth optimization, environmental controls, water/nutrient management, harvest quality, energy efficiency, and food safety compliance across 240 hours.',
     data: verticalHydroponicsScenario,
     tags: ['agriculture', 'sustainability', 'food-safety']
+  },
+  'test-minimal': {
+    id: 'test-minimal',
+    title: 'Test Minimal — Fast Test Harness',
+    description: 'Minimal scenario with 2 agents, 2 envelopes, and 5 events across 6 hours. Designed for fast, predictable test execution.',
+    data: testMinimalScenario,
+    tags: ['testing', 'minimal', 'fast']
   }
 }
 

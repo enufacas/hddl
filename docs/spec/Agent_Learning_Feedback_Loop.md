@@ -266,7 +266,7 @@ Agents operate in a **decision memory** model - they learn from every interactio
 ### Documentation
 - [x] Document feedback loop (this file)
 - [ ] Update [Implementers_Guide.md](Implementers_Guide.md) with retrieval event usage
-- [ ] Update [PARTICLE_FLOW_RULES.md](../../hddl-sim/PARTICLE_FLOW_RULES.md) with retrieval particle flow
+- [x] ~~Update [PARTICLE_FLOW_RULES.md](../../hddl-sim/docs/PARTICLE_FLOW_RULES.md) with retrieval particle flow~~ (**COMPLETED**: Section 6 documents retrieval particle behavior)
 
 ---
 

@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="hddl-sim/public/hddl-icon.png" alt="HDDL" width="200"/>
+</div>
+
 # HDDL - Human-Derived Decision Layer
 
 An exploratory framework for reasoning about who is allowed to decide what in automated and AI-assisted systems.
