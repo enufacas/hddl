@@ -517,7 +517,423 @@ if (flowIssues.length === 0) {
 }
 
 // ============================================================================
-// PART 9: POTENTIAL ISSUES
+// PART 9: SEMANTIC COHERENCE & LEARNING VALIDATION
+// ============================================================================
+
+console.log('\n')
+console.log('🧠 SEMANTIC COHERENCE & LEARNING')
+console.log('─'.repeat(60))
+
+const semanticIssues = []
+
+// Check semantic vector positioning (should be in [0,1] range and diverse)
+const vectoredEmbeddings = embeddings.filter(e => e.semanticVector && Array.isArray(e.semanticVector))
+if (vectoredEmbeddings.length > 0) {
+  console.log(`Embeddings with semantic vectors: ${vectoredEmbeddings.length}/${embeddings.length}`)
+  
+  // Check vector dimensions
+  const invalidVectors = vectoredEmbeddings.filter(e => 
+    e.semanticVector.length !== 2 || 
+    e.semanticVector.some(v => v < 0 || v > 1)
+  )
+  if (invalidVectors.length > 0) {
+    semanticIssues.push({
+      severity: 'error',
+      type: 'invalid-semantic-vector',
+      message: `${invalidVectors.length} embeddings have invalid semantic vectors (must be 2D with values 0-1)`
+    })
+  }
+  
+  // Check semantic diversity (vectors shouldn't all be in same quadrant)
+  const quadrants = { q1: 0, q2: 0, q3: 0, q4: 0 }
+  vectoredEmbeddings.forEach(e => {
+    const [x, y] = e.semanticVector
+    if (x >= 0.5 && y >= 0.5) quadrants.q1++
+    else if (x < 0.5 && y >= 0.5) quadrants.q2++
+    else if (x < 0.5 && y < 0.5) quadrants.q3++
+    else quadrants.q4++
+  })
+  
+  const dominantQuadrant = Math.max(...Object.values(quadrants))
+  const diversityScore = ((vectoredEmbeddings.length - dominantQuadrant) / vectoredEmbeddings.length * 100).toFixed(0)
+  console.log(`Semantic diversity: ${diversityScore}% (vectors spread across quadrants)`)
+  
+  if (diversityScore < 30) {
+    semanticIssues.push({
+      severity: 'warning',
+      type: 'low-semantic-diversity',
+      message: `Only ${diversityScore}% semantic diversity - vectors clustered in one region`
+    })
+  }
+}
+
+// Check retrieval-query alignment
+const retrievalsWithQueries = retrievals.filter(r => r.queryText && r.retrievedEmbeddings && r.retrievedEmbeddings.length > 0)
+console.log(`\nRetrieval-Query Alignment:`)
+console.log(`  Retrievals with queries: ${retrievalsWithQueries.length}/${retrievals.length}`)
+
+retrievalsWithQueries.forEach(r => {
+  r.retrievedEmbeddings.forEach((embId, idx) => {
+    const emb = embeddings.find(e => e.embeddingId === embId)
+    if (emb && emb.semanticContext) {
+      const queryWords = new Set(r.queryText.toLowerCase().split(/\s+/))
+      const contextWords = new Set(emb.semanticContext.toLowerCase().split(/\s+/))
+      const overlap = [...queryWords].filter(w => contextWords.has(w)).length
+      const alignmentScore = overlap / Math.max(queryWords.size, 1)
+      
+      if (alignmentScore < 0.2 && (r.relevanceScores && r.relevanceScores[idx] > 0.8)) {
+        semanticIssues.push({
+          severity: 'warning',
+          type: 'query-mismatch',
+          message: `Retrieval at hour ${r.hour}: High relevance (${(r.relevanceScores[idx] * 100).toFixed(0)}%) but low query-context overlap for ${embId}`
+        })
+      }
+    }
+  })
+})
+
+// Check relevance score realism
+const relevanceScores = retrievals.flatMap(r => r.relevanceScores || [])
+if (relevanceScores.length > 0) {
+  const avgRelevance = (relevanceScores.reduce((a, b) => a + b, 0) / relevanceScores.length * 100).toFixed(0)
+  const perfectScores = relevanceScores.filter(s => s >= 0.95).length
+  const perfectPct = (perfectScores / relevanceScores.length * 100).toFixed(0)
+  
+  console.log(`\nRelevance Score Analysis:`)
+  console.log(`  Average relevance: ${avgRelevance}%`)
+  console.log(`  Perfect scores (≥95%): ${perfectPct}%`)
+  
+  if (perfectPct > 50) {
+    semanticIssues.push({
+      severity: 'suggestion',
+      type: 'unrealistic-relevance',
+      message: `${perfectPct}% of relevance scores are ≥95% - consider adding more variation for realism`
+    })
+  }
+}
+
+// Historical baseline check
+const historicalEmbeddings = embeddings.filter(e => e.hour < 0)
+if (historicalEmbeddings.length > 0) {
+  console.log(`\nHistorical Baseline: ${historicalEmbeddings.length} embeddings before hour 0`)
+  const referencedBaseline = retrievals.filter(r => 
+    r.retrievedEmbeddings && r.retrievedEmbeddings.some(id => 
+      historicalEmbeddings.some(h => h.embeddingId === id)
+    )
+  ).length
+  console.log(`  Referenced in retrievals: ${referencedBaseline}/${retrievals.length} (${(referencedBaseline / Math.max(retrievals.length, 1) * 100).toFixed(0)}%)`)
+  
+  if (referencedBaseline === 0 && retrievals.length > 0) {
+    semanticIssues.push({
+      severity: 'warning',
+      type: 'unused-baseline',
+      message: `Historical baseline exists but is never retrieved - agents not learning from history`
+    })
+  }
+}
+
+if (semanticIssues.length === 0) {
+  console.log('\n✅ Semantic coherence validated')
+} else {
+  console.log(`\n⚠️  Found ${semanticIssues.length} semantic issues`)
+}
+
+// ============================================================================
+// PART 10: FEEDBACK LOOP EFFECTIVENESS
+// ============================================================================
+
+console.log('\n')
+console.log('🔄 FEEDBACK LOOP EFFECTIVENESS')
+console.log('─'.repeat(60))
+
+const effectivenessIssues = []
+
+// Check if revisions actually address boundaries
+const revisionBoundaryAlignment = revisions.map(rev => {
+  if (!rev.resolvesEventId) return null
+  
+  const boundary = boundaries.find(b => b.eventId === rev.resolvesEventId)
+  if (!boundary) return null
+  
+  // Check semantic alignment between revision reason and boundary reason
+  const revisionWords = new Set((rev.reason || '').toLowerCase().split(/\s+/))
+  const boundaryContext = `${boundary.label} ${boundary.detail} ${boundary.boundary_reason || ''}`.toLowerCase()
+  const boundaryWords = new Set(boundaryContext.split(/\s+/))
+  const overlap = [...revisionWords].filter(w => boundaryWords.has(w)).length
+  const alignmentScore = overlap / Math.max(revisionWords.size, 1)
+  
+  return {
+    revision: rev,
+    boundary: boundary,
+    alignmentScore: alignmentScore,
+    aligned: alignmentScore > 0.15
+  }
+}).filter(Boolean)
+
+const alignedRevisions = revisionBoundaryAlignment.filter(r => r.aligned).length
+console.log(`Revision-Boundary Alignment: ${alignedRevisions}/${revisionBoundaryAlignment.length} revisions semantically address their boundaries`)
+
+revisionBoundaryAlignment.filter(r => !r.aligned).forEach(item => {
+  effectivenessIssues.push({
+    severity: 'warning',
+    type: 'misaligned-revision',
+    message: `Revision at hour ${item.revision.hour} doesn't clearly address boundary at ${item.boundary.hour} (low semantic overlap)`
+  })
+})
+
+// Check for learning evidence (revisions referenced in later retrievals)
+const revisionEmbeddings = embeddings.filter(e => e.embeddingType === 'revision')
+const referencedRevisionEmbeddings = revisionEmbeddings.filter(re =>
+  retrievals.some(r => 
+    r.retrievedEmbeddings && r.retrievedEmbeddings.includes(re.embeddingId) &&
+    r.hour > re.hour
+  )
+)
+
+console.log(`Learning Evidence: ${referencedRevisionEmbeddings.length}/${revisionEmbeddings.length} revision embeddings retrieved in future decisions`)
+
+if (revisionEmbeddings.length > 0 && referencedRevisionEmbeddings.length === 0) {
+  effectivenessIssues.push({
+    severity: 'warning',
+    type: 'no-learning-evidence',
+    message: `No revision embeddings are ever retrieved - agents may not be learning from policy changes`
+  })
+}
+
+// Check for boundary recurrence patterns
+const boundaryTypes = boundaries.reduce((acc, b) => {
+  const key = `${b.envelopeId}:${b.boundary_reason || 'unknown'}`
+  if (!acc[key]) acc[key] = []
+  acc[key].push(b)
+  return acc
+}, {})
+
+const recurringBoundaries = Object.entries(boundaryTypes).filter(([_, items]) => items.length > 1)
+console.log(`Recurring Boundary Patterns: ${recurringBoundaries.length} boundary types occur multiple times`)
+
+recurringBoundaries.forEach(([key, items]) => {
+  const [envelopeId, reason] = key.split(':')
+  const sorted = items.sort((a, b) => a.hour - b.hour)
+  const hasRevision = sorted.some(b => revisions.some(r => r.resolvesEventId === b.eventId))
+  
+  if (hasRevision && sorted.length > 2) {
+    effectivenessIssues.push({
+      severity: 'info',
+      type: 'recurring-despite-revision',
+      message: `Boundary "${reason}" in ${envelopeId} recurs ${items.length} times despite revisions - may indicate incomplete policy fix`
+    })
+  }
+})
+
+if (effectivenessIssues.length === 0) {
+  console.log('\n✅ Feedback loops appear effective')
+} else {
+  console.log(`\n⚠️  Found ${effectivenessIssues.length} effectiveness issues`)
+}
+
+// ============================================================================
+// PART 11: TEMPORAL REALISM
+// ============================================================================
+
+console.log('\n')
+console.log('⏱️  TEMPORAL REALISM')
+console.log('─'.repeat(60))
+
+const temporalIssues = []
+
+// Check embedding delay patterns (should be 0.5-1.5h after source)
+const embeddingDelays = embeddings.filter(e => e.sourceEventId).map(e => {
+  const sourceEvent = events.find(ev => ev.eventId === e.sourceEventId)
+  if (!sourceEvent) return null
+  
+  const delay = e.hour - sourceEvent.hour
+  return {
+    embedding: e,
+    delay: delay,
+    realistic: delay >= 0.2 && delay <= 2
+  }
+}).filter(Boolean)
+
+const realisticDelays = embeddingDelays.filter(d => d.realistic).length
+console.log(`Embedding Delays: ${realisticDelays}/${embeddingDelays.length} have realistic timing (0.2-2h after source)`)
+
+embeddingDelays.filter(d => !d.realistic).forEach(item => {
+  if (item.delay < 0.2) {
+    temporalIssues.push({
+      severity: 'warning',
+      type: 'instant-embedding',
+      message: `Embedding at hour ${item.embedding.hour} created too quickly (${item.delay.toFixed(2)}h) - embeddings need processing time`
+    })
+  } else if (item.delay > 2) {
+    temporalIssues.push({
+      severity: 'info',
+      type: 'delayed-embedding',
+      message: `Embedding at hour ${item.embedding.hour} created ${item.delay.toFixed(1)}h after source - unusually long delay`
+    })
+  }
+})
+
+// Check retrieval-to-action timing
+const retrievalActions = retrievals.map(r => {
+  const nextAction = events.find(e => 
+    e.hour > r.hour && 
+    e.hour - r.hour < 1 &&
+    e.actorName === r.actorName &&
+    (e.type === 'decision' || e.type === 'boundary_interaction')
+  )
+  
+  if (!nextAction) return null
+  
+  const gap = nextAction.hour - r.hour
+  return {
+    retrieval: r,
+    action: nextAction,
+    gap: gap,
+    realistic: gap >= 0.05 && gap <= 0.7
+  }
+}).filter(Boolean)
+
+const realisticActionGaps = retrievalActions.filter(ra => ra.realistic).length
+console.log(`Retrieval-to-Action Timing: ${realisticActionGaps}/${retrievalActions.length} have realistic gap (0.05-0.7h)`)
+
+retrievalActions.filter(ra => !ra.realistic).forEach(item => {
+  if (item.gap < 0.05) {
+    temporalIssues.push({
+      severity: 'warning',
+      type: 'instant-action',
+      message: `Action at hour ${item.action.hour} occurs ${(item.gap * 60).toFixed(0)}min after retrieval - unrealistically fast`
+    })
+  }
+})
+
+// Check decision latency (escalated should take longer than routine)
+const escalatedDecisions = events.filter(e => 
+  e.type === 'decision' && 
+  boundaries.some(b => b.hour < e.hour && e.hour - b.hour < 4 && b.envelopeId === e.envelopeId)
+)
+const routineDecisions = events.filter(e => 
+  e.type === 'decision' && 
+  !escalatedDecisions.includes(e)
+)
+
+if (escalatedDecisions.length > 0 && routineDecisions.length > 0) {
+  console.log(`\nDecision Latency Patterns:`)
+  console.log(`  Escalated decisions: ${escalatedDecisions.length}`)
+  console.log(`  Routine decisions: ${routineDecisions.length}`)
+  console.log(`  Note: Escalated decisions should show deliberation time`)
+}
+
+if (temporalIssues.length === 0) {
+  console.log('\n✅ Temporal patterns appear realistic')
+} else {
+  console.log(`\n⚠️  Found ${temporalIssues.length} temporal realism issues`)
+}
+
+// ============================================================================
+// PART 12: ACTOR BEHAVIOR PATTERNS
+// ============================================================================
+
+console.log('\n')
+console.log('👤 ACTOR BEHAVIOR PATTERNS')
+console.log('─'.repeat(60))
+
+const behaviorIssues = []
+
+// Check agent specialization (should stick to designated envelopes)
+const agentEnvelopeViolations = []
+scenario.fleets.forEach(fleet => {
+  fleet.agents.forEach(agent => {
+    const agentEvents = events.filter(e => e.actorName === agent.name)
+    const designatedEnvelopes = new Set(agent.envelopeIds || [])
+    
+    agentEvents.forEach(e => {
+      if (e.envelopeId && !designatedEnvelopes.has(e.envelopeId)) {
+        agentEnvelopeViolations.push({
+          agent: agent.name,
+          event: e,
+          violatedEnvelope: e.envelopeId
+        })
+      }
+    })
+  })
+})
+
+console.log(`Agent Specialization: ${agentEnvelopeViolations.length} events where agents operated outside their designated envelopes`)
+
+if (agentEnvelopeViolations.length > 0) {
+  agentEnvelopeViolations.slice(0, 3).forEach(v => {
+    behaviorIssues.push({
+      severity: 'warning',
+      type: 'agent-scope-violation',
+      message: `${v.agent} operated in ${v.violatedEnvelope} outside its designated scope at hour ${v.event.hour}`
+    })
+  })
+  if (agentEnvelopeViolations.length > 3) {
+    console.log(`  (${agentEnvelopeViolations.length - 3} more violations...)`)
+  }
+}
+
+// Check decision patterns (should have variety)
+const decisionsByActor = {}
+events.filter(e => e.type === 'decision').forEach(d => {
+  if (!decisionsByActor[d.actorName]) {
+    decisionsByActor[d.actorName] = { allowed: 0, denied: 0 }
+  }
+  if (d.status === 'denied') {
+    decisionsByActor[d.actorName].denied++
+  } else {
+    decisionsByActor[d.actorName].allowed++
+  }
+})
+
+console.log(`\nDecision Patterns:`)
+Object.entries(decisionsByActor).forEach(([actor, decisions]) => {
+  const total = decisions.allowed + decisions.denied
+  if (total >= 3) {
+    const allowedPct = (decisions.allowed / total * 100).toFixed(0)
+    console.log(`  ${actor}: ${allowedPct}% allowed (${decisions.allowed}/${total})`)
+    
+    if (allowedPct === '100' || allowedPct === '0') {
+      behaviorIssues.push({
+        severity: 'suggestion',
+        type: 'monotonic-decisions',
+        message: `${actor} shows no decision variety (${total} decisions, all ${allowedPct === '100' ? 'allowed' : 'denied'})`
+      })
+    }
+  }
+})
+
+// Check retrieval usage correlation with decision complexity
+const agentsWithRetrievals = new Set(retrievals.map(r => r.actorName))
+const agentsWithComplexDecisions = new Set(
+  events.filter(e => 
+    e.type === 'decision' && 
+    (e.status === 'denied' || boundaries.some(b => Math.abs(b.hour - e.hour) < 1))
+  ).map(e => e.actorName)
+)
+
+const complexWithoutRetrieval = [...agentsWithComplexDecisions].filter(a => !agentsWithRetrievals.has(a))
+if (complexWithoutRetrieval.length > 0) {
+  console.log(`\nRetrieval Usage:`)
+  console.log(`  ${complexWithoutRetrieval.length} agents make complex decisions without using retrieval`)
+  
+  complexWithoutRetrieval.forEach(agent => {
+    behaviorIssues.push({
+      severity: 'suggestion',
+      type: 'missing-retrieval-pattern',
+      message: `${agent} makes complex decisions but never retrieves context - consider adding retrieval for realism`
+    })
+  })
+}
+
+if (behaviorIssues.length === 0) {
+  console.log('\n✅ Actor behavior patterns are realistic')
+} else {
+  console.log(`\n⚠️  Found ${behaviorIssues.length} behavior pattern issues`)
+}
+
+// ============================================================================
+// PART 13: POTENTIAL ISSUES (BASIC VALIDATION)
 // ============================================================================
 
 console.log('\n')
@@ -616,14 +1032,22 @@ agentNames.forEach(name => {
   }
 })
 
-// Group and display issues
-const groupedIssues = issues.reduce((acc, issue) => {
+// Group and display issues - combine all issue types
+const allValidationIssues = [
+  ...semanticIssues,
+  ...effectivenessIssues,
+  ...temporalIssues,
+  ...behaviorIssues,
+  ...issues
+]
+
+const groupedIssues = allValidationIssues.reduce((acc, issue) => {
   if (!acc[issue.severity]) acc[issue.severity] = []
   acc[issue.severity].push(issue)
   return acc
 }, {})
 
-if (issues.length === 0) {
+if (allValidationIssues.length === 0) {
   console.log('✅ No issues found!')
 } else {
   ['error', 'warning', 'suggestion', 'info'].forEach(severity => {
@@ -660,6 +1084,23 @@ const metrics = {
     { metric: 'Missing agent lookups', value: flowIssues.filter(i => i.type === 'missing-agent-lookup' || i.type === 'missing-actor-name').length, status: flowIssues.filter(i => i.type === 'missing-agent-lookup' || i.type === 'missing-actor-name').length === 0 ? '✅' : '⚠️' },
     { metric: 'Missing envelope targets', value: flowIssues.filter(i => i.type === 'missing-envelope-id' || i.type === 'missing-envelope-target' || i.type === 'missing-signal-target').length, status: flowIssues.filter(i => i.type === 'missing-envelope-id' || i.type === 'missing-envelope-target' || i.type === 'missing-signal-target').length === 0 ? '✅' : '❌' },
     { metric: 'Unresolved boundaries', value: flowIssues.filter(i => i.type === 'missing-resolution').length, status: flowIssues.filter(i => i.type === 'missing-resolution').length === 0 ? '✅' : '⚠️' },
+  ],
+  'Semantic Coherence': [
+    { metric: 'Semantic vector validity', value: semanticIssues.filter(i => i.type === 'invalid-semantic-vector').length, status: semanticIssues.filter(i => i.type === 'invalid-semantic-vector').length === 0 ? '✅' : '❌' },
+    { metric: 'Semantic diversity', value: vectoredEmbeddings.length > 0 ? 'Validated' : 'N/A', status: semanticIssues.filter(i => i.type === 'low-semantic-diversity').length === 0 ? '✅' : '⚠️' },
+    { metric: 'Historical baseline usage', value: historicalEmbeddings.length > 0 ? 'Present' : 'None', status: semanticIssues.filter(i => i.type === 'unused-baseline').length === 0 ? '✅' : '⚠️' },
+  ],
+  'Feedback Effectiveness': [
+    { metric: 'Revision-boundary alignment', value: revisionBoundaryAlignment.length > 0 ? `${alignedRevisions}/${revisionBoundaryAlignment.length}` : 'N/A', status: effectivenessIssues.filter(i => i.type === 'misaligned-revision').length === 0 ? '✅' : '⚠️' },
+    { metric: 'Learning evidence', value: revisionEmbeddings.length > 0 ? `${referencedRevisionEmbeddings.length}/${revisionEmbeddings.length} reused` : 'N/A', status: effectivenessIssues.filter(i => i.type === 'no-learning-evidence').length === 0 ? '✅' : '⚠️' },
+  ],
+  'Temporal Realism': [
+    { metric: 'Embedding timing', value: embeddingDelays.length > 0 ? `${realisticDelays}/${embeddingDelays.length} realistic` : 'N/A', status: temporalIssues.filter(i => i.type === 'instant-embedding' || i.type === 'delayed-embedding').length === 0 ? '✅' : '⚠️' },
+    { metric: 'Retrieval-to-action gaps', value: retrievalActions.length > 0 ? `${realisticActionGaps}/${retrievalActions.length} realistic` : 'N/A', status: temporalIssues.filter(i => i.type === 'instant-action').length === 0 ? '✅' : '⚠️' },
+  ],
+  'Actor Behavior': [
+    { metric: 'Agent scope violations', value: agentEnvelopeViolations.length, status: agentEnvelopeViolations.length === 0 ? '✅' : '⚠️' },
+    { metric: 'Decision variety', value: 'Validated', status: behaviorIssues.filter(i => i.type === 'monotonic-decisions').length === 0 ? '✅' : '⚠️' },
   ],
   'Scenario Health': [
     { metric: 'Total events', value: scenario.events.length },
