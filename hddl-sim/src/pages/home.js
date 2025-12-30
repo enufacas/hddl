@@ -5,6 +5,7 @@ import { navigateTo } from '../router'
 import { createHDDLMap } from '../components/hddl-map'
 import { getStewardColor, toSemver } from '../sim/steward-colors'
 import { createTourButton } from '../components/tour'
+import { createStaticTimelineButton } from '../components/static-timeline-view'
 
 // Track active map cleanup to prevent leaks
 let activeMapCleanup = null
@@ -31,6 +32,7 @@ export function renderHome(container) {
   }
 
   let disposeGlossary = () => {}
+  let currentFilter = getStewardFilter()
 
   container.innerHTML = `
     <div class="page-container" data-testid="home-page">
@@ -152,8 +154,41 @@ export function renderHome(container) {
   // Add tour button
   const tourButtonContainer = container.querySelector('#tour-button-container')
   if (tourButtonContainer) {
+    tourButtonContainer.style.gap = '8px'
+    
     const tourButton = createTourButton()
     tourButtonContainer.appendChild(tourButton)
+    
+    // Add static timeline button when filtered to single steward
+    const updateTimelineButton = () => {
+      const existingTimelineButton = tourButtonContainer.querySelector('.static-timeline-button')
+      const isDesktop = window.innerWidth >= 768
+      const isSingleSteward = currentFilter && currentFilter !== 'all'
+      
+      if (isDesktop && isSingleSteward) {
+        // Always recreate button to capture current filter value
+        if (existingTimelineButton) {
+          existingTimelineButton.remove()
+        }
+        const timelineButton = createStaticTimelineButton(currentFilter)
+        tourButtonContainer.appendChild(timelineButton)
+      } else {
+        if (existingTimelineButton) {
+          existingTimelineButton.remove()
+        }
+      }
+    }
+    
+    // Initial check
+    updateTimelineButton()
+    
+    // Update on filter change
+    onFilterChange(() => {
+      updateTimelineButton()
+    })
+    
+    // Update on window resize
+    window.addEventListener('resize', updateTimelineButton)
   }
 
   const grid = container.querySelector('#envelope-grid')
@@ -172,7 +207,6 @@ export function renderHome(container) {
   bindGlossary()
 
   // Steward filter functionality
-  let currentFilter = getStewardFilter()
   const stewardFilter = container.querySelector('#steward-filter')
   
   // Populate filter options based on scenario
@@ -194,6 +228,11 @@ export function renderHome(container) {
       stewardFilter.value = 'all'
       currentFilter = 'all'
       setStewardFilter('all')
+    }
+
+    // Keep the map filter in sync even when a scenario change forces a reset.
+    if (activeMapInstance && activeMapInstance.setFilter) {
+      activeMapInstance.setFilter(stewardFilter.value)
     }
   }
   
@@ -355,6 +394,11 @@ export function renderHome(container) {
     if (!container.isConnected) { unsubScenario(); unsubTime(); return }
     populateStewardFilter()
     renderEnvelopeCards()
+
+    // Re-mount the map on scenario change so it can't get stuck rendering nothing
+    // due to stale internal state or an invalid steward filter for the new scenario.
+    if (activeMapMountRaf != null) cancelAnimationFrame(activeMapMountRaf)
+    activeMapMountRaf = requestAnimationFrame(mountMap)
   })
   const unsubTime = onTimeChange(() => {
     if (!container.isConnected) { unsubScenario(); unsubTime(); return }

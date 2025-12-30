@@ -44,6 +44,12 @@ For detailed breakdown see [TEST_REPORT.md](TEST_REPORT.md)
    - Requires: `VITE_COVERAGE=true` environment variable
    - Output: `coverage/index.html`
 
+4. **Performance Testing** - Browser rendering metrics
+   - Location: `analysis/performance-metrics.mjs`
+   - Run: `npm run performance [scenario]`
+   - Suite: `npm run performance:suite` (5 runs with statistics)
+   - See: [`../analysis/README.md`](../analysis/README.md#performance-testing-workflow) for details
+
 ## Current Test Suite
 
 **Total: 254 tests across 22 files (91% pass rate)**

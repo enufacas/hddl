@@ -21,7 +21,8 @@
     "validate:canon": "node ./scripts/validate-canon-registry.mjs",
     "conformance": "node ./scripts/conformance.mjs",
     "cognitive-load": "node ./analysis/cognitive-load-metrics.mjs",
-    "performance": "node ./analysis/performance-metrics.mjs"
+    "performance": "node ./analysis/performance-metrics.mjs",
+    "performance:suite": "node ./scripts/run-perf-suite.mjs"
   },
   "devDependencies": {
     "@istanbuljs/nyc-config-typescript": "^1.0.2",

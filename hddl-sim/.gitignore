@@ -20,6 +20,9 @@ playwright-report
 .nyc_output
 coverage
 
+# Performance test results
+analysis/perf-runs/*.json
+
 # UX review harness artifacts
 review/artifacts
 

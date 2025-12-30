@@ -792,10 +792,11 @@ function buildTelemetryNarrative(scenario, timeHour) {
     : envelopes.filter(env => env.ownerRole === stewardFilter)
   const filteredEnvelopeIds = new Set(filteredEnvelopes.map(e => e.envelopeId))
 
-  const windowStart = Math.max(0, timeHour - 48)
+  // Show all events from the start of the scenario up to current time
+  // (no sliding window - preserve all narrative history during replay)
   const recent = events
     .map((e, idx) => ({ e, idx }))
-    .filter(({ e }) => e && typeof e.hour === 'number' && e.hour <= timeHour && e.hour >= windowStart)
+    .filter(({ e }) => e && typeof e.hour === 'number' && e.hour <= timeHour)
     .filter(({ e }) => isNarratableEventType(e.type))
     // Filter to only events related to filtered envelopes
     .filter(({ e }) => {

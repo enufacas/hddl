@@ -8,7 +8,9 @@ export default defineConfig(({ command }) => ({
     // Only instrument for coverage when explicitly requested
     istanbul({
       include: 'src/**/*.js',
-      exclude: ['node_modules/**', 'tests/**', 'src/**/*.test.js', '**/*.spec.js'],
+      // main.js starts with CSS imports; some instrumentation strategies can
+      // inject statements before imports, producing invalid ESM.
+      exclude: ['node_modules/**', 'tests/**', 'src/**/*.test.js', '**/*.spec.js', 'src/main.js'],
       extension: ['.js'],
       requireEnv: true, // Only activate when VITE_COVERAGE=true
       forceBuildInstrument: true,

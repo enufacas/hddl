@@ -22,7 +22,7 @@ import { spawn } from 'child_process';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const scenarioName = process.argv[2] || 'insurance-underwriting';
+const scenarioName = process.argv[2] || 'test-minimal';
 const devServerUrl = process.argv[3] || 'http://localhost:5173';
 
 console.log(`\n⚡ PERFORMANCE METRICS: ${scenarioName.toUpperCase()}`);

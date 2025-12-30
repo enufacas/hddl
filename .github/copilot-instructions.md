@@ -107,7 +107,9 @@ npm run test:coverage      # Generate coverage report (opens browser)
    - SVG complexity (DOM nodes, path segments)
    - Memory usage (heap size)
    - Render times (initial load, first paint)
-   - Run: `npm run performance <scenario-name>` (requires dev server running)
+  - Default perf scenario: `test-minimal` (fast, predictable baseline)
+  - Run: `npm run performance` (defaults to `test-minimal`; requires dev server running)
+  - Override: `npm run performance <scenario-name>`
 
 ### Creating Analysis Reports
 
