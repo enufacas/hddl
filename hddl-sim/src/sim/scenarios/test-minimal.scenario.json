@@ -1,68 +1,42 @@
 {
-  "schemaVersion": "1.0.0",
-  "metadata": {
-    "name": "Test Minimal",
-    "description": "Minimal scenario designed for fast, predictable test harness validation. Contains one of each key feature: decision, boundary, revision, with known timing.",
-    "domain": "testing",
-    "created": "2024-12-29",
-    "author": "HDDL Test Team"
-  },
-  "simulation": {
-    "durationHours": 6,
-    "focusHour": 2.5
-  },
-  "fleets": [
-    {
-      "role": "claim_processor",
-      "label": "Test Processors",
-      "agentIds": ["agent-test-1", "agent-test-2"]
-    }
-  ],
-  "agents": [
-    {
-      "id": "agent-test-1",
-      "name": "TestBot Alpha",
-      "role": "claim_processor"
-    },
-    {
-      "id": "agent-test-2",
-      "name": "TestBot Beta",
-      "role": "claim_processor"
-    }
-  ],
+  "schemaVersion": 2,
+  "id": "test-minimal",
+  "title": "Test Minimal — Fast Test Harness",
+  "durationHours": 6,
   "envelopes": [
     {
       "envelopeId": "env-test-policy",
-      "id": "env-test-policy",
       "name": "Test Policy",
-      "kind": "policy",
-      "status": "active",
-      "ownerSteward": "steward-test-policy"
+      "ownerRole": "policy",
+      "createdHour": 0,
+      "endHour": 6
     },
     {
       "envelopeId": "env-test-queue",
-      "id": "env-test-queue",
       "name": "Test Queue",
-      "kind": "queue",
-      "status": "evaluating",
-      "ownerSteward": "steward-test-ops"
+      "ownerRole": "operations",
+      "createdHour": 0,
+      "endHour": 6
     }
   ],
-  "stewards": [
+  "fleets": [
     {
-      "id": "steward-test-policy",
-      "name": "Policy Test Steward",
-      "role": "policy",
-      "color": "#3b82f6"
-    },
-    {
-      "id": "steward-test-ops",
-      "name": "Ops Test Steward",
-      "role": "operations",
-      "color": "#10b981"
+      "stewardRole": "policy",
+      "agents": [
+        {
+          "agentId": "agent-test-1",
+          "name": "TestBot Alpha",
+          "envelopeIds": ["env-test-policy", "env-test-queue"]
+        },
+        {
+          "agentId": "agent-test-2",
+          "name": "TestBot Beta",
+          "envelopeIds": ["env-test-policy"]
+        }
+      ]
     }
   ],
-  "timeline": [
+  "events": [
     {
       "hour": 0,
       "type": "embedding",
@@ -76,7 +50,9 @@
       "hour": 1.0,
       "type": "decision",
       "eventId": "decision-test-1",
-      "actorName": "agent-test-1",
+      "actorRole": "policy",
+      "actorName": "TestBot Alpha",
+      "agentId": "agent-test-1",
       "envelopeId": "env-test-policy",
       "status": "allowed",
       "summary": "Standard test case approved"
@@ -85,7 +61,9 @@
       "hour": 2.0,
       "type": "boundary_interaction",
       "eventId": "boundary-test-1",
-      "actorName": "agent-test-1",
+      "actorRole": "policy",
+      "actorName": "TestBot Alpha",
+      "agentId": "agent-test-1",
       "envelopeId": "env-test-policy",
       "boundary_kind": "escalated",
       "boundary_reason": "threshold_exceeded",
@@ -105,7 +83,8 @@
       "hour": 3.0,
       "type": "decision",
       "eventId": "decision-test-2",
-      "actorName": "steward-test-policy",
+      "actorRole": "policy",
+      "actorName": "policy steward",
       "envelopeId": "env-test-policy",
       "status": "allowed",
       "resolvesEventId": "boundary-test-1",
@@ -125,7 +104,8 @@
       "type": "revision",
       "eventId": "revision-test-1",
       "envelopeId": "env-test-policy",
-      "actorName": "steward-test-policy",
+      "actorRole": "policy",
+      "actorName": "policy steward",
       "resolvesEventId": "boundary-test-1",
       "summary": "Updated test policy: raised threshold to prevent future escalations"
     },
@@ -142,7 +122,9 @@
       "hour": 5.0,
       "type": "decision",
       "eventId": "decision-test-3",
-      "actorName": "agent-test-2",
+      "actorRole": "policy",
+      "actorName": "TestBot Beta",
+      "agentId": "agent-test-2",
       "envelopeId": "env-test-policy",
       "status": "denied",
       "summary": "Test case denied under original policy"

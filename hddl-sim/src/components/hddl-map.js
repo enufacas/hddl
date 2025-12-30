@@ -1879,15 +1879,15 @@ export function createHDDLMap(container, options = {}) {
 
     exceptionSel.enter()
       .append('line')
-      .attr('stroke', 'var(--status-warning)')
-      .attr('stroke-width', 3)
+      .attr('stroke', 'red')
+      .attr('stroke-width', 15)
       .attr('opacity', 0.0)
       .transition().duration(200)
       .attr('opacity', 0.85)
 
     exceptionSel
-      .attr('stroke', 'var(--status-warning)')
-      .attr('stroke-width', 3)
+      .attr('stroke', 'red')
+      .attr('stroke-width', 15)
       .attr('opacity', 0.85)
 
     exceptionSel.exit().transition().duration(200).attr('opacity', 0).remove()

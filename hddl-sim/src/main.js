@@ -158,6 +158,29 @@ if (!isTestEnv) {
       playBtn.click()
     }
   }, 300)
+} else {
+  // Expose store functions to window for test automation
+  window.getScenario = getScenario
+  window.setTimeHour = setTimeHour
+  window.getTimeHour = getTimeHour
+  // Load scenario from URL query parameter if in test mode
+  const params = new URLSearchParams(window.location.search)
+  const scenarioParam = params.get('scenario')
+  if (scenarioParam) {
+    // Load from scenario catalog
+    Promise.all([
+      import('./sim/scenario-loader.js'),
+      import('./sim/store.js')
+    ]).then(([loaderModule, storeModule]) => {
+      const scenario = loaderModule.SCENARIOS[scenarioParam]
+      if (scenario) {
+        storeModule.setScenario(scenario.data)
+        console.log(`✓ Loaded test scenario: ${scenarioParam} (${scenario.title})`)
+      } else {
+        console.error(`Scenario '${scenarioParam}' not found in catalog`)
+      }
+    }).catch(err => console.error(`Failed to load scenario ${scenarioParam}:`, err))
+  }
 }
 
 const timeDisplay = document.createElement('div')
