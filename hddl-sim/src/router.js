@@ -43,10 +43,15 @@ export function initRouter() {
 }
 
 export function navigateTo(path) {
-  const normalized = normalizePath(path)
+  // Extract hash before normalization
+  const hashIndex = path.indexOf('#')
+  const hash = hashIndex >= 0 ? path.slice(hashIndex) : ''
+  const pathWithoutHash = hashIndex >= 0 ? path.slice(0, hashIndex) : path
+  
+  const normalized = normalizePath(pathWithoutHash)
   // Use base-aware path for pushState
   const base = import.meta.env.BASE_URL
-  const fullPath = base !== '/' ? base.slice(0, -1) + normalized : normalized
+  const fullPath = base !== '/' ? base.slice(0, -1) + normalized + hash : normalized + hash
   history.pushState(null, null, fullPath)
   navigate(normalized)
 }

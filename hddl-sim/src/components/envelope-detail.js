@@ -82,9 +82,14 @@ export function createEnvelopeDetailModal(envelopeId) {
             </div>
           </div>
         </div>
-        <button class="monaco-button" id="close-modal" style="padding: 6px 12px;">
-          <span class="codicon codicon-close"></span>
-        </button>
+        <div style="display: flex; gap: 8px;">
+          <button class="monaco-button" id="open-glossary-btn" style="padding: 6px 12px; background: var(--vscode-button-secondaryBackground); color: var(--vscode-button-secondaryForeground);">
+            Open Glossary
+          </button>
+          <button class="monaco-button" id="close-modal" style="padding: 6px 12px;">
+            Close
+          </button>
+        </div>
       </div>
       
       <p style="color: var(--vscode-statusBar-foreground); margin-bottom: 12px;">${envelope?.domain ? `Domain: ${envelope.domain}` : ''}</p>
@@ -233,6 +238,15 @@ export function createEnvelopeDetailModal(envelopeId) {
   const closeBtn = modalContent.querySelector('#close-modal');
   closeBtn.addEventListener('click', () => {
     modal.remove();
+  });
+  
+  const glossaryBtn = modalContent.querySelector('#open-glossary-btn');
+  glossaryBtn.addEventListener('click', () => {
+    modal.remove();
+    // Use setTimeout to ensure modal is removed before navigation
+    setTimeout(() => {
+      navigateTo('/docs#glossary');
+    }, 0);
   });
   
   modal.addEventListener('click', (e) => {

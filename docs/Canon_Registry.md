@@ -59,7 +59,3 @@ Any document not listed here is non-canonical.
 - appendices/HDDL_Simulation_Concept.md
 - appendices/Individual_Human_Judgment_Balance_Sheet.md
 - operations/Request_Lifecycle_Walkthrough.md
-
-## Legacy / Deprecated (Non-canonical)
-
-- foundations/Human_Derived_Decision_Layer_Manifesto.md

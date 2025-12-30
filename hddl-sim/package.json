@@ -13,7 +13,6 @@
     "test:unit:watch": "vitest --watch",
     "test:coverage": "node scripts/run-coverage.mjs",
     "test:coverage:verbose": "node scripts/run-coverage.mjs --verbose",
-    "ux:review": "playwright test tests/ux-review.spec.js",
     "test:ui": "playwright test --ui",
     "test:report": "playwright show-report",
     "export:default-scenario": "node ./scripts/export-default-scenario.mjs",
@@ -33,6 +32,7 @@
     "vitest": "^4.0.16"
   },
   "dependencies": {
+    "@google-cloud/vertexai": "^1.10.0",
     "d3": "^7.9.0",
     "intro.js": "^8.3.2"
   }

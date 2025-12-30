@@ -33,6 +33,7 @@ export function renderHome(container) {
 
   let disposeGlossary = () => {}
   let currentFilter = getStewardFilter()
+  let mountMap = null // Will be initialized if mapContainer exists
 
   container.innerHTML = `
     <div class="page-container" data-testid="home-page">
@@ -42,12 +43,12 @@ export function renderHome(container) {
           <div>
             <h1 style="margin: 0; font-size: 16px;">Decision Envelopes</h1>
           </div>
-          <div id="tour-button-container" style="display: flex; align-items: center;"></div>
+          <div id="tour-button-container" style="display: flex; align-items: center; gap: 8px;"></div>
         </div>
         
-        <div style="min-width: 200px;">
-          <div style="font-size: 9px; color: var(--vscode-statusBar-foreground); margin-bottom: 4px; letter-spacing: 0.5px;">VIEW AS</div>
-          <select id="steward-filter" style="width: 100%; padding: 6px 10px; background: var(--vscode-input-background); color: var(--vscode-editor-foreground); border: 1px solid var(--vscode-input-border); border-radius: 2px; font-size: 12px; cursor: pointer;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div id="timeline-button-container" style="display: flex; align-items: center;"></div>
+          <select id="steward-filter" style="padding: 6px 10px; background: var(--vscode-input-background); color: var(--vscode-editor-foreground); border: 1px solid var(--vscode-input-border); border-radius: 2px; font-size: 12px; cursor: pointer; min-width: 200px;">
             <option value="all">All Envelopes</option>
             <option value="Customer Steward">Customer Steward</option>
             <option value="HR Steward">HR Steward</option>
@@ -84,7 +85,7 @@ export function renderHome(container) {
     let lastBreakpoint = null
     let destroyed = false
 
-    const mountMap = () => {
+    mountMap = () => {
       if (destroyed || !container.isConnected) return
 
       const measuredWidth = Math.round(mapContainer.getBoundingClientRect().width || 0)
@@ -158,10 +159,13 @@ export function renderHome(container) {
     
     const tourButton = createTourButton()
     tourButtonContainer.appendChild(tourButton)
-    
-    // Add static timeline button when filtered to single steward
+  }
+
+  // Add static timeline button when filtered to single steward
+  const timelineButtonContainer = container.querySelector('#timeline-button-container')
+  if (timelineButtonContainer) {
     const updateTimelineButton = () => {
-      const existingTimelineButton = tourButtonContainer.querySelector('.static-timeline-button')
+      const existingTimelineButton = timelineButtonContainer.querySelector('.static-timeline-button')
       const isDesktop = window.innerWidth >= 768
       const isSingleSteward = currentFilter && currentFilter !== 'all'
       
@@ -171,7 +175,7 @@ export function renderHome(container) {
           existingTimelineButton.remove()
         }
         const timelineButton = createStaticTimelineButton(currentFilter)
-        tourButtonContainer.appendChild(timelineButton)
+        timelineButtonContainer.appendChild(timelineButton)
       } else {
         if (existingTimelineButton) {
           existingTimelineButton.remove()
@@ -397,8 +401,10 @@ export function renderHome(container) {
 
     // Re-mount the map on scenario change so it can't get stuck rendering nothing
     // due to stale internal state or an invalid steward filter for the new scenario.
-    if (activeMapMountRaf != null) cancelAnimationFrame(activeMapMountRaf)
-    activeMapMountRaf = requestAnimationFrame(mountMap)
+    if (mountMap) {
+      if (activeMapMountRaf != null) cancelAnimationFrame(activeMapMountRaf)
+      activeMapMountRaf = requestAnimationFrame(mountMap)
+    }
   })
   const unsubTime = onTimeChange(() => {
     if (!container.isConnected) { unsubScenario(); unsubTime(); return }

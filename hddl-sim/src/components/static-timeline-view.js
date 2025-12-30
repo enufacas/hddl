@@ -6,7 +6,6 @@ export function createStaticTimelineButton(stewardFilter) {
   const button = document.createElement('button')
   button.className = 'monaco-button static-timeline-button'
   button.innerHTML = `
-    <span class="codicon codicon-timeline-view"></span>
     <span class="button-text">Timeline View</span>
   `
   button.style.cssText = `
@@ -19,9 +18,10 @@ export function createStaticTimelineButton(stewardFilter) {
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 6px;
+    justify-content: center;
     font-size: 12px;
     transition: all 0.2s;
+    white-space: nowrap;
   `
   
   button.addEventListener('mouseenter', () => {

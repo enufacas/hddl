@@ -292,10 +292,10 @@ test.describe('Scenario Data Integrity', () => {
     expect(nodeCount).toBeGreaterThan(0);
     expect(nodeCount).toBeLessThanOrEqual(10);
     
-    // Count envelope shapes in map (should also be 4)
+    // Count envelope shapes in map (test-minimal has 2 envelopes)
     const envelopeShapes = page.locator('.envelope-body, .envelope-icon-circle');
     const shapeCount = await envelopeShapes.count();
     
-    expect(shapeCount).toBeGreaterThanOrEqual(4);
+    expect(shapeCount).toBeGreaterThanOrEqual(2);
   });
 });

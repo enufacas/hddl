@@ -492,7 +492,7 @@ body {
 }
 
 .docs-hero h1 {
-  font-size: 3rem;
+  font-size: 1.5rem;
   margin-bottom: 1rem;
   background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
   -webkit-background-clip: text;
@@ -566,49 +566,39 @@ body {
 .doc-link {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  justify-content: space-between;
   padding: 1rem 1.25rem;
-  background-color: var(--background);
-  border: 1px solid var(--border);
+  background-color: color-mix(in srgb, var(--vscode-sideBar-background) 90%, var(--vscode-editor-background));
+  border: 1px solid var(--vscode-sideBar-border);
   border-radius: 8px;
   text-decoration: none;
   color: var(--text);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
+  transition: all 0.2s;
+  cursor: pointer;
+  user-select: none;
 }
 
 .doc-link::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  height: 100%;
-  width: 4px;
-  background: linear-gradient(180deg, var(--primary-color), var(--secondary-color));
-  transform: scaleY(0);
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: none;
 }
 
 .doc-link:hover {
-  transform: translateX(4px);
+  background-color: color-mix(in srgb, var(--vscode-button-background) 14%, var(--vscode-sideBar-background));
   border-color: var(--primary-color);
-  background-color: rgba(25, 118, 210, 0.05);
-  box-shadow: 0 4px 12px rgba(25, 118, 210, 0.15);
+  transform: none;
+  box-shadow: none;
 }
 
 .doc-link:hover::before {
-  transform: scaleY(1);
+  display: none;
 }
 
 .doc-link .doc-icon {
-  font-size: 2rem;
-  flex-shrink: 0;
-  transition: transform 0.3s;
+  display: none;
 }
 
 .doc-link:hover .doc-icon {
-  transform: scale(1.1) rotate(5deg);
+  display: none;
 }
 
 .doc-content {
@@ -617,29 +607,27 @@ body {
 }
 
 .doc-link .doc-title {
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 600;
   margin-bottom: 0.25rem;
   color: var(--text);
 }
 
 .doc-link .doc-desc {
-  font-size: 0.9rem;
-  color: var(--text-secondary);
+  font-size: 0.875rem;
+  color: var(--vscode-statusBar-foreground);
   line-height: 1.4;
 }
 
-.doc-arrow {
-  font-size: 1.5rem;
+.doc-chevron {
+  font-size: 20px;
   color: var(--text-secondary);
-  opacity: 0;
-  transition: all 0.3s;
+  transition: transform 0.2s;
   flex-shrink: 0;
 }
 
-.doc-link:hover .doc-arrow {
-  opacity: 1;
-  transform: translateX(4px);
+.doc-link:hover .doc-chevron {
+  color: var(--primary-color);
 }
 
 /* Info Banner */
@@ -679,102 +667,24 @@ body {
 }
 
 /* Markdown Viewer Modal */
-.markdown-viewer {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: opacity 0.3s;
+/* Inline Documentation Content */
+.inline-doc-content {
+  background-color: color-mix(in srgb, var(--vscode-sideBar-background) 90%, var(--vscode-editor-background));
+  border: 1px solid var(--vscode-sideBar-border);
+  border-top: none;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+  overflow: hidden;
 }
 
-.markdown-viewer.visible {
-  opacity: 1;
-}
-
-.markdown-viewer.closing {
-  opacity: 0;
-}
-
-.markdown-viewer-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(4px);
-}
-
-.markdown-viewer-content {
-  position: relative;
-  width: 90%;
-  max-width: 900px;
-  max-height: 85vh;
-  background-color: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-  transform: scale(0.95);
-  transition: transform 0.3s;
-}
-
-.markdown-viewer.visible .markdown-viewer-content {
-  transform: scale(1);
-}
-
-.markdown-viewer-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.5rem 2rem;
-  border-bottom: 2px solid var(--border);
-  flex-shrink: 0;
-}
-
-.markdown-viewer-header h2 {
-  margin: 0;
-  font-size: 1.5rem;
-  color: var(--primary-color);
-}
-
-.markdown-viewer-close {
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  color: var(--text);
-  cursor: pointer;
-  padding: 0.5rem;
-  width: 2.5rem;
-  height: 2.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 6px;
-  transition: all 0.2s;
-}
-
-.markdown-viewer-close:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: var(--accent-color);
-}
-
-.markdown-viewer-body {
-  flex: 1;
+.inline-doc-body {
+  padding: 1.5rem;
   overflow-y: auto;
-  padding: 2rem;
   line-height: 1.8;
 }
 
-.markdown-viewer-body h1 {
-  font-size: 2rem;
+.inline-doc-body h1 {
+  font-size: 1.8rem;
   margin-top: 0;
   margin-bottom: 1rem;
   color: var(--primary-color);
@@ -782,26 +692,26 @@ body {
   padding-bottom: 0.5rem;
 }
 
-.markdown-viewer-body h2 {
-  font-size: 1.6rem;
-  margin-top: 2rem;
-  margin-bottom: 1rem;
-  color: var(--text);
-}
-
-.markdown-viewer-body h3 {
-  font-size: 1.3rem;
+.inline-doc-body h2 {
+  font-size: 1.4rem;
   margin-top: 1.5rem;
   margin-bottom: 0.75rem;
   color: var(--text);
 }
 
-.markdown-viewer-body p {
+.inline-doc-body h3 {
+  font-size: 1.2rem;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+  color: var(--text);
+}
+
+.inline-doc-body p {
   margin-bottom: 1rem;
   color: var(--text);
 }
 
-.markdown-viewer-body code {
+.inline-doc-body code {
   background-color: var(--background);
   padding: 0.2rem 0.4rem;
   border-radius: 4px;
@@ -810,7 +720,7 @@ body {
   color: var(--accent-color);
 }
 
-.markdown-viewer-body pre {
+.inline-doc-body pre {
   background-color: var(--background);
   border: 1px solid var(--border);
   border-radius: 6px;
@@ -819,35 +729,49 @@ body {
   margin: 1rem 0;
 }
 
-.markdown-viewer-body pre code {
+.inline-doc-body pre code {
   background: none;
   padding: 0;
   color: var(--text);
 }
 
-.markdown-viewer-body ul {
+.inline-doc-body ul {
   margin-left: 1.5rem;
   margin-bottom: 1rem;
 }
 
-.markdown-viewer-body li {
+.inline-doc-body li {
   margin-bottom: 0.5rem;
   color: var(--text);
 }
 
-.markdown-viewer-body a {
+.inline-doc-body a {
   color: var(--primary-color);
   text-decoration: none;
   border-bottom: 1px solid transparent;
   transition: border-color 0.2s;
 }
 
-.markdown-viewer-body a:hover {
+.inline-doc-body a:hover {
   border-bottom-color: var(--primary-color);
 }
 
-.markdown-viewer-body strong {
+.inline-doc-body strong {
   color: var(--text);
+  font-weight: 600;
+}
+
+.doc-link.expanded {
+  background-color: color-mix(in srgb, var(--vscode-button-background) 10%, var(--vscode-sideBar-background));
+  border-color: var(--primary-color);
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.doc-link.expanded .doc-chevron {
+  transform: rotate(180deg);
+}
+
   font-weight: 600;
 }
 
