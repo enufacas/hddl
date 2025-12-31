@@ -305,6 +305,20 @@
       "actorName": "AlertRouter"
     },
     {
+      "eventId": "retrieval:6_6:ENV-DB-001:4a",
+      "hour": 6.6,
+      "type": "retrieval",
+      "envelopeId": "ENV-DB-001",
+      "severity": "info",
+      "label": "Retrieving PII optimization patterns",
+      "detail": "QueryOptimizer checking historical PII table optimization protocols before escalation.",
+      "actorRole": "Performance Steward",
+      "actorName": "QueryOptimizer",
+      "queryText": "PII table optimization security review patterns",
+      "retrievedEmbeddings": [],
+      "relevanceScores": []
+    },
+    {
       "eventId": "boundary_interaction:6_8:ENV-DB-001:5",
       "hour": 6.8,
       "type": "boundary_interaction",
@@ -314,7 +328,8 @@
       "detail": "QueryOptimizer identified optimization on customer_profiles table (contains PII). Escalated to security review per constraints.",
       "actorRole": "Performance Steward",
       "actorName": "QueryOptimizer",
-      "boundaryType": "security_review_required"
+      "boundaryType": "security_review_required",
+      "boundary_kind": "escalated"
     },
     {
       "eventId": "envelope_promoted:12:ENV-DB-003:6",
@@ -399,6 +414,20 @@
       "sessionId": "DSG-PERF-001-W2"
     },
     {
+      "eventId": "retrieval:36_5:ENV-DB-003:12a",
+      "hour": 36.5,
+      "type": "retrieval",
+      "envelopeId": "ENV-DB-003",
+      "severity": "info",
+      "label": "Retrieving capacity buffer protocols",
+      "detail": "CostOptimizer checking historical capacity constraint patterns before cost optimization recommendation.",
+      "actorRole": "Infrastructure Steward",
+      "actorName": "CostOptimizer",
+      "queryText": "capacity buffer constraint cost optimization",
+      "retrievedEmbeddings": [],
+      "relevanceScores": []
+    },
+    {
       "eventId": "boundary_interaction:36_7:ENV-DB-003:13",
       "hour": 36.7,
       "type": "boundary_interaction",
@@ -408,7 +437,8 @@
       "detail": "CostOptimizer recommended downsizing test environment to save costs, but current utilization at 82% (buffer constraint: 20%).",
       "actorRole": "Infrastructure Steward",
       "actorName": "CostOptimizer",
-      "boundaryType": "constraint_approached"
+      "boundaryType": "constraint_approached",
+      "boundary_kind": "escalated"
     },
     {
       "eventId": "embedding:37_2:boundary:36_7",
