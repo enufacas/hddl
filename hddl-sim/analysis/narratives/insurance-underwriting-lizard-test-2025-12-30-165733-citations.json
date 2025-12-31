@@ -1,0 +1,65 @@
+{
+  "narrativeFile": "insurance-underwriting-lizard-test-2025-12-30-165733.md",
+  "scenarioId": "scenario-insurance-underwriting-001",
+  "model": "gemini-3-flash-preview",
+  "method": "llm-full-context",
+  "tokensIn": 18392,
+  "tokensOut": 656,
+  "cost": 0.011164,
+  "generatedAt": "2025-12-30T21:57:47.978Z",
+  "citations": [
+    {
+      "eventId": "envelope_promoted:0:ENV-INS-001:0",
+      "offset": 1054,
+      "context": "...nt envelope, setting the constraints for her fleet^[envelope_promoted:0:ENV-INS-001:0]. Her agents, such as RiskScorer, operated efficie...",
+      "hour": 0,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-INS-001"
+    },
+    {
+      "eventId": "decision:2.8:ENV-INS-001:3",
+      "offset": 1246,
+      "context": "...ard auto policies with a flick of a digital tongue^[decision:2.8:ENV-INS-001:3]. However, when the ThresholdEscalator agent encou..."
+    },
+    {
+      "eventId": "boundary_interaction:5.3:ENV-INS-001:4",
+      "offset": 1442,
+      "context": "... reached a boundary it was not authorized to cross^[boundary_interaction:5.3:ENV-INS-001:4]. This triggered an escalation to a senior underwr..."
+    },
+    {
+      "eventId": "decision:5.7:ENV-INS-001:5",
+      "offset": 1778,
+      "context": "... a specific mitigation requirement for a sump pump^[decision:5.7:ENV-INS-001:5]. This wasn't just a one-off fix; Rebecca Foster i..."
+    },
+    {
+      "eventId": "revision:6.2:ENV-INS-001:5a",
+      "offset": 2032,
+      "context": "...behavior reflected this refined reptilian judgment^[revision:6.2:ENV-INS-001:5a].  The feedback loops continued to sharpen the sys..."
+    },
+    {
+      "eventId": "boundary_interaction:12.4:ENV-INS-002:7",
+      "offset": 2296,
+      "context": "...udDetector flagged a claim for suspicious patterns^[boundary_interaction:12.4:ENV-INS-002:7]. After a senior adjuster's heat-sensing pits dete..."
+    },
+    {
+      "eventId": "decision:18.2:ENV-INS-002:10",
+      "offset": 2532,
+      "context": "...s realized the automation was being too aggressive^[decision:18.2:ENV-INS-002:10]. He revised the envelope assumptions to exclude c..."
+    },
+    {
+      "eventId": "revision:19.1:ENV-INS-002:10a",
+      "offset": 2710,
+      "context": "...fraud logic, successfully reducing false positives^[revision:19.1:ENV-INS-002:10a]. Similarly, on day two, Pricing Steward Alicia Ro..."
+    },
+    {
+      "eventId": "boundary_interaction:28.7:ENV-INS-003:12",
+      "offset": 2881,
+      "context": "...en a renewal quote exceeded the 15% increase limit^[boundary_interaction:28.7:ENV-INS-003:12]. After reviewing the customer's history with a st..."
+    }
+  ],
+  "coverage": {
+    "eventsTotal": 73,
+    "eventsCited": 9,
+    "citationsTotal": 9
+  }
+}

@@ -127,6 +127,7 @@ let aiNarrativeGenerated = false
 let aiNarrativeCitations = []
 let aiNarrativeSyncEnabled = false
 let aiNarrativeFullHtml = ''
+let aiNarrativeUserAddendum = ''
 
 // Helper to rewire citation click handlers
 const rewireCitationLinks = (containerEl) => {
@@ -1711,6 +1712,28 @@ function createBottomPanel() {
             <span>Sync with Timeline</span>
           </label>
         </div>
+        <div style="margin-bottom: 12px;">
+          <label for="ai-narrative-user-addendum" style="display: block; font-size: 11px; color: var(--vscode-descriptionForeground); margin-bottom: 6px;">
+            Additional instructions (optional)
+          </label>
+          <textarea id="ai-narrative-user-addendum" rows="3" placeholder="Add constraints like: focus on boundary interactions, emphasize day-by-day structure, keep it concise…" style="
+            width: 100%;
+            resize: vertical;
+            min-height: 54px;
+            max-height: 180px;
+            padding: 8px 10px;
+            border-radius: 4px;
+            border: 1px solid var(--vscode-input-border);
+            background: var(--vscode-input-background);
+            color: var(--vscode-input-foreground);
+            font-size: 12px;
+            line-height: 1.4;
+            outline: none;
+          "></textarea>
+          <div style="margin-top: 6px; font-size: 10px; color: var(--vscode-descriptionForeground); opacity: 0.9;">
+            Appended to the request; the base prompt and scenario facts remain authoritative.
+          </div>
+        </div>
         <div id="ai-narrative-content" style="
           min-height: 200px;
           color: var(--vscode-foreground);
@@ -1724,20 +1747,31 @@ function createBottomPanel() {
     
     const generateBtn = outputEl.querySelector('#generate-ai-narrative')
     generateBtn.addEventListener('click', generateAINarrative)
+
+    const addendumEl = outputEl.querySelector('#ai-narrative-user-addendum')
+    if (addendumEl) {
+      addendumEl.value = aiNarrativeUserAddendum
+      addendumEl.addEventListener('input', () => {
+        aiNarrativeUserAddendum = addendumEl.value || ''
+      })
+    }
     
     const syncToggle = outputEl.querySelector('#sync-narrative-toggle')
     if (syncToggle) {
       syncToggle.addEventListener('change', (e) => {
         aiNarrativeSyncEnabled = e.target.checked
+        const contentEl = outputEl.querySelector('#ai-narrative-content')
+        if (!contentEl) return
+        
         if (aiNarrativeSyncEnabled && aiNarrativeFullHtml) {
           updateNarrativeSync()
         } else if (!aiNarrativeSyncEnabled && aiNarrativeFullHtml) {
-          // Show full narrative when sync is disabled
-          const contentEl = outputEl.querySelector('#ai-narrative-content')
-          if (contentEl) {
-            contentEl.innerHTML = aiNarrativeFullHtml
-            rewireCitationLinks(contentEl)
-          }
+          // Show full narrative when sync is disabled - reset all elements to visible
+          const elements = contentEl.querySelectorAll('[data-reveal-time]')
+          elements.forEach(el => {
+            el.style.opacity = '1'
+            el.style.filter = 'none'
+          })
         }
       })
     }
@@ -1747,6 +1781,7 @@ function createBottomPanel() {
     const outputEl = getOutputEl('ai-narrative')
     const contentEl = outputEl.querySelector('#ai-narrative-content')
     const generateBtn = outputEl.querySelector('#generate-ai-narrative')
+    const addendumEl = outputEl.querySelector('#ai-narrative-user-addendum')
     
     if (!contentEl || !generateBtn) return
     
@@ -1768,12 +1803,14 @@ function createBottomPanel() {
     
     try {
       const apiUrl = 'http://localhost:8080/generate'
+      const userAddendum = (addendumEl?.value || aiNarrativeUserAddendum || '').trim()
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           scenario: scenarioKey, // Use filename-based ID for API 
-          fullContext: true 
+          fullContext: true,
+          userAddendum
         })
       })
       
@@ -1784,8 +1821,28 @@ function createBottomPanel() {
       const data = await response.json()
       aiNarrativeCitations = data.citations || []
       
+      // === INTEGRITY CHECKPOINT 1: Raw API Response ===
+      console.log('\n🔍 CHECKPOINT 1: Raw markdown from API')
+      console.log('Length:', data.markdown.length)
+      console.log('Last 200 chars:', data.markdown.slice(-200))
+      const testSentence = data.markdown.match(/team finished the season with[^.]*\.?/)?.[0]
+      console.log('Test sentence:', testSentence)
+      console.log('Full match (300 chars):', data.markdown.match(/By the end of[^]*?(?:\.|$)/)?.[0]?.slice(0, 300))
+      
       // Render markdown with clickable citations
       let html = renderMarkdown(data.markdown)
+      
+      // === INTEGRITY CHECKPOINT 2: After renderMarkdown ===
+      console.log('\n🔍 CHECKPOINT 2: After renderMarkdown')
+      console.log('Length:', html.length)
+      console.log('Last paragraph HTML:', html.match(/<p>[^]*?<\/p>$/)?.[0]?.slice(0, 500))
+      const tempDiv1 = document.createElement('div')
+      tempDiv1.innerHTML = html
+      const textAfterRender = tempDiv1.textContent || tempDiv1.innerText
+      console.log('Last 200 chars of text:', textAfterRender.slice(-200))
+      const testSentence2 = textAfterRender.match(/team finished the season with[^.]*\.?/)?.[0]
+      console.log('Test sentence:', testSentence2)
+      console.log('Full match:', textAfterRender.match(/By the end of[^]*?(?:\.|$)/)?.[0]?.slice(0, 300))
       
       // Event type color mapping
       const eventColors = {
@@ -1799,159 +1856,131 @@ function createBottomPanel() {
         retrieval: '#58a6ff'
       }
       
-      // Find all sentences with citations and wrap them with highlighting
-      // First, collect all citations and their positions
-      const citationPattern = /\^\[([^\]]+)\]/g
-      // Match sentences: text ending with .!? followed by space+capital or end, OR remaining text at end
-      const sentencePattern = /[^.!?]+[.!?]+(?=\s+[A-Z]|$)|[^.!?]+$/g
+      // Helper: convert hour to day start (0, 24, 48, etc.)
+      const hourToDay = (hour) => Math.floor(hour / 24) * 24
       
-      // Process each paragraph to wrap sentences containing citations and add reveal time metadata
+      // Process each paragraph: 
+      // 1. Extract citations and find earliest time
+      // 2. Highlight cited sentences with visual styling (no reveal-time on individual sentences)
+      // 3. Wrap entire paragraph with single reveal-time based on earliest citation
+      let currentNarrativeDay = 0 // Track day-based position for uncited paragraphs
+      
       html = html.replace(/<p>(.*?)<\/p>/gs, (match, paragraphContent) => {
-        // Find and extract all citations first
+        // SIMPLIFIED APPROACH: 
+        // - Day-based reveal at paragraph level (for timeline sync)
+        // - Sentence-level color coding (for visual distinction)
+        
+        // Find all citations in this paragraph with their positions
         const citations = []
-        const cleanContent = paragraphContent.replace(/\^\[([^\]]+)\]/g, (match, eventId, offset) => {
-          citations.push({ eventId, originalIndex: offset })
-          return `<<<CIT${citations.length - 1}>>>` // Placeholder
+        let tempContent = paragraphContent
+        tempContent.replace(/\^\[([^\]]+)\]/g, (match, eventId, offset) => {
+          citations.push({ eventId, offset })
+          return match
         })
         
-        if (citations.length === 0) {
-          return match // No citations, return unchanged
-        }
-        
-        console.log('=== Processing paragraph ===')
-        console.log('Original:', paragraphContent.substring(0, 150) + '...')
-        console.log('Clean:', cleanContent.substring(0, 150) + '...')
-        console.log('Citations found:', citations.length, citations.map(c => c.eventId))
-        
-        // Find sentences in clean text (without citation markers)
-        const sentences = []
-        let sentMatch
-        while ((sentMatch = sentencePattern.exec(cleanContent)) !== null) {
-          sentences.push({
-            text: sentMatch[0],
-            start: sentMatch.index,
-            end: sentMatch.index + sentMatch[0].length
-          })
-        }
-        
-        console.log('Sentences found:', sentences.length)
-        sentences.forEach((s, idx) => {
-          console.log(`  [${idx}] ${s.start}-${s.end}: "${s.text.substring(0, 50)}..."`)
-        })
-        
-        // Build a map of sentence index to reveal time
-        const sentenceRevealTimes = new Map()
-        sentences.forEach((sentence, idx) => {
-          // Check which citations fall within this sentence
-          const citationsInSentence = citations.filter((c, citIdx) => {
-            const placeholder = `<<<CIT${citIdx}>>>`
-            const placeholderPos = sentence.text.indexOf(placeholder)
-            return placeholderPos !== -1
-          })
-          
-          if (citationsInSentence.length > 0) {
-            // Get earliest citation time
-            let earliestTime = Infinity
-            citationsInSentence.forEach(c => {
-              const citation = aiNarrativeCitations.find(cit => cit.eventId === c.eventId)
-              if (citation?.hour !== undefined) {
-                earliestTime = Math.min(earliestTime, citation.hour)
-              }
-            })
-            sentenceRevealTimes.set(idx, earliestTime)
-          }
-        })
-        
-        // Assign reveal times to all sentences
-        const finalRevealTimes = []
-        
-        // Find the earliest citation time in the paragraph for leading uncited sentences
-        const earliestCitationTime = sentenceRevealTimes.size > 0 
-          ? Math.min(...Array.from(sentenceRevealTimes.values())) 
-          : Infinity
-        
-        let currentRevealTime = earliestCitationTime // Start with earliest, not Infinity
-        
-        for (let i = 0; i < sentences.length; i++) {
-          if (sentenceRevealTimes.has(i)) {
-            // This sentence has a citation - use its time
-            currentRevealTime = sentenceRevealTimes.get(i)
-          }
-          finalRevealTimes.push(currentRevealTime)
-        }
-        
-        console.log('Reveal times:', finalRevealTimes.map((t, idx) => `[${idx}]=${t === Infinity ? '∞' : t}`).join(', '))
-        
-        // Build result by wrapping sentences (process backwards to maintain indices)
-        let result = cleanContent
-        const adjustments = [] // Track how much we've added/removed
-        
-        for (let i = sentences.length - 1; i >= 0; i--) {
-          const sentence = sentences[i]
-          const revealTime = finalRevealTimes[i]
-          const hasCitation = citations.some((c, citIdx) => {
-            const placeholder = `<<<CIT${citIdx}>>>`
-            return sentence.text.includes(placeholder)
-          })
-          
-          console.log(`Wrapping sentence ${i}: hasCitation=${hasCitation}, revealTime=${revealTime}, text="${sentence.text.substring(0, 40)}..."`)
-          
-          if (hasCitation) {
-            // Get colors for cited sentence (use first citation in sentence)
-            const firstCit = citations.find((c, citIdx) => {
-              const placeholder = `<<<CIT${citIdx}>>>`
-              return sentence.text.includes(placeholder)
-            })
-            const eventId = firstCit.eventId
-            const eventType = eventId.split(':')[0].split('_')[0]
-            const fullType = eventId.split(':')[0]
-            const color = eventColors[fullType] || eventColors[eventType] || '#58a6ff'
-            
+        // Find earliest citation hour for this paragraph
+        let paragraphDay = currentNarrativeDay
+        if (citations.length > 0) {
+          let earliestHour = Infinity
+          citations.forEach(({ eventId }) => {
             const citation = aiNarrativeCitations.find(c => c.eventId === eventId)
-            const stewardRole = citation?.stewardRole || citation?.actorRole
-            const stewardColor = stewardRole ? getStewardColor(stewardRole) : null
-            const bgColor = stewardColor 
-              ? `color-mix(in srgb, ${stewardColor} 20%, transparent)` 
-              : `color-mix(in srgb, ${color} 20%, transparent)`
-            
-            // Wrap the sentence
-            const wrappedSentence = `<span class="cited-sentence" data-reveal-time="${revealTime}" style="background: ${bgColor}; padding: 2px 4px; border-radius: 2px; box-shadow: -3px 0 0 ${color}; transition: opacity 0.5s ease, filter 0.5s ease;">${sentence.text}</span>`
-            result = result.substring(0, sentence.start) + wrappedSentence + result.substring(sentence.end)
-          } else if (revealTime !== Infinity) {
-            // Non-cited sentence with inherited reveal time
-            const wrappedSentence = `<span class="narrative-sentence" data-reveal-time="${revealTime}" style="transition: opacity 0.5s ease, filter 0.5s ease;">${sentence.text}</span>`
-            result = result.substring(0, sentence.start) + wrappedSentence + result.substring(sentence.end)
+            if (citation?.hour !== undefined) {
+              earliestHour = Math.min(earliestHour, citation.hour)
+            }
+          })
+          
+          if (earliestHour !== Infinity) {
+            paragraphDay = hourToDay(earliestHour)
+            currentNarrativeDay = paragraphDay // Update tracker for next uncited paragraphs
           }
         }
         
-        // Restore citation markers as placeholders (will be replaced later)
-        citations.forEach((c, idx) => {
-          result = result.replace(`<<<CIT${idx}>>>`, `^[${c.eventId}]`)
+        console.log(`Paragraph: ${citations.length} citations, reveal at day ${paragraphDay / 24}`)
+        
+        // Step 1: Replace citations with placeholders to find sentence boundaries
+        let workingContent = paragraphContent
+        citations.forEach((cit, idx) => {
+          workingContent = workingContent.replace(`^[${cit.eventId}]`, `<<<CIT${idx}>>>`)
         })
         
-        console.log('Final result length:', result.length, 'vs original:', paragraphContent.length)
-        console.log('=== End paragraph ===\n')
+        // Step 2: Find and highlight sentences containing citations
+        citations.forEach((cit, idx) => {
+          const placeholder = `<<<CIT${idx}>>>`
+          const citPos = workingContent.indexOf(placeholder)
+          if (citPos === -1) return
+          
+          // Find sentence boundaries
+          let sentStart = citPos
+          while (sentStart > 0) {
+            const char = workingContent[sentStart - 1]
+            if (char === '.' || char === '!' || char === '?') break
+            sentStart--
+          }
+          while (sentStart < citPos && /\s/.test(workingContent[sentStart])) sentStart++
+          
+          let sentEnd = citPos + placeholder.length
+          while (sentEnd < workingContent.length) {
+            const char = workingContent[sentEnd]
+            if (char === '.' || char === '!' || char === '?') {
+              sentEnd++
+              break
+            }
+            sentEnd++
+          }
+          
+          // Get colors for this citation
+          const eventId = cit.eventId
+          const eventType = eventId.split(':')[0].split('_')[0]
+          const fullType = eventId.split(':')[0]
+          const color = eventColors[fullType] || eventColors[eventType] || '#58a6ff'
+          
+          const citation = aiNarrativeCitations.find(c => c.eventId === eventId)
+          const stewardRole = citation?.stewardRole || citation?.actorRole
+          const stewardColor = stewardRole ? getStewardColor(stewardRole) : null
+          const bgColor = stewardColor 
+            ? `color-mix(in srgb, ${stewardColor} 20%, transparent)` 
+            : `color-mix(in srgb, ${color} 20%, transparent)`
+          
+          // Check if sentence is already wrapped (avoid double-wrapping)
+          const beforeSent = workingContent.substring(0, sentStart)
+          if (beforeSent.endsWith('<span class="cited-sentence"') || 
+              workingContent.substring(sentStart).startsWith('<span class="cited-sentence"')) {
+            return
+          }
+          
+          // Extract and wrap the sentence
+          const sentenceText = workingContent.substring(sentStart, sentEnd)
+          const wrappedSentence = `<span class="cited-sentence" style="background: ${bgColor}; padding: 2px 4px; border-radius: 2px; box-shadow: -3px 0 0 ${color};">${sentenceText}</span>`
+          
+          workingContent = workingContent.substring(0, sentStart) + wrappedSentence + workingContent.substring(sentEnd)
+        })
         
-        return `<p>${result}</p>`
+        // Step 3: Replace citation placeholders with styled links
+        citations.forEach((cit, idx) => {
+          const eventId = cit.eventId
+          const eventType = eventId.split(':')[0].split('_')[0]
+          const fullType = eventId.split(':')[0]
+          const color = eventColors[fullType] || eventColors[eventType] || '#58a6ff'
+          
+          const citationLink = `<sup><a href="#" class="citation-link" data-event-id="${eventId}" style="color: ${color}; text-decoration: none; font-size: 9px; opacity: 0.7; margin-left: 2px;">[${eventId}]</a></sup>`
+          workingContent = workingContent.replace(`<<<CIT${idx}>>>`, citationLink)
+        })
+        
+        // Wrap entire paragraph with single reveal-time (day-based)
+        return `<p class="narrative-reveal" data-reveal-time="${paragraphDay}">${workingContent}</p>`
       })
       
-      // Replace citation markers with clickable links (smaller, less prominent)
-      html = html.replace(/\^\[([^\]]+)\]/g, (match, eventId) => {
-        const eventType = eventId.split(':')[0].split('_')[0]
-        const fullType = eventId.split(':')[0]
-        const color = eventColors[fullType] || eventColors[eventType] || '#58a6ff'
-        
-        return `<sup><a href="#" class="citation-link" data-event-id="${eventId}" style="
-          color: ${color};
-          text-decoration: none;
-          font-size: 9px;
-          opacity: 0.7;
-          margin-left: 2px;
-        ">[${eventId}]</a></sup>`
+      // Also wrap headers (title)
+      html = html.replace(/<h([1-6])>(.*?)<\/h\1>/gs, (match, level, content) => {
+        return `<h${level} class="narrative-reveal" data-reveal-time="0">${content}</h${level}>`
       })
+      
+      console.log('Paragraph processing complete')
+
       
       // Add metadata footer
       const metadata = data.metadata || {}
+      
       const legendHtml = `
         <div style="
           margin-top: 20px;
@@ -1984,7 +2013,8 @@ function createBottomPanel() {
           Model: ${metadata.model || 'unknown'} | 
           Cost: $${(metadata.cost || 0).toFixed(6)} | 
           Tokens: ${metadata.tokensIn || 0} in / ${metadata.tokensOut || 0} out | 
-          Duration: ${(metadata.duration || 0).toFixed(2)}s
+          Duration: ${(metadata.duration || 0).toFixed(2)}s | 
+          Day-based reveal: enabled
         </div>
       `
       

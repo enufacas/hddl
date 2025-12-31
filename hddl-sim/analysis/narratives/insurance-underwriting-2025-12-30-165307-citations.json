@@ -1,0 +1,73 @@
+{
+  "narrativeFile": "insurance-underwriting-2025-12-30-165307.md",
+  "scenarioId": "scenario-insurance-underwriting-001",
+  "model": "gemini-3-flash-preview",
+  "method": "llm-full-context",
+  "tokensIn": 18363,
+  "tokensOut": 627,
+  "cost": 0.011063,
+  "generatedAt": "2025-12-30T21:53:23.273Z",
+  "citations": [
+    {
+      "eventId": "boundary_interaction:5_3:ENV-INS-001:4",
+      "offset": 1214,
+      "context": "...lation based on the high-risk threshold constraint^[boundary_interaction:5_3:ENV-INS-001:4]. This wasn't a failure of the system, but a desig...",
+      "hour": 5.3,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-INS-001"
+    },
+    {
+      "eventId": "decision:5_7:ENV-INS-001:5",
+      "offset": 1481,
+      "context": "...e condition that the homeowner install a sump pump^[decision:5_7:ENV-INS-001:5]. This human judgment—balancing underwriting rigor...",
+      "hour": 5.7,
+      "type": "decision",
+      "envelopeId": "ENV-INS-001"
+    },
+    {
+      "eventId": "revision:6_2:ENV-INS-001:5a",
+      "offset": 1746,
+      "context": "...tion verification for similar high-risk properties^[revision:6_2:ENV-INS-001:5a], ensuring that future agents would benefit from t...",
+      "hour": 6.2,
+      "type": "revision",
+      "envelopeId": "ENV-INS-001"
+    },
+    {
+      "eventId": "boundary_interaction:12_4:ENV-INS-002:7",
+      "offset": 2136,
+      "context": "... having multiple prior incidents in a short window^[boundary_interaction:12_4:ENV-INS-002:7]. Upon review, an adjuster found the claims were l...",
+      "hour": 12.4,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-INS-002"
+    },
+    {
+      "eventId": "revision:19_1:ENV-INS-002:10a",
+      "offset": 2432,
+      "context": "...e assumptions to refine the vehicle tracking logic^[revision:19_1:ENV-INS-002:10a]. Similarly, early on day two, Alicia Rodriguez ad...",
+      "hour": 19.1,
+      "type": "revision",
+      "envelopeId": "ENV-INS-002"
+    },
+    {
+      "eventId": "boundary_interaction:28_7:ENV-INS-003:12",
+      "offset": 2611,
+      "context": "...% renewal increase was blocked by a 15% constraint^[boundary_interaction:28_7:ENV-INS-003:12]. Recognizing the need to balance profitability wi...",
+      "hour": 28.7,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-INS-003"
+    },
+    {
+      "eventId": "revision:30_5:ENV-INS-003:13a",
+      "offset": 2864,
+      "context": "...ith retention incentives like accident forgiveness^[revision:30_5:ENV-INS-003:13a]. These revisions show a governance model that evo...",
+      "hour": 30.5,
+      "type": "revision",
+      "envelopeId": "ENV-INS-003"
+    }
+  ],
+  "coverage": {
+    "eventsTotal": 73,
+    "eventsCited": 7,
+    "citationsTotal": 7
+  }
+}

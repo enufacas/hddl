@@ -839,3 +839,8 @@ circle.agent-activity-halo.active {
   transform-origin: center;
   animation: activity-pulse 520ms ease-in-out infinite;
 }
+
+/* AI Narrative Timeline Sync */
+.narrative-reveal {
+  transition: opacity 0.5s ease, filter 0.5s ease;
+}

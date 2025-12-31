@@ -13,6 +13,29 @@
 cd hddl-sim && npm run dev
 ```
 
+### AI Narrative API Server
+
+The narrative generation API runs as a Docker container locally and requires Google Cloud credentials for Vertex AI.
+
+**Starting the API:**
+```bash
+cd hddl-sim
+docker build -t narrative-api .
+docker run -d -p 8080:8080 -v "$env:APPDATA\gcloud:/root/.config/gcloud:ro" narrative-api
+```
+
+**Key points:**
+- The `-v "$env:APPDATA\gcloud:/root/.config/gcloud:ro"` mount is **required** to pass host gcloud credentials into the container
+- Without this mount, you'll get `GoogleAuthError: Unable to authenticate` 
+- Make sure you've run `gcloud auth login` on your host machine first
+- API will be available at `http://localhost:8080`
+- Check health: `curl http://localhost:8080/health`
+
+**Generation config:**
+- Model: `gemini-3-flash-preview` 
+- Max output tokens: `8192` (set in `api/narrative-lib.mjs`)
+- If narratives are truncated mid-sentence, increase `maxOutputTokens`
+
 ### When to Run Tests
 - Before committing
 - After completing a feature set

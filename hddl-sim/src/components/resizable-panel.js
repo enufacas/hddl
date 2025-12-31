@@ -11,7 +11,7 @@ const STORAGE_PREFIX = 'hddl:panel:'
 const PANEL_DEFAULTS = {
   sidebar: { min: 180, max: 500, default: 300 },
   auxiliary: { min: 200, max: 600, default: 350 },
-  bottom: { min: 100, max: 400, default: 200 }
+  bottom: { min: 100, max: 800, default: 200 }
 }
 
 /**

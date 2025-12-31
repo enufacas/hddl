@@ -21,7 +21,9 @@
     "conformance": "node ./scripts/conformance.mjs",
     "cognitive-load": "node ./analysis/cognitive-load-metrics.mjs",
     "performance": "node ./analysis/performance-metrics.mjs",
-    "performance:suite": "node ./scripts/run-perf-suite.mjs"
+    "performance:suite": "node ./scripts/run-perf-suite.mjs",
+    "api:dev": "NODE_ENV=development node analysis/api-server.mjs",
+    "api:start": "node analysis/api-server.mjs"
   },
   "devDependencies": {
     "@istanbuljs/nyc-config-typescript": "^1.0.2",
@@ -33,7 +35,9 @@
   },
   "dependencies": {
     "@google-cloud/vertexai": "^1.10.0",
+    "cors": "^2.8.5",
     "d3": "^7.9.0",
+    "express": "^4.22.1",
     "intro.js": "^8.3.2"
   }
 }

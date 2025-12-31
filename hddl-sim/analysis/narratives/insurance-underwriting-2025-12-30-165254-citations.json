@@ -1,0 +1,81 @@
+{
+  "narrativeFile": "insurance-underwriting-2025-12-30-165254.md",
+  "scenarioId": "scenario-insurance-underwriting-001",
+  "model": "gemini-3-flash-preview",
+  "method": "llm-full-context",
+  "tokensIn": 18363,
+  "tokensOut": 702,
+  "cost": 0.011288,
+  "generatedAt": "2025-12-30T21:53:07.849Z",
+  "citations": [
+    {
+      "eventId": "decision:2_8:ENV-INS-001:3",
+      "offset": 971,
+      "context": "...erns from decision memory to recommend a fair rate^[decision:2_8:ENV-INS-001:3]. However, the system is designed to recognize its...",
+      "hour": 2.8,
+      "type": "decision",
+      "envelopeId": "ENV-INS-001"
+    },
+    {
+      "eventId": "boundary_interaction:5_3:ENV-INS-001:4",
+      "offset": 1259,
+      "context": "...ry interaction rather than making an unguided call^[boundary_interaction:5_3:ENV-INS-001:4]. This moved the decision to a senior underwriter,...",
+      "hour": 5.3,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-INS-001"
+    },
+    {
+      "eventId": "decision:5_7:ENV-INS-001:5",
+      "offset": 1469,
+      "context": "...flood mitigation, such as a sump pump installation^[decision:5_7:ENV-INS-001:5]. This collaboration ensures that while agents han...",
+      "hour": 5.7,
+      "type": "decision",
+      "envelopeId": "ENV-INS-001"
+    },
+    {
+      "eventId": "revision:6_2:ENV-INS-001:5a",
+      "offset": 2021,
+      "context": "... high-risk properties, ensuring future consistency^[revision:6_2:ENV-INS-001:5a]. Similarly, Marcus Chen noticed that the FraudDet...",
+      "hour": 6.2,
+      "type": "revision",
+      "envelopeId": "ENV-INS-001"
+    },
+    {
+      "eventId": "revision:19_1:ENV-INS-002:10a",
+      "offset": 2343,
+      "context": "...ifferent vehicle registrations from fraud analysis^[revision:19_1:ENV-INS-002:10a]. By mid-week, Alicia Rodriguez managed a pricing ...",
+      "hour": 19.1,
+      "type": "revision",
+      "envelopeId": "ENV-INS-002"
+    },
+    {
+      "eventId": "decision:29_1:ENV-INS-003:13",
+      "offset": 2565,
+      "context": "...by pairing it with an accident forgiveness program^[decision:29_1:ENV-INS-003:13], subsequently relaxing the envelope constraints t...",
+      "hour": 29.1,
+      "type": "decision",
+      "envelopeId": "ENV-INS-003"
+    },
+    {
+      "eventId": "revision:30_5:ENV-INS-003:13a",
+      "offset": 2722,
+      "context": "...s when combined with specific retention incentives^[revision:30_5:ENV-INS-003:13a].  By the end of the week, the system demonstrated...",
+      "hour": 30.5,
+      "type": "revision",
+      "envelopeId": "ENV-INS-003"
+    },
+    {
+      "eventId": "revision:54_2:ENV-INS-004:16b",
+      "offset": 3105,
+      "context": "... denials, closing an identified explainability gap^[revision:54_2:ENV-INS-004:16b]. This HDDL framework transforms the AI from a \"bl...",
+      "hour": 54.2,
+      "type": "revision",
+      "envelopeId": "ENV-INS-004"
+    }
+  ],
+  "coverage": {
+    "eventsTotal": 73,
+    "eventsCited": 8,
+    "citationsTotal": 8
+  }
+}
