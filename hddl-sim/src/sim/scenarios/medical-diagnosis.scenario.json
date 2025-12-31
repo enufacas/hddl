@@ -237,6 +237,20 @@
       "actorName": "Pharmacist Mike Torres"
     },
     {
+      "eventId": "retrieval:8_0:ENV-MED-002:2a",
+      "hour": 8.0,
+      "type": "retrieval",
+      "envelopeId": "ENV-MED-002",
+      "severity": "info",
+      "label": "Retrieving similar drug interactions",
+      "detail": "InteractionChecker querying historical warfarin interaction patterns before escalation.",
+      "actorRole": "Pharmacy Steward",
+      "actorName": "InteractionChecker",
+      "queryText": "warfarin aspirin interaction resolution patterns",
+      "retrievedEmbeddings": [],
+      "relevanceScores": []
+    },
+    {
       "eventId": "boundary_interaction:8_2:ENV-MED-002:3",
       "hour": 8.2,
       "type": "boundary_interaction",
@@ -246,7 +260,8 @@
       "detail": "InteractionChecker identified moderate interaction between warfarin and aspirin. Escalated to pharmacist for review.",
       "actorRole": "Pharmacy Steward",
       "actorName": "InteractionChecker",
-      "boundaryType": "constraint_approached"
+      "boundaryType": "constraint_approached",
+      "boundary_kind": "escalated"
     },
     {
       "eventId": "decision:8_3:ENV-MED-002:4",
@@ -309,6 +324,20 @@
       "sessionId": "DSG-MED-001-W1"
     },
     {
+      "eventId": "retrieval:21_9:ENV-MED-002:8a",
+      "hour": 21.9,
+      "type": "retrieval",
+      "envelopeId": "ENV-MED-002",
+      "severity": "info",
+      "label": "Retrieving allergy protocols",
+      "detail": "AllergyGuard checking historical penicillin allergy handling before blocking prescription.",
+      "actorRole": "Pharmacy Steward",
+      "actorName": "AllergyGuard",
+      "queryText": "penicillin allergy alternative prescription patterns",
+      "retrievedEmbeddings": [],
+      "relevanceScores": []
+    },
+    {
       "eventId": "boundary_interaction:22_1:ENV-MED-002:9",
       "hour": 22.1,
       "type": "boundary_interaction",
@@ -318,7 +347,8 @@
       "detail": "AllergyGuard blocked prescription: Patient documented allergy to penicillin class. Alternative required.",
       "actorRole": "Pharmacy Steward",
       "actorName": "AllergyGuard",
-      "boundaryType": "hard_constraint"
+      "boundaryType": "hard_constraint",
+      "boundary_kind": "escalated"
     },
     {
       "eventId": "signal:24:ENV-MED-003:10",
@@ -453,7 +483,69 @@
       "semanticVector": [0.85, 0.85]
     },
     {
-      "eventId": "embedding:25:ENV-MED-003:13",
+      "eventId": "revision:26:ENV-MED-002:13",
+      "hour": 26,
+      "type": "revision",
+      "envelopeId": "ENV-MED-002",
+      "severity": "info",
+      "label": "Drug interaction handling updated",
+      "detail": "Pharmacy Steward refined warfarin-aspirin interaction protocols based on recent escalations. Updated monitoring requirements.",
+      "actorRole": "Pharmacy Steward",
+      "actorName": "Pharmacist Mike Torres",
+      "revisionType": "boundary_adjustment",
+      "reason": "Reduce false positive escalations while maintaining safety for anticoagulant interactions.",
+      "resolvesEventId": "boundary_interaction:8_2:ENV-MED-002:3"
+    },
+    {
+      "eventId": "embedding:26_5:ENV-MED-002:13e",
+      "hour": 26.5,
+      "type": "embedding",
+      "envelopeId": "ENV-MED-002",
+      "severity": "info",
+      "label": "Drug interaction revision embedded",
+      "detail": "Updated warfarin interaction protocols stored for future reference.",
+      "actorRole": "Pharmacy Steward",
+      "actorName": "Pharmacist Mike Torres",
+      "embeddingId": "EMB-MED-REV-001",
+      "embeddingType": "revision",
+      "vectorDimensions": 768,
+      "sourceEventId": "revision:26:ENV-MED-002:13",
+      "semanticContext": "warfarin-aspirin interaction protocol refinement",
+      "semanticVector": [0.70, 0.65]
+    },
+    {
+      "eventId": "revision:27:ENV-MED-002:14",
+      "hour": 27,
+      "type": "revision",
+      "envelopeId": "ENV-MED-002",
+      "severity": "info",
+      "label": "Allergy alert precision improved",
+      "detail": "Pharmacy Steward expanded penicillin allergy detection to include cross-reactive cephalosporins. Enhanced safety coverage.",
+      "actorRole": "Pharmacy Steward",
+      "actorName": "Pharmacist Mike Torres",
+      "revisionType": "constraint_addition",
+      "reason": "Address cross-reactivity gaps identified during allergy block review.",
+      "resolvesEventId": "boundary_interaction:22_1:ENV-MED-002:9"
+    },
+    {
+      "eventId": "embedding:27_5:ENV-MED-002:14e",
+      "hour": 27.5,
+      "type": "embedding",
+      "envelopeId": "ENV-MED-002",
+      "severity": "info",
+      "label": "Allergy revision embedded",
+      "detail": "Expanded penicillin cross-reactivity rules stored.",
+      "actorRole": "Pharmacy Steward",
+      "actorName": "Pharmacist Mike Torres",
+      "embeddingId": "EMB-MED-REV-002",
+      "embeddingType": "revision",
+      "vectorDimensions": 768,
+      "sourceEventId": "revision:27:ENV-MED-002:14",
+      "semanticContext": "penicillin allergy cross-reactivity expansion",
+      "semanticVector": [0.72, 0.82]
+    },
+    {
+      "eventId": "embedding:25:ENV-MED-003:15",
       "hour": 25,
       "type": "embedding",
       "envelopeId": "ENV-MED-003",
