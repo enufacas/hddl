@@ -732,6 +732,9 @@ layoutManager.init({
   sidebar: document.querySelector('.sidebar'),
   auxiliary: document.querySelector('.auxiliarybar'),
   bottom: document.querySelector('.panel'),
+  setSidebarCollapsed: (collapsed) => {
+    document.body.classList.toggle('sidebar-hidden', Boolean(collapsed))
+  },
   setAuxCollapsed: (collapsed) => {
     document.body.classList.toggle('aux-hidden', Boolean(collapsed))
   },

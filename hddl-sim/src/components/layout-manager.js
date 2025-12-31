@@ -134,6 +134,7 @@ export class LayoutManager {
     this.sidebar = options.sidebar || document.querySelector('.sidebar')
     this.auxiliary = options.auxiliary || document.querySelector('.auxiliarybar')
     this.bottom = options.bottom || document.querySelector('.panel')
+    this.setSidebarCollapsed = options.setSidebarCollapsed || (() => {})
     this.setAuxCollapsed = options.setAuxCollapsed || (() => {})
     this.setBottomCollapsed = options.setBottomCollapsed || (() => {})
     
@@ -180,12 +181,11 @@ export class LayoutManager {
     
     // Apply sidebar settings
     if (this.sidebar && preset.sidebar) {
-      if (preset.sidebar.visible) {
+      this.setSidebarCollapsed(!preset.sidebar.visible)
+      // Only set width when visible - body class handles collapse
+      if (preset.sidebar.visible && this.sidebar) {
         this.sidebar.style.width = `${preset.sidebar.width}px`
         document.documentElement.style.setProperty('--sidebar-width', `${preset.sidebar.width}px`)
-      } else {
-        this.sidebar.style.width = '0px'
-        document.documentElement.style.setProperty('--sidebar-width', '0px')
       }
     }
     
