@@ -43,8 +43,26 @@ function setCssVar(name, value) {
 
 function setAuxCollapsed(collapsed) {
   document.body.classList.toggle('aux-hidden', Boolean(collapsed))
+  
+  // Remove inline CSS variable set by layout manager to let CSS rules take effect
+  if (!collapsed) {
+    document.documentElement.style.removeProperty('--auxiliarybar-width')
+  }
+  
   const state = loadLayoutState()
   saveLayoutState({ ...state, auxCollapsed: Boolean(collapsed) })
+}
+
+function setSidebarCollapsed(collapsed) {
+  document.body.classList.toggle('sidebar-hidden', Boolean(collapsed))
+  
+  // Remove inline CSS variable set by layout manager to let CSS rules take effect
+  if (!collapsed) {
+    document.documentElement.style.removeProperty('--sidebar-width')
+  }
+  
+  const state = loadLayoutState()
+  saveLayoutState({ ...state, sidebarCollapsed: Boolean(collapsed) })
 }
 
 function setBottomCollapsed(collapsed) {
@@ -661,14 +679,17 @@ function createSidebar() {
   title.textContent = 'HDDL SIMULATION';
   title.style.cssText = 'font-size: 11px; font-weight: 600; margin: 0;';
   
-  const actionButton = document.createElement('a');
-  actionButton.className = 'codicon codicon-ellipsis';
-  actionButton.setAttribute('role', 'button');
-  actionButton.setAttribute('aria-label', 'More Actions');
-  actionButton.style.cssText = 'cursor: pointer; padding: 4px;';
+  const minimizeButton = document.createElement('a');
+  minimizeButton.className = 'codicon codicon-chevron-left';
+  minimizeButton.setAttribute('role', 'button');
+  minimizeButton.setAttribute('aria-label', 'Minimize Panel');
+  minimizeButton.style.cssText = 'cursor: pointer; padding: 4px;';
+  minimizeButton.addEventListener('click', () => {
+    setSidebarCollapsed(true);
+  });
   
   titleContainer.appendChild(title);
-  titleContainer.appendChild(actionButton);
+  titleContainer.appendChild(minimizeButton);
   
   header.appendChild(titleContainer);
   
@@ -1099,17 +1120,17 @@ function createAuxiliaryBar() {
   title.textContent = 'AI NARRATIVE';
   title.style.cssText = 'font-size: 11px; font-weight: 600; margin: 0;';
   
-  const toggleButton = document.createElement('a');
-  toggleButton.className = 'codicon codicon-close';
-  toggleButton.setAttribute('role', 'button');
-  toggleButton.setAttribute('aria-label', 'Close Panel');
-  toggleButton.style.cssText = 'cursor: pointer; padding: 4px;';
-  toggleButton.addEventListener('click', () => {
+  const minimizeButton = document.createElement('a');
+  minimizeButton.className = 'codicon codicon-chevron-right';
+  minimizeButton.setAttribute('role', 'button');
+  minimizeButton.setAttribute('aria-label', 'Minimize Panel');
+  minimizeButton.style.cssText = 'cursor: pointer; padding: 4px;';
+  minimizeButton.addEventListener('click', () => {
     setAuxCollapsed(true)
   });
   
   titleContainer.appendChild(title);
-  titleContainer.appendChild(toggleButton);
+  titleContainer.appendChild(minimizeButton);
   header.appendChild(titleContainer);
   
   const content = document.createElement('div');
@@ -1843,6 +1864,7 @@ export function createWorkspace() {
 
   // Default-collapsed per spec.
   setAuxCollapsed(persisted.auxCollapsed !== undefined ? persisted.auxCollapsed : true)
+  setSidebarCollapsed(persisted.sidebarCollapsed !== undefined ? persisted.sidebarCollapsed : false)
   // Always start with bottom panel collapsed (ignore persisted state).
   setBottomCollapsed(true)
 
@@ -1860,25 +1882,8 @@ export function createWorkspace() {
   editorArea.id = 'editor-area';
   editorArea.setAttribute('role', 'main');
 
-  // Discoverability handle for collapsed aux (AI Narrative) panel.
-  const auxPeek = document.createElement('div')
-  auxPeek.className = 'aux-peek'
-  auxPeek.setAttribute('role', 'button')
-  auxPeek.setAttribute('tabindex', '0')
-  auxPeek.setAttribute('aria-label', 'Open AI Narrative panel')
-  auxPeek.innerHTML = `
-    <span class="codicon codicon-chevron-left" aria-hidden="true"></span>
-    <span class="aux-peek__label">AI NARRATIVE</span>
-  `.trim()
-  const openAux = () => setAuxCollapsed(false)
-  auxPeek.addEventListener('click', openAux)
-  auxPeek.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault()
-      openAux()
-    }
-  })
-  editorArea.appendChild(auxPeek)
+  // NOTE: Peek handles for collapsed panels are created by router.js after initial navigation
+  // This ensures they persist across route changes
   
   // Resize handle between editor and auxiliary bar
   const sash2 = createSash('vertical', 'auxiliary-resize');
@@ -2713,6 +2718,8 @@ function createSash(orientation, id) {
   let startX = 0;
   let startY = 0;
   let ghostLine = null;
+  let initialWidth = 0; // Store initial width on mousedown
+  let initialHeight = 0; // Store initial height on mousedown
   
   function createGhostLine() {
     ghostLine = document.createElement('div');
@@ -2748,6 +2755,19 @@ function createSash(orientation, id) {
     if (orientation === 'horizontal') {
       document.body.classList.add('sash-horizontal-dragging');
     }
+    
+    // Capture initial sizes based on panel being resized
+    if (id === 'sidebar-resize') {
+      const currentWidth = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sidebar-width')) || 300;
+      initialWidth = currentWidth;
+    } else if (id === 'auxiliary-resize') {
+      const currentWidth = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--auxiliarybar-width')) || 350;
+      initialWidth = currentWidth;
+    } else if (id === 'panel-resize') {
+      const currentHeight = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--panel-height')) || 240;
+      initialHeight = currentHeight;
+    }
+    
     createGhostLine();
     updateGhostLine(orientation === 'vertical' ? e.clientX : e.clientY);
     e.preventDefault();
@@ -2766,10 +2786,9 @@ function createSash(orientation, id) {
       if (id === 'sidebar-resize') {
         const sidebar = document.querySelector('.sidebar');
         if (!sidebar) return;
-        const config = PANEL_DEFAULTS.sidebar || { min: 180, max: 500 };
-        // Get width from CSS variable for accuracy
-        const currentWidth = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sidebar-width')) || config.default || 300;
-        const newWidth = Math.max(config.min, Math.min(config.max, currentWidth + deltaX));
+        const config = PANEL_DEFAULTS.sidebar || { min: 180, max: 2000 };
+        // Use initial width captured on mousedown
+        const newWidth = Math.max(config.min, Math.min(config.max, initialWidth + deltaX));
         sidebar.style.width = `${newWidth}px`;
         document.documentElement.style.setProperty('--sidebar-width', `${newWidth}px`);
 
@@ -2780,10 +2799,9 @@ function createSash(orientation, id) {
         setAuxCollapsed(false);
         const auxiliary = document.querySelector('.auxiliarybar');
         if (!auxiliary) return;
-        const config = PANEL_DEFAULTS.auxiliary || { min: 200, max: 600 };
-        // Get width from CSS variable for accuracy
-        const currentWidth = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--auxiliarybar-width')) || config.default || 350;
-        const newWidth = Math.max(config.min, Math.min(config.max, currentWidth - deltaX));
+        const config = PANEL_DEFAULTS.auxiliary || { min: 200, max: 2000 };
+        // Use initial width captured on mousedown
+        const newWidth = Math.max(config.min, Math.min(config.max, initialWidth - deltaX));
         auxiliary.style.width = `${newWidth}px`;
         document.documentElement.style.setProperty('--auxiliarybar-width', `${newWidth}px`);
 
@@ -2791,7 +2809,11 @@ function createSash(orientation, id) {
         saveLayoutState({ ...state, auxWidth: newWidth, auxCollapsed: false });
         savePanelWidth('auxiliary', newWidth);
       }
-      startX = e.clientX;
+      
+      // Dispatch resize event for other components to react
+      window.dispatchEvent(new CustomEvent('hddl:panel:resize', {
+        detail: { panel: id.replace('-resize', ''), orientation }
+      }));
       
       // Dispatch resize event for other components to react
       window.dispatchEvent(new CustomEvent('hddl:panel:resize', {
@@ -2803,10 +2825,9 @@ function createSash(orientation, id) {
       if (id === 'panel-resize') {
         setBottomCollapsed(false);
         const root = document.documentElement;
-        const currentRaw = getComputedStyle(root).getPropertyValue('--panel-height').trim();
-        const current = Number.parseInt(currentRaw || '240', 10);
-        const config = PANEL_DEFAULTS.bottom || { min: 100, max: 400 };
-        const next = Math.max(config.min, Math.min(config.max, current - deltaY));
+        const config = PANEL_DEFAULTS.bottom || { min: 100, max: 2000 };
+        // Use initial height captured on mousedown
+        const next = Math.max(config.min, Math.min(config.max, initialHeight - deltaY));
         root.style.setProperty('--panel-height', `${next}px`);
 
         const state = loadLayoutState();
@@ -2838,7 +2859,7 @@ function createSash(orientation, id) {
       const sidebar = document.querySelector('.sidebar');
       if (!sidebar) return;
       const currentWidth = parseInt(getComputedStyle(sidebar).width);
-      const config = PANEL_DEFAULTS.sidebar || { min: 180, max: 500, default: 300 };
+      const config = PANEL_DEFAULTS.sidebar || { min: 180, max: 2000, default: 300 };
       // If close to min, expand to default; otherwise collapse to min
       const newWidth = currentWidth <= config.min + 20 ? config.default : config.min;
       sidebar.style.width = `${newWidth}px`;
@@ -2879,7 +2900,7 @@ function createSash(orientation, id) {
         const sidebar = document.querySelector('.sidebar');
         if (!sidebar) return;
         const currentWidth = parseInt(getComputedStyle(sidebar).width);
-        const config = PANEL_DEFAULTS.sidebar || { min: 180, max: 500 };
+        const config = PANEL_DEFAULTS.sidebar || { min: 180, max: 2000 };
         const newWidth = Math.max(config.min, Math.min(config.max, currentWidth + delta));
         sidebar.style.width = `${newWidth}px`;
         document.documentElement.style.setProperty('--sidebar-width', `${newWidth}px`);
@@ -2888,7 +2909,7 @@ function createSash(orientation, id) {
         if (!auxiliary) return;
         setAuxCollapsed(false);
         const currentWidth = parseInt(getComputedStyle(auxiliary).width);
-        const config = PANEL_DEFAULTS.auxiliary || { min: 200, max: 600 };
+        const config = PANEL_DEFAULTS.auxiliary || { min: 200, max: 2000 };
         const newWidth = Math.max(config.min, Math.min(config.max, currentWidth - delta));
         auxiliary.style.width = `${newWidth}px`;
         document.documentElement.style.setProperty('--auxiliarybar-width', `${newWidth}px`);
@@ -2897,7 +2918,7 @@ function createSash(orientation, id) {
         const root = document.documentElement;
         const currentRaw = getComputedStyle(root).getPropertyValue('--panel-height').trim();
         const current = Number.parseInt(currentRaw || '240', 10);
-        const config = PANEL_DEFAULTS.bottom || { min: 100, max: 400 };
+        const config = PANEL_DEFAULTS.bottom || { min: 100, max: 2000 };
         const next = Math.max(config.min, Math.min(config.max, current - delta));
         root.style.setProperty('--panel-height', `${next}px`);
       }
