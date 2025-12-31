@@ -28,6 +28,17 @@ This tracker monitors the health and compliance of all HDDL scenarios. Run `node
 | vertical-hydroponics-farm | ⚠️ | 2/2 ✅ | 5/5 ✅ | 0 ✅ | 0/5 ⚠️ | 6W 7S | 2025-12-31 |
 | test-minimal | ✅ | 1/1 ✅ | 1/1 ✅ | 0 ✅ | 1/1 ✅ | 2W 2S 1I | 2025-12-31 |
 | default | ✅ | 4/4 ✅ | 2/2 ✅ | 0 ✅ | 2/2 ✅ | 4W | 2025-12-31 |
+| insurance-underwriting | ✅ | 7/7 ✅ | 6/6 ✅ | 0 ✅ | 6/6 ✅ | 12W | 2025-12-31 |
+| financial-lending | ✅ | 2/2 ✅ | 4/4 ✅ | 0 ✅ | 4/4 ✅ | 5W 2S | 2025-12-31 |
+| medical-diagnosis | ✅ | 3/3 ✅ | 2/2 ✅ | 0 ✅ | 2/2 ✅ | 7W 1S | 2025-12-31 |
+| autonomous-vehicles | ✅ | 3/3 ✅ | 2/2 ✅ | 0 ✅ | 2/2 ✅ | 6W 3S | 2025-12-31 |
+| database-performance | ✅ | 4/4 ✅ | 2/2 ✅ | 0 ✅ | 2/2 ✅ | 5W 2S | 2025-12-31 |
+| saas-dashboarding | ✅ | 5/5 ✅ | 3/3 ✅ | 0 ✅ | 3/3 ✅ | 5W 4S | 2025-12-31 |
+| baseball-analytics | ✅ | 6/6 ✅ | 4/4 ✅ | 0 ✅ | 4/4 ✅ | 5W 5S | 2025-12-31 |
+| airforce-avionics-maintenance | ✅ | 5/5 ✅ | 5/5 ✅ | 0 ✅ | 5/5 ✅ | 7W 7S | 2025-12-31 |
+| vertical-hydroponics-farm | ✅ | 6/6 ✅ | 5/5 ✅ | 0 ✅ | 5/5 ✅ | 6W 7S | 2025-12-31 |
+| test-minimal | ✅ | 1/1 ✅ | 1/1 ✅ | 0 ✅ | 1/1 ✅ | 2W 2S 1I | 2025-12-31 |
+| default | ✅ | 4/4 ✅ | 2/2 ✅ | 0 ✅ | 2/2 ✅ | 4W | 2025-12-31 |
 
 **Column Key:**
 - **Rev w/ Emb** = Revisions with Embeddings (REQUIRED)
