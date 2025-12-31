@@ -408,6 +408,27 @@
       "artifactOutput": []
     },
     {
+      "eventId": "retrieval:12_1:ENV-001:8",
+      "hour": 12.1,
+      "type": "retrieval",
+      "envelopeId": "ENV-001",
+      "severity": "info",
+      "label": "Retrieve refund precedents",
+      "detail": "Decision memory retrieval for recent refund > $100 decisions and related boundary interactions.",
+      "actorRole": "Customer Steward",
+      "actorName": "DecisionMemory",
+      "queryText": "refund > $100 escalation precedents",
+      "retrievedEmbeddings": ["EMB-DEF-001"],
+      "assumptionRefs": [],
+      "nextAssumptions": [],
+      "nextConstraints": [],
+      "boundary_refs": [],
+      "involvedEnvelopeIds": [],
+      "impactSummary": [],
+      "resolutionPolicy": [],
+      "artifactOutput": []
+    },
+    {
       "eventId": "BI-ENV-001-001",
       "hour": 12.6,
       "type": "boundary_interaction",
@@ -416,6 +437,7 @@
       "label": "Refund boundary touched",
       "detail": "A refund over $100 triggered the human-review boundary.",
       "actorRole": "Customer Steward",
+      "actorName": "Customer Steward",
       "assumptionRefs": [],
       "nextAssumptions": [],
       "nextConstraints": [],
@@ -493,6 +515,7 @@
       "resolutionPolicy": [],
       "artifactOutput": []
     },
+    
     {
       "eventId": "BI-ENV-003-001",
       "hour": 16.4,
@@ -502,6 +525,7 @@
       "label": "Discount boundary touched",
       "detail": "A requested discount exceeded allowed bounds and triggered a steward escalation.",
       "actorRole": "Sales Steward",
+      "actorName": "Sales Steward",
       "assumptionRefs": [],
       "nextAssumptions": [],
       "nextConstraints": [],
