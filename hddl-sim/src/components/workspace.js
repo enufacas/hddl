@@ -1,3 +1,15 @@
+// HDDL glossary for tooltips
+const HDDL_GLOSSARY = {
+  'envelope': 'A versioned, steward-owned boundary defining what automation/agents may do, under what constraints, and what must be escalated.',
+  'steward': 'A domain-aligned human who holds bounded decision authority. Stewards define and revise envelopes, arbitrate domain conflicts, and preserve human judgment under scale.',
+  'boundary interaction': 'When execution reaches an envelope boundary (escalated, overridden, deferred). These are key signals for steward review.',
+  'revision': 'An authoritative change to an envelope\'s assumptions or constraints. Revisions create lineage and make authority changes inspectable.',
+  'feedback loop': 'The pattern where boundary interactions trigger steward decisions, leading to envelope revisions that update agent behavior.',
+  'decision memory': 'AI-assisted recall layer (embeddings) derived from past decisions and events. Supports precedent discovery but does not hold authority.',
+  'embedding': 'A vectorized memory of a decision, event, or boundary interaction, used for AI recall and precedent discovery.',
+  'agent': 'An automated system or process operating within the constraints of an envelope, subject to escalation and revision by stewards.'
+}
+
 // Workspace layout component
 import { navigateTo } from '../router';
 import { formatSimTime, getBoundaryInteractionCounts, getEnvelopeStatus, getScenario, getTimeHour, onScenarioChange, onTimeChange, getStewardFilter, onFilterChange, getEnvelopeAtTime, getRevisionDiffAtTime, setTimeHour } from '../sim/sim-state'
@@ -128,6 +140,7 @@ let aiNarrativeCitations = []
 let aiNarrativeSyncEnabled = false
 let aiNarrativeFullHtml = ''
 let aiNarrativeUserAddendum = ''
+let aiNarrativeTimeHooked = false
 
 // Helper to rewire citation click handlers
 const rewireCitationLinks = (containerEl) => {
@@ -147,9 +160,7 @@ const rewireCitationLinks = (containerEl) => {
 const updateNarrativeSync = () => {
   if (!aiNarrativeSyncEnabled || !aiNarrativeFullHtml) return
   
-  const outputEl = document.querySelector('#ai-narrative-content')?.closest('.terminal-output')
-  if (!outputEl) return
-  const contentEl = outputEl.querySelector('#ai-narrative-content')
+  const contentEl = document.querySelector('#ai-narrative-content')
   if (!contentEl) return
   
   const currentTime = getTimeHour()
@@ -187,6 +198,448 @@ const updateNarrativeSync = () => {
   
   console.log(`Visibility: ${visibleCount} shown, ${hiddenCount} hidden`)
   console.log('=== End Sync Update ===\n')
+}
+
+// Simple markdown renderer for AI narratives
+const renderNarrativeMarkdown = (markdown) => {
+  // Split into paragraphs first
+  const paragraphs = String(markdown || '').split(/\n\n+/)
+
+  const processedParagraphs = paragraphs.map(para => {
+    let html = para.trim()
+    if (!html) return ''
+
+    // Headers
+    html = html
+      .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+      .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+      .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+
+    // Bold
+    html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    // Italic
+    html = html.replace(/\*(.*?)\*/g, '<em>$1</em>')
+    // Code blocks
+    html = html.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
+    // Inline code
+    html = html.replace(/`([^`]+)`/g, '<code>$1</code>')
+    // Links
+    html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>')
+    // Single line breaks within paragraphs
+    html = html.replace(/\n/g, '<br>')
+
+    // Wrap in paragraph tag if not a header or code block
+    if (!html.startsWith('<h') && !html.startsWith('<pre>')) {
+      html = `<p>${html}</p>`
+    }
+
+    return html
+  })
+
+  // Join HTML and inject tooltips only into text nodes using DOMParser
+  let htmlOut = processedParagraphs.join('')
+  // Tooltip logic removed: narrative markdown is rendered as plain HTML only
+  return htmlOut
+}
+
+const mountAINarrative = (containerEl) => {
+  if (!containerEl) return
+  if (containerEl.querySelector('.ai-narrative-container')) return
+
+  if (!aiNarrativeTimeHooked) {
+    aiNarrativeTimeHooked = true
+    onTimeChange(() => {
+      if (!aiNarrativeSyncEnabled || !aiNarrativeFullHtml) return
+      updateNarrativeSync()
+    })
+  }
+
+  containerEl.style.padding = '16px'
+  containerEl.style.fontFamily = 'var(--vscode-font-family)'
+  containerEl.style.overflow = 'auto'
+
+  containerEl.innerHTML = `
+    <div class="ai-narrative-container">
+      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+        <h3 style="margin: 0; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--vscode-descriptionForeground);">
+          AI-Generated Narrative
+        </h3>
+        <button id="generate-ai-narrative" style="
+          background: var(--vscode-button-background);
+          color: var(--vscode-button-foreground);
+          border: none;
+          border-radius: 4px;
+          padding: 6px 12px;
+          font-size: 11px;
+          cursor: pointer;
+          font-weight: 600;
+        ">
+          ${aiNarrativeGenerated ? 'Regenerate' : 'Generate Narrative'}
+        </button>
+        <label style="display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--vscode-descriptionForeground); cursor: pointer;">
+          <input type="checkbox" id="sync-narrative-toggle" style="cursor: pointer;" ${aiNarrativeSyncEnabled ? 'checked' : ''}>
+          <span>Sync with Timeline</span>
+        </label>
+      </div>
+      <div style="margin-bottom: 12px;">
+        <label for="ai-narrative-user-addendum" style="display: block; font-size: 11px; color: var(--vscode-descriptionForeground); margin-bottom: 6px;">
+          Additional instructions (optional)
+        </label>
+        <textarea id="ai-narrative-user-addendum" rows="3" placeholder="Add constraints like: focus on boundary interactions, emphasize day-by-day structure, keep it concise…" style="
+          width: 100%;
+          resize: vertical;
+          min-height: 54px;
+          max-height: 180px;
+          padding: 8px 10px;
+          border-radius: 4px;
+          border: 1px solid var(--vscode-input-border);
+          background: var(--vscode-input-background);
+          color: var(--vscode-input-foreground);
+          font-size: 12px;
+          line-height: 1.4;
+          outline: none;
+        "></textarea>
+        <div style="margin-top: 6px; font-size: 10px; color: var(--vscode-descriptionForeground); opacity: 0.9;">
+          Appended to the request; the base prompt and scenario facts remain authoritative.
+        </div>
+      </div>
+      <div id="ai-narrative-content" style="
+        min-height: 200px;
+        color: var(--vscode-foreground);
+        line-height: 1.7;
+        font-size: 14px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        padding-bottom: 40px;
+      "></div>
+    </div>
+  `.trim()
+
+  const generateBtn = containerEl.querySelector('#generate-ai-narrative')
+  if (generateBtn) generateBtn.addEventListener('click', () => generateAINarrative(containerEl))
+
+  const addendumEl = containerEl.querySelector('#ai-narrative-user-addendum')
+  if (addendumEl) {
+    addendumEl.value = aiNarrativeUserAddendum
+    addendumEl.addEventListener('input', () => {
+      aiNarrativeUserAddendum = addendumEl.value || ''
+    })
+  }
+
+  const syncToggle = containerEl.querySelector('#sync-narrative-toggle')
+  if (syncToggle) {
+    syncToggle.addEventListener('change', (e) => {
+      aiNarrativeSyncEnabled = e.target.checked
+      const contentEl = containerEl.querySelector('#ai-narrative-content')
+      if (!contentEl) return
+
+      if (aiNarrativeSyncEnabled && aiNarrativeFullHtml) {
+        updateNarrativeSync()
+      } else if (!aiNarrativeSyncEnabled && aiNarrativeFullHtml) {
+        // Show full narrative when sync is disabled - reset all elements to visible
+        const elements = contentEl.querySelectorAll('[data-reveal-time]')
+        elements.forEach(el => {
+          el.style.opacity = '1'
+          el.style.filter = 'none'
+        })
+      }
+    })
+  }
+
+  if (aiNarrativeFullHtml) {
+    const contentEl = containerEl.querySelector('#ai-narrative-content')
+    if (contentEl) {
+      contentEl.innerHTML = aiNarrativeFullHtml
+      rewireCitationLinks(contentEl)
+      if (aiNarrativeSyncEnabled) updateNarrativeSync()
+    }
+  }
+}
+
+const generateAINarrative = async (containerEl) => {
+  const contentEl = containerEl?.querySelector?.('#ai-narrative-content')
+  const generateBtn = containerEl?.querySelector?.('#generate-ai-narrative')
+  const addendumEl = containerEl?.querySelector?.('#ai-narrative-user-addendum')
+
+  if (!contentEl || !generateBtn) return
+
+  const scenario = getScenario()
+  const scenarioKey = getCurrentScenarioId() // Get the filename-based ID for the API
+  if (!scenario || !scenarioKey) {
+    contentEl.innerHTML = '<p style="color: var(--status-error);">No scenario loaded.</p>'
+    return
+  }
+
+  generateBtn.disabled = true
+  generateBtn.textContent = 'Generating...'
+  contentEl.innerHTML = `
+    <div style="display: flex; align-items: center; gap: 8px; color: var(--vscode-descriptionForeground);">
+      <span class="codicon codicon-loading codicon-modifier-spin"></span>
+      <span>Generating narrative for ${scenario.title || scenarioKey}...</span>
+    </div>
+  `.trim()
+
+  try {
+    const apiUrl = 'http://localhost:8080/generate'
+    const userAddendum = (addendumEl?.value || aiNarrativeUserAddendum || '').trim()
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        scenario: scenarioKey, // Use filename-based ID for API
+        fullContext: true,
+        userAddendum
+      })
+    })
+
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status} ${response.statusText}`)
+    }
+
+    const data = await response.json()
+    aiNarrativeCitations = data.citations || []
+
+    // Render markdown with clickable citations
+    let html = renderNarrativeMarkdown(data.markdown)
+
+    // Event type color mapping
+    const eventColors = {
+      signal: '#7eb8da',
+      revision: '#98d4a0',
+      decision: '#a8a8a8',
+      boundary_interaction: '#f0b866',
+      envelope_promoted: '#c4a7e7',
+      dsg_session: '#f0b866',
+      embedding: '#b4a7e7',
+      retrieval: '#58a6ff'
+    }
+
+    // Helper: convert hour to day start (0, 24, 48, etc.)
+    const hourToDay = (hour) => Math.floor(hour / 24) * 24
+
+    // Process each paragraph:
+    // 1. Extract citations and find earliest time
+    // 2. Highlight cited sentences with visual styling (no reveal-time on individual sentences)
+    // 3. Wrap entire paragraph with single reveal-time based on earliest citation
+    let currentNarrativeDay = 0 // Track day-based position for uncited paragraphs
+
+    html = html.replace(/<p>(.*?)<\/p>/gs, (match, paragraphContent) => {
+      // SIMPLIFIED APPROACH:
+      // - Day-based reveal at paragraph level (for timeline sync)
+      // - Sentence-level color coding (for visual distinction)
+
+      // Find all citations in this paragraph with their positions
+      const citations = []
+      let tempContent = paragraphContent
+      tempContent.replace(/\^\[([^\]]+)\]/g, (match, eventId, offset) => {
+        citations.push({ eventId, offset })
+        return match
+      })
+
+      // Find earliest citation hour for this paragraph
+      let paragraphDay = currentNarrativeDay
+      if (citations.length > 0) {
+        let earliestHour = Infinity
+        citations.forEach(({ eventId }) => {
+          const citation = aiNarrativeCitations.find(c => c.eventId === eventId)
+          if (citation?.hour !== undefined) {
+            earliestHour = Math.min(earliestHour, citation.hour)
+          }
+        })
+
+        if (earliestHour !== Infinity) {
+          paragraphDay = hourToDay(earliestHour)
+          currentNarrativeDay = paragraphDay // Update tracker for next uncited paragraphs
+        }
+      }
+
+      // Step 1: Replace citations with placeholders to find sentence boundaries
+      let workingContent = paragraphContent
+      citations.forEach((cit, idx) => {
+        workingContent = workingContent.replace(`^[${cit.eventId}]`, `<<<CIT${idx}>>>`)
+      })
+
+      // Step 2: Highlight each citation individually by steward color
+      citations.forEach((cit, idx) => {
+        const placeholder = `<<<CIT${idx}>>>`
+        const eventId = cit.eventId
+        const eventType = eventId.split(':')[0].split('_')[0]
+        const fullType = eventId.split(':')[0]
+        const color = eventColors[fullType] || eventColors[eventType] || '#58a6ff'
+        const citation = aiNarrativeCitations.find(c => c.eventId === eventId)
+        const stewardRole = citation?.stewardRole || citation?.actorRole
+        const stewardColor = stewardRole ? getStewardColor(stewardRole) : null
+        const bgColor = stewardColor
+          ? `color-mix(in srgb, ${stewardColor} 20%, transparent)`
+          : `color-mix(in srgb, ${color} 20%, transparent)`
+
+        // Find a small context window: up to 8 chars before and after the placeholder
+        const idxInContent = workingContent.indexOf(placeholder)
+        if (idxInContent === -1) return
+        const before = workingContent.slice(Math.max(0, idxInContent - 8), idxInContent)
+        const after = workingContent.slice(idxInContent + placeholder.length, idxInContent + placeholder.length + 8)
+        // Only wrap the citation itself (not the whole sentence)
+        // We'll wrap the placeholder and any immediately adjacent punctuation/space
+        // (The actual citation link + punctuation is handled in the next step)
+        // So just mark the placeholder for now; color will be applied in the next step
+        // (No-op here, but left for clarity)
+      })
+
+      // Step 3: Replace citation placeholders with styled links
+      citations.forEach((cit, idx) => {
+        const eventId = cit.eventId
+        const eventType = eventId.split(':')[0].split('_')[0]
+        const fullType = eventId.split(':')[0]
+        const color = eventColors[fullType] || eventColors[eventType] || '#58a6ff'
+
+        const citationLink = `<sup><a href="#" class="citation-link" data-event-id="${eventId}" style="color: ${color}; text-decoration: none; font-size: 9px; opacity: 0.7; margin-left: 2px;">[${eventId}]</a></sup>`
+        const placeholder = `<<<CIT${idx}>>>`
+        // Find and include any immediate punctuation after the placeholder
+        const punctMatch = workingContent.slice(workingContent.indexOf(placeholder) + placeholder.length).match(/^([.!?]+)/)
+        const trailingPunct = punctMatch ? punctMatch[1] : ''
+        // Remove the punctuation from after the placeholder (so we don't double it)
+        if (trailingPunct) {
+          const punctIdx = workingContent.indexOf(placeholder) + placeholder.length
+          workingContent = workingContent.slice(0, punctIdx) + workingContent.slice(punctIdx + trailingPunct.length)
+        }
+        // Calculate steward color for this citation
+        const citationObj = aiNarrativeCitations.find(c => c.eventId === eventId)
+        const stewardRole = citationObj?.stewardRole || citationObj?.actorRole
+        const stewardColor = stewardRole ? getStewardColor(stewardRole) : null
+        const bgColor = stewardColor
+          ? `color-mix(in srgb, ${stewardColor} 20%, transparent)`
+          : `color-mix(in srgb, ${color} 20%, transparent)`
+        // Wrap citation + punctuation in a colored span
+        const colored = `<span class=\"cited-citation\" style=\"background: ${bgColor}; padding: 2px 4px; border-radius: 2px; box-shadow: -3px 0 0 ${color}; white-space: nowrap;\">${citationLink}${trailingPunct}</span>`
+        workingContent = workingContent.replace(placeholder, colored)
+      })
+
+      // Wrap entire paragraph with single reveal-time (day-based)
+      return `<p class="narrative-reveal" data-reveal-time="${paragraphDay}">${workingContent}</p>`
+    })
+
+    // Also wrap headers (title)
+    html = html.replace(/<h([1-6])>(.*?)<\/h\1>/gs, (match, level, content) => {
+      return `<h${level} class="narrative-reveal" data-reveal-time="0">${content}</h${level}>`
+    })
+
+    // Add metadata footer
+    const metadata = data.metadata || {}
+
+    const stewardRoles = Array.from(
+      new Set((scenario?.envelopes ?? []).map(e => e?.ownerRole).filter(Boolean))
+    ).sort((a, b) => String(a).localeCompare(String(b)))
+
+    const stewardRolesHtml = stewardRoles.length
+      ? stewardRoles
+          .slice(0, 10)
+          .map(role => {
+            const stewardColor = getStewardColor(role)
+            return `
+              <span style="display:flex; align-items:center; gap: 6px;">
+                <span style="display:inline-block; width: 10px; height: 10px; border-radius: 2px; background: color-mix(in srgb, ${stewardColor} 18%, transparent); border-left: 3px solid ${stewardColor};"></span>
+                ${escapeHtml(role)}
+              </span>
+            `.trim()
+          })
+          .join('')
+      : `<span style="color: var(--vscode-statusBar-foreground);">No steward roles in this scenario.</span>`
+
+    const legendHtml = `
+      <div style="
+        margin-top: 20px;
+        padding: 12px;
+        background: color-mix(in srgb, var(--vscode-textLink-foreground) 5%, transparent);
+        border-radius: 4px;
+        font-size: 11px;
+        color: var(--vscode-descriptionForeground);
+      ">
+        <div style="font-weight: 600; margin-bottom: 8px;">Citation Colors:</div>
+        <div style="display: flex; flex-wrap: wrap; gap: 12px;">
+          <span><span style="color: #98d4a0;">●</span> Revisions</span>
+          <span><span style="color: #f0b866;">●</span> Boundaries</span>
+          <span><span style="color: #a8a8a8;">●</span> Decisions</span>
+          <span><span style="color: #7eb8da;">●</span> Signals</span>
+          <span><span style="color: #c4a7e7;">●</span> Envelopes</span>
+          <span><span style="color: #58a6ff;">●</span> Retrieval</span>
+        </div>
+        <div style="margin-top: 10px; font-weight: 600;">Steward Colors:</div>
+        <div style="margin-top: 6px; display: flex; flex-wrap: wrap; gap: 12px;">${stewardRolesHtml}</div>
+      </div>
+    `
+    const metadataHtml = `
+      <div style="
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px solid var(--vscode-sideBar-border);
+        font-size: 10px;
+        color: var(--vscode-descriptionForeground);
+      ">
+        <strong>Generation Metadata:</strong><br>
+        Model: ${metadata.model || 'unknown'} |
+        Cost: $${(metadata.cost || 0).toFixed(6)} |
+        Tokens: ${metadata.tokensIn || 0} in / ${metadata.tokensOut || 0} out |
+        Duration: ${(metadata.duration || 0).toFixed(2)}s |
+        Day-based reveal: enabled
+      </div>
+    `
+
+    // Store the full HTML for sync mode
+    aiNarrativeFullHtml = html + legendHtml + metadataHtml
+
+    contentEl.innerHTML = aiNarrativeFullHtml
+
+    // Add CSS for paragraph spacing and transitions
+    const style = document.createElement('style')
+    style.textContent = `
+      #ai-narrative-content p {
+        margin-bottom: 1em;
+      }
+      #ai-narrative-content p:last-of-type {
+        margin-bottom: 0;
+      }
+      #ai-narrative-content h1,
+      #ai-narrative-content h2,
+      #ai-narrative-content h3 {
+        margin-top: 1.5em;
+        margin-bottom: 0.5em;
+      }
+      #ai-narrative-content h1:first-child,
+      #ai-narrative-content h2:first-child,
+      #ai-narrative-content h3:first-child {
+        margin-top: 0;
+      }
+      .cited-sentence {
+        transition: opacity 0.5s ease, filter 0.5s ease;
+      }
+    `
+    if (!document.head.querySelector('#ai-narrative-styles')) {
+      style.id = 'ai-narrative-styles'
+      document.head.appendChild(style)
+    }
+
+    // Wire up citation clicks
+    rewireCitationLinks(contentEl)
+
+    // If sync mode is enabled, update visibility
+    if (aiNarrativeSyncEnabled) {
+      updateNarrativeSync()
+    }
+
+    aiNarrativeGenerated = true
+    generateBtn.textContent = 'Regenerate'
+    generateBtn.disabled = false
+  } catch (err) {
+    console.error('Failed to generate AI narrative:', err)
+    contentEl.innerHTML = `
+      <div style="color: var(--status-error); padding: 12px; background: color-mix(in srgb, var(--status-error) 10%, transparent); border-radius: 4px; border: 1px solid var(--status-error);">
+        <strong>Generation Failed</strong><br>
+        ${err.message}<br><br>
+        <small>Make sure the API server is running at localhost:8080</small>
+      </div>
+    `
+    generateBtn.textContent = 'Try Again'
+    generateBtn.disabled = false
+  }
 }
 
 // Create sidebar with collapsible sections
@@ -537,7 +990,7 @@ function updatePersonaView(persona) {
       'executive': 'RISK EXPOSURE',
       'data-steward': 'TELEMETRY BOUNDARIES'
     };
-    auxTitle.textContent = personaTitles[persona] || 'EVIDENCE (BOUNDED)';
+    auxTitle.textContent = personaTitles[persona] || 'AI NARRATIVE';
   }
   
   // Store selected persona for page rendering
@@ -643,7 +1096,7 @@ function createAuxiliaryBar() {
   titleContainer.style.cssText = 'display: flex; align-items: center; justify-content: space-between; width: 100%;';
   
   const title = document.createElement('h3');
-  title.textContent = 'EVIDENCE (BOUNDED)';
+  title.textContent = 'AI NARRATIVE';
   title.style.cssText = 'font-size: 11px; font-weight: 600; margin: 0;';
   
   const toggleButton = document.createElement('a');
@@ -662,27 +1115,9 @@ function createAuxiliaryBar() {
   const content = document.createElement('div');
   content.className = 'content auxiliary-content';
   content.id = 'auxiliarybar-content';
-  
-  // Initial telemetry + reactive updates
-  const rerender = () => {
-    const scenario = getScenario()
-    const timeHour = getTimeHour()
-    updateTelemetry(content, scenario, timeHour)
-  }
 
-  rerender()
-  onTimeChange(() => {
-    if (!content.isConnected) return
-    rerender()
-  })
-  onScenarioChange(() => {
-    if (!content.isConnected) return
-    rerender()
-  })
-  onFilterChange(() => {
-    if (!content.isConnected) return
-    rerender()
-  })
+  // AI Narrative mounted in the auxiliary panel.
+  mountAINarrative(content)
   
   auxiliarybar.appendChild(header);
   auxiliarybar.appendChild(content);
@@ -981,7 +1416,7 @@ function updateTelemetry(container, scenario, timeHour) {
   const stick = shouldStickToTop()
   narrativeEl.style.borderLeft = `3px solid ${narrative.accent}`
   narrativeEl.innerHTML = `
-    <div style="font-size: 11px; font-weight: 800; letter-spacing: 0.6px; text-transform: uppercase; color: var(--vscode-statusBar-foreground);">Narrative</div>
+    <div style="font-size: 11px; font-weight: 800; letter-spacing: 0.6px; text-transform: uppercase; color: var(--vscode-statusBar-foreground);">Event Stream</div>
     ${narrative.html}
   `.trim()
   if (stick) {
@@ -1425,15 +1860,15 @@ export function createWorkspace() {
   editorArea.id = 'editor-area';
   editorArea.setAttribute('role', 'main');
 
-  // Discoverability handle for collapsed aux (Evidence) panel.
+  // Discoverability handle for collapsed aux (AI Narrative) panel.
   const auxPeek = document.createElement('div')
   auxPeek.className = 'aux-peek'
   auxPeek.setAttribute('role', 'button')
   auxPeek.setAttribute('tabindex', '0')
-  auxPeek.setAttribute('aria-label', 'Open Evidence panel')
+  auxPeek.setAttribute('aria-label', 'Open AI Narrative panel')
   auxPeek.innerHTML = `
     <span class="codicon codicon-chevron-left" aria-hidden="true"></span>
-    <span class="aux-peek__label">EVIDENCE</span>
+    <span class="aux-peek__label">AI NARRATIVE</span>
   `.trim()
   const openAux = () => setAuxCollapsed(false)
   auxPeek.addEventListener('click', openAux)
@@ -1480,7 +1915,7 @@ export function createWorkspace() {
   document.body.appendChild(mobilePanelFAB)
   document.body.appendChild(mobilePanelModal)
 
-  // Route-aware auto-open: Aux opens on Evidence + DSG routes.
+  // Route-aware auto-open: Evidence now lives in the bottom panel.
   window.addEventListener('hddl:navigate', (e) => {
     const path = e?.detail?.path || window.location.pathname || '/'
     // Only auto-open if we are NOT in focus mode
@@ -1488,7 +1923,8 @@ export function createWorkspace() {
     const isFocusMode = activeLayout === 'focus'
     
     if (!isFocusMode && (path === '/' || path === '/decision-telemetry' || path === '/dsg-event')) {
-      setAuxCollapsed(false)
+      setBottomCollapsed(false)
+      document.querySelector('.panel-tab[data-tab="evidence"]')?.click()
     }
     // Close mobile nav on navigation
     document.body.classList.remove('mobile-nav-open')
@@ -1541,9 +1977,8 @@ function createBottomPanel() {
   const tabs = [
     { id: 'envelopes', label: 'ENVELOPES' },
     { id: 'steward', label: 'STEWARD ACTIVITY' },
-    { id: 'dts', label: 'DTS STREAM' },
     { id: 'cli', label: 'HDDL CLI' },
-    { id: 'ai-narrative', label: 'AI NARRATIVE' },
+    { id: 'evidence', label: 'DTS STREAM' },
   ]
 
   panel.innerHTML = `
@@ -1634,448 +2069,43 @@ function createBottomPanel() {
     if (inputRowEl) inputRowEl.style.display = cliActive ? 'flex' : 'none'
     if (cliActive && inputEl) inputEl.focus()
     
-    // Initialize AI Narrative tab on first activation
-    if (tabId === 'ai-narrative') {
-      initializeAINarrative()
+    // Initialize Evidence (Bounded) tab on first activation
+    if (tabId === 'evidence') {
+      initializeEvidenceBounded()
     }
   }
 
-  // Simple markdown renderer for AI narratives
-  const renderMarkdown = (markdown) => {
-    // Split into paragraphs first
-    const paragraphs = markdown.split(/\n\n+/)
-    
-    const processedParagraphs = paragraphs.map(para => {
-      let html = para.trim()
-      if (!html) return ''
-      
-      // Headers
-      html = html
-        .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-        .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-        .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-      
-      // Bold
-      html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      // Italic  
-      html = html.replace(/\*(.*?)\*/g, '<em>$1</em>')
-      // Code blocks
-      html = html.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
-      // Inline code
-      html = html.replace(/`([^`]+)`/g, '<code>$1</code>')
-      // Links
-      html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>')
-      // Single line breaks within paragraphs
-      html = html.replace(/\n/g, '<br>')
-      
-      // Wrap in paragraph tag if not a header or code block
-      if (!html.startsWith('<h') && !html.startsWith('<pre>')) {
-        html = `<p>${html}</p>`
-      }
-      
-      return html
-    })
-    
-    return processedParagraphs.join('')
-  }
-
-  const initializeAINarrative = () => {
-    const outputEl = getOutputEl('ai-narrative')
+  const initializeEvidenceBounded = () => {
+    const outputEl = getOutputEl('evidence')
     if (!outputEl) return
-    
-    // Only initialize once
-    if (aiNarrativeGenerated || outputEl.querySelector('.ai-narrative-container')) return
-    
-    outputEl.style.padding = '16px'
-    outputEl.style.fontFamily = 'var(--vscode-font-family)'
+    if (outputEl.dataset.initialized === 'true') return
+    outputEl.dataset.initialized = 'true'
+
+    outputEl.style.padding = '12px'
     outputEl.style.overflow = 'auto'
-    outputEl.innerHTML = `
-      <div class="ai-narrative-container">
-        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-          <h3 style="margin: 0; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--vscode-descriptionForeground);">
-            AI-Generated Narrative
-          </h3>
-          <button id="generate-ai-narrative" style="
-            background: var(--vscode-button-background); 
-            color: var(--vscode-button-foreground);
-            border: none;
-            border-radius: 4px;
-            padding: 6px 12px;
-            font-size: 11px;
-            cursor: pointer;
-            font-weight: 600;
-          ">
-            Generate Narrative
-          </button>
-          <label style="display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--vscode-descriptionForeground); cursor: pointer;">
-            <input type="checkbox" id="sync-narrative-toggle" style="cursor: pointer;">
-            <span>Sync with Timeline</span>
-          </label>
-        </div>
-        <div style="margin-bottom: 12px;">
-          <label for="ai-narrative-user-addendum" style="display: block; font-size: 11px; color: var(--vscode-descriptionForeground); margin-bottom: 6px;">
-            Additional instructions (optional)
-          </label>
-          <textarea id="ai-narrative-user-addendum" rows="3" placeholder="Add constraints like: focus on boundary interactions, emphasize day-by-day structure, keep it concise…" style="
-            width: 100%;
-            resize: vertical;
-            min-height: 54px;
-            max-height: 180px;
-            padding: 8px 10px;
-            border-radius: 4px;
-            border: 1px solid var(--vscode-input-border);
-            background: var(--vscode-input-background);
-            color: var(--vscode-input-foreground);
-            font-size: 12px;
-            line-height: 1.4;
-            outline: none;
-          "></textarea>
-          <div style="margin-top: 6px; font-size: 10px; color: var(--vscode-descriptionForeground); opacity: 0.9;">
-            Appended to the request; the base prompt and scenario facts remain authoritative.
-          </div>
-        </div>
-        <div id="ai-narrative-content" style="
-          min-height: 200px;
-          color: var(--vscode-foreground);
-          line-height: 1.7;
-          font-size: 14px;
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-          padding-bottom: 40px;
-        "></div>
-      </div>
-    `
-    
-    const generateBtn = outputEl.querySelector('#generate-ai-narrative')
-    generateBtn.addEventListener('click', generateAINarrative)
 
-    const addendumEl = outputEl.querySelector('#ai-narrative-user-addendum')
-    if (addendumEl) {
-      addendumEl.value = aiNarrativeUserAddendum
-      addendumEl.addEventListener('input', () => {
-        aiNarrativeUserAddendum = addendumEl.value || ''
-      })
+    const rerender = () => {
+      const scenario = getScenario()
+      const timeHour = getTimeHour()
+      updateTelemetry(outputEl, scenario, timeHour)
     }
-    
-    const syncToggle = outputEl.querySelector('#sync-narrative-toggle')
-    if (syncToggle) {
-      syncToggle.addEventListener('change', (e) => {
-        aiNarrativeSyncEnabled = e.target.checked
-        const contentEl = outputEl.querySelector('#ai-narrative-content')
-        if (!contentEl) return
-        
-        if (aiNarrativeSyncEnabled && aiNarrativeFullHtml) {
-          updateNarrativeSync()
-        } else if (!aiNarrativeSyncEnabled && aiNarrativeFullHtml) {
-          // Show full narrative when sync is disabled - reset all elements to visible
-          const elements = contentEl.querySelectorAll('[data-reveal-time]')
-          elements.forEach(el => {
-            el.style.opacity = '1'
-            el.style.filter = 'none'
-          })
-        }
-      })
-    }
-  }
 
-  const generateAINarrative = async () => {
-    const outputEl = getOutputEl('ai-narrative')
-    const contentEl = outputEl.querySelector('#ai-narrative-content')
-    const generateBtn = outputEl.querySelector('#generate-ai-narrative')
-    const addendumEl = outputEl.querySelector('#ai-narrative-user-addendum')
-    
-    if (!contentEl || !generateBtn) return
-    
-    const scenario = getScenario()
-    const scenarioKey = getCurrentScenarioId() // Get the filename-based ID for the API
-    if (!scenario || !scenarioKey) {
-      contentEl.innerHTML = '<p style="color: var(--status-error);">No scenario loaded.</p>'
-      return
-    }
-    
-    generateBtn.disabled = true
-    generateBtn.textContent = 'Generating...'
-    contentEl.innerHTML = `
-      <div style="display: flex; align-items: center; gap: 8px; color: var(--vscode-descriptionForeground);">
-        <span class="codicon codicon-loading codicon-modifier-spin"></span>
-        <span>Generating narrative for ${scenario.title || scenarioKey}...</span>
-      </div>
-    `
-    
-    try {
-      const apiUrl = 'http://localhost:8080/generate'
-      const userAddendum = (addendumEl?.value || aiNarrativeUserAddendum || '').trim()
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          scenario: scenarioKey, // Use filename-based ID for API 
-          fullContext: true,
-          userAddendum
-        })
-      })
-      
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status} ${response.statusText}`)
-      }
-      
-      const data = await response.json()
-      aiNarrativeCitations = data.citations || []
-      
-      // === INTEGRITY CHECKPOINT 1: Raw API Response ===
-      console.log('\n🔍 CHECKPOINT 1: Raw markdown from API')
-      console.log('Length:', data.markdown.length)
-      console.log('Last 200 chars:', data.markdown.slice(-200))
-      const testSentence = data.markdown.match(/team finished the season with[^.]*\.?/)?.[0]
-      console.log('Test sentence:', testSentence)
-      console.log('Full match (300 chars):', data.markdown.match(/By the end of[^]*?(?:\.|$)/)?.[0]?.slice(0, 300))
-      
-      // Render markdown with clickable citations
-      let html = renderMarkdown(data.markdown)
-      
-      // === INTEGRITY CHECKPOINT 2: After renderMarkdown ===
-      console.log('\n🔍 CHECKPOINT 2: After renderMarkdown')
-      console.log('Length:', html.length)
-      console.log('Last paragraph HTML:', html.match(/<p>[^]*?<\/p>$/)?.[0]?.slice(0, 500))
-      const tempDiv1 = document.createElement('div')
-      tempDiv1.innerHTML = html
-      const textAfterRender = tempDiv1.textContent || tempDiv1.innerText
-      console.log('Last 200 chars of text:', textAfterRender.slice(-200))
-      const testSentence2 = textAfterRender.match(/team finished the season with[^.]*\.?/)?.[0]
-      console.log('Test sentence:', testSentence2)
-      console.log('Full match:', textAfterRender.match(/By the end of[^]*?(?:\.|$)/)?.[0]?.slice(0, 300))
-      
-      // Event type color mapping
-      const eventColors = {
-        signal: '#7eb8da',
-        revision: '#98d4a0',
-        decision: '#a8a8a8',
-        boundary_interaction: '#f0b866',
-        envelope_promoted: '#c4a7e7',
-        dsg_session: '#f0b866',
-        embedding: '#b4a7e7',
-        retrieval: '#58a6ff'
-      }
-      
-      // Helper: convert hour to day start (0, 24, 48, etc.)
-      const hourToDay = (hour) => Math.floor(hour / 24) * 24
-      
-      // Process each paragraph: 
-      // 1. Extract citations and find earliest time
-      // 2. Highlight cited sentences with visual styling (no reveal-time on individual sentences)
-      // 3. Wrap entire paragraph with single reveal-time based on earliest citation
-      let currentNarrativeDay = 0 // Track day-based position for uncited paragraphs
-      
-      html = html.replace(/<p>(.*?)<\/p>/gs, (match, paragraphContent) => {
-        // SIMPLIFIED APPROACH: 
-        // - Day-based reveal at paragraph level (for timeline sync)
-        // - Sentence-level color coding (for visual distinction)
-        
-        // Find all citations in this paragraph with their positions
-        const citations = []
-        let tempContent = paragraphContent
-        tempContent.replace(/\^\[([^\]]+)\]/g, (match, eventId, offset) => {
-          citations.push({ eventId, offset })
-          return match
-        })
-        
-        // Find earliest citation hour for this paragraph
-        let paragraphDay = currentNarrativeDay
-        if (citations.length > 0) {
-          let earliestHour = Infinity
-          citations.forEach(({ eventId }) => {
-            const citation = aiNarrativeCitations.find(c => c.eventId === eventId)
-            if (citation?.hour !== undefined) {
-              earliestHour = Math.min(earliestHour, citation.hour)
-            }
-          })
-          
-          if (earliestHour !== Infinity) {
-            paragraphDay = hourToDay(earliestHour)
-            currentNarrativeDay = paragraphDay // Update tracker for next uncited paragraphs
-          }
-        }
-        
-        console.log(`Paragraph: ${citations.length} citations, reveal at day ${paragraphDay / 24}`)
-        
-        // Step 1: Replace citations with placeholders to find sentence boundaries
-        let workingContent = paragraphContent
-        citations.forEach((cit, idx) => {
-          workingContent = workingContent.replace(`^[${cit.eventId}]`, `<<<CIT${idx}>>>`)
-        })
-        
-        // Step 2: Find and highlight sentences containing citations
-        citations.forEach((cit, idx) => {
-          const placeholder = `<<<CIT${idx}>>>`
-          const citPos = workingContent.indexOf(placeholder)
-          if (citPos === -1) return
-          
-          // Find sentence boundaries
-          let sentStart = citPos
-          while (sentStart > 0) {
-            const char = workingContent[sentStart - 1]
-            if (char === '.' || char === '!' || char === '?') break
-            sentStart--
-          }
-          while (sentStart < citPos && /\s/.test(workingContent[sentStart])) sentStart++
-          
-          let sentEnd = citPos + placeholder.length
-          while (sentEnd < workingContent.length) {
-            const char = workingContent[sentEnd]
-            if (char === '.' || char === '!' || char === '?') {
-              sentEnd++
-              break
-            }
-            sentEnd++
-          }
-          
-          // Get colors for this citation
-          const eventId = cit.eventId
-          const eventType = eventId.split(':')[0].split('_')[0]
-          const fullType = eventId.split(':')[0]
-          const color = eventColors[fullType] || eventColors[eventType] || '#58a6ff'
-          
-          const citation = aiNarrativeCitations.find(c => c.eventId === eventId)
-          const stewardRole = citation?.stewardRole || citation?.actorRole
-          const stewardColor = stewardRole ? getStewardColor(stewardRole) : null
-          const bgColor = stewardColor 
-            ? `color-mix(in srgb, ${stewardColor} 20%, transparent)` 
-            : `color-mix(in srgb, ${color} 20%, transparent)`
-          
-          // Check if sentence is already wrapped (avoid double-wrapping)
-          const beforeSent = workingContent.substring(0, sentStart)
-          if (beforeSent.endsWith('<span class="cited-sentence"') || 
-              workingContent.substring(sentStart).startsWith('<span class="cited-sentence"')) {
-            return
-          }
-          
-          // Extract and wrap the sentence
-          const sentenceText = workingContent.substring(sentStart, sentEnd)
-          const wrappedSentence = `<span class="cited-sentence" style="background: ${bgColor}; padding: 2px 4px; border-radius: 2px; box-shadow: -3px 0 0 ${color};">${sentenceText}</span>`
-          
-          workingContent = workingContent.substring(0, sentStart) + wrappedSentence + workingContent.substring(sentEnd)
-        })
-        
-        // Step 3: Replace citation placeholders with styled links
-        citations.forEach((cit, idx) => {
-          const eventId = cit.eventId
-          const eventType = eventId.split(':')[0].split('_')[0]
-          const fullType = eventId.split(':')[0]
-          const color = eventColors[fullType] || eventColors[eventType] || '#58a6ff'
-          
-          const citationLink = `<sup><a href="#" class="citation-link" data-event-id="${eventId}" style="color: ${color}; text-decoration: none; font-size: 9px; opacity: 0.7; margin-left: 2px;">[${eventId}]</a></sup>`
-          workingContent = workingContent.replace(`<<<CIT${idx}>>>`, citationLink)
-        })
-        
-        // Wrap entire paragraph with single reveal-time (day-based)
-        return `<p class="narrative-reveal" data-reveal-time="${paragraphDay}">${workingContent}</p>`
-      })
-      
-      // Also wrap headers (title)
-      html = html.replace(/<h([1-6])>(.*?)<\/h\1>/gs, (match, level, content) => {
-        return `<h${level} class="narrative-reveal" data-reveal-time="0">${content}</h${level}>`
-      })
-      
-      console.log('Paragraph processing complete')
-
-      
-      // Add metadata footer
-      const metadata = data.metadata || {}
-      
-      const legendHtml = `
-        <div style="
-          margin-top: 20px;
-          padding: 12px;
-          background: color-mix(in srgb, var(--vscode-textLink-foreground) 5%, transparent);
-          border-radius: 4px;
-          font-size: 11px;
-          color: var(--vscode-descriptionForeground);
-        ">
-          <div style="font-weight: 600; margin-bottom: 8px;">Citation Colors:</div>
-          <div style="display: flex; flex-wrap: wrap; gap: 12px;">
-            <span><span style="color: #98d4a0;">●</span> Revisions</span>
-            <span><span style="color: #f0b866;">●</span> Boundaries</span>
-            <span><span style="color: #a8a8a8;">●</span> Decisions</span>
-            <span><span style="color: #7eb8da;">●</span> Signals</span>
-            <span><span style="color: #c4a7e7;">●</span> Envelopes</span>
-            <span><span style="color: #58a6ff;">●</span> Retrieval</span>
-          </div>
-        </div>
-      `
-      const metadataHtml = `
-        <div style="
-          margin-top: 16px; 
-          padding-top: 16px; 
-          border-top: 1px solid var(--vscode-sideBar-border);
-          font-size: 10px;
-          color: var(--vscode-descriptionForeground);
-        ">
-          <strong>Generation Metadata:</strong><br>
-          Model: ${metadata.model || 'unknown'} | 
-          Cost: $${(metadata.cost || 0).toFixed(6)} | 
-          Tokens: ${metadata.tokensIn || 0} in / ${metadata.tokensOut || 0} out | 
-          Duration: ${(metadata.duration || 0).toFixed(2)}s | 
-          Day-based reveal: enabled
-        </div>
-      `
-      
-      // Store the full HTML for sync mode
-      aiNarrativeFullHtml = html + legendHtml + metadataHtml
-      
-      contentEl.innerHTML = aiNarrativeFullHtml
-      
-      // Add CSS for paragraph spacing and transitions
-      const style = document.createElement('style')
-      style.textContent = `
-        #ai-narrative-content p {
-          margin-bottom: 1em;
-        }
-        #ai-narrative-content p:last-of-type {
-          margin-bottom: 0;
-        }
-        #ai-narrative-content h1,
-        #ai-narrative-content h2,
-        #ai-narrative-content h3 {
-          margin-top: 1.5em;
-          margin-bottom: 0.5em;
-        }
-        #ai-narrative-content h1:first-child,
-        #ai-narrative-content h2:first-child,
-        #ai-narrative-content h3:first-child {
-          margin-top: 0;
-        }
-        .cited-sentence {
-          transition: opacity 0.5s ease, filter 0.5s ease;
-        }
-      `
-      if (!document.head.querySelector('#ai-narrative-styles')) {
-        style.id = 'ai-narrative-styles'
-        document.head.appendChild(style)
-      }
-      
-      // Wire up citation clicks
-      rewireCitationLinks(contentEl)
-      
-      // If sync mode is enabled, update visibility
-      if (aiNarrativeSyncEnabled) {
-        updateNarrativeSync()
-      }
-      
-      aiNarrativeGenerated = true
-      generateBtn.textContent = 'Regenerate'
-      generateBtn.disabled = false
-      
-    } catch (err) {
-      console.error('Failed to generate AI narrative:', err)
-      contentEl.innerHTML = `
-        <div style="color: var(--status-error); padding: 12px; background: color-mix(in srgb, var(--status-error) 10%, transparent); border-radius: 4px; border: 1px solid var(--status-error);">
-          <strong>Generation Failed</strong><br>
-          ${err.message}<br><br>
-          <small>Make sure the API server is running at localhost:8080</small>
-        </div>
-      `
-      generateBtn.textContent = 'Try Again'
-      generateBtn.disabled = false
-    }
+    rerender()
+    onTimeChange(() => {
+      if (!outputEl.isConnected) return
+      if (activeTab !== 'evidence') return
+      rerender()
+    })
+    onScenarioChange(() => {
+      if (!outputEl.isConnected) return
+      if (activeTab !== 'evidence') return
+      rerender()
+    })
+    onFilterChange(() => {
+      if (!outputEl.isConnected) return
+      if (activeTab !== 'evidence') return
+      rerender()
+    })
   }
 
   const formatEventLine = (event) => {
@@ -2094,9 +2124,9 @@ function createBottomPanel() {
       const key = event.signalKey ? ` ${event.signalKey}` : ''
       const detail = event.detail || event.label || ''
       return {
-        envelopes: null,
+        envelopes: { text: `[${ts}] ${sev}${envelope}${key} - ${detail}`.trim(), kind: sev === 'WARNING' ? 'warning' : 'info' },
         steward: null,
-        dts: { text: `[${ts}] ${sev}${envelope}${key} - ${detail}`.trim(), kind: sev === 'WARNING' ? 'warning' : 'info' },
+        dts: null,
       }
     }
     if (event?.type === 'boundary_interaction') {
@@ -2159,7 +2189,6 @@ function createBottomPanel() {
 
       if (formatted.envelopes) writeLine('envelopes', formatted.envelopes.text, formatted.envelopes.kind)
       if (formatted.steward) writeLine('steward', formatted.steward.text, formatted.steward.kind)
-      if (formatted.dts) writeLine('dts', formatted.dts.text, formatted.dts.kind)
     })
   }
 
@@ -2209,7 +2238,6 @@ function createBottomPanel() {
   writeLine('cli', 'HDDL CLI - type "help" to see commands.', 'muted')
   writeLine('envelopes', 'Envelope console - tracks envelope activations and revisions.', 'muted')
   writeLine('steward', 'Steward activity - escalations, DSG reviews, and steward actions.', 'muted')
-  writeLine('dts', 'DTS stream - bounded signals and outcome telemetry.', 'muted')
 
   if (inputEl) {
     inputEl.addEventListener('keydown', (e) => {
@@ -2257,7 +2285,6 @@ function createBottomPanel() {
       const marker = `[${formatSimTime(next)}] timeline rewound`
       writeLine('envelopes', marker, 'muted')
       writeLine('steward', marker, 'muted')
-      writeLine('dts', marker, 'muted')
       writeLine('cli', marker, 'muted')
       return
     }
@@ -2283,7 +2310,6 @@ function createBottomPanel() {
       const msg = `Scenario loaded: ${scenario?.title || scenarioId}`
       writeLine('envelopes', msg, 'muted')
       writeLine('steward', msg, 'muted')
-      writeLine('dts', msg, 'muted')
       writeLine('cli', msg, 'muted')
     }
   })
@@ -2954,8 +2980,7 @@ function normalizeRoute(pathname) {
 
 // Refresh telemetry (can be called periodically)
 export function refreshTelemetry() {
-  const content = document.getElementById('auxiliarybar-content');
-  if (content) {
-    updateTelemetry(content);
-  }
+  const content = document.querySelector('.terminal-output[data-terminal="evidence"]')
+  if (!content) return
+  updateTelemetry(content, getScenario(), getTimeHour())
 }

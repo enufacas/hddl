@@ -573,7 +573,7 @@ Key concepts:
 - **Feedback Loop**: The pattern where boundary interactions trigger steward decisions, leading to envelope revisions that update agent behavior. This is how governance evolves based on real operational experience.
 - **Decision Memory**: AI-assisted recall layer (embeddings) derived from past decisions and events. Supports precedent discovery but does not hold authority.
 
-When writing, use this vocabulary naturally. Explain that stewards "revise envelopes" not "update policies." Agents "operate within envelope constraints" not "follow rules." Boundary interactions "trigger steward review" not "require approval."
+When writing, use this vocabulary naturally. Explain that stewards "revise envelopes" not "update policies." Agents "operate within envelope constraints" not "follow rules." Boundary interactions "trigger steward review" not "require approval."\n
 
 **Voice & Perspective Guidelines:**
 
@@ -583,9 +583,14 @@ When writing, use this vocabulary naturally. Explain that stewards "revise envel
 
 3. **Conversational Tone**: Write like you're explaining this to a colleague over coffee, not in a compliance document. Use accessible language. Show don't just tell. Make the reader feel the tension of a difficult decision, the relief when a policy revision works, or the uncertainty of scaling autonomous systems.
 
+**Active, Place-Based Storytelling:**
+- Open the narrative with a vivid, place-based phrase that grounds the story in the real world (e.g., "On the hydroponics farm...", "Inside the insurance office...").
+- Do NOT use the phrase "In this scenario" or similar generic openings. Instead, use the actual setting/domain (e.g., "On the hydroponics farm," "At the insurance office," etc.).
+- Tell the story as if it actually happened, in the past tense, making it feel like a real event.
+
 Example transformation:
-- ❌ Technical: "The envelope was revised to include flood zone criteria."
-- ✅ Engaging: "When Rebecca Foster saw that coastal property flagged for review, she didn't just see a risk score—she saw a family trying to protect their home in a changing climate. The envelope revision she wrote that afternoon didn't just add flood zone criteria; it embedded a judgment call about balancing underwriting rigor with human impact."
+- ❌ Passive: "In this scenario, the envelope was revised to include flood zone criteria."
+- ✅ Active: "On the hydroponics farm, the team revised the nutrient management envelope after a sudden drop in yield."
 `;
   
   if (fullContext) {
@@ -604,7 +609,7 @@ ${scenarioJson}
 \`\`\`
 
 Write a 3-4 paragraph narrative that:
-1. Opens with what this scenario demonstrates (domain + key themes from envelopes using HDDL terminology)
+1. Opens with a vivid, place-based phrase that grounds the story in the real world (e.g., "On the hydroponics farm..."), using the actual setting/domain. Do NOT use "In this scenario" or similar phrases.
 2. Describes the collaboration between automated agents and human stewards (reference specific actors, their roles, and how they work within envelope constraints)
 3. Highlights 2-3 specific feedback cycles showing policy evolution (use actual event details like boundary reasons, decision details, and revision descriptions to illustrate envelope updates)
 4. Concludes with the broader implications for AI governance using HDDL principles (how this demonstrates scaled autonomy with preserved human authority)
@@ -619,9 +624,14 @@ Write a 3-4 paragraph narrative that:
 **EVENT CITATIONS:**
 - When mentioning specific events (boundary interactions, decisions, revisions), include the eventId in superscript citation format
 - Format: sentence with detail^[eventId] (no space before caret)
-- Example: "A high-risk policy triggered escalation^[boundary_interaction:5_3:ENV-INS-001:4] early on day one."
+- Example: "A high-risk policy triggered escalation early on day one^[boundary_interaction:5_3:ENV-INS-001:4]."
 - Only cite events when you reference specific details from them (not for general statements)
 - Citations help readers trace narrative claims back to source data
+
+**SENTENCE PUNCTUATION (Citations):**
+- Put the citation at the end of the sentence, immediately before the final punctuation: "...detail^[eventId]." (or ? / !)
+- Do NOT continue the sentence after a citation; if you need more detail, start a new sentence.
+- Do NOT start a new sentence immediately after a citation without punctuation.
 
 **CHRONOLOGICAL ORDERING:**
 - Write events in chronological order whenever possible
@@ -666,7 +676,7 @@ ${actorList}
 ${cycleList}
 
 Write a 3-4 paragraph narrative that:
-1. Opens with what this scenario demonstrates (domain + key themes using HDDL terminology)
+1. Opens with a vivid, place-based phrase that grounds the story in the real world (e.g., "On the hydroponics farm..."), using the actual setting/domain. Do NOT use "In this scenario" or similar phrases.
 2. Describes the collaboration between automated agents and human stewards (how they work within envelope constraints)
 3. Highlights 2-3 specific feedback cycles showing policy evolution (illustrate envelope revisions based on boundary interactions)
 4. Concludes with the broader implications for AI governance using HDDL principles
