@@ -541,6 +541,18 @@
       "artifactOutput": []
     },
     {
+      "eventId": "embedding:17_5:revision:17",
+      "hour": 17.5,
+      "type": "embedding",
+      "embeddingType": "revision",
+      "sourceEventId": "revision:17:ENV-003:13",
+      "embeddingId": "EMB-DEF-017",
+      "context": "Discount evidence packet requirements clarified for large discounts requiring steward approval",
+      "semanticVector": [0.28, 0.68],
+      "chunkText": "Revision clarifies evidence required for large discounts. Authority remains explicit with 15% threshold requiring evidence packet and steward approval.",
+      "actorRole": "Sales Steward"
+    },
+    {
       "eventId": "signal:20:ENV-004:14",
       "hour": 20,
       "type": "signal",

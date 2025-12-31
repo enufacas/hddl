@@ -367,6 +367,7 @@ const mountAINarrative = (containerEl) => {
     const contentEl = containerEl.querySelector('#ai-narrative-content')
     if (contentEl) {
       contentEl.innerHTML = aiNarrativeFullHtml
+      contentEl.style.backgroundImage = 'none' // Remove background when content is loaded
       rewireCitationLinks(contentEl)
       if (aiNarrativeSyncEnabled) updateNarrativeSync()
     }
@@ -384,11 +385,13 @@ const generateAINarrative = async (containerEl) => {
   const scenarioKey = getCurrentScenarioId() // Get the filename-based ID for the API
   if (!scenario || !scenarioKey) {
     contentEl.innerHTML = '<p style="color: var(--status-error);">No scenario loaded.</p>'
+    contentEl.style.backgroundImage = 'none' // Remove background for error message
     return
   }
 
   generateBtn.disabled = true
   generateBtn.textContent = 'Generating...'
+  contentEl.style.backgroundImage = 'none' // Remove background while generating
   contentEl.innerHTML = `
     <div style="display: flex; align-items: center; gap: 8px; color: var(--vscode-descriptionForeground);">
       <span class="codicon codicon-loading codicon-modifier-spin"></span>
@@ -605,6 +608,7 @@ const generateAINarrative = async (containerEl) => {
     aiNarrativeFullHtml = html + legendHtml + metadataHtml
 
     contentEl.innerHTML = aiNarrativeFullHtml
+    contentEl.style.backgroundImage = 'none' // Remove background when narrative is loaded
 
     // Add CSS for paragraph spacing and transitions
     const style = document.createElement('style')

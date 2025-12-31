@@ -417,6 +417,19 @@
       "actorName": "AppealProcessor"
     },
     {
+      "eventId": "embedding:37_2:boundary:36_7",
+      "hour": 37.2,
+      "type": "embedding",
+      "embeddingType": "boundary_interaction",
+      "sourceEventId": "boundary_interaction:36_7:ENV-FIN-002:11",
+      "embeddingId": "EMB-FIN-011",
+      "context": "Customer disputed international transaction fraud alert, providing travel documentation as evidence",
+      "semanticVector": [0.75, 0.68],
+      "chunkText": "Fraud alert disputed by customer with documented international travel. Appeal processor reviewing evidence of legitimate transaction pattern.",
+      "actorRole": "Risk Steward",
+      "actorName": "AppealProcessor"
+    },
+    {
       "eventId": "dsg_session:48:ENV-FIN-001:13",
       "hour": 48,
       "type": "dsg_session",

@@ -264,7 +264,7 @@ export function createHDDLMap(container, options = {}) {
     .attr('width', '100%')
     .attr('height', height)
     .attr('viewBox', [0, 0, width, height])
-    .style('background', 'var(--vscode-editor-background)')
+    .style('background', 'linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.75)), url(/dark-bg.png) center/cover no-repeat')
     .style('border', '1px solid var(--vscode-widget-border)')
     .style('border-radius', '6px')
 
@@ -1753,6 +1753,7 @@ export function createHDDLMap(container, options = {}) {
     linkSelection.exit().remove()
 
     // --- Open Exception Links (rendered on top) ---
+    // HIDDEN: Temporarily disabled for cleaner visualization
     const exceptionSel = exceptionLinkLayer.selectAll('line')
       .data(exceptionLinks, d => d.id)
 
@@ -1762,12 +1763,12 @@ export function createHDDLMap(container, options = {}) {
       .attr('stroke-width', 15)
       .attr('opacity', 0.0)
       .transition().duration(200)
-      .attr('opacity', 0.85)
+      .attr('opacity', 0.0)  // Hidden
 
     exceptionSel
       .attr('stroke', 'red')
       .attr('stroke-width', 15)
-      .attr('opacity', 0.85)
+      .attr('opacity', 0.0)  // Hidden
 
     exceptionSel.exit().transition().duration(200).attr('opacity', 0).remove()
 

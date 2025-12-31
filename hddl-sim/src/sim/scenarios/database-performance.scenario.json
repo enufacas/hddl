@@ -411,6 +411,19 @@
       "boundaryType": "constraint_approached"
     },
     {
+      "eventId": "embedding:37_2:boundary:36_7",
+      "hour": 37.2,
+      "type": "embedding",
+      "embeddingType": "boundary_interaction",
+      "sourceEventId": "boundary_interaction:36_7:ENV-DB-003:13",
+      "embeddingId": "EMB-DB-013",
+      "context": "Cost optimization conflicting with capacity buffer constraint on test environment",
+      "semanticVector": [0.72, 0.75],
+      "chunkText": "CostOptimizer recommended downsizing but current 82% utilization approaches 20% buffer constraint. Escalated for capacity review.",
+      "actorRole": "Infrastructure Steward",
+      "actorName": "CostOptimizer"
+    },
+    {
       "eventId": "signal:48:ENV-DB-002:14",
       "hour": 48,
       "type": "signal",

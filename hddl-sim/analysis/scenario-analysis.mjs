@@ -496,24 +496,37 @@ events.filter(e => e.type === 'signal').forEach(e => {
 if (flowIssues.length === 0) {
   console.log('✅ All particle flows have required fields for visualization')
 } else {
-  const flowGrouped = flowIssues.reduce((acc, issue) => {
-    if (!acc[issue.severity]) acc[issue.severity] = []
-    acc[issue.severity].push(issue)
-    return acc
-  }, {})
+  console.log(`Found ${flowIssues.length} particle flow issues`)
   
-  ['error', 'warning', 'info'].forEach(severity => {
-    if (flowGrouped && flowGrouped[severity]) {
-      console.log(`\n${severity.toUpperCase()} (${flowGrouped[severity].length}):`)
-      flowGrouped[severity].slice(0, 3).forEach(issue => {
-        const icon = severity === 'error' ? '❌' : severity === 'warning' ? '⚠️' : 'ℹ️'
-        console.log(`  ${icon} ${issue.message}`)
-      })
-      if (flowGrouped[severity].length > 3) {
-        console.log(`  ... and ${flowGrouped[severity].length - 3} more`)
+  try {
+    const flowGrouped = flowIssues.reduce((acc, issue) => {
+      if (!issue || typeof issue !== 'object') {
+        console.error(`⚠️  Malformed issue:`, issue)
+        return acc
+      }
+      const sev = issue.severity || 'warning'
+      if (!acc[sev]) acc[sev] = []
+      acc[sev].push(issue)
+      return acc
+    }, {})
+    
+    const severities = ['error', 'warning', 'info']
+    for (const severity of severities) {
+      if (flowGrouped[severity] && flowGrouped[severity].length > 0) {
+        console.log(`\n${severity.toUpperCase()} (${flowGrouped[severity].length}):`)
+        flowGrouped[severity].slice(0, 3).forEach(issue => {
+          const icon = severity === 'error' ? '❌' : severity === 'warning' ? '⚠️' : 'ℹ️'
+          console.log(`  ${icon} ${issue.message || 'No message'}`)
+        })
+        if (flowGrouped[severity].length > 3) {
+          console.log(`  ... and ${flowGrouped[severity].length - 3} more`)
+        }
       }
     }
-  })
+  } catch (err) {
+    console.error('Error processing flow issues:', err.message)
+    console.log('Flow issues:', flowIssues)
+  }
 }
 
 // ============================================================================
@@ -1042,8 +1055,9 @@ const allValidationIssues = [
 ]
 
 const groupedIssues = allValidationIssues.reduce((acc, issue) => {
-  if (!acc[issue.severity]) acc[issue.severity] = []
-  acc[issue.severity].push(issue)
+  const sev = issue.severity || 'info'
+  if (!acc[sev]) acc[sev] = []
+  acc[sev].push(issue)
   return acc
 }, {})
 
@@ -1051,7 +1065,7 @@ if (allValidationIssues.length === 0) {
   console.log('✅ No issues found!')
 } else {
   ['error', 'warning', 'suggestion', 'info'].forEach(severity => {
-    if (groupedIssues[severity]) {
+    if (groupedIssues[severity] && groupedIssues[severity].length > 0) {
       console.log(`\n${severity.toUpperCase()} (${groupedIssues[severity].length}):`)
       groupedIssues[severity].slice(0, 5).forEach(issue => {
         const icon = severity === 'error' ? '❌' : severity === 'warning' ? '⚠️' : 'ℹ️'
