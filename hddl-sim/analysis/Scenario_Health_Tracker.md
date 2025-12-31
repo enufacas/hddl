@@ -27,7 +27,7 @@ This tracker monitors the health and compliance of all HDDL scenarios. Run `node
 | airforce-avionics-maintenance | ⚠️ | 2/2 ✅ | 5/5 ✅ | 0 ✅ | 0/5 ⚠️ | 7W 7S | 2025-12-31 |
 | vertical-hydroponics-farm | ⚠️ | 2/2 ✅ | 5/5 ✅ | 0 ✅ | 0/5 ⚠️ | 6W 7S | 2025-12-31 |
 | test-minimal | ✅ | 1/1 ✅ | 1/1 ✅ | 0 ✅ | 1/1 ✅ | 2W 2S 1I | 2025-12-31 |
-| default | ⚠️ | 4/4 ✅ | 2/2 ✅ | 0 ✅ | 0/2 ⚠️ | 1W 4S | 2025-12-31 |
+| default | ✅ | 4/4 ✅ | 2/2 ✅ | 0 ✅ | 2/2 ✅ | 4W | 2025-12-31 |
 
 **Column Key:**
 - **Rev w/ Emb** = Revisions with Embeddings (REQUIRED)
@@ -37,8 +37,8 @@ This tracker monitors the health and compliance of all HDDL scenarios. Run `node
 - **Warnings** = W=Warning, S=Suggestion, I=Info
 
 **Progress Summary:**
-- ✅ 5/11 scenarios with complete feedback cycles
-- ⚠️ 6/11 scenarios need revisions to complete cycles
+- ✅ 6/11 scenarios with complete feedback cycles
+- ⚠️ 5/11 scenarios need revisions to complete cycles
 - 🎯 All scenarios are compliant with REQUIRED closed-loop standards
 
 ## Required Compliance Metrics
