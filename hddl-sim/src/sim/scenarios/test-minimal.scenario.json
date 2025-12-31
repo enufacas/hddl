@@ -119,6 +119,20 @@
       "summary": "Policy change: threshold adjustment"
     },
     {
+      "hour": 4.8,
+      "type": "retrieval",
+      "eventId": "retrieval:4_8:env-test-policy:rev",
+      "envelopeId": "env-test-policy",
+      "severity": "info",
+      "label": "Retrieve recent policy revision",
+      "detail": "DecisionMemory retrieves the recent policy revision embedding for decisions.",
+      "actorRole": "policy",
+      "actorName": "DecisionMemory",
+      "queryText": "policy threshold adjustment revision",
+      "retrievedEmbeddings": ["EMB-003"],
+      "relevanceScores": [0.95]
+    },
+    {
       "hour": 5.0,
       "type": "decision",
       "eventId": "decision-test-3",

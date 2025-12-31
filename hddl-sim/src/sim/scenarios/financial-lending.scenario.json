@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "id": "scenario-financial-lending-001",
+  "id": "financial-lending",
   "title": "Consumer Lending Decisions — Fairness & Compliance",
   "durationHours": 120,
   "envelopes": [
@@ -302,6 +302,23 @@
       "actorName": "Patricia Nguyen"
     },
     {
+      "eventId": "embedding:0_1:ENV-FIN-BASE:hist",
+      "hour": 0.1,
+      "type": "embedding",
+      "envelopeId": "ENV-FIN-001",
+      "severity": "info",
+      "label": "Historical baseline embedding",
+      "detail": "Baseline historical embeddings for lending scenario.",
+      "actorRole": "Lending Steward",
+      "actorName": "System",
+      "embeddingId": "EMB-FIN-HIST-001",
+      "embeddingType": "historical",
+      "vectorDimensions": 2,
+      "sourceEventId": "historical-baseline",
+      "semanticContext": "historical lending baseline",
+      "semanticVector": [0.5, 0.5]
+    },
+    {
       "eventId": "decision:2_5:ENV-FIN-001:3",
       "hour": 2.5,
       "type": "decision",
@@ -323,8 +340,8 @@
       "actorRole": "Lending Steward",
       "actorName": "BorderlineReviewer",
       "queryText": "borderline applications near threshold requiring manual review",
-      "retrievedEmbeddings": [],
-      "relevanceScores": []
+      "retrievedEmbeddings": ["EMB-FIN-HIST-001"],
+      "relevanceScores": [0.88]
     },
     {
       "eventId": "boundary_interaction:5_8:ENV-FIN-001:4",
@@ -374,8 +391,8 @@
       "actorRole": "Lending Steward",
       "actorName": "CreditScorer",
       "queryText": "debt-to-income ratio denials adverse action requirements",
-      "retrievedEmbeddings": [],
-      "relevanceScores": []
+      "retrievedEmbeddings": ["EMB-FIN-HIST-001"],
+      "relevanceScores": [0.86]
     },
     {
       "eventId": "boundary_interaction:12_5:ENV-FIN-001:7",
@@ -522,9 +539,9 @@
       "detail": "OutreachScheduler retrieved FDCPA contact time restrictions and violation prevention patterns.",
       "actorRole": "Recovery Steward",
       "actorName": "OutreachScheduler",
-      "queryText": "FDCPA contact time restrictions collections compliance",
-      "retrievedEmbeddings": [],
-      "relevanceScores": []
+      "queryText": "portfolio drift precedents",
+      "retrievedEmbeddings": ["EMB-FIN-HIST-001"],
+      "relevanceScores": [0.8]
     },
     {
       "eventId": "boundary_interaction:96_5:ENV-FIN-003:16",
@@ -565,6 +582,20 @@
       "chunkText": "Recovery Steward enhanced automated compliance checks after collections contact blocked due to late-hour attempt. Added customer timezone validation to prevent FDCPA violations.",
       "actorRole": "Recovery Steward",
       "actorName": "Patricia Nguyen"
+    },
+    {
+      "eventId": "retrieval:98_0:ENV-FIN-003:16b",
+      "hour": 98.0,
+      "type": "retrieval",
+      "envelopeId": "ENV-FIN-003",
+      "severity": "info",
+      "label": "Retrieve FDCPA revision",
+      "detail": "DecisionMemory retrieves the FDCPA contact time restriction revision embedding for collections logic.",
+      "actorRole": "Recovery Steward",
+      "actorName": "DecisionMemory",
+      "queryText": "FDCPA contact time restriction revision timezone validation",
+      "retrievedEmbeddings": ["EMB-FIN-017"],
+      "relevanceScores": [0.91]
     },
     {
       "eventId": "embedding:7:ENV-FIN-001:18",

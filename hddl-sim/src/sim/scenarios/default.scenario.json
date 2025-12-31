@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "id": "scenario-default-002-simplified",
+  "id": "default",
   "title": "HDDL Replay (Simplified) — Four Fleets",
   "durationHours": 48,
   "envelopes": [
@@ -830,6 +830,20 @@
       "sourceEventId": "revision:13_1:ENV-001:9",
       "semanticContext": "refund escalation evidence packet requirements policy update",
       "semanticVector": [0.20, 0.75]
+    },
+    {
+      "eventId": "retrieval:15_5:ENV-001:29a",
+      "hour": 15.5,
+      "type": "retrieval",
+      "envelopeId": "ENV-001",
+      "severity": "info",
+      "label": "Retrieve refund revision",
+      "detail": "DecisionMemory retrieves the refund escalation revision embedding for future adjudications.",
+      "actorRole": "Customer Steward",
+      "actorName": "DecisionMemory",
+      "queryText": "refund escalation evidence packet requirements revision",
+      "retrievedEmbeddings": ["EMB-DEF-004"],
+      "relevanceScores": [0.9]
     },
     {
       "eventId": "embedding:17:ENV-003:29",

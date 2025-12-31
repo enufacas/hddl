@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "id": "scenario-database-performance-001",
+  "id": "database-performance",
   "title": "Database Performance Monitoring — Observability & SLAs",
   "durationHours": 72,
   "envelopes": [
@@ -259,6 +259,23 @@
       "actorName": "Maya Chen"
     },
     {
+      "eventId": "embedding:0_1:ENV-DB-001:hist",
+      "hour": 0.1,
+      "type": "embedding",
+      "envelopeId": "ENV-DB-001",
+      "severity": "info",
+      "label": "Historical baseline embedding",
+      "detail": "Baseline embedding for database performance scenario.",
+      "actorRole": "Performance Steward",
+      "actorName": "System",
+      "embeddingId": "EMB-DB-HIST-001",
+      "embeddingType": "historical",
+      "vectorDimensions": 2,
+      "sourceEventId": "historical-baseline",
+      "semanticContext": "database performance baseline",
+      "semanticVector": [0.5, 0.5]
+    },
+    {
       "eventId": "envelope_promoted:0:ENV-DB-002:1",
       "hour": 0,
       "type": "envelope_promoted",
@@ -315,8 +332,8 @@
       "actorRole": "Performance Steward",
       "actorName": "QueryOptimizer",
       "queryText": "PII table optimization security review patterns",
-      "retrievedEmbeddings": [],
-      "relevanceScores": []
+      "retrievedEmbeddings": ["EMB-DB-HIST-001"],
+      "relevanceScores": [0.87]
     },
     {
       "eventId": "boundary_interaction:6_8:ENV-DB-001:5",
@@ -424,8 +441,8 @@
       "actorRole": "Infrastructure Steward",
       "actorName": "CostOptimizer",
       "queryText": "capacity buffer constraint cost optimization",
-      "retrievedEmbeddings": [],
-      "relevanceScores": []
+      "retrievedEmbeddings": ["EMB-DB-HIST-001"],
+      "relevanceScores": [0.82]
     },
     {
       "eventId": "boundary_interaction:36_7:ENV-DB-003:13",
@@ -656,6 +673,20 @@
       "sourceEventId": "revision:10:ENV-DB-001:26a",
       "semanticContext": "PII table optimization security review requirement",
       "semanticVector": [0.65, 0.80]
+    },
+    {
+      "eventId": "retrieval:11_0:ENV-DB-001:26e",
+      "hour": 11.0,
+      "type": "retrieval",
+      "envelopeId": "ENV-DB-001",
+      "severity": "info",
+      "label": "Retrieve PII optimization revision",
+      "detail": "DecisionMemory retrieves the PII optimization revision embedding for query planning.",
+      "actorRole": "Performance Steward",
+      "actorName": "DecisionMemory",
+      "queryText": "PII optimization security revision",
+      "retrievedEmbeddings": ["EMB-DB-REV-001"],
+      "relevanceScores": [0.9]
     },
     {
       "eventId": "revision:40:ENV-DB-003:26c",

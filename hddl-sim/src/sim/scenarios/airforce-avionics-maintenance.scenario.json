@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "id": "scenario-airforce-avionics-001",
+  "id": "airforce-avionics-maintenance",
   "title": "Air Force Avionics Maintenance Backshop — Mission Readiness",
   "durationHours": 336,
   "envelopes": [

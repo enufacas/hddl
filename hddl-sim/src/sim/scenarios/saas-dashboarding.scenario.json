@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "id": "scenario-saas-dashboarding-001",
+  "id": "saas-dashboarding",
   "title": "SaaS Dashboard Builder — Self-Service Analytics",
   "durationHours": 96,
   "envelopes": [
@@ -488,6 +488,20 @@
       "sourceEventId": "revision:8:ENV-DASH-002:11a",
       "semanticContext": "query scan threshold increased from 1M to 2.5M rows based on approval patterns",
       "semanticVector": [0.25, 0.68]
+    },
+    {
+      "eventId": "retrieval:9_0:ENV-DASH-002:11c",
+      "hour": 9.0,
+      "type": "retrieval",
+      "envelopeId": "ENV-DASH-002",
+      "severity": "info",
+      "label": "Retrieve query threshold revision",
+      "detail": "DecisionMemory retrieves the query threshold revision embedding for future query checks.",
+      "actorRole": "Data Steward",
+      "actorName": "DecisionMemory",
+      "queryText": "query scan threshold revision 1M to 2.5M",
+      "retrievedEmbeddings": ["EMB-DASH-013"],
+      "relevanceScores": [0.9]
     },
     {
       "eventId": "revision:20:ENV-DASH-002:11e",

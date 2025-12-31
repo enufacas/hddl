@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "id": "scenario-medical-diagnosis-001",
+  "id": "medical-diagnosis",
   "title": "Medical Diagnosis Support — Healthcare Stewardship",
   "durationHours": 72,
   "envelopes": [
@@ -447,6 +447,20 @@
       "sourceEventId": "revision:16_5:ENV-MED-001:7",
       "semanticContext": "diagnostic confidence threshold increase from 75% to 80%",
       "semanticVector": [0.22, 0.75]
+    },
+    {
+      "eventId": "retrieval:18_5:ENV-MED-001:7a",
+      "hour": 18.5,
+      "type": "retrieval",
+      "envelopeId": "ENV-MED-001",
+      "severity": "info",
+      "label": "Retrieve confidence threshold revision",
+      "detail": "DecisionMemory retrieves the diagnostic confidence revision embedding for use in differential diagnosis.",
+      "actorRole": "Medical Steward",
+      "actorName": "DecisionMemory",
+      "queryText": "diagnostic confidence threshold revision 75 to 80",
+      "retrievedEmbeddings": ["EMB-MED-002d"],
+      "relevanceScores": [0.88]
     },
     {
       "eventId": "embedding:20:ENV-MED-001:12e",

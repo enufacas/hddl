@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "id": "scenario-insurance-underwriting-001",
+  "id": "insurance-underwriting",
   "title": "Insurance Underwriting — Risk Assessment & Claims",
   "durationHours": 120,
   "envelopes": [
@@ -540,6 +540,20 @@
       "sourceEventId": "revision:6_2:ENV-INS-001:5a",
       "semanticContext": "flood mitigation coastal property high risk underwriting constraint",
       "semanticVector": [0.28, 0.58]
+    },
+    {
+      "eventId": "retrieval:7_2:ENV-INS-001:5c",
+      "hour": 7.2,
+      "type": "retrieval",
+      "envelopeId": "ENV-INS-001",
+      "severity": "info",
+      "label": "Retrieve recent policy revisions",
+      "detail": "DecisionMemory retrieves recent revision embedding for flood mitigation policy update.",
+      "actorRole": "Underwriting Steward",
+      "actorName": "DecisionMemory",
+      "queryText": "flood mitigation verification policy revision",
+      "retrievedEmbeddings": ["EMB-INS-005"],
+      "relevanceScores": [0.92]
     },
     {
       "eventId": "retrieval:8_05:ENV-INS-002:5a",

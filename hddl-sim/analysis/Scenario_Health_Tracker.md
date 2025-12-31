@@ -17,17 +17,6 @@ This tracker monitors the health and compliance of all HDDL scenarios. Run `node
 
 | Scenario | Status | Rev w/ Emb | Bound w/ Emb | Time Paradox | Complete Cycles | Warnings | Last Analyzed |
 |----------|--------|------------|--------------|--------------|-----------------|----------|---------------|
-| insurance-underwriting | ✅ | 7/7 ✅ | 6/6 ✅ | 0 ✅ | 6/6 ✅ | 12W | 2025-12-30 |
-| financial-lending | ✅ | 1/1 ✅ | 4/4 ✅ | 0 ✅ | 4/4 ✅ | 5W 2S | 2025-12-31 |
-| medical-diagnosis | ✅ | 3/3 ✅ | 2/2 ✅ | 0 ✅ | 2/2 ✅ | 7W 1S | 2025-12-31 |
-| autonomous-vehicles | ✅ | 3/3 ✅ | 2/2 ✅ | 0 ✅ | 2/2 ✅ | 6W 3S | 2025-12-31 |
-| database-performance | ⚠️ | 2/2 ✅ | 2/2 ✅ | 0 ✅ | 0/2 ⚠️ | 5W 2S | 2025-12-31 |
-| saas-dashboarding | ⚠️ | 2/2 ✅ | 3/3 ✅ | 0 ✅ | 0/3 ⚠️ | 5W 4S | 2025-12-31 |
-| baseball-analytics | ⚠️ | 2/2 ✅ | 4/4 ✅ | 0 ✅ | 0/4 ⚠️ | 5W 5S | 2025-12-31 |
-| airforce-avionics-maintenance | ⚠️ | 2/2 ✅ | 5/5 ✅ | 0 ✅ | 0/5 ⚠️ | 7W 7S | 2025-12-31 |
-| vertical-hydroponics-farm | ⚠️ | 2/2 ✅ | 5/5 ✅ | 0 ✅ | 0/5 ⚠️ | 6W 7S | 2025-12-31 |
-| test-minimal | ✅ | 1/1 ✅ | 1/1 ✅ | 0 ✅ | 1/1 ✅ | 2W 2S 1I | 2025-12-31 |
-| default | ✅ | 4/4 ✅ | 2/2 ✅ | 0 ✅ | 2/2 ✅ | 4W | 2025-12-31 |
 | insurance-underwriting | ✅ | 7/7 ✅ | 6/6 ✅ | 0 ✅ | 6/6 ✅ | 12W | 2025-12-31 |
 | financial-lending | ✅ | 2/2 ✅ | 4/4 ✅ | 0 ✅ | 4/4 ✅ | 5W 2S | 2025-12-31 |
 | medical-diagnosis | ✅ | 3/3 ✅ | 2/2 ✅ | 0 ✅ | 2/2 ✅ | 7W 1S | 2025-12-31 |
@@ -48,9 +37,9 @@ This tracker monitors the health and compliance of all HDDL scenarios. Run `node
 - **Warnings** = W=Warning, S=Suggestion, I=Info
 
 **Progress Summary:**
-- ✅ 6/11 scenarios with complete feedback cycles
-- ⚠️ 5/11 scenarios need revisions to complete cycles
-- 🎯 All scenarios are compliant with REQUIRED closed-loop standards
+- ✅ **11/11 scenarios** with complete feedback cycles
+- 🎯 **All scenarios** compliant with REQUIRED closed-loop standards
+- ⚠️ Minor semantic polish opportunities remain (query-context alignment)
 
 ## Required Compliance Metrics
 

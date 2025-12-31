@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "id": "scenario-baseball-analytics-001",
+  "id": "baseball-analytics",
   "title": "Baseball Analytics — Performance & Strategy Optimization",
   "durationHours": 168,
   "envelopes": [
@@ -370,6 +370,20 @@
       "sourceEventId": "revision:22:ENV-BB-003:16a",
       "semanticContext": "pitcher workload monitoring tightened with arm slot deviation threshold reduction",
       "semanticVector": [0.20, 0.78]
+    },
+    {
+      "eventId": "retrieval:23_0:ENV-BB-003:16c",
+      "hour": 23.0,
+      "type": "retrieval",
+      "envelopeId": "ENV-BB-003",
+      "severity": "info",
+      "label": "Retrieve workload threshold revision",
+      "detail": "DecisionMemory retrieves the workload-threshold revision embedding for pitcher management.",
+      "actorRole": "Health Steward",
+      "actorName": "DecisionMemory",
+      "queryText": "workload threshold revision pitcher injury prevention",
+      "retrievedEmbeddings": ["EMB-BB-016"],
+      "relevanceScores": [0.89]
     },
     {
       "eventId": "decision:24_3:ENV-BB-002:7",

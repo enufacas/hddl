@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "id": "scenario-autonomous-vehicles-001",
+  "id": "autonomous-vehicles",
   "title": "Autonomous Vehicle Operations — Fleet Safety & Ethics",
   "durationHours": 96,
   "envelopes": [
@@ -281,6 +281,23 @@
       "actorName": "CollisionPredictor"
     },
     {
+      "eventId": "embedding:0_1:ENV-AV-001:hist",
+      "hour": 0.1,
+      "type": "embedding",
+      "envelopeId": "ENV-AV-001",
+      "severity": "info",
+      "label": "Historical baseline embedding",
+      "detail": "Baseline embedding for autonomous vehicles scenario.",
+      "actorRole": "Safety Steward",
+      "actorName": "System",
+      "embeddingId": "EMB-AV-HIST-001",
+      "embeddingType": "historical",
+      "vectorDimensions": 2,
+      "sourceEventId": "historical-baseline",
+      "semanticContext": "autonomous vehicles baseline",
+      "semanticVector": [0.5, 0.5]
+    },
+    {
       "eventId": "signal:6_5:ENV-AV-002:3",
       "hour": 6.5,
       "type": "signal",
@@ -527,6 +544,20 @@
       "sourceEventId": "revision:20:ENV-AV-001:15c",
       "semanticContext": "construction zone conflicting signage prioritization rule",
       "semanticVector": [0.78, 0.85]
+    },
+    {
+      "eventId": "retrieval:21_0:ENV-AV-001:15d",
+      "hour": 21.0,
+      "type": "retrieval",
+      "envelopeId": "ENV-AV-001",
+      "severity": "info",
+      "label": "Retrieve construction signage revision",
+      "detail": "DecisionMemory retrieves the construction signage revision embedding for routing decisions.",
+      "actorRole": "Safety Steward",
+      "actorName": "DecisionMemory",
+      "queryText": "construction signage prioritization revision",
+      "retrievedEmbeddings": ["EMB-AV-REV-001"],
+      "relevanceScores": [0.9]
     },
     {
       "eventId": "embedding:30:ENV-AV-004:16",
