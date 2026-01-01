@@ -9,7 +9,7 @@
       "name": "Customer Service Responses",
       "domain": "Customer Service",
       "ownerRole": "Customer Steward",
-      "createdHour": 2,
+      "createdHour": 0.25,
       "endHour": 18,
       "accent": "var(--status-info)",
       "envelope_version": 1,
@@ -28,7 +28,7 @@
       "name": "Hiring Recommendations",
       "domain": "Hiring",
       "ownerRole": "HR Steward",
-      "createdHour": 10,
+      "createdHour": 1,
       "endHour": 24,
       "accent": "var(--status-success)",
       "envelope_version": 1,
@@ -49,7 +49,7 @@
       "name": "Discount Guidance",
       "domain": "Sales",
       "ownerRole": "Sales Steward",
-      "createdHour": 4,
+      "createdHour": 0.5,
       "endHour": 20,
       "accent": "var(--vscode-charts-orange, var(--status-warning))",
       "envelope_version": 1,
@@ -68,7 +68,7 @@
       "name": "Dataset Access & Schema Changes",
       "domain": "Data",
       "ownerRole": "Data Steward",
-      "createdHour": 8,
+      "createdHour": 0.75,
       "endHour": 24,
       "accent": "var(--vscode-charts-purple, var(--status-info))",
       "envelope_version": 1,
@@ -264,7 +264,7 @@
   "events": [
     {
       "eventId": "envelope_promoted:2:ENV-001:0",
-      "hour": 2,
+      "hour": 0.25,
       "type": "envelope_promoted",
       "envelopeId": "ENV-001",
       "severity": "info",
@@ -281,7 +281,7 @@
     },
     {
       "eventId": "envelope_promoted:4:ENV-003:1",
-      "hour": 4,
+      "hour": 0.5,
       "type": "envelope_promoted",
       "envelopeId": "ENV-003",
       "severity": "info",
@@ -298,7 +298,7 @@
     },
     {
       "eventId": "envelope_promoted:8:ENV-004:3",
-      "hour": 8,
+      "hour": 0.75,
       "type": "envelope_promoted",
       "envelopeId": "ENV-004",
       "severity": "info",
@@ -315,7 +315,7 @@
     },
     {
       "eventId": "envelope_promoted:10:ENV-002:2",
-      "hour": 10,
+      "hour": 1,
       "type": "envelope_promoted",
       "envelopeId": "ENV-002",
       "severity": "info",
@@ -332,7 +332,7 @@
     },
     {
       "eventId": "signal:11_2:ENV-001:4",
-      "hour": 11.2,
+      "hour": 1.2,
       "type": "signal",
       "envelopeId": "ENV-001",
       "severity": "info",
@@ -351,7 +351,7 @@
     },
     {
       "eventId": "decision:11_35:ENV-001:5",
-      "hour": 11.35,
+      "hour": 1.35,
       "type": "decision",
       "envelopeId": "ENV-001",
       "severity": "info",
@@ -370,7 +370,7 @@
     },
     {
       "eventId": "signal:12_4:ENV-001:6",
-      "hour": 12.4,
+      "hour": 2.4,
       "type": "signal",
       "envelopeId": "ENV-001",
       "severity": "warning",
@@ -389,7 +389,7 @@
     },
     {
       "eventId": "decision:12_55:ENV-001:7",
-      "hour": 12.55,
+      "hour": 2.55,
       "type": "decision",
       "envelopeId": "ENV-001",
       "severity": "warning",
@@ -409,7 +409,7 @@
     },
     {
       "eventId": "retrieval:12_1:ENV-001:8",
-      "hour": 12.1,
+      "hour": 2.1,
       "type": "retrieval",
       "envelopeId": "ENV-001",
       "severity": "info",
@@ -430,7 +430,7 @@
     },
     {
       "eventId": "BI-ENV-001-001",
-      "hour": 12.6,
+      "hour": 2.6,
       "type": "boundary_interaction",
       "envelopeId": "ENV-001",
       "severity": "warning",
@@ -450,7 +450,7 @@
     },
     {
       "eventId": "revision:13_1:ENV-001:9",
-      "hour": 13.1,
+      "hour": 3.1,
       "type": "revision",
       "envelopeId": "ENV-001",
       "label": "Clarify refund escalation packet",
@@ -478,7 +478,7 @@
     },
     {
       "eventId": "signal:16_2:ENV-003:10",
-      "hour": 16.2,
+      "hour": 6.2,
       "type": "signal",
       "envelopeId": "ENV-003",
       "severity": "warning",
@@ -497,7 +497,7 @@
     },
     {
       "eventId": "decision:16_35:ENV-003:11",
-      "hour": 16.35,
+      "hour": 6.35,
       "type": "decision",
       "envelopeId": "ENV-003",
       "severity": "warning",
@@ -518,7 +518,7 @@
     
     {
       "eventId": "BI-ENV-003-001",
-      "hour": 16.4,
+      "hour": 6.4,
       "type": "boundary_interaction",
       "envelopeId": "ENV-003",
       "severity": "warning",
@@ -538,7 +538,7 @@
     },
     {
       "eventId": "revision:17:ENV-003:13",
-      "hour": 17,
+      "hour": 7,
       "type": "revision",
       "envelopeId": "ENV-003",
       "label": "Clarify discount evidence packet",
@@ -566,7 +566,7 @@
     },
     {
       "eventId": "embedding:17_5:revision:17",
-      "hour": 17.5,
+      "hour": 7.5,
       "type": "embedding",
       "embeddingType": "revision",
       "sourceEventId": "revision:17:ENV-003:13",
@@ -578,7 +578,7 @@
     },
     {
       "eventId": "signal:20:ENV-004:14",
-      "hour": 20,
+      "hour": 10,
       "type": "signal",
       "envelopeId": "ENV-004",
       "severity": "warning",
@@ -597,7 +597,7 @@
     },
     {
       "eventId": "decision:20_25:ENV-004:15",
-      "hour": 20.25,
+      "hour": 10.25,
       "type": "decision",
       "envelopeId": "ENV-004",
       "severity": "info",
@@ -616,7 +616,7 @@
     },
     {
       "eventId": "revision:20_8:ENV-004:16",
-      "hour": 20.8,
+      "hour": 10.8,
       "type": "revision",
       "envelopeId": "ENV-004",
       "label": "Update schema contract",
@@ -769,7 +769,7 @@
     },
     {
       "eventId": "embedding:12:ENV-001:25",
-      "hour": 12,
+      "hour": 2,
       "type": "embedding",
       "envelopeId": "ENV-001",
       "severity": "info",
@@ -785,7 +785,7 @@
     },
     {
       "eventId": "embedding:13:ENV-001:26",
-      "hour": 13,
+      "hour": 3,
       "type": "embedding",
       "envelopeId": "ENV-001",
       "severity": "info",
@@ -801,7 +801,7 @@
     },
     {
       "eventId": "embedding:14:ENV-001:27",
-      "hour": 14,
+      "hour": 4,
       "type": "embedding",
       "envelopeId": "ENV-001",
       "severity": "info",
@@ -817,7 +817,7 @@
     },
     {
       "eventId": "embedding:15:ENV-001:28",
-      "hour": 15,
+      "hour": 5,
       "type": "embedding",
       "envelopeId": "ENV-001",
       "severity": "info",
@@ -833,7 +833,7 @@
     },
     {
       "eventId": "retrieval:15_5:ENV-001:29a",
-      "hour": 15.5,
+      "hour": 5.5,
       "type": "retrieval",
       "envelopeId": "ENV-001",
       "severity": "info",
@@ -847,7 +847,7 @@
     },
     {
       "eventId": "embedding:17:ENV-003:29",
-      "hour": 17,
+      "hour": 7,
       "type": "embedding",
       "envelopeId": "ENV-003",
       "severity": "info",
@@ -863,7 +863,7 @@
     },
     {
       "eventId": "embedding:18:ENV-003:30",
-      "hour": 18,
+      "hour": 8,
       "type": "embedding",
       "envelopeId": "ENV-003",
       "severity": "info",
@@ -879,7 +879,7 @@
     },
     {
       "eventId": "embedding:19:ENV-003:31",
-      "hour": 19,
+      "hour": 9,
       "type": "embedding",
       "envelopeId": "ENV-003",
       "severity": "info",
@@ -895,7 +895,7 @@
     },
     {
       "eventId": "embedding:21:ENV-004:32",
-      "hour": 21,
+      "hour": 11,
       "type": "embedding",
       "envelopeId": "ENV-004",
       "severity": "info",
@@ -911,7 +911,7 @@
     },
     {
       "eventId": "embedding:22:ENV-004:33",
-      "hour": 22,
+      "hour": 12,
       "type": "embedding",
       "envelopeId": "ENV-004",
       "severity": "info",
@@ -927,7 +927,7 @@
     },
     {
       "eventId": "embedding:23:ENV-004:34",
-      "hour": 23,
+      "hour": 13,
       "type": "embedding",
       "envelopeId": "ENV-004",
       "severity": "info",

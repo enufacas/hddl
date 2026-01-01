@@ -1,6 +1,6 @@
-# Authority Order: What is Normative?
+# What Counts (Normative vs Illustrative)
 
-**Purpose:** Define which documents are authoritative (normative) vs illustrative (non-normative) so SIM implementers, external teams, and spec contributors know where the source of truth lives.
+**Purpose:** A quick map of which docs are binding vs just guidance.
 
 **Last updated:** 2025-12-26
 
@@ -88,15 +88,10 @@ These documents define **what HDDL is** and **what implementations MUST comply w
 
 These documents provide **guidance, examples, and teaching** but are **not binding** on implementations. External teams MAY adopt these patterns but are not required to.
 
-### Teaching + Narratives
+### Teaching
 **Illustrative stories and scenarios**
 
-8. **Narratives** (`docs/narratives/`)
-   - Example scenarios that teach HDDL concepts
-   - **Note:** Default SIM scenario is based on "Narrative_Thursday_Two_Years_Later.md" but the narrative itself is non-normative
-   - These are teaching tools, not requirements
-
-9. **Simulation Concept** (`docs/appendices/HDDL_Simulation_Concept.md`)
+8. **Simulation Concept** (`docs/appendices/HDDL_Simulation_Concept.md`)
    - Describes how HDDL concepts *could* be experienced
    - Explicitly labeled as non-normative in the doc itself
 

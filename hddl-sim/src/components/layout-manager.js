@@ -88,9 +88,9 @@ function saveCustomPresets(presets) {
  */
 function getActivePresetId() {
   try {
-    return localStorage.getItem(ACTIVE_PRESET_KEY) || 'focus'
+    return localStorage.getItem(ACTIVE_PRESET_KEY) || 'default'
   } catch {
-    return 'focus'
+    return 'default'
   }
 }
 

@@ -1184,7 +1184,7 @@ function createAuxiliaryBar() {
 
 // Update telemetry display with collapsible sections
 const telemetrySectionState = {
-  'Active Envelopes': true,
+  'Active Envelopes': false, // Collapsed by default
   'Live Metrics': true,
   'Decision Quality': true,
   'Stewardship': true,
@@ -1898,8 +1898,9 @@ export function createWorkspace() {
   if (typeof persisted.auxWidth === 'number') setCssVar('--auxiliarybar-width', `${persisted.auxWidth}px`)
   if (typeof persisted.panelHeight === 'number') setCssVar('--panel-height', `${persisted.panelHeight}px`)
 
-  // Default-collapsed per spec.
-  setAuxCollapsed(persisted.auxCollapsed !== undefined ? persisted.auxCollapsed : true)
+  // AI Narrative panel: always default to open for desktop users.
+  setAuxCollapsed(false)
+
   setSidebarCollapsed(persisted.sidebarCollapsed !== undefined ? persisted.sidebarCollapsed : false)
   // Always start with bottom panel collapsed (ignore persisted state).
   setBottomCollapsed(true)
@@ -1962,11 +1963,11 @@ export function createWorkspace() {
   // Route-aware auto-open: Evidence now lives in the bottom panel.
   window.addEventListener('hddl:navigate', (e) => {
     const path = e?.detail?.path || window.location.pathname || '/'
-    // Only auto-open if we are NOT in focus mode
-    const activeLayout = localStorage.getItem('hddl:layout:active') || 'focus'
-    const isFocusMode = activeLayout === 'focus'
+    // Only auto-open if we are in review layout
+    const activeLayout = localStorage.getItem('hddl:layout:active') || 'default'
+    const isReviewMode = activeLayout === 'review'
     
-    if (!isFocusMode && (path === '/' || path === '/decision-telemetry' || path === '/dsg-event')) {
+    if (isReviewMode && (path === '/decision-telemetry' || path === '/dsg-event')) {
       setBottomCollapsed(false)
       document.querySelector('.panel-tab[data-tab="evidence"]')?.click()
     }

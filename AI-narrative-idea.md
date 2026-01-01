@@ -234,7 +234,6 @@ After core implementation works:
 - [insurance-underwriting.scenario.json](hddl-sim/src/sim/scenarios/insurance-underwriting.scenario.json) - Primary test scenario
 - [scenario-analysis.mjs](hddl-sim/analysis/scenario-analysis.mjs) - Existing validation tool
 - [workspace.js](hddl-sim/src/components/workspace.js) - UI integration point
-- [Narrative examples](docs/narratives/) - Existing narrative docs for style reference
 
 ## Next Steps
 

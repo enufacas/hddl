@@ -8,10 +8,9 @@ export function renderAuthority(container) {
   
   container.innerHTML = `
     <div class="page-container" style="max-width: 900px; margin: 0 auto; padding: 20px;">
-      <h1>Authority Order: What is Normative?</h1>
+      <h1>What Counts (Normative vs Illustrative)</h1>
       <p class="subtitle" style="margin-bottom: 30px; color: var(--vscode-statusBar-foreground);">
-        Defines which HDDL documents are authoritative (binding) vs illustrative (guidance).
-        This helps implementers, spec contributors, and external teams understand where the source of truth lives.
+        A quick map of which docs are binding vs just guidance.
       </p>
 
       <section style="margin-bottom: 40px;">
@@ -91,10 +90,6 @@ export function renderAuthority(container) {
         </p>
 
         <div class="non-normative-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-          <div style="padding: 12px; background: var(--vscode-sideBar-background); border-left: 3px solid ${nonNormativeColor}; border-radius: 4px; opacity: 0.75;">
-            <strong>Narratives</strong><br>
-            <span style="color: var(--vscode-statusBar-foreground); font-size: 13px;">Teaching scenarios</span>
-          </div>
           <div style="padding: 12px; background: var(--vscode-sideBar-background); border-left: 3px solid ${nonNormativeColor}; border-radius: 4px; opacity: 0.75;">
             <strong>Operations</strong><br>
             <span style="color: var(--vscode-statusBar-foreground); font-size: 13px;">Ceremonies, cadence, playbooks</span>

@@ -4,102 +4,53 @@
 
 # HDDL - Human-Derived Decision Layer
 
-An exploratory framework for reasoning about who is allowed to decide what in automated and AI-assisted systems.
+HDDL (Human-Derived Decision Layer) is a thought experiment and specification concept for reasoning about how Human-in-the-Loop (HITL) scales with autonomous agent fleets.
 
-**🚀 [Try the Interactive Simulation](https://enufacas.github.io/hddl/)**
+The core idea is simple: systems can execute fast, but they should only *decide* inside clearly defined bounds ("decision envelopes")—and escalate to humans when they're outside those bounds.
 
-Explore decision authority hierarchies, steward capability tracking, and real-time decision telemetry through an interactive visualization platform.
+## Start Here: Interactive SIM
 
-## Quick Start
+Open the interactive simulation:
 
-### For Implementers
-Building HDDL-compatible tools or integrations? Start here:
+- https://enufacas.github.io/hddl/
 
-1. **[Implementers Guide](docs/spec/Implementers_Guide.md)** - How to build with HDDL
-2. **[Scenario Replay Wire Format](docs/spec/Scenario_Replay_Wire_Format.md)** - Normative interchange format
-3. **[Canonical Event Patterns](docs/spec/Canonical_Event_Patterns.md)** - Required feedback loop patterns
-4. **Schema:** `hddl-sim/schemas/hddl-scenario.schema.json`
-5. **Conformance:** `npm run conformance` in `hddl-sim/`
+Then click **"Explain this to me"** in the top bar to start the guided tour.
 
-### For Learning
-Understanding HDDL concepts? Start here:
+What you'll see:
 
-1. **[System Overview](docs/foundations/HDDL_System_Overview.md)** - Architecture and core concepts
-2. **[Foundational Principles](docs/foundations/Human_Derived_Decision_Layer_Foundational_Principles.md)** - Why HDDL exists
-3. **[Glossary](docs/Glossary.md)** - Canonical terminology
-4. **[Narratives](docs/narratives/)** - Real-world scenarios
+- **Decision envelopes** (the current operating boundaries)
+- **Boundary interactions** (where an agent hits a limit and escalates)
+- **Envelope revisions** (how humans update the boundaries over time)
+- **Decision memory** (embeddings and retrieval events that make past judgments usable)
+- **DTS / DSG views** (the query-first event log and stewardship sessions)
 
-### For Contributors
-Working on HDDL specifications or implementations:
+The SIM includes multiple scenarios across different industries (e.g., insurance, lending, healthcare, SaaS, aviation/defense, and more) so you can see how the same governance mechanics show up in different domains.
 
-1. **[Canon Registry](docs/Canon_Registry.md)** - Authoritative index of all canonical documents
-2. **[Authority Order](docs/spec/Authority_Order.md)** - What's normative vs illustrative
-3. **[Agent Learning Feedback Loop](docs/spec/Agent_Learning_Feedback_Loop.md)** - How agents learn from decisions
-4. **[Copilot Instructions](.github/copilot-instructions.md)** - Development patterns and canonical requirements
+It also has an **AI-Generated Narrative** panel that can generate a scenario-aligned story to help the concepts land. You can add optional extra instructions to steer the narrative (they're appended to the base prompt).
 
-## Key Concepts
+## Spec / Format
 
-### Closed Loop Requirements
-HDDL scenarios demonstrate **complete feedback loops** for agent learning:
+If you want the "real" definitions, start here:
 
-- **Every revision MUST have an embedding** - Policy changes are retrievable
-- **Every boundary interaction MUST have an embedding** - Escalation patterns teach boundaries
-- **Retrievals MUST be chronologically consistent** - Can't retrieve future knowledge
-- **Scenarios SHOULD include historical baseline** - Agents start with pre-existing knowledge
+- **Canon Registry:** [docs/Canon_Registry.md](docs/Canon_Registry.md)
+- **What's normative vs illustrative:** [docs/spec/Authority_Order.md](docs/spec/Authority_Order.md)
+- **Implementer entrypoint:** [docs/spec/Implementers_Guide.md](docs/spec/Implementers_Guide.md)
+- **Scenario replay wire format:** [docs/spec/Scenario_Replay_Wire_Format.md](docs/spec/Scenario_Replay_Wire_Format.md)
+- **Canonical event patterns (feedback cycles):** [docs/spec/Canonical_Event_Patterns.md](docs/spec/Canonical_Event_Patterns.md)
+- **Scenario JSON Schema:** [hddl-sim/schemas/hddl-scenario.schema.json](hddl-sim/schemas/hddl-scenario.schema.json)
 
-See [Canonical Event Patterns](docs/spec/Canonical_Event_Patterns.md) for the complete 6-event feedback cycle.
-
-### What Makes HDDL Different
-Traditional audit logs record "what happened." HDDL scenarios with closed loops demonstrate:
-
-- **Agent learning:** Retrieval events show agents "thinking with memory"
-- **Policy evolution:** Revision embeddings store WHY rules changed
-- **Feedback mechanism:** Complete cycles from boundary → decision → revision → embedding
-- **Chronological consistency:** Time-aware retrieval prevents paradoxes
-- **Historical baseline:** Agents start with realistic pre-existing knowledge
-
-## Validation
-
-Run conformance checks to validate scenarios:
+## Run Locally (Optional)
 
 ```bash
 cd hddl-sim
 npm install
-npm run conformance
+npm run dev
 ```
 
-This validates:
-- ✅ Canon Registry entries exist
-- ✅ Scenarios conform to JSON schema
-- ✅ Closed loop requirements (revisions/boundaries have embeddings)
-- ✅ Chronological consistency (retrievals reference existing embeddings)
+## Repo Map
 
-**📖 See [hddl-sim/VALIDATION.md](hddl-sim/VALIDATION.md) for comprehensive validation documentation.**
-
-## Project Structure
-
-```
-docs/
-  ├── spec/                          # Normative specifications
-  │   ├── Canonical_Event_Patterns.md
-  │   ├── Scenario_Replay_Wire_Format.md
-  │   ├── Agent_Learning_Feedback_Loop.md
-  │   ├── Implementers_Guide.md
-  │   └── Authority_Order.md
-  ├── foundations/                   # Core architecture
-  ├── narratives/                    # Teaching scenarios
-  ├── Canon_Registry.md              # Authoritative document index
-  └── Glossary.md                    # Canonical terminology
-hddl-sim/
-  ├── schemas/                       # JSON schemas
-  │   └── hddl-scenario.schema.json
-  ├── scripts/                       # Conformance validation
-  │   ├── validate-closed-loops.mjs
-  │   └── conformance.mjs
-  └── src/sim/scenarios/             # Example scenarios
-```
-
-## Deployment
-
-This project is deployed to GitHub Pages as a Single Page Application (SPA). To enable deep-linking and direct navigation to any route (e.g., `/specification`, `/authority`), the build process generates a `404.html` file that mirrors `index.html`. This allows GitHub Pages to serve the SPA shell for any unmatched path, letting the client-side router handle the routing.
+- **Interactive simulation:** [hddl-sim/](hddl-sim/)
+- **Scenario library:** [hddl-sim/src/sim/scenarios/](hddl-sim/src/sim/scenarios/) and [hddl-sim/src/sim/scenarios/README.md](hddl-sim/src/sim/scenarios/README.md)
+- **Tests (unit + Playwright):** [hddl-sim/tests/README.md](hddl-sim/tests/README.md)
+- **Analytics tooling:** [hddl-sim/analysis/](hddl-sim/analysis/) (scenario analysis, cognitive load metrics, performance metrics)
 

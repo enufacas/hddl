@@ -13,7 +13,7 @@ The HDDL portable spec gives you:
 - ✅ **Scenario Replay Wire Format**: Deterministic event logs for HDDL scenarios
 - ✅ **Machine-readable schemas**: JSON Schema for validation
 - ✅ **Conformance harness**: Headless validation you can run without the SIM
-- ✅ **Authority order**: Know what's normative vs illustrative
+- ✅ **What counts**: Know what's binding vs guidance
 - ✅ **Drift + gap analysis**: Know what's stable vs experimental
 
 You can build your own UI, exporter, analyzer, or integration **without reading the SIM code**.
@@ -32,7 +32,7 @@ cd hddl
 ### 2. Read the normative docs
 
 **Start here:**
-- [Authority Order](docs/spec/Authority_Order.md): What's binding vs guidance
+- [What Counts](docs/spec/Authority_Order.md): What's binding vs guidance
 - [Scenario Replay Wire Format](docs/spec/Scenario_Replay_Wire_Format.md): Interchange format
 - [Drift + Gap Analysis](docs/spec/Drift_Gap_Analysis.md): What's stable vs SIM-specific
 
@@ -529,7 +529,7 @@ If you want to build an interactive UI (action-driven, not replay-only):
 
 Want to improve the spec or add conformance fixtures?
 
-1. Read [Authority Order](docs/spec/Authority_Order.md) to understand what's normative
+1. Read [What Counts](docs/spec/Authority_Order.md) to understand what's binding vs guidance
 2. Propose changes via ADR (see `.github/adr/template.md`)
 3. Run `npm run conformance` to validate
 4. Submit a PR with ADR reference

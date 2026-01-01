@@ -35,14 +35,6 @@ Any document not listed here is non-canonical.
 - operations/Ceremonies_and_Operating_Cadence.md
 - appendices/Envelope_Efficiency_Metrics.md
 
-## Narratives
-- narratives/Narrative_Tuesday_in_the_Near_Future.md
-- narratives/Narrative_Thursday_Two_Years_Later.md
-- narratives/Narrative_Year_Five_The_Exit.md
-- narratives/Narrative_Year_Eight_The_Data_Steward_Kevin.md
-- narratives/Narrative_The_Glen_Sales_Stewardship.md
-- narratives/Narrative_Fractional_HR_and_Human_Resources_Steward.md
-
 ## Appendices
 - appendices/HDDL_vs_AgentOps_vs_AI_Gateway.md
 - appendices/HDDL_Simulation_Concept.md

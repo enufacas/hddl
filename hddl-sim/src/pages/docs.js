@@ -238,10 +238,10 @@ export function renderDocs(container) {
               </div>
               <span class="codicon codicon-chevron-down doc-chevron"></span>
             </a>
-            <a href="/docs/spec/Authority_Order.md" class="doc-link" data-markdown data-title="Authority Order">
+            <a href="/docs/spec/Authority_Order.md" class="doc-link" data-markdown data-title="What Counts">
               <div class="doc-content">
-                <div class="doc-title">Authority Order Specification</div>
-                <div class="doc-desc">Decision authority hierarchy and delegation</div>
+                <div class="doc-title">What Counts (Normative vs Illustrative)</div>
+                <div class="doc-desc">A quick map of what's binding vs guidance</div>
               </div>
               <span class="codicon codicon-chevron-down doc-chevron"></span>
             </a>
@@ -249,36 +249,6 @@ export function renderDocs(container) {
               <div class="doc-content">
                 <div class="doc-title">Interactive Specification Explorer</div>
                 <div class="doc-desc">Explore HDDL scenarios and decision telemetry</div>
-              </div>
-              <span class="codicon codicon-chevron-down doc-chevron"></span>
-            </a>
-          </div>
-        </div>
-
-        <div class="docs-section">
-          <div class="section-header">
-            <h2>Narratives</h2>
-            <p class="section-desc">Story-driven walkthroughs of HDDL in action</p>
-          </div>
-          <div class="docs-links">
-            <a href="/docs/narratives/Narrative_Tuesday_in_the_Near_Future.md" class="doc-link" data-markdown data-title="Tuesday in the Near Future">
-              <div class="doc-content">
-                <div class="doc-title">Tuesday in the Near Future</div>
-                <div class="doc-desc">A day in the life with HDDL-powered systems</div>
-              </div>
-              <span class="codicon codicon-chevron-down doc-chevron"></span>
-            </a>
-            <a href="/docs/narratives/Narrative_The_Glen_Judgment_Drift.md" class="doc-link" data-markdown data-title="The Glen: Judgment Drift">
-              <div class="doc-content">
-                <div class="doc-title">The Glen: Judgment Drift</div>
-                <div class="doc-desc">Detecting and correcting AI drift in property management</div>
-              </div>
-              <span class="codicon codicon-chevron-down doc-chevron"></span>
-            </a>
-            <a href="/docs/narratives/Narrative_The_Glen_Sales_Stewardship.md" class="doc-link" data-markdown data-title="The Glen: Sales Stewardship">
-              <div class="doc-content">
-                <div class="doc-title">The Glen: Sales Stewardship</div>
-                <div class="doc-desc">Cross-domain decision making in sales operations</div>
               </div>
               <span class="codicon codicon-chevron-down doc-chevron"></span>
             </a>

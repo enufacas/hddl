@@ -14,9 +14,9 @@ export function renderDecisionTelemetry(container) {
     <div class="page-container" style="max-width: 100%; padding: 16px 24px;">
       <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
         <div style="display: flex; align-items: center; gap: 12px;">
-          <span class="codicon codicon-database" style="font-size: 28px;"></span>
+          <span class="codicon codicon-database" style="font-size: 20px;"></span>
           <div>
-            <h1 style="margin: 0;">Decision Telemetry Stream</h1>
+            <h1 style="margin: 0; font-size: 16px;">Decision Telemetry Stream</h1>
             <p style="margin: 0; color: var(--vscode-statusBar-foreground);">Query-first DTS event log</p>
           </div>
           <div id="dts-tour-button-container" style="display: flex; align-items: center;"></div>

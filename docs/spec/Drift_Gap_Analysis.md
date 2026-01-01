@@ -154,7 +154,7 @@
 
 ## Next Actions (to complete plan)
 
-1. **Step 1 (authority order doc):** Write `docs/spec/Authority_Order.md` defining canon vs non-normative hierarchy
+1. **Step 1 (what counts doc):** Write `docs/spec/Authority_Order.md` defining canon vs non-normative hierarchy
 2. **Step 5 (ADR process):** Create `.github/adr/template.md` + decision log for SIM→canon promotion workflow
 3. **Step 3 (interaction fixtures):** Create `hddl-sim/conformance/fixtures/` with must-pass/must-fail interaction sequences
 4. **Step 7 (deprecation warnings):** Add console warnings in normalizer for legacy keys
