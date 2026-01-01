@@ -400,7 +400,12 @@ const generateAINarrative = async (containerEl) => {
   `.trim()
 
   try {
-    const apiUrl = 'http://localhost:8080/generate'
+    // Use Cloud Run in production (GitHub Pages), localhost in development
+    const isProduction = window.location.hostname === 'enufacas.github.io'
+    const apiUrl = isProduction 
+      ? 'https://narrative-api-alm36fcxzq-uc.a.run.app/generate'
+      : 'http://localhost:8080/generate'
+    
     const userAddendum = (addendumEl?.value || aiNarrativeUserAddendum || '').trim()
     const response = await fetch(apiUrl, {
       method: 'POST',
@@ -652,11 +657,16 @@ const generateAINarrative = async (containerEl) => {
     generateBtn.disabled = false
   } catch (err) {
     console.error('Failed to generate AI narrative:', err)
+    const isProduction = window.location.hostname === 'enufacas.github.io'
+    const helpText = isProduction
+      ? 'The narrative generation service may be temporarily unavailable. Please try again.'
+      : 'Make sure the API server is running at localhost:8080 (npm run api:dev)'
+    
     contentEl.innerHTML = `
       <div style="color: var(--status-error); padding: 12px; background: color-mix(in srgb, var(--status-error) 10%, transparent); border-radius: 4px; border: 1px solid var(--status-error);">
         <strong>Generation Failed</strong><br>
         ${err.message}<br><br>
-        <small>Make sure the API server is running at localhost:8080</small>
+        <small>${helpText}</small>
       </div>
     `
     generateBtn.textContent = 'Try Again'

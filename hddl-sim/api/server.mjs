@@ -13,6 +13,7 @@
 
 import express from 'express';
 import cors from 'cors';
+import rateLimit from 'express-rate-limit';
 import { readFile } from 'fs/promises';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -32,6 +33,54 @@ app.use(cors({
   ]
 }));
 app.use(express.json());
+
+// Origin validation: Only allow requests from GitHub Pages
+// Prevents direct API access via curl/Postman/scripts
+const validateOrigin = (req, res, next) => {
+  const origin = req.headers.origin || req.headers.referer;
+  
+  // Allow localhost for local testing
+  if (process.env.NODE_ENV === 'development' && origin?.includes('localhost')) {
+    return next();
+  }
+  
+  if (!origin) {
+    console.warn('Blocked request: No origin header');
+    return res.status(403).json({ error: 'Access denied: No origin header' });
+  }
+  
+  try {
+    const originUrl = new URL(origin);
+    const isAllowed = originUrl.href.startsWith('https://enufacas.github.io');
+    
+    if (!isAllowed) {
+      console.warn(`Blocked request from: ${originUrl.origin}`);
+      return res.status(403).json({ 
+        error: 'Access denied: Invalid origin'
+      });
+    }
+    
+    next();
+  } catch (err) {
+    console.warn('Blocked request: Invalid origin format');
+    return res.status(403).json({ error: 'Access denied: Invalid origin' });
+  }
+};
+
+// Rate limiting: 20 requests per hour per IP
+// Generous for demo use, but prevents script abuse
+const limiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 20, // 20 requests per hour per instance
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { 
+    error: 'Rate limit reached',
+    limit: '20 narratives per hour',
+    note: 'This is a demo API for HDDL narrative generation.',
+    retryAfter: 3600
+  }
+});
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -55,8 +104,8 @@ app.get('/scenarios', async (req, res) => {
   }
 });
 
-// Generate narrative endpoint
-app.post('/generate', async (req, res) => {
+// Generate narrative endpoint (with origin validation and rate limiting)
+app.post('/generate', validateOrigin, limiter, async (req, res) => {
   const startTime = Date.now();
   
   try {
