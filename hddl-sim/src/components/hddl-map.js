@@ -247,6 +247,11 @@ export function createHDDLMap(container, options = {}) {
   
   // Determine detail level based on container width
   let detailLevel = getDetailLevel(width)
+
+  // GitHub Pages deploys under a subpath; use BASE_URL so assets resolve
+  // correctly even on nested routes.
+  const darkBgUrl = `${import.meta.env.BASE_URL}dark-bg.png`
+  const planetUrl = `${import.meta.env.BASE_URL}planet.png`
   
   // Dynamic embedding height based on detail level
   const embeddingHeight = detailLevel === DETAIL_LEVELS.FULL ? 200 
@@ -264,7 +269,7 @@ export function createHDDLMap(container, options = {}) {
     .attr('width', '100%')
     .attr('height', height + 80)
     .attr('viewBox', [0, -80, width, height + 80])
-    .style('background', 'linear-gradient(to bottom, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0.5) 20%, rgba(0, 0, 0, 0.65) 80%, rgba(0, 0, 0, 0.85) 100%), url(./dark-bg.png) center 55%/cover no-repeat')
+    .style('background', `linear-gradient(to bottom, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0.5) 20%, rgba(0, 0, 0, 0.65) 80%, rgba(0, 0, 0, 0.85) 100%), url(${darkBgUrl}) center 55%/cover no-repeat`)
     .style('border', '1px solid var(--vscode-widget-border)')
     .style('border-radius', '6px')
     .style('overflow', 'visible')
@@ -370,7 +375,7 @@ export function createHDDLMap(container, options = {}) {
   
   // Add the Earth image, flipped vertically
   planetaryLayer.append('image')
-    .attr('href', './planet.png')
+    .attr('href', planetUrl)
     .attr('x', earthImageX)
     .attr('y', earthImageY)
     .attr('width', earthImageWidth)

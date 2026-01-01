@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host",
-    "build": "vite build && cp dist/index.html dist/404.html",
+    "build": "vite build && node --input-type=module -e \"import { copyFileSync } from 'node:fs'; copyFileSync('dist/index.html','dist/404.html')\"",
     "preview": "vite preview",
+    "preview:pages": "node scripts/preview-pages.mjs",
     "pretest": "npm run conformance",
     "test": "playwright test",
     "test:unit": "vitest",
