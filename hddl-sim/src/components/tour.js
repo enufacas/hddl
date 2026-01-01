@@ -59,6 +59,9 @@ export async function startTour() {
   const introJs = await loadIntroJs()
   const intro = introJs()
   
+  // Track if we need to restore aux panel state after tour
+  let wasAuxCollapsed = document.body.classList.contains('aux-hidden')
+  
   intro.setOptions({
     steps: [
       {
@@ -143,7 +146,7 @@ export async function startTour() {
             <p>Agents include analyzers, optimizers, monitors – specialized AI for different tasks.</p>
           </div>
         `,
-        position: 'top'
+        position: 'bottom'
       },
       {
         element: 'svg g.steward-icon',
@@ -181,6 +184,24 @@ export async function startTour() {
         position: 'top'
       },
       {
+        element: '.auxiliarybar',
+        title: 'AI-Generated Narrative',
+        intro: `
+          <div style="font-size: 14px; line-height: 1.6;">
+            <p>The <strong>AI Narrative panel</strong> generates contextual explanations of what's happening in the simulation.</p>
+            <p>Features:</p>
+            <ul style="margin: 8px 0; padding-left: 20px;">
+              <li><strong>Generate Narrative</strong> – Creates a natural language summary of the current scenario state</li>
+              <li><strong>Sync with Timeline</strong> – Automatically updates as you scrub through time</li>
+              <li><strong>Additional Instructions</strong> – Guide the AI to focus on specific aspects</li>
+            </ul>
+            <p style="margin-top: 8px;">This helps translate complex technical patterns into understandable stories about how the system is operating.</p>
+          </div>
+        `,
+        position: 'left',
+        scrollTo: 'tooltip'
+      },
+      {
         title: "You're Ready!",
         intro: `
           <div style="font-size: 14px; line-height: 1.6;">
@@ -193,6 +214,7 @@ export async function startTour() {
               <li style="margin-bottom: 6px;"><strong>Stewards</strong> – Humans who maintain envelopes</li>
               <li style="margin-bottom: 6px;"><strong>Agent Fleets</strong> – AI operating within bounds</li>
               <li style="margin-bottom: 6px;"><strong>Embeddings</strong> – Learning from past decisions</li>
+              <li style="margin-bottom: 6px;"><strong>AI Narrative</strong> – Natural language explanations</li>
             </ul>
             <p style="margin-top: 12px;">Explore the simulation by switching scenarios, filtering by steward, clicking envelopes, and scrubbing the timeline!</p>
           </div>
@@ -206,6 +228,25 @@ export async function startTour() {
     nextLabel: 'Next →',
     prevLabel: '← Back',
     doneLabel: 'Got it!'
+  })
+  
+  // Before changing to each step, ensure auxiliary panel is open when needed
+  intro.onbeforechange(function(targetElement) {
+    const stepIndex = this._currentStep
+    // Step 8 is the AI Narrative panel step (0-indexed, so it's the 9th step)
+    if (stepIndex === 8) {
+      // Open auxiliary panel if it's closed
+      if (document.body.classList.contains('aux-hidden')) {
+        document.body.classList.remove('aux-hidden')
+      }
+    }
+  })
+  
+  // Restore original aux panel state when tour ends
+  intro.onexit(function() {
+    if (wasAuxCollapsed) {
+      document.body.classList.add('aux-hidden')
+    }
   })
   
   intro.start()

@@ -698,8 +698,23 @@ versionText.textContent = 'Simulation v1.0'
 versionItem.appendChild(versionIcon)
 versionItem.appendChild(versionText)
 
+// GitHub link
+const githubLink = document.createElement('a')
+githubLink.href = 'https://github.com/enufacas/hddl'
+githubLink.target = '_blank'
+githubLink.rel = 'noopener noreferrer'
+githubLink.className = 'statusbar-item statusbar-link'
+githubLink.style.cssText = 'cursor: pointer; text-decoration: none; color: inherit;'
+const githubIcon = document.createElement('span')
+githubIcon.className = 'codicon codicon-github'
+const githubText = document.createElement('span')
+githubText.textContent = 'GitHub'
+githubLink.appendChild(githubIcon)
+githubLink.appendChild(githubText)
+
 statusLeft.appendChild(connStatus)
 statusLeft.appendChild(versionItem)
+statusLeft.appendChild(githubLink)
 
 const statusRight = document.createElement('div')
 statusRight.className = 'items-container status-right'
