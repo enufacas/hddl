@@ -1892,7 +1892,10 @@ export function createWorkspace() {
   // Resize handle between editor and auxiliary bar
   const sash2 = createSash('vertical', 'auxiliary-resize');
   
-  const auxiliarybar = createAuxiliaryBar();
+  // Create placeholder for auxiliary bar (will be populated lazily)
+  const auxiliarybar = document.createElement('div')
+  auxiliarybar.className = 'part auxiliarybar'
+  auxiliarybar.style.display = 'none' // Hidden until populated
 
   // Resize handle between main area and bottom panel
   const sash3 = createSash('horizontal', 'panel-resize');
@@ -1972,6 +1975,16 @@ export function createWorkspace() {
       }
     }
   });
+  
+  // Lazy-load auxiliary bar after initial render (non-blocking)
+  // This defers telemetry panel creation to improve initial load time
+  setTimeout(() => {
+    const auxBar = createAuxiliaryBar()
+    const placeholder = document.querySelector('.part.auxiliarybar')
+    if (placeholder && auxBar) {
+      placeholder.replaceWith(auxBar)
+    }
+  }, 100) // Small delay after first paint
   
   return workbench;
 }

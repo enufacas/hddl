@@ -1,4 +1,4 @@
-import { loadScenario, getCurrentScenarioId } from './scenario-loader'
+import { loadScenario, loadScenarioAsync, getCurrentScenarioId, SCENARIOS } from './scenario-loader'
 import { normalizeScenario } from './scenario-schema'
 
 const listeners = {
@@ -7,10 +7,26 @@ const listeners = {
   filter: new Set(),
 }
 
+// Initialize with bundled scenario synchronously
+// If saved scenario is not bundled, fall back to default
+const initialScenarioId = getCurrentScenarioId()
+const scenarioInfo = SCENARIOS[initialScenarioId]
+const fallbackId = scenarioInfo?.bundled ? initialScenarioId : 'default'
+const initialScenario = loadScenario(fallbackId)
+
 const state = {
-  scenario: normalizeScenario(loadScenario(getCurrentScenarioId())).scenario,
+  scenario: normalizeScenario(initialScenario).scenario,
   timeHour: 25,
   stewardFilter: 'all',
+}
+
+// If we fell back to default, load the desired scenario in the background
+if (fallbackId !== initialScenarioId) {
+  loadScenarioAsync(initialScenarioId).then(scenarioData => {
+    setScenario(normalizeScenario(scenarioData).scenario)
+  }).catch(err => {
+    console.error(`Failed to load saved scenario ${initialScenarioId}:`, err)
+  })
 }
 
 // Scrubbing optimization state

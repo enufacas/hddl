@@ -1,4 +1,4 @@
-import { getScenarioList, getCurrentScenarioId, setCurrentScenarioId, loadScenario } from '../sim/scenario-loader'
+import { getScenarioList, getCurrentScenarioId, setCurrentScenarioId, loadScenarioAsync } from '../sim/scenario-loader'
 import { setScenario, setTimeHour } from '../sim/store'
 
 export function createScenarioSelector() {
@@ -130,37 +130,54 @@ export function createScenarioSelector() {
     select.appendChild(option)
   })
   
-  select.addEventListener('change', (e) => {
+  select.addEventListener('change', async (e) => {
     const newScenarioId = e.target.value
     setCurrentScenarioId(newScenarioId)
-    const scenarioData = loadScenario(newScenarioId)
-    setScenario(scenarioData)
-    setTimeHour(0) // Reset timeline to start of new scenario
     
-    // Show notification
-    const notification = document.createElement('div')
-    notification.style.cssText = `
-      position: fixed;
-      top: 100px;
-      right: 20px;
-      padding: 12px 20px;
-      background: var(--vscode-notifications-background);
-      border: 1px solid var(--vscode-notifications-border);
-      border-radius: 6px;
-      color: var(--vscode-notifications-foreground);
-      box-shadow: 0 2px 12px rgba(0,0,0,0.3);
-      z-index: 10000;
-      font-size: 12px;
-      animation: slideInRight 0.3s ease-out;
-    `
-    const scenarioMeta = scenarios.find(s => s.id === newScenarioId)
-    notification.textContent = `Loaded: ${scenarioMeta.title}`
-    document.body.appendChild(notification)
-    setTimeout(() => {
-      notification.style.opacity = '0'
-      notification.style.transition = 'opacity 0.3s'
-      setTimeout(() => notification.remove(), 300)
-    }, 2000)
+    // Show loading state
+    select.disabled = true
+    const originalText = select.options[select.selectedIndex].textContent
+    select.options[select.selectedIndex].textContent = '⏳ Loading...'
+    
+    try {
+      const scenarioData = await loadScenarioAsync(newScenarioId)
+      setScenario(scenarioData)
+      setTimeHour(0) // Reset timeline to start of new scenario
+      
+      // Restore select
+      select.options[select.selectedIndex].textContent = originalText
+      select.disabled = false
+      
+      // Show notification
+      const notification = document.createElement('div')
+      notification.style.cssText = `
+        position: fixed;
+        top: 100px;
+        right: 20px;
+        padding: 12px 20px;
+        background: var(--vscode-notifications-background);
+        border: 1px solid var(--vscode-notifications-border);
+        border-radius: 6px;
+        color: var(--vscode-notifications-foreground);
+        box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+        z-index: 10000;
+        font-size: 12px;
+        animation: slideInRight 0.3s ease-out;
+      `
+      const scenarioMeta = scenarios.find(s => s.id === newScenarioId)
+      notification.textContent = `Loaded: ${scenarioMeta.title}`
+      document.body.appendChild(notification)
+      setTimeout(() => {
+        notification.style.opacity = '0'
+        notification.style.transition = 'opacity 0.3s'
+        setTimeout(() => notification.remove(), 300)
+      }, 2000)
+    } catch (err) {
+      console.error('Failed to load scenario:', err)
+      select.options[select.selectedIndex].textContent = originalText
+      select.disabled = false
+      alert(`Failed to load scenario: ${err.message}`)
+    }
   })
   
   container.appendChild(label)

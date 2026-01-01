@@ -166,17 +166,18 @@ if (!isTestEnv) {
   const params = new URLSearchParams(window.location.search)
   const scenarioParam = params.get('scenario')
   if (scenarioParam) {
-    // Load from scenario catalog
+    // Load from scenario catalog (async)
     Promise.all([
       import('./sim/scenario-loader.js'),
       import('./sim/store.js')
-    ]).then(([loaderModule, storeModule]) => {
-      const scenario = loaderModule.SCENARIOS[scenarioParam]
-      if (scenario) {
-        storeModule.setScenario(scenario.data)
+    ]).then(async ([loaderModule, storeModule]) => {
+      try {
+        const scenarioData = await loaderModule.loadScenarioAsync(scenarioParam)
+        storeModule.setScenario(scenarioData)
+        const scenario = loaderModule.SCENARIOS[scenarioParam]
         console.log(`✓ Loaded test scenario: ${scenarioParam} (${scenario.title})`)
-      } else {
-        console.error(`Scenario '${scenarioParam}' not found in catalog`)
+      } catch (err) {
+        console.error(`Failed to load scenario '${scenarioParam}':`, err)
       }
     }).catch(err => console.error(`Failed to load scenario ${scenarioParam}:`, err))
   }
@@ -667,6 +668,15 @@ onTimeChange((t) => {
 
 // Create workspace layout
 const workbench = createWorkspace()
+
+// Preload all scenarios in background after initial render (non-blocking)
+// This ensures zero delay when users switch scenarios
+if (!isTestEnv) {
+  setTimeout(async () => {
+    const { preloadScenarios } = await import('./sim/scenario-loader.js')
+    await preloadScenarios()
+  }, 1000) // Wait 1s after initial load
+}
 
 // Create statusbar with proper status indicators
 const statusbar = document.createElement('div')

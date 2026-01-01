@@ -1,0 +1,56 @@
+{
+  "date": "2025-12-31",
+  "scenario": "test-minimal",
+  "measurements": {
+    "loadTime": {
+      "value": 1009,
+      "unit": "ms",
+      "target": 2000,
+      "status": "pass"
+    },
+    "firstContentfulPaint": {
+      "value": 416,
+      "unit": "ms",
+      "target": 1000,
+      "status": "pass"
+    },
+    "averageFPS": {
+      "value": 60.4,
+      "unit": "fps",
+      "target": 30,
+      "status": "pass"
+    },
+    "memoryUsage": {
+      "value": 16.3,
+      "unit": "MB",
+      "status": "light"
+    },
+    "svgNodeCount": {
+      "value": 161,
+      "target": 1000,
+      "status": "simple"
+    }
+  },
+  "optimizations": [
+    "Lazy-load scenarios (9 scenarios, ~340 KB)",
+    "Preload scenarios in background (zero switching delay)",
+    "Defer auxiliary bar/telemetry panel (100ms delay)",
+    "Scrubbing throttle (16ms/60fps)",
+    "Embedding skip during scrub and catch-up",
+    "Lazy-load intro.js (~63 KB)",
+    "localStorage fallback for non-bundled scenarios"
+  ],
+  "bundleSize": {
+    "main": {
+      "value": 436,
+      "unit": "KB",
+      "before": 695
+    },
+    "reduction": {
+      "value": 259,
+      "unit": "KB",
+      "percentage": 37
+    }
+  },
+  "notes": "Consistent performance across multiple test runs. Load time stable at ~1000ms, FCP at ~400ms, FPS at 60+. All metrics well within target ranges."
+}
