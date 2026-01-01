@@ -270,6 +270,19 @@
       "actorName": "Julia Kim"
     },
     {
+      "eventId": "signal:2_0:ENV-AV-001:1a",
+      "hour": 2.0,
+      "type": "signal",
+      "envelopeId": "ENV-AV-001",
+      "severity": "warning",
+      "label": "Weather advisory: Heavy rain detected",
+      "detail": "Regional weather service: Precipitation rate 1.2 inches/hour. Road visibility reduced to 50 meters. Hydroplaning risk elevated on highways.",
+      "actorRole": "Safety Steward",
+      "actorName": "WeatherIntegration",
+      "signalKey": "weather_hazard",
+      "value": 1.2
+    },
+    {
       "eventId": "decision:3_2:ENV-AV-001:2",
       "hour": 3.2,
       "type": "decision",
@@ -320,6 +333,32 @@
       "detail": "Passenger comfort and accessibility envelope activated for enhanced UX.",
       "actorRole": "UX Steward",
       "actorName": "Aisha Patel"
+    },
+    {
+      "eventId": "signal:10_5:ENV-AV-002:4a",
+      "hour": 10.5,
+      "type": "signal",
+      "envelopeId": "ENV-AV-002",
+      "severity": "warning",
+      "label": "Traffic congestion: Major accident I-90",
+      "detail": "Multi-vehicle collision on I-90 eastbound at mile marker 23. All lanes blocked. Estimated clearance: 90 minutes. Rerouting 47 active vehicles.",
+      "actorRole": "Operations Steward",
+      "actorName": "TrafficMonitoring",
+      "signalKey": "traffic_disruption",
+      "value": 1.5
+    },
+    {
+      "eventId": "signal:20_2:ENV-AV-004:4b",
+      "hour": 20.2,
+      "type": "signal",
+      "envelopeId": "ENV-AV-004",
+      "severity": "info",
+      "label": "Fleet health: Tire wear patterns detected",
+      "detail": "Predictive maintenance system flagged 12 vehicles with accelerated front-left tire wear. Scheduled rotation and alignment within 200 miles.",
+      "actorRole": "Engineering Steward",
+      "actorName": "PredictiveMaintenance",
+      "signalKey": "maintenance_forecast",
+      "value": 12.0
     },
     {
       "eventId": "retrieval:15_6:ENV-AV-001:4a",
@@ -510,9 +549,35 @@
       "embeddingId": "EMB-AV-002b",
       "embeddingType": "decision",
       "vectorDimensions": 768,
-      "sourceEventId": "decision:15_9:ENV-AV-001:6",
-      "semanticContext": "remote operator guidance for temporary construction detour",
-      "semanticVector": [0.80, 0.75]
+      "sourceEventId": "decision:16_2:ENV-AV-001:6",
+      "semanticContext": "remote operator approved cautious proceed through construction with reduced speed",
+      "semanticVector": [0.75, 0.82]
+    },
+    {
+      "eventId": "signal:40_0:ENV-AV-001:15c",
+      "hour": 40.0,
+      "type": "signal",
+      "envelopeId": "ENV-AV-001",
+      "severity": "warning",
+      "label": "Regulatory update: School zone timing changes",
+      "detail": "City ordinance updated: School zone active hours extended to 7 AM-5 PM during academic year (previously 8 AM-4 PM). Update route planning logic.",
+      "actorRole": "Safety Steward",
+      "actorName": "RegulatoryCompliance",
+      "signalKey": "regulatory_update",
+      "value": 1.0
+    },
+    {
+      "eventId": "signal:55_5:ENV-AV-002:15d",
+      "hour": 55.5,
+      "type": "signal",
+      "envelopeId": "ENV-AV-002",
+      "severity": "info",
+      "label": "Road closure: Downtown construction project",
+      "detail": "Downtown Main Street closed for utility work starting next week (duration: 6 weeks). Update routing database and customer notifications.",
+      "actorRole": "Operations Steward",
+      "actorName": "InfrastructureMonitoring",
+      "signalKey": "road_closure",
+      "value": 42.0
     },
     {
       "eventId": "revision:20:ENV-AV-001:15c",

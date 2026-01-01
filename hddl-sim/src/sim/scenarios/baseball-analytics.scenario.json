@@ -560,6 +560,58 @@
       "reason": "Mid-season data shows exit velo correlates better with power output than previous weighting."
     },
     {
+      "eventId": "signal:12_0:ENV-BB-001:14a",
+      "hour": 12.0,
+      "type": "signal",
+      "envelopeId": "ENV-BB-001",
+      "severity": "info",
+      "label": "Player performance: Outfielder exit velocity surge",
+      "detail": "Statcast data shows RF #24 exit velocity up 4.2 mph over last 10 games (avg 94.8 mph). Barrel rate improved to 12.5%. Hard-hit rate: 51%.",
+      "actorRole": "Performance Steward",
+      "actorName": "StatcastMonitor",
+      "signalKey": "exit_velocity_trend",
+      "value": 94.8
+    },
+    {
+      "eventId": "signal:36_0:ENV-BB-003:14b",
+      "hour": 36.0,
+      "type": "signal",
+      "envelopeId": "ENV-BB-003",
+      "severity": "warning",
+      "label": "Injury risk: Pitcher workload elevated",
+      "detail": "Biomechanics system flagged SP #45: 320 pitches in last 14 days (target: <280). Elbow stress metrics at 87% of historical injury threshold. Rest day recommended.",
+      "actorRole": "Health Steward",
+      "actorName": "BiomechanicsMonitor",
+      "signalKey": "pitcher_workload_risk",
+      "value": 320.0
+    },
+    {
+      "eventId": "signal:60_0:ENV-BB-002:14c",
+      "hour": 60.0,
+      "type": "signal",
+      "envelopeId": "ENV-BB-002",
+      "severity": "info",
+      "label": "Opponent scouting: Pitcher tendencies identified",
+      "detail": "Video analysis of opponent ace: Fastball usage 58% with 2-strike counts, slider 89% vs. lefties in late innings. Weak spot: changeup vs. RHH (47% chase rate).",
+      "actorRole": "Strategy Steward",
+      "actorName": "OpponentAnalysis",
+      "signalKey": "opponent_tendencies",
+      "value": 0.89
+    },
+    {
+      "eventId": "signal:84_0:ENV-BB-002:14d",
+      "hour": 84.0,
+      "type": "signal",
+      "envelopeId": "ENV-BB-002",
+      "severity": "warning",
+      "label": "Weather forecast: Rain delay likely tonight",
+      "detail": "National Weather Service: 80% chance of thunderstorms 7-9 PM. Heavy rain expected, winds 15-20 mph. Game start delay or postponement likely.",
+      "actorRole": "Strategy Steward",
+      "actorName": "WeatherIntegration",
+      "signalKey": "weather_forecast",
+      "value": 0.80
+    },
+    {
       "eventId": "signal:96:ENV-BB-003:14",
       "hour": 96,
       "type": "signal",
@@ -571,6 +623,32 @@
       "actorName": "WorkloadTracker",
       "signalKey": "injury_prevention_success",
       "value": 0.23
+    },
+    {
+      "eventId": "signal:132_0:ENV-BB-004:14e",
+      "hour": 132.0,
+      "type": "signal",
+      "envelopeId": "ENV-BB-004",
+      "severity": "info",
+      "label": "Roster move: Triple-A call-up imminent",
+      "detail": "Player development reports prospect SS #7 hitting .340 with 12 HR in Triple-A. 40-man roster spot available. MLB-ready defensive metrics. Trade deadline consideration.",
+      "actorRole": "Roster Steward",
+      "actorName": "ProspectTracking",
+      "signalKey": "roster_callup",
+      "value": 0.340
+    },
+    {
+      "eventId": "signal:156_0:ENV-BB-001:14f",
+      "hour": 156.0,
+      "type": "signal",
+      "envelopeId": "ENV-BB-001",
+      "severity": "info",
+      "label": "Equipment data: Bat sensor analytics update",
+      "detail": "Blast Motion sensors show 3B #10 swing plane improving: attack angle +2.5° (optimal for power). Bat speed: 73.2 mph. Time to contact: 0.142s (elite range).",
+      "actorRole": "Performance Steward",
+      "actorName": "EquipmentAnalytics",
+      "signalKey": "bat_sensor_metrics",
+      "value": 73.2
     },
     {
       "eventId": "decision:108_5:ENV-BB-001:15",

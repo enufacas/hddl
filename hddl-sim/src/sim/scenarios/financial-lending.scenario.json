@@ -319,6 +319,19 @@
       "semanticVector": [0.5, 0.5]
     },
     {
+      "eventId": "signal:1_5:ENV-FIN-001:0a",
+      "hour": 1.5,
+      "type": "signal",
+      "envelopeId": "ENV-FIN-001",
+      "severity": "info",
+      "label": "Credit market conditions stable",
+      "detail": "Prime rate unchanged at 7.25%. Average FICO scores trending up slightly (+3 pts). Delinquency rates holding steady at 2.4%. Economic outlook positive.",
+      "actorRole": "Lending Steward",
+      "actorName": "CreditScorer",
+      "signalKey": "credit_market_baseline",
+      "value": 0.76
+    },
+    {
       "eventId": "decision:2_5:ENV-FIN-001:3",
       "hour": 2.5,
       "type": "decision",
@@ -504,6 +517,32 @@
       "sessionId": "DSG-LEND-001-Q1"
     },
     {
+      "eventId": "signal:28_5:ENV-FIN-003:9a",
+      "hour": 28.5,
+      "type": "signal",
+      "envelopeId": "ENV-FIN-003",
+      "severity": "warning",
+      "label": "Hardship applications increasing",
+      "detail": "Hardship program requests up 18% month-over-month. Correlation with recent layoff announcements in tech sector. Proactive outreach initiated.",
+      "actorRole": "Recovery Steward",
+      "actorName": "HardshipEvaluator",
+      "signalKey": "hardship_application_rate",
+      "value": 1.18
+    },
+    {
+      "eventId": "signal:42_5:ENV-FIN-002:11a",
+      "hour": 42.5,
+      "type": "signal",
+      "envelopeId": "ENV-FIN-002",
+      "severity": "info",
+      "label": "Fraud detection accuracy improving",
+      "detail": "Machine learning model refinements reduce false positive rate to 8.2% (from 12.3%). True positive rate maintained at 94%. Customer friction reduced significantly.",
+      "actorRole": "Risk Steward",
+      "actorName": "FraudDetector",
+      "signalKey": "fraud_detection_accuracy",
+      "value": 0.94
+    },
+    {
       "eventId": "signal:72:ENV-FIN-004:14",
       "hour": 72,
       "type": "signal",
@@ -515,6 +554,32 @@
       "actorName": "FairnessMonitor",
       "signalKey": "compliance_health",
       "value": 0.98
+    },
+    {
+      "eventId": "signal:54_5:ENV-FIN-001:14a",
+      "hour": 54.5,
+      "type": "signal",
+      "envelopeId": "ENV-FIN-001",
+      "severity": "warning",
+      "label": "Default rate trending upward",
+      "detail": "90-day delinquency rate increased to 3.1% (from 2.8%). Portfolio concentration in affected industries flagged for enhanced monitoring. Risk models recalibrating.",
+      "actorRole": "Lending Steward",
+      "actorName": "CreditScorer",
+      "signalKey": "default_rate",
+      "value": 0.031
+    },
+    {
+      "eventId": "signal:88_5:ENV-FIN-004:14b",
+      "hour": 88.5,
+      "type": "signal",
+      "envelopeId": "ENV-FIN-004",
+      "severity": "info",
+      "label": "Regulatory examination scheduled",
+      "detail": "Federal banking regulator scheduled annual UDAAP examination for next quarter. Focus areas: AI fairness, adverse action compliance, model risk management.",
+      "actorRole": "Compliance Steward",
+      "actorName": "FairnessMonitor",
+      "signalKey": "regulatory_examination",
+      "value": 1.0
     },
     {
       "eventId": "revision:84:ENV-FIN-001:15",
@@ -783,6 +848,32 @@
       "sourceEventId": "boundary_interaction:96_5:ENV-FIN-003:16",
       "semanticContext": "FDCPA contact time constraint enforcement to prevent regulatory violation",
       "semanticVector": [0.25, 0.85]
+    },
+    {
+      "eventId": "signal:108_5:ENV-FIN-001:19a",
+      "hour": 108.5,
+      "type": "signal",
+      "envelopeId": "ENV-FIN-001",
+      "severity": "info",
+      "label": "Fed signals stable rates",
+      "detail": "Federal Reserve minutes indicate no rate changes expected for next two quarters. Lending demand forecast stable. Competitive pressure likely to intensify.",
+      "actorRole": "Lending Steward",
+      "actorName": "CreditScorer",
+      "signalKey": "interest_rate_environment",
+      "value": 0.725
+    },
+    {
+      "eventId": "signal:116_5:ENV-FIN-003:19b",
+      "hour": 116.5,
+      "type": "signal",
+      "envelopeId": "ENV-FIN-003",
+      "severity": "info",
+      "label": "Hardship program success metrics",
+      "detail": "82% of hardship participants remain current after 6 months. Default rate among hardship cohort: 12% (vs 45% industry average for similar risk). Program proving effective.",
+      "actorRole": "Recovery Steward",
+      "actorName": "HardshipEvaluator",
+      "signalKey": "hardship_program_success",
+      "value": 0.82
     },
     {
       "eventId": "signal:120:ENV-FIN-001:21",

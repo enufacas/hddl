@@ -39,10 +39,10 @@ function ensurePeekHandles() {
   sidebarPeek.className = 'sidebar-peek'
   sidebarPeek.setAttribute('role', 'button')
   sidebarPeek.setAttribute('tabindex', '0')
-  sidebarPeek.setAttribute('aria-label', 'Open HDDL Simulation panel')
+  sidebarPeek.setAttribute('aria-label', 'Open Navigation panel')
   sidebarPeek.innerHTML = `
     <span class="codicon codicon-chevron-right" aria-hidden="true"></span>
-    <span class="sidebar-peek__label">HDDL SIMULATION</span>
+    <span class="sidebar-peek__label">NAVIGATION</span>
   `.trim()
   sidebarPeek.addEventListener('click', () => {
     document.body.classList.remove('sidebar-hidden')
@@ -139,6 +139,9 @@ function navigate(path) {
   if (auxPeek) editorArea.appendChild(auxPeek)
   
   route(editorArea)
+  
+  // Ensure peek handles exist after navigation (in case they weren't preserved)
+  ensurePeekHandles()
   
   // Update active state in navigation
   updateActiveNav(normalized)

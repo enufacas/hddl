@@ -247,6 +247,11 @@ export function createHDDLMap(container, options = {}) {
   
   // Determine detail level based on container width
   let detailLevel = getDetailLevel(width)
+
+  // GitHub Pages deploys under a subpath; use BASE_URL so assets resolve
+  // correctly even on nested routes.
+  const darkBgUrl = `${import.meta.env.BASE_URL}dark-bg.png`
+  const planetUrl = `${import.meta.env.BASE_URL}planet.png`
   
   // Dynamic embedding height based on detail level
   const embeddingHeight = detailLevel === DETAIL_LEVELS.FULL ? 200 
@@ -262,11 +267,13 @@ export function createHDDLMap(container, options = {}) {
   const svg = d3.select(container)
     .append('svg')
     .attr('width', '100%')
-    .attr('height', height)
-    .attr('viewBox', [0, 0, width, height])
-    .style('background', 'linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.75)), url(/dark-bg.png) center/cover no-repeat')
+    .attr('height', height + 80)
+    .attr('viewBox', [0, -80, width, height + 80])
+    .style('background', `linear-gradient(to bottom, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0.5) 20%, rgba(0, 0, 0, 0.65) 80%, rgba(0, 0, 0, 0.85) 100%), url(${darkBgUrl}) center 55%/cover no-repeat`)
     .style('border', '1px solid var(--vscode-widget-border)')
     .style('border-radius', '6px')
+    .style('overflow', 'visible')
+    .style('margin-top', '-80px')
 
   // 2. Simulation Setup
   // Keep a lightweight simulation running so particles animate smoothly,
@@ -346,6 +353,38 @@ export function createHDDLMap(container, options = {}) {
     return { p0, p1, p2, p3 }
   }
 
+  // Planetary Limb (Telemetry / World) - Behind everything, extending into header
+  const planetaryLayer = svg.insert('g', ':first-child').attr('class', 'planetary-limb-layer')
+  
+  // Use Earth limb image (flipped upside down) - extend upward to cover header area
+  const earthImageWidth = width * 0.9
+  const earthImageHeight = 180
+  const earthImageX = width * 0.05
+  const earthImageY = -80
+  
+  // Add clipping path to create curved appearance
+  const planetDefs = svg.select('defs').empty() ? svg.append('defs') : svg.select('defs')
+  const clipPathId = 'earth-limb-clip'
+  planetDefs.append('clipPath')
+    .attr('id', clipPathId)
+    .append('ellipse')
+    .attr('cx', width / 2)
+    .attr('cy', 40)
+    .attr('rx', width * 0.48)
+    .attr('ry', 80)
+  
+  // Add the Earth image, flipped vertically
+  planetaryLayer.append('image')
+    .attr('href', planetUrl)
+    .attr('x', earthImageX)
+    .attr('y', earthImageY)
+    .attr('width', earthImageWidth)
+    .attr('height', earthImageHeight)
+    .attr('clip-path', `url(#${clipPathId})`)
+    .attr('transform', `scale(1, -1) translate(0, ${-(earthImageY * 2 + earthImageHeight)})`)
+    .attr('opacity', 0.7)
+    .attr('preserveAspectRatio', 'xMidYMid slice')
+
   // Column Headers (add a background band so text never becomes black-on-black)
   headerLayer
     .append('rect')
@@ -354,7 +393,7 @@ export function createHDDLMap(container, options = {}) {
     .attr('width', width)
     .attr('height', 26)
     .attr('fill', 'var(--vscode-editor-background)')
-    .attr('opacity', 0.84)
+    .attr('opacity', 0)
 
   // Give agents and envelopes more space: 35% / 38% / 27%
   const col1Width = width * 0.35
@@ -405,7 +444,7 @@ export function createHDDLMap(container, options = {}) {
     headerLayer.append('text')
       .attr('class', 'header-telemetry')
       .attr('x', col2Center)
-      .attr('y', 8)
+      .attr('y', -25)
       .attr('text-anchor', 'middle')
       .text('WORLD (Telemetry) ↓')
       .attr('fill', 'var(--vscode-statusBar-foreground)')
