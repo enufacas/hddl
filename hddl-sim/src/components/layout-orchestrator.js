@@ -215,9 +215,22 @@ export class LayoutOrchestrator {
     } catch {
       activeLayout = null
     }
-    const isFocusLayout = (activeLayout || 'focus') === 'focus'
+    const isFocusLayout = (activeLayout || 'default') === 'focus'
+
+    // Respect persisted sidebar state only
+    let persistedLayout = null
+    try {
+      persistedLayout = JSON.parse(localStorage.getItem('hddl:layout') || 'null')
+    } catch {
+      persistedLayout = null
+    }
     
     if (panel === 'sidebar') {
+      if (persistedLayout && typeof persistedLayout.sidebarCollapsed === 'boolean') {
+        visible = !persistedLayout.sidebarCollapsed
+        collapsed = false
+      }
+
       if (isFocusLayout) {
         visible = false
         collapsed = false
@@ -229,6 +242,8 @@ export class LayoutOrchestrator {
       body.classList.toggle('sidebar-hidden', !visible)
       body.classList.toggle('sidebar-collapsed', collapsed)
     } else if (panel === 'auxiliary') {
+      // Always default to visible (don't respect persisted collapse state)
+      // This ensures AI Narrative panel is open by default every time
       if (isFocusLayout) {
         visible = false
       }

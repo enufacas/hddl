@@ -18,9 +18,9 @@ export function render(container) {
   root.innerHTML = `
     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
       <div style="display: flex; align-items: center; gap: 12px;">
-        <span class="codicon codicon-law" style="font-size: 28px;"></span>
+        <span class="codicon codicon-law" style="font-size: 20px;"></span>
         <div>
-          <h1 style="margin: 0;">Steward Action Surface</h1>
+          <h1 style="margin: 0; font-size: 16px;">Steward Action Surface</h1>
           <p style="margin: 0; font-size: 13px; color: var(--vscode-statusBar-foreground);">What stewards can and cannot do · All actions shown · Availability based on timeline state</p>
         </div>
       </div>
