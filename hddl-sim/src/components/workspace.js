@@ -275,9 +275,11 @@ const mountAINarrative = (containerEl) => {
   containerEl.style.padding = '16px'
   containerEl.style.fontFamily = 'var(--vscode-font-family)'
   containerEl.style.overflow = 'auto'
+  containerEl.style.maxHeight = '100%'
+  containerEl.style.WebkitOverflowScrolling = 'touch'
 
   containerEl.innerHTML = `
-    <div class="ai-narrative-container">
+    <div class="ai-narrative-container" style="max-height: 100%; overflow-y: auto; -webkit-overflow-scrolling: touch;">
       <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
         <h3 style="margin: 0; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--vscode-descriptionForeground);">
           AI-Generated Narrative
@@ -323,6 +325,9 @@ const mountAINarrative = (containerEl) => {
       </div>
       <div id="ai-narrative-content" style="
         min-height: 200px;
+        max-height: calc(100vh - 300px);
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
         color: var(--vscode-foreground);
         line-height: 1.7;
         font-size: 14px;

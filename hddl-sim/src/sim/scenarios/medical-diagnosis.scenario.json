@@ -215,6 +215,19 @@
       "actorName": "Dr. Sarah Chen"
     },
     {
+      "eventId": "signal:2_0:ENV-MED-001:0a",
+      "hour": 2.0,
+      "type": "signal",
+      "envelopeId": "ENV-MED-001",
+      "severity": "info",
+      "label": "Lab results: Elevated WBC count",
+      "detail": "Patient lab results indicate white blood cell count 14,500/μL (elevated, suggesting infection). C-reactive protein 45 mg/L.",
+      "actorRole": "Medical Steward",
+      "actorName": "LabIntegration",
+      "signalKey": "lab_infection_marker",
+      "value": 14.5
+    },
+    {
       "eventId": "decision:2_5:ENV-MED-001:1",
       "hour": 2.5,
       "type": "decision",
@@ -235,6 +248,19 @@
       "detail": "Medication interaction checking envelope activated for pharmacy operations.",
       "actorRole": "Pharmacy Steward",
       "actorName": "Pharmacist Mike Torres"
+    },
+    {
+      "eventId": "signal:7_5:ENV-MED-002:2b",
+      "hour": 7.5,
+      "type": "signal",
+      "envelopeId": "ENV-MED-002",
+      "severity": "warning",
+      "label": "Formulary update: New antibiotic restrictions",
+      "detail": "Hospital formulary system updated with new vancomycin usage restrictions due to resistance patterns. Requires infectious disease consult for initiation.",
+      "actorRole": "Pharmacy Steward",
+      "actorName": "FormularySystem",
+      "signalKey": "formulary_restriction",
+      "value": 1.0
     },
     {
       "eventId": "retrieval:8_0:ENV-MED-002:2a",
@@ -310,6 +336,19 @@
       "actorName": "Dr. Sarah Chen",
       "revisionType": "boundary_adjustment",
       "reason": "Reduce false positive escalations while maintaining patient safety margins."
+    },
+    {
+      "eventId": "signal:18_2:ENV-MED-001:7a",
+      "hour": 18.2,
+      "type": "signal",
+      "envelopeId": "ENV-MED-001",
+      "severity": "info",
+      "label": "Diagnostic model performance update",
+      "detail": "Monthly diagnostic accuracy review: Pneumonia detection 94.2% sensitivity, 89.1% specificity. Within performance targets.",
+      "actorRole": "Medical Steward",
+      "actorName": "ModelMonitoring",
+      "signalKey": "model_performance",
+      "value": 0.942
     },
     {
       "eventId": "dsg_session:18:ENV-MED-001:8",
@@ -410,9 +449,48 @@
       "embeddingId": "EMB-MED-002b",
       "embeddingType": "decision",
       "vectorDimensions": 768,
-      "sourceEventId": "decision:8_3:ENV-MED-002:4",
-      "semanticContext": "pharmacist override approval with patient monitoring plan for interaction",
-      "semanticVector": [0.78, 0.72]
+      "sourceEventId": "decision:8_5:ENV-MED-002:4",
+      "semanticContext": "pharmacist approved warfarin aspirin co-administration with monitoring plan",
+      "semanticVector": [0.75, 0.82]
+    },
+    {
+      "eventId": "signal:35_0:ENV-MED-003:12c",
+      "hour": 35.0,
+      "type": "signal",
+      "envelopeId": "ENV-MED-003",
+      "severity": "warning",
+      "label": "Emergency department capacity alert",
+      "detail": "ED at 95% capacity. Average wait time 3.2 hours. Trauma bay utilization high. Consider diversion protocol activation.",
+      "actorRole": "Emergency Steward",
+      "actorName": "CapacityMonitoring",
+      "signalKey": "ed_capacity_critical",
+      "value": 0.95
+    },
+    {
+      "eventId": "signal:50_5:ENV-MED-001:12d",
+      "hour": 50.5,
+      "type": "signal",
+      "envelopeId": "ENV-MED-001",
+      "severity": "info",
+      "label": "Respiratory illness trend rising",
+      "detail": "Regional public health alert: Influenza A cases up 40% week-over-week. Recommend heightened respiratory infection protocols and stock verification.",
+      "actorRole": "Medical Steward",
+      "actorName": "PublicHealthIntegration",
+      "signalKey": "epidemic_trend",
+      "value": 1.4
+    },
+    {
+      "eventId": "signal:65_8:ENV-MED-002:12e",
+      "hour": 65.8,
+      "type": "signal",
+      "envelopeId": "ENV-MED-002",
+      "severity": "info",
+      "label": "Medication shortage advisory",
+      "detail": "National drug shortage database updated: Generic cephalexin supply constrained. Recommend therapeutic alternatives and patient notification protocols.",
+      "actorRole": "Pharmacy Steward",
+      "actorName": "SupplyChainMonitoring",
+      "signalKey": "drug_shortage",
+      "value": 0.35
     },
     {
       "eventId": "embedding:16:ENV-MED-003:12c",

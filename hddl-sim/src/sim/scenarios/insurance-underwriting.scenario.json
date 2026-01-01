@@ -400,6 +400,19 @@
       "semanticVector": [0.75, 0.35]
     },
     {
+      "eventId": "signal:0_5:ENV-INS-001:0a",
+      "hour": 0.5,
+      "type": "signal",
+      "envelopeId": "ENV-INS-001",
+      "severity": "info",
+      "label": "Market conditions baseline",
+      "detail": "Industry-wide loss ratios stable at 64%. No major weather events predicted for next 48 hours. Market competitiveness index: 0.82.",
+      "actorRole": "Underwriting Steward",
+      "actorName": "RiskScorer",
+      "signalKey": "market_baseline",
+      "value": 0.64
+    },
+    {
       "eventId": "envelope_promoted:0:ENV-INS-001:0",
       "hour": 0,
       "type": "envelope_promoted",
@@ -447,6 +460,19 @@
       "relevanceScores": [0.94]
     },
     {
+      "eventId": "signal:2_3:ENV-INS-001:2a",
+      "hour": 2.3,
+      "type": "signal",
+      "envelopeId": "ENV-INS-001",
+      "severity": "info",
+      "label": "Application volume surge detected",
+      "detail": "New policy applications up 18% from prior week. Competitor rate increase in market driving shopping behavior.",
+      "actorRole": "Underwriting Steward",
+      "actorName": "RiskScorer",
+      "signalKey": "application_volume",
+      "value": 1.18
+    },
+    {
       "eventId": "decision:2_8:ENV-INS-001:3",
       "hour": 2.8,
       "type": "decision",
@@ -456,6 +482,19 @@
       "detail": "RiskScorer evaluated new auto policy application. Risk score: 72/100 (standard risk). Recommended rate: $1,240/year.",
       "actorRole": "Underwriting Steward",
       "actorName": "RiskScorer"
+    },
+    {
+      "eventId": "signal:4_8:ENV-INS-001:3b",
+      "hour": 4.8,
+      "type": "signal",
+      "envelopeId": "ENV-INS-001",
+      "severity": "warning",
+      "label": "Coastal flood risk elevated",
+      "detail": "National Weather Service upgraded flood watch to warning for coastal regions. Hurricane season forecast indicates above-average activity.",
+      "actorRole": "Underwriting Steward",
+      "actorName": "RiskScorer",
+      "signalKey": "flood_risk_level",
+      "value": 0.78
     },
     {
       "eventId": "retrieval:5_25:ENV-INS-001:3a",
@@ -611,6 +650,19 @@
       "semanticVector": [0.82, 0.88]
     },
     {
+      "eventId": "signal:11_5:ENV-INS-002:6b",
+      "hour": 11.5,
+      "type": "signal",
+      "envelopeId": "ENV-INS-002",
+      "severity": "warning",
+      "label": "Claims volume spike detected",
+      "detail": "Auto collision claims up 32% this week. Correlation with icy road conditions and recent storm. Regional pattern suggests weather-related surge.",
+      "actorRole": "Claims Steward",
+      "actorName": "ClaimTriager",
+      "signalKey": "claims_volume_surge",
+      "value": 1.32
+    },
+    {
       "eventId": "retrieval:12_35:ENV-INS-002:6a",
       "hour": 12.35,
       "type": "retrieval",
@@ -701,6 +753,19 @@
       "sourceEventId": "revision:19_1:ENV-INS-002:10a",
       "semanticContext": "fraud detection vehicle registration claim history false positive",
       "semanticVector": [0.35, 0.52]
+    },
+    {
+      "eventId": "signal:22_5:ENV-INS-003:11a",
+      "hour": 22.5,
+      "type": "signal",
+      "envelopeId": "ENV-INS-003",
+      "severity": "info",
+      "label": "Competitive rate pressure increasing",
+      "detail": "Market analysis shows 3 major competitors reduced premiums by 5-8% in past month. Customer shopping rate up 24%. Retention pressure building.",
+      "actorRole": "Pricing Steward",
+      "actorName": "CompetitivenessMonitor",
+      "signalKey": "competitive_pressure",
+      "value": 0.76
     },
     {
       "eventId": "signal:24:ENV-INS-004:11",
@@ -812,6 +877,19 @@
       "sessionId": "DSG-UW-001-Q1"
     },
     {
+      "eventId": "signal:38_5:ENV-INS-002:14a",
+      "hour": 38.5,
+      "type": "signal",
+      "envelopeId": "ENV-INS-002",
+      "severity": "warning",
+      "label": "Fraud pattern alert: repair shop network",
+      "detail": "Analytics detected suspicious clustering: 4 repair shops with 28% higher-than-average claim rates. Cross-referencing with claimant networks.",
+      "actorRole": "Claims Steward",
+      "actorName": "FraudDetector",
+      "signalKey": "fraud_network_indicator",
+      "value": 0.84
+    },
+    {
       "eventId": "revision:40:ENV-INS-001:15",
       "hour": 40,
       "type": "revision",
@@ -910,6 +988,19 @@
       "sourceEventId": "revision:54_2:ENV-INS-004:16b",
       "semanticContext": "explainability compliance denial justification template documentation",
       "semanticVector": [0.25, 0.68]
+    },
+    {
+      "eventId": "signal:52_5:ENV-INS-004:16a",
+      "hour": 52.5,
+      "type": "signal",
+      "envelopeId": "ENV-INS-004",
+      "severity": "info",
+      "label": "Regulatory update: new disclosure requirements",
+      "detail": "State insurance commission issued bulletin requiring enhanced AI decision transparency. Effective in 45 days. Impacts denial documentation.",
+      "actorRole": "Compliance Steward",
+      "actorName": "RegulatoryChecker",
+      "signalKey": "regulatory_change",
+      "value": 1.0
     },
     {
       "eventId": "signal:56:ENV-INS-002:17",
@@ -1041,6 +1132,19 @@
       "sourceEventId": "revision:66_8:ENV-INS-002:17c",
       "semanticContext": "fraud detection network analysis GPS timeline validation cross-claim",
       "semanticVector": [0.38, 0.72]
+    },
+    {
+      "eventId": "signal:70_5:ENV-INS-003:17a",
+      "hour": 70.5,
+      "type": "signal",
+      "envelopeId": "ENV-INS-003",
+      "severity": "info",
+      "label": "Customer retention rate improving",
+      "detail": "Policy renewal rate climbed to 88% (from 84% last quarter). Accident forgiveness program credited with 12% reduction in voluntary non-renewals.",
+      "actorRole": "Pricing Steward",
+      "actorName": "CompetitivenessMonitor",
+      "signalKey": "retention_rate",
+      "value": 0.88
     },
     {
       "eventId": "decision:72:ENV-INS-004:18",
@@ -1380,6 +1484,19 @@
       "semanticVector": [0.28, 0.35]
     },
     {
+      "eventId": "signal:84_5:ENV-INS-001:23a",
+      "hour": 84.5,
+      "type": "signal",
+      "envelopeId": "ENV-INS-001",
+      "severity": "warning",
+      "label": "Wildfire risk season begins",
+      "detail": "Wildfire forecasting models predict above-average fire season. Properties in wildland-urban interface zones flagged for enhanced review. Premium adjustments may be needed.",
+      "actorRole": "Underwriting Steward",
+      "actorName": "RiskScorer",
+      "signalKey": "wildfire_risk",
+      "value": 0.72
+    },
+    {
       "eventId": "signal:96:ENV-INS-003:24",
       "hour": 96,
       "type": "signal",
@@ -1391,6 +1508,32 @@
       "actorName": "CompetitivenessMonitor",
       "signalKey": "market_position",
       "value": 0.34
+    },
+    {
+      "eventId": "signal:102_5:ENV-INS-004:24a",
+      "hour": 102.5,
+      "type": "signal",
+      "envelopeId": "ENV-INS-004",
+      "severity": "info",
+      "label": "Model fairness audit: Q2 results",
+      "detail": "Quarterly disparate impact analysis complete. Approval rate variance across demographics: 1.8% (target: <3%). Zero regulatory red flags. Model performance stable.",
+      "actorRole": "Compliance Steward",
+      "actorName": "ModelAuditor",
+      "signalKey": "fairness_audit_result",
+      "value": 0.98
+    },
+    {
+      "eventId": "signal:115_5:ENV-INS-002:24b",
+      "hour": 115.5,
+      "type": "signal",
+      "envelopeId": "ENV-INS-002",
+      "severity": "info",
+      "label": "Claims processing velocity improving",
+      "detail": "Average claim resolution time reduced to 3.8 days (from 4.2). Fraud detection accuracy improved to 91%. Customer satisfaction score: 4.3/5.0.",
+      "actorRole": "Claims Steward",
+      "actorName": "ClaimTriager",
+      "signalKey": "claims_velocity",
+      "value": 0.91
     },
     {
       "eventId": "signal:120:ENV-INS-001:25",

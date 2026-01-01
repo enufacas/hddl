@@ -795,6 +795,58 @@
       "reason": "Field data shows FLIR temperature variance within normal operating range being flagged as faults."
     },
     {
+      "eventId": "signal:6_0:ENV-AF-004:19a",
+      "hour": 6.0,
+      "type": "signal",
+      "envelopeId": "ENV-AF-004",
+      "severity": "info",
+      "label": "Weekly maintenance schedule published",
+      "detail": "Operations Center published week 4 maintenance schedule: 47 LRU repairs planned, 12 scheduled inspections, 3 TCTOs due. Estimated man-hours: 2,840.",
+      "actorRole": "Operations Steward",
+      "actorName": "SchedulingSystem",
+      "signalKey": "maintenance_schedule",
+      "value": 47.0
+    },
+    {
+      "eventId": "signal:24_5:ENV-AF-002:19b",
+      "hour": 24.5,
+      "type": "signal",
+      "envelopeId": "ENV-AF-002",
+      "severity": "warning",
+      "label": "Parts shortage: Radar module backorder",
+      "detail": "Supply system reports 8 radar transmitter modules on backorder. Estimated delivery: 14 days. Impacts 3 Code 2 aircraft. Alternative: cannibalize from depot stock.",
+      "actorRole": "Supply Steward",
+      "actorName": "InventoryMonitoring",
+      "signalKey": "parts_shortage",
+      "value": 8.0
+    },
+    {
+      "eventId": "signal:72_0:ENV-AF-001:19c",
+      "hour": 72.0,
+      "type": "signal",
+      "envelopeId": "ENV-AF-001",
+      "severity": "info",
+      "label": "Fleet readiness update: Mission capability 89%",
+      "detail": "Weekly readiness assessment: 25 of 28 aircraft mission-capable. 2 aircraft down for scheduled depot maintenance, 1 MICAP for hydraulic actuator.",
+      "actorRole": "Maintenance Steward",
+      "actorName": "ReadinessReporting",
+      "signalKey": "fleet_readiness",
+      "value": 0.89
+    },
+    {
+      "eventId": "signal:120_0:ENV-AF-004:19d",
+      "hour": 120.0,
+      "type": "signal",
+      "envelopeId": "ENV-AF-004",
+      "severity": "warning",
+      "label": "Operational tempo increase: Exercise RED FLAG",
+      "detail": "Wing Operations notified of Exercise RED FLAG participation starting day 8. Surge requirement: 95% mission-capable rate. Prioritize Code 1 aircraft.",
+      "actorRole": "Operations Steward",
+      "actorName": "MissionPlanning",
+      "signalKey": "mission_tempo_change",
+      "value": 0.95
+    },
+    {
       "eventId": "signal:168:ENV-AF-001:19",
       "hour": 168,
       "type": "signal",
@@ -806,6 +858,32 @@
       "actorName": "ComponentTracker",
       "signalKey": "weekly_readiness",
       "value": 0.87
+    },
+    {
+      "eventId": "signal:216_5:ENV-AF-003:19e",
+      "hour": 216.5,
+      "type": "signal",
+      "envelopeId": "ENV-AF-003",
+      "severity": "warning",
+      "label": "Weather advisory: Severe thunderstorms approaching",
+      "detail": "Base weather station: Severe thunderstorm warning issued. Wind gusts up to 60 mph, heavy rain expected 18:00-22:00 local. Ground all outdoor maintenance operations.",
+      "actorRole": "Safety Steward",
+      "actorName": "WeatherMonitoring",
+      "signalKey": "weather_impact",
+      "value": 60.0
+    },
+    {
+      "eventId": "signal:288_0:ENV-AF-003:19f",
+      "hour": 288.0,
+      "type": "signal",
+      "envelopeId": "ENV-AF-003",
+      "severity": "info",
+      "label": "Quality inspection results: 96% pass rate",
+      "detail": "Monthly QA inspection complete: 52 of 54 repairs passed first-time inspection. 2 reworks required (ESD handling violation, improper torque documentation).",
+      "actorRole": "Safety Steward",
+      "actorName": "QualityAssurance",
+      "signalKey": "inspection_results",
+      "value": 0.96
     },
     {
       "eventId": "decision:192_4:ENV-AF-002:20",

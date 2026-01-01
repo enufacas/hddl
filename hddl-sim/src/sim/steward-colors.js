@@ -132,6 +132,8 @@ export const EVENT_COLORS = {
   envelope_promoted: '#c4a7e7',    // Lavender - promotions
   dsg_session: '#f0b866',      // Amber - DSG events (same as boundary)
   dsg_message: '#f0b866',      // Amber - DSG messages
+  embedding: '#d4a8d4',        // Lavender purple - memory embeddings
+  retrieval: '#b8b8d8',        // Cool gray-purple - memory queries
 }
 
 /**

@@ -23,6 +23,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const app = express();
+app.set('trust proxy', 1); // Trust first proxy (Cloud Run load balancer)
 const PORT = process.env.PORT || 8080;
 
 // Middleware
@@ -119,6 +120,10 @@ app.post('/generate', validateOrigin, limiter, async (req, res) => {
     }
     
     console.log(`[${new Date().toISOString()}] Generating narrative for: ${scenario}`);
+    if (userAddendum) {
+      // Log the prompt (truncated to avoid massive logs)
+      console.log(`[${new Date().toISOString()}] Prompt: ${userAddendum.slice(0, 500).replace(/\n/g, ' ')}${userAddendum.length > 500 ? '...' : ''}`);
+    }
     
     // Load scenario - path from api/ to src/sim/scenarios/
     const scenarioPath = join(__dirname, '..', 'src', 'sim', 'scenarios', `${scenario}.scenario.json`);
@@ -130,6 +135,11 @@ app.post('/generate', validateOrigin, limiter, async (req, res) => {
     const duration = Date.now() - startTime;
     console.log(`[${new Date().toISOString()}] Completed in ${duration}ms - ${result.citations.length} citations, cost: $${result.metadata.cost}`);
     
+    if (result.narrative) {
+      // Log a preview of the generated narrative
+      console.log(`[${new Date().toISOString()}] Response: ${result.narrative.slice(0, 200).replace(/\n/g, ' ')}...`);
+    }
+
     res.json({
       ...result,
       metadata: {

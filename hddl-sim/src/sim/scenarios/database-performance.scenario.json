@@ -311,6 +311,58 @@
       "value": 0.92
     },
     {
+      "eventId": "signal:12_0:ENV-DB-001:3a",
+      "hour": 12.0,
+      "type": "signal",
+      "envelopeId": "ENV-DB-001",
+      "severity": "warning",
+      "label": "Query load spike: Reporting dashboard surge",
+      "detail": "Query throughput increased 280% during morning business hours. Reporting dashboard generating 14,500 queries/hour (baseline: 5,200/hour). Table scans detected.",
+      "actorRole": "Performance Steward",
+      "actorName": "QueryLoadMonitoring",
+      "signalKey": "query_spike",
+      "value": 14500.0
+    },
+    {
+      "eventId": "signal:36_0:ENV-DB-001:3b",
+      "hour": 36.0,
+      "type": "signal",
+      "envelopeId": "ENV-DB-001",
+      "severity": "warning",
+      "label": "Lock contention: Orders table experiencing waits",
+      "detail": "Lock wait time on orders table increased to 8.4 seconds P95 (baseline: 0.3s). Concurrent write operations from batch processing and API writes.",
+      "actorRole": "Performance Steward",
+      "actorName": "LockMonitoring",
+      "signalKey": "lock_contention",
+      "value": 8.4
+    },
+    {
+      "eventId": "signal:48_0:ENV-DB-003:3c",
+      "hour": 48.0,
+      "type": "signal",
+      "envelopeId": "ENV-DB-003",
+      "severity": "warning",
+      "label": "Replication lag: Secondary replica behind by 45 seconds",
+      "detail": "Read replica in us-west-2 lagging primary by 45 seconds (target: <10s). High write volume on primary. Read query routing adjusted to other replicas.",
+      "actorRole": "Infrastructure Steward",
+      "actorName": "ReplicationMonitoring",
+      "signalKey": "replication_lag",
+      "value": 45.0
+    },
+    {
+      "eventId": "signal:60_0:ENV-DB-003:3d",
+      "hour": 60.0,
+      "type": "signal",
+      "envelopeId": "ENV-DB-003",
+      "severity": "info",
+      "label": "Storage utilization: 72% capacity, trending upward",
+      "detail": "Database storage at 72% of provisioned 10TB (7.2TB used). Growth rate: 180GB/week. Projected capacity exhaustion: 16 weeks at current rate.",
+      "actorRole": "Infrastructure Steward",
+      "actorName": "StorageMonitoring",
+      "signalKey": "storage_growth",
+      "value": 0.72
+    },
+    {
       "eventId": "decision:4_3:ENV-DB-002:4",
       "hour": 4.3,
       "type": "decision",

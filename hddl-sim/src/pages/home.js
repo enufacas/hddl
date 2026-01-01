@@ -37,7 +37,7 @@ export function renderHome(container) {
 
   container.innerHTML = `
     <div class="page-container" data-testid="home-page">
-      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; position: relative; z-index: 10;">
         <div style="display: flex; align-items: center; gap: 12px;">
           <span class="codicon codicon-shield" style="font-size: 20px;"></span>
           <div>
@@ -59,7 +59,7 @@ export function renderHome(container) {
         </div>
       </div>
 
-      <div id="hddl-map-container" style="margin-bottom: 24px;"></div>
+      <div id="hddl-map-container" style="margin-bottom: 24px; position: relative; z-index: 1;"></div>
 
             <div id="glossary-inline" style="display:none; background: var(--vscode-sideBar-background); border: 1px solid var(--vscode-sideBar-border); padding: 10px; border-radius: 4px; margin-bottom: 10px;"></div>
 

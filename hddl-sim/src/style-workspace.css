@@ -322,18 +322,47 @@ html {
 }
 
 /* Event-type denotation: distinct palette from steward colors
-   Uses EVENT_COLORS from steward-colors.js for consistency */
+   Colors must match EVENT_COLORS in steward-colors.js (canonical source)
+   TODO: Consider CSS custom properties set dynamically from EVENT_COLORS */
 .timeline-event-marker[data-type="signal"] {
-    background: #7eb8da;  /* Light steel blue */
-    width: 2px;
+    background: #7eb8da;  /* signal - Light steel blue */
+    width: 3px;
+    transform: translateX(-1.5px);
     opacity: 0.85;
+}
+
+.timeline-event-marker[data-type="signal"]::after {
+    content: '~';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #ffffff;
+    font-size: 10px;
+    font-weight: bold;
+    text-shadow: 0 0 2px rgba(0, 0, 0, 0.8);
+    pointer-events: none;
 }
 
 .timeline-event-marker[data-type="revision"] {
     background: #98d4a0;  /* Mint green */
-    width: 3px;
-    transform: translateX(-1.5px);
-    opacity: 0.9;
+    width: 4px;
+    transform: translateX(-2px);
+    opacity: 1;
+    box-shadow: 0 0 3px rgba(152, 212, 160, 0.6);
+}
+
+.timeline-event-marker[data-type="revision"]::after {
+    content: '+';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #ffffff;
+    font-size: 10px;
+    font-weight: bold;
+    text-shadow: 0 0 2px rgba(0, 0, 0, 0.8);
+    pointer-events: none;
 }
 
 .timeline-event-marker[data-type="boundary_interaction"],
@@ -362,6 +391,18 @@ html {
     width: 3px;
     transform: translateX(-1.5px);
     opacity: 0.75;
+}
+
+.timeline-event-marker[data-type="embedding"] {
+    background: #d4a8d4;  /* embedding - Lavender purple (canonical) */
+    width: 2px;
+    opacity: 0.75;
+}
+
+.timeline-event-marker[data-type="retrieval"] {
+    background: #b8b8d8;  /* retrieval - Cool gray-purple (canonical) */
+    width: 2px;
+    opacity: 0.7;
 }
 
 .timeline-event-marker[data-type="signal"][data-severity="warning"] {

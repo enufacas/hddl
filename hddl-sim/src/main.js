@@ -4,7 +4,7 @@ import { initRouter, navigateTo } from './router'
 import { createWorkspace } from './components/workspace'
 import { createScenarioSelector } from './components/scenario-selector'
 import { formatSimTime, getEnvelopeAtTime, getScenario, getTimeHour, onScenarioChange, onTimeChange, setTimeHour, getStewardFilter, onFilterChange, setScrubbingState, triggerCatchupWindow } from './sim/sim-state'
-import { getStewardColor } from './sim/steward-colors'
+import { getStewardColor, getEventColor } from './sim/steward-colors'
 import { getStoryModeEnabled, onStoryModeChange, setStoryModeEnabled } from './story-mode'
 import { initReviewHarness, isReviewModeEnabled, setReviewModeEnabled } from './review-harness'
 import { layoutManager, createLayoutSelector } from './components/layout-manager'
@@ -384,17 +384,8 @@ function renderEventMarkers() {
     // Background color: steward color if envelope exists, otherwise no special color
     const tooltipBgColor = envelope ? getStewardColor(envelope.ownerRole) : null
     
-    // Title color: CSS event-type colors
-    const eventTypeColors = {
-      'signal': '#7eb8da',
-      'revision': '#98d4a0',
-      'boundary_interaction': '#f0b866',
-      'decision': '#a8a8a8',
-      'envelope_promoted': '#c4a7e7',
-      'embedding': '#d4a8d4',
-      'retrieval': '#b8b8d8'
-    }
-    const titleColor = eventTypeColors[eventType] || '#a8a8a8'
+    // Title color: use shared EVENT_COLORS palette via getEventColor()
+    const titleColor = getEventColor(eventType, ev?.severity, ev?.status)
 
     // Enhanced tooltip with event details
     const typeLabels = {

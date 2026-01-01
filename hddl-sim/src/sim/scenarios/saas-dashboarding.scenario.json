@@ -560,6 +560,32 @@
       "sessionId": "DSG-DATA-001-W1"
     },
     {
+      "eventId": "signal:12_0:ENV-DASH-001:14a",
+      "hour": 12.0,
+      "type": "signal",
+      "envelopeId": "ENV-DASH-001",
+      "severity": "info",
+      "label": "User activity: Dashboard creation spike",
+      "detail": "Platform analytics show 340% increase in dashboard creation (last 6 hours vs. baseline). Peak usage during business hours. Template usage: 68%.",
+      "actorRole": "UX Steward",
+      "actorName": "UsageAnalytics",
+      "signalKey": "user_activity_spike",
+      "value": 3.40
+    },
+    {
+      "eventId": "signal:24_0:ENV-DASH-002:14b",
+      "hour": 24.0,
+      "type": "signal",
+      "envelopeId": "ENV-DASH-002",
+      "severity": "warning",
+      "label": "API latency: Query service P95 elevated",
+      "detail": "Query API P95 latency at 12.4 seconds (target: <10s). Database connection pool at 78% capacity. 3 large table scans detected.",
+      "actorRole": "Data Steward",
+      "actorName": "PerformanceMonitoring",
+      "signalKey": "api_latency_elevated",
+      "value": 12.4
+    },
+    {
       "eventId": "signal:36:ENV-DASH-004:14",
       "hour": 36,
       "type": "signal",
@@ -573,17 +599,6 @@
       "value": 0.78
     },
     {
-      "eventId": "decision:42_5:ENV-DASH-003:15",
-      "hour": 42.5,
-      "type": "decision",
-      "envelopeId": "ENV-DASH-003",
-      "severity": "info",
-      "label": "Access revoked",
-      "detail": "Dashboard owner revoked external access after project completion. AuditLogger recorded permission change with timestamp.",
-      "actorRole": "Security Steward",
-      "actorName": "PermissionCalculator"
-    },
-    {
       "eventId": "signal:48:ENV-DASH-002:16",
       "hour": 48,
       "type": "signal",
@@ -595,6 +610,45 @@
       "actorName": "QueryPerformanceGuard",
       "signalKey": "query_health",
       "value": 0.94
+    },
+    {
+      "eventId": "signal:60_0:ENV-DASH-002:14c",
+      "hour": 60.0,
+      "type": "signal",
+      "envelopeId": "ENV-DASH-002",
+      "severity": "info",
+      "label": "Feature adoption: Natural language query usage up 45%",
+      "detail": "NL-to-SQL feature usage increased to 2,840 queries/day (up from 1,960). Accuracy: 96.2%. User satisfaction: 4.3/5 stars.",
+      "actorRole": "Data Steward",
+      "actorName": "FeatureAdoption",
+      "signalKey": "nl_query_adoption",
+      "value": 0.45
+    },
+    {
+      "eventId": "signal:72_0:ENV-DASH-002:14d",
+      "hour": 72.0,
+      "type": "signal",
+      "envelopeId": "ENV-DASH-002",
+      "severity": "info",
+      "label": "Infrastructure health: Database cluster at 65% capacity",
+      "detail": "Multi-region database cluster health check: CPU 65%, memory 58%, disk I/O 42%. All replicas synchronized. Backup retention: 30 days.",
+      "actorRole": "Data Steward",
+      "actorName": "InfrastructureMonitoring",
+      "signalKey": "infrastructure_health",
+      "value": 0.65
+    },
+    {
+      "eventId": "signal:84_0:ENV-DASH-001:14e",
+      "hour": 84.0,
+      "type": "signal",
+      "envelopeId": "ENV-DASH-001",
+      "severity": "info",
+      "label": "Customer behavior: Export feature heavily used",
+      "detail": "Analytics show dashboard export feature used 1,250 times this week (CSV: 58%, PDF: 32%, PNG: 10%). Scheduled exports: 340 active jobs.",
+      "actorRole": "UX Steward",
+      "actorName": "BehaviorAnalytics",
+      "signalKey": "export_usage",
+      "value": 1250.0
     },
     {
       "eventId": "revision:60:ENV-DASH-003:17",
