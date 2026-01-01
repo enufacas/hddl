@@ -2928,7 +2928,8 @@ body.mobile-nav-open .mobile-nav-overlay {
     }
     
     .mobile-bottom-sheet {
-        display: block;
+        /* Keep hidden by default on mobile - user must explicitly open */
+        display: none;
     }
     
     /* Hide bottom panel, show FAB */

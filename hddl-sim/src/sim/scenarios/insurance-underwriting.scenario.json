@@ -218,12 +218,6 @@
         },
         {
           "agentId": "AG-UW-04",
-          "name": "Rebecca Foster",
-          "role": "underwriting policy steward and decision calibration",
-          "envelopeIds": ["ENV-INS-001"]
-        },
-        {
-          "agentId": "AG-UW-05",
           "name": "Senior Underwriter #12",
           "role": "senior underwriter for complex risk assessment",
           "envelopeIds": ["ENV-INS-001"]

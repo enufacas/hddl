@@ -272,67 +272,79 @@ const mountAINarrative = (containerEl) => {
     })
   }
 
-  containerEl.style.padding = '16px'
+  containerEl.style.padding = '20px 24px'
   containerEl.style.fontFamily = 'var(--vscode-font-family)'
-  containerEl.style.overflow = 'auto'
-  containerEl.style.maxHeight = '100%'
-  containerEl.style.WebkitOverflowScrolling = 'touch'
+  containerEl.style.overflow = 'hidden'
+  containerEl.style.height = '100%'
+  containerEl.style.display = 'flex'
+  containerEl.style.flexDirection = 'column'
 
   containerEl.innerHTML = `
-    <div class="ai-narrative-container" style="max-height: 100%; overflow-y: auto; -webkit-overflow-scrolling: touch;">
-      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-        <h3 style="margin: 0; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--vscode-descriptionForeground);">
-          AI-Generated Narrative
-        </h3>
-        <button id="generate-ai-narrative" style="
-          background: var(--vscode-button-background);
-          color: var(--vscode-button-foreground);
-          border: none;
-          border-radius: 4px;
-          padding: 6px 12px;
-          font-size: 11px;
-          cursor: pointer;
-          font-weight: 600;
-        ">
-          ${aiNarrativeGenerated ? 'Regenerate' : 'Generate Narrative'}
-        </button>
-        <label style="display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--vscode-descriptionForeground); cursor: pointer;">
-          <input type="checkbox" id="sync-narrative-toggle" style="cursor: pointer;" ${aiNarrativeSyncEnabled ? 'checked' : ''}>
-          <span>Sync with Timeline</span>
-        </label>
-      </div>
-      <div style="margin-bottom: 12px;">
-        <label for="ai-narrative-user-addendum" style="display: block; font-size: 11px; color: var(--vscode-descriptionForeground); margin-bottom: 6px;">
-          Additional instructions (optional)
-        </label>
-        <textarea id="ai-narrative-user-addendum" rows="3" placeholder="Add constraints like: focus on boundary interactions, emphasize day-by-day structure, keep it concise…" style="
-          width: 100%;
-          resize: vertical;
-          min-height: 54px;
-          max-height: 180px;
-          padding: 8px 10px;
-          border-radius: 4px;
-          border: 1px solid var(--vscode-input-border);
-          background: var(--vscode-input-background);
-          color: var(--vscode-input-foreground);
-          font-size: 12px;
-          line-height: 1.4;
-          outline: none;
-        "></textarea>
-        <div style="margin-top: 6px; font-size: 10px; color: var(--vscode-descriptionForeground); opacity: 0.9;">
-          Appended to the request; the base prompt and scenario facts remain authoritative.
+    <div class="ai-narrative-container" style="display: flex; flex-direction: column; height: 100%;">
+      <div style="flex-shrink: 0;">
+        <p style="margin: 0 0 16px 0; font-size: 12px; line-height: 1.5; color: var(--vscode-descriptionForeground); opacity: 0.85;">
+          Generate a contextual explanation of the scenario timeline
+        </p>
+        
+        <div style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 20px;">
+          <button id="generate-ai-narrative" style="
+            background: linear-gradient(135deg, var(--vscode-button-background) 0%, color-mix(in srgb, var(--vscode-button-background) 85%, black) 100%);
+            color: var(--vscode-button-foreground);
+            border: none;
+            border-radius: 5px;
+            padding: 8px 16px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+          " onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 2px 8px rgba(0, 0, 0, 0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 1px 4px rgba(0, 0, 0, 0.1)'">
+            <span class="codicon codicon-sparkle"></span>
+            <span>${aiNarrativeGenerated ? 'Regenerate' : 'Generate Narrative'}</span>
+          </button>
+          
+          <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--vscode-foreground); cursor: pointer; user-select: none;">
+            <input type="checkbox" id="sync-narrative-toggle" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--vscode-button-background);" ${aiNarrativeSyncEnabled ? 'checked' : ''}>
+            <span style="font-weight: 500;">Sync with Timeline</span>
+          </label>
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+          <label for="ai-narrative-user-addendum" style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--vscode-descriptionForeground); margin-bottom: 8px;">
+            Additional instructions (optional)
+          </label>
+          <textarea id="ai-narrative-user-addendum" rows="3" placeholder="Add constraints like: focus on boundary interactions, emphasize day-by-day structure, keep it concise…" style="
+            width: 100%;
+            resize: vertical;
+            min-height: 72px;
+            max-height: 180px;
+            padding: 12px 14px;
+            border-radius: 6px;
+            border: 1px solid var(--vscode-input-border);
+            background: var(--vscode-input-background);
+            color: var(--vscode-input-foreground);
+            font-size: 13px;
+            line-height: 1.6;
+            font-family: var(--vscode-font-family);
+            outline: none;
+            transition: border-color 0.2s ease;
+          " onfocus="this.style.borderColor='var(--vscode-focusBorder)'" onblur="this.style.borderColor='var(--vscode-input-border)'"></textarea>
         </div>
       </div>
+      
       <div id="ai-narrative-content" style="
-        min-height: 200px;
-        max-height: calc(100vh - 300px);
+        flex: 1;
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
         color: var(--vscode-foreground);
-        line-height: 1.7;
+        line-height: 1.8;
         font-size: 14px;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-        padding-bottom: 40px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        padding-bottom: 20px;
       "></div>
     </div>
   `.trim()
