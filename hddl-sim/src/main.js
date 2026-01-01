@@ -1,10 +1,9 @@
 import './design-tokens.css'
 import './style-workspace.css'
-import 'intro.js/introjs.css'
 import { initRouter, navigateTo } from './router'
 import { createWorkspace } from './components/workspace'
 import { createScenarioSelector } from './components/scenario-selector'
-import { formatSimTime, getEnvelopeAtTime, getScenario, getTimeHour, onScenarioChange, onTimeChange, setTimeHour, getStewardFilter, onFilterChange } from './sim/sim-state'
+import { formatSimTime, getEnvelopeAtTime, getScenario, getTimeHour, onScenarioChange, onTimeChange, setTimeHour, getStewardFilter, onFilterChange, setScrubbingState, triggerCatchupWindow } from './sim/sim-state'
 import { getStewardColor } from './sim/steward-colors'
 import { getStoryModeEnabled, onStoryModeChange, setStoryModeEnabled } from './story-mode'
 import { initReviewHarness, isReviewModeEnabled, setReviewModeEnabled } from './review-harness'
@@ -587,6 +586,7 @@ renderMismatchMarkers()
 let isDragging = false
 scrubberHandle.addEventListener('mousedown', (e) => {
   isDragging = true
+  setScrubbingState(true)
   e.preventDefault()
 })
 
@@ -597,14 +597,19 @@ document.addEventListener('mousemove', (e) => {
   const percent = x / rect.width
   const duration = getScenario()?.durationHours ?? 48
   currentTime = Math.round(percent * duration)
-  setTimeHour(currentTime)
+  setTimeHour(currentTime, { throttle: true })
 })
 
 document.addEventListener('mouseup', () => {
+  if (isDragging) {
+    setScrubbingState(false)
+  }
   isDragging = false
 })
 
 scrubberContainer.addEventListener('click', (e) => {
+  // Trigger catch-up window for click-to-jump (instant embedding placement)
+  triggerCatchupWindow()
   const rect = scrubberContainer.getBoundingClientRect()
   const x = e.clientX - rect.left
   const percent = x / rect.width

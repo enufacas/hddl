@@ -1,5 +1,5 @@
 import * as d3 from 'd3'
-import { getScenario, getEnvelopeAtTime, getEventsNearTime, getTimeHour, onTimeChange, onScenarioChange, getEnvelopeStatus, setStewardFilter } from '../sim/sim-state'
+import { getScenario, getEnvelopeAtTime, getEventsNearTime, getTimeHour, onTimeChange, onScenarioChange, getEnvelopeStatus, setStewardFilter, getIsScrubbing, isWithinScrubCatchup } from '../sim/sim-state'
 import { getStewardColor, STEWARD_PALETTE, toSemver, getEventColor } from '../sim/steward-colors'
 import { navigateTo } from '../router'
 import { createEnvelopeDetailModal } from './envelope-detail'
@@ -3306,7 +3306,7 @@ export function createHDDLMap(container, options = {}) {
   let embeddingElements = []
   let embeddingCount = 0
 
-  function createFloatingEmbedding(event) {
+  function createFloatingEmbedding(event, skipAnimation = false) {
     // Find source node position
     const sourceNode = nodes.find(n => n.id === event.primarySteward || n.id === event.actorRole)
     const sourceX = sourceNode ? sourceNode.x : width / 2
@@ -3651,11 +3651,18 @@ export function createHDDLMap(container, options = {}) {
       .text('</>')
 
     // Animate to target with rotation, scale, and depth-based opacity
-    chipGroup.transition()
-      .duration(2500)
-      .ease(d3.easeCubicOut)
-      .attr('transform', `translate(${targetX}, ${targetY}) scale(${perspectiveScale}) rotate(${rotateAngle})`)
-      .attr('opacity', depthOpacity)
+    // Skip animation during catch-up window for instant placement
+    if (skipAnimation) {
+      chipGroup
+        .attr('transform', `translate(${targetX}, ${targetY}) scale(${perspectiveScale}) rotate(${rotateAngle})`)
+        .attr('opacity', depthOpacity)
+    } else {
+      chipGroup.transition()
+        .duration(2500)
+        .ease(d3.easeCubicOut)
+        .attr('transform', `translate(${targetX}, ${targetY}) scale(${perspectiveScale}) rotate(${rotateAngle})`)
+        .attr('opacity', depthOpacity)
+    }
 
     embeddingElements.push({ element: chipGroup, event, timestamp: Date.now() })
     embeddingCount++
@@ -3664,8 +3671,14 @@ export function createHDDLMap(container, options = {}) {
   }
 
   function renderEmbeddings() {
+    // Skip rendering during active scrubbing for performance
+    if (getIsScrubbing()) {
+      return
+    }
+    
     const scenario = getScenario()
     const currentHour = getTimeHour()
+    const skipAnimation = isWithinScrubCatchup()
 
     const embeddingEvents = scenario.events
       .filter(e => e.type === 'embedding' && e.hour <= currentHour)
@@ -3695,11 +3708,18 @@ export function createHDDLMap(container, options = {}) {
     //   })
     // }
 
-    newEvents.forEach((event, index) => {
-      setTimeout(() => {
-        createFloatingEmbedding(event)
-      }, index * 150)
-    })
+    // During catch-up window, create all embeddings instantly without stagger
+    if (skipAnimation && newEvents.length > 0) {
+      newEvents.forEach((event) => {
+        createFloatingEmbedding(event, true) // skipAnimation = true
+      })
+    } else {
+      newEvents.forEach((event, index) => {
+        setTimeout(() => {
+          createFloatingEmbedding(event, false)
+        }, index * 150)
+      })
+    }
   }
 
   renderEmbeddings()

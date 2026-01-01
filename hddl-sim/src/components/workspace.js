@@ -303,7 +303,7 @@ const mountAINarrative = (containerEl) => {
         <label for="ai-narrative-user-addendum" style="display: block; font-size: 11px; color: var(--vscode-descriptionForeground); margin-bottom: 6px;">
           Additional instructions (optional)
         </label>
-        <textarea id="ai-narrative-user-addendum" rows="3" placeholder="Add constraints or backdrop like: focus on boundary interactions, emphasize day-by-day structure, keep it concise, set the tone (e.g., a human vs AI conflict backdrop)…" style="
+        <textarea id="ai-narrative-user-addendum" rows="3" placeholder="Add constraints like: focus on boundary interactions, emphasize day-by-day structure, keep it concise…" style="
           width: 100%;
           resize: vertical;
           min-height: 54px;
