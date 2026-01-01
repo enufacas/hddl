@@ -2116,6 +2116,8 @@ export function createHDDLMap(container, options = {}) {
       .attr('class', 'agent-bot')
       .attr('data-testid', d => `agent-${d.id}`)
       .attr('data-agent-active', d => d.isRecentlyActive ? 'true' : 'false')
+      .attr('stroke', d => d.fleetColor || 'var(--vscode-sideBar-border)')
+      .attr('fill', d => d.fleetColor || 'var(--vscode-statusBar-foreground)')
       .attr('tabindex', 0)
       .style('pointer-events', 'all')
       .style('cursor', 'pointer')

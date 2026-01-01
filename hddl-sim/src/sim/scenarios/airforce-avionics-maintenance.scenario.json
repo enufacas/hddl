@@ -257,48 +257,6 @@
           "name": "ComponentTracker",
           "role": "LRU lifecycle and traceability management",
           "envelopeIds": ["ENV-AF-001"]
-        },
-        {
-          "agentId": "AG-MAINT-04",
-          "name": "E4MafiaLeader",
-          "role": "strategic tool room disappearances",
-          "envelopeIds": ["ENV-AF-001"]
-        },
-        {
-          "agentId": "AG-MAINT-05",
-          "name": "SnackFundManager",
-          "role": "snack bar inventory optimization",
-          "envelopeIds": ["ENV-AF-001"]
-        },
-        {
-          "agentId": "AG-MAINT-06",
-          "name": "DormLawyerBot",
-          "role": "AFI interpretation for max benefit",
-          "envelopeIds": ["ENV-AF-001"]
-        },
-        {
-          "agentId": "AG-MAINT-07",
-          "name": "WaffleHouseNavigator",
-          "role": "optimal 24hr shift fueling routes",
-          "envelopeIds": ["ENV-AF-001"]
-        },
-        {
-          "agentId": "AG-MAINT-08",
-          "name": "ProfileWarrior",
-          "role": "permanent light duty optimization",
-          "envelopeIds": ["ENV-AF-001"]
-        },
-        {
-          "agentId": "AG-MAINT-09",
-          "name": "DeploymentDodger",
-          "role": "Leave Web timing strategist",
-          "envelopeIds": ["ENV-AF-001"]
-        },
-        {
-          "agentId": "AG-MAINT-10",
-          "name": "CrewChiefSupreme",
-          "role": "aircraft ownership enforcement",
-          "envelopeIds": ["ENV-AF-001"]
         }
       ]
     },
@@ -321,36 +279,6 @@
           "agentId": "AG-SUPPLY-03",
           "name": "ShelfLifeMonitor",
           "role": "time-sensitive component tracking",
-          "envelopeIds": ["ENV-AF-002"]
-        },
-        {
-          "agentId": "AG-SUPPLY-04",
-          "name": "FormFillerExtraordinaire",
-          "role": "DD Form 1348 completion speed records",
-          "envelopeIds": ["ENV-AF-002"]
-        },
-        {
-          "agentId": "AG-SUPPLY-05",
-          "name": "NINEONEWANNABETracker",
-          "role": "stock number memorization champion",
-          "envelopeIds": ["ENV-AF-002"]
-        },
-        {
-          "agentId": "AG-SUPPLY-06",
-          "name": "BXDeliveryOptimizer",
-          "role": "BX run scheduling during duty hours",
-          "envelopeIds": ["ENV-AF-002"]
-        },
-        {
-          "agentId": "AG-SUPPLY-07",
-          "name": "TurnInTuesday",
-          "role": "equipment hand receipt cleansing",
-          "envelopeIds": ["ENV-AF-002"]
-        },
-        {
-          "agentId": "AG-SUPPLY-08",
-          "name": "ExcessPropertyFlipper",
-          "role": "DRMO treasure identification",
           "envelopeIds": ["ENV-AF-002"]
         }
       ]
@@ -377,12 +305,6 @@
           "envelopeIds": ["ENV-AF-003"]
         },
         {
-          "agentId": "AG-SAFETY-04",
-          "name": "ReflectiveBeltEnforcer",
-          "role": "PT belt visibility compliance 24/7",
-          "envelopeIds": ["ENV-AF-003"]
-        },
-        {
           "agentId": "AG-SAFETY-05",
           "name": "TripHazardHunter",
           "role": "floor cord incident prevention",
@@ -392,24 +314,6 @@
           "agentId": "AG-SAFETY-06",
           "name": "CBTReminderBot",
           "role": "computer-based training deadline alerts",
-          "envelopeIds": ["ENV-AF-003"]
-        },
-        {
-          "agentId": "AG-SAFETY-07",
-          "name": "GreenDotAdvocate",
-          "role": "bystander intervention promotion",
-          "envelopeIds": ["ENV-AF-003"]
-        },
-        {
-          "agentId": "AG-SAFETY-08",
-          "name": "PilotWaveProtector",
-          "role": "hand salute enforcement in FOD areas",
-          "envelopeIds": ["ENV-AF-003"]
-        },
-        {
-          "agentId": "AG-SAFETY-09",
-          "name": "WeeklyWingReporter",
-          "role": "mundane incident write-up automation",
           "envelopeIds": ["ENV-AF-003"]
         }
       ]
@@ -433,48 +337,6 @@
           "agentId": "AG-OPS-03",
           "name": "ShiftOptimizer",
           "role": "crew scheduling and labor hour management",
-          "envelopeIds": ["ENV-AF-004"]
-        },
-        {
-          "agentId": "AG-OPS-04",
-          "name": "TDYTravelAgent",
-          "role": "per diem maximization strategies",
-          "envelopeIds": ["ENV-AF-004"]
-        },
-        {
-          "agentId": "AG-OPS-05",
-          "name": "MidShiftGhost",
-          "role": "graveyard shift staffing illusions",
-          "envelopeIds": ["ENV-AF-004"]
-        },
-        {
-          "agentId": "AG-OPS-06",
-          "name": "ChangeOfCommandCoordinator",
-          "role": "coin ceremony logistics expert",
-          "envelopeIds": ["ENV-AF-004"]
-        },
-        {
-          "agentId": "AG-OPS-07",
-          "name": "WeekendDutySwapper",
-          "role": "duty roster negotiation optimizer",
-          "envelopeIds": ["ENV-AF-004"]
-        },
-        {
-          "agentId": "AG-OPS-08",
-          "name": "LongLunchLiaison",
-          "role": "meal period extension justifications",
-          "envelopeIds": ["ENV-AF-004"]
-        },
-        {
-          "agentId": "AG-OPS-09",
-          "name": "CommandPostCoffeeBot",
-          "role": "break room resource allocation",
-          "envelopeIds": ["ENV-AF-004"]
-        },
-        {
-          "agentId": "AG-OPS-10",
-          "name": "FirstShirtDiplomatAI",
-          "role": "CC-enlisted communication bridge",
           "envelopeIds": ["ENV-AF-004"]
         }
       ]
@@ -501,51 +363,9 @@
           "envelopeIds": ["ENV-AF-005"]
         },
         {
-          "agentId": "AG-TRAIN-04",
-          "name": "SKTStudyGroupBot",
-          "role": "Specialty Knowledge Test cramming",
-          "envelopeIds": ["ENV-AF-005"]
-        },
-        {
-          "agentId": "AG-TRAIN-05",
-          "name": "EPRBulletGenerator",
-          "role": "enlisted performance report impact statements",
-          "envelopeIds": ["ENV-AF-005"]
-        },
-        {
-          "agentId": "AG-TRAIN-06",
-          "name": "PMEProcrastinator",
-          "role": "last-minute Professional Military Education",
-          "envelopeIds": ["ENV-AF-005"]
-        },
-        {
-          "agentId": "AG-TRAIN-07",
-          "name": "CDCFinisher",
-          "role": "Career Development Course volume speedruns",
-          "envelopeIds": ["ENV-AF-005"]
-        },
-        {
-          "agentId": "AG-TRAIN-08",
-          "name": "DistanceLearningChamp",
-          "role": "CCAF credit transfer strategist",
-          "envelopeIds": ["ENV-AF-005"]
-        },
-        {
-          "agentId": "AG-TRAIN-09",
-          "name": "VolunteerHourTracker",
-          "role": "EPR bullet ammunition collector",
-          "envelopeIds": ["ENV-AF-005"]
-        },
-        {
           "agentId": "AG-TRAIN-10",
           "name": "PT TestScheduler",
           "role": "fitness assessment weather optimization",
-          "envelopeIds": ["ENV-AF-005"]
-        },
-        {
-          "agentId": "AG-TRAIN-11",
-          "name": "TAPSNavigator",
-          "role": "transition assistance program maximizer",
           "envelopeIds": ["ENV-AF-005"]
         }
       ]

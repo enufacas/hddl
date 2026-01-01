@@ -58,7 +58,7 @@ test.describe('Envelope Detail Modal - Open Glossary Navigation', () => {
     await expect(glossaryContent).toBeVisible({ timeout: 3000 })
     
     // Verify the glossary content is shown
-    const glossaryHeader = glossaryContent.locator('h3:has-text("Glossary")')
+    const glossaryHeader = glossaryContent.locator('h1:has-text("Glossary"), h2:has-text("Glossary"), h3:has-text("Glossary")')
     await expect(glossaryHeader).toBeVisible()
   })
 })

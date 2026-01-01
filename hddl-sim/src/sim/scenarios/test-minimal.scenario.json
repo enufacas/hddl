@@ -41,8 +41,10 @@
       "hour": 0,
       "type": "embedding",
       "eventId": "EMB-BASELINE-001",
+      "embeddingId": "EMB-BASELINE-001",
       "embeddingType": "revision",
       "sourceEventId": "historical-baseline",
+      "semanticContext": "historical baseline: standard test procedures",
       "vector": [0.25, 0.35],
       "summary": "Historical baseline: standard test procedures"
     },
@@ -74,8 +76,10 @@
       "hour": 2.5,
       "type": "embedding",
       "eventId": "EMB-001",
+      "embeddingId": "EMB-001",
       "embeddingType": "boundary_interaction",
       "sourceEventId": "boundary-test-1",
+      "semanticContext": "escalation pattern: threshold exceeded",
       "vector": [0.78, 0.72],
       "summary": "Escalation pattern: threshold exceeded"
     },
@@ -94,8 +98,10 @@
       "hour": 3.5,
       "type": "embedding",
       "eventId": "EMB-002",
+      "embeddingId": "EMB-002",
       "embeddingType": "decision",
       "sourceEventId": "decision-test-2",
+      "semanticContext": "steward judgment: exception approved",
       "vector": [0.32, 0.68],
       "summary": "Steward judgment: exception approved"
     },
@@ -113,8 +119,10 @@
       "hour": 4.5,
       "type": "embedding",
       "eventId": "EMB-003",
+      "embeddingId": "EMB-003",
       "embeddingType": "revision",
       "sourceEventId": "revision-test-1",
+      "semanticContext": "policy change: threshold adjustment",
       "vector": [0.28, 0.62],
       "summary": "Policy change: threshold adjustment"
     },

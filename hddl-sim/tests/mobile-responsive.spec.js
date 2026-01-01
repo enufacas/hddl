@@ -259,12 +259,18 @@ test.describe('Mobile: Portrait', () => {
     await page.click('.mobile-hamburger');
     await page.waitForTimeout(400);
 
+    // Ensure drawer is open
+    await expect(page.locator('body')).toHaveClass(/mobile-nav-open/);
+
     // Check nav items
-    const navItems = page.locator('.monaco-list-row');
+    const navItems = page.locator('.mobile-nav-drawer .monaco-list-row[data-route]');
     const count = await navItems.count();
 
     for (let i = 0; i < count; i++) {
-      const box = await navItems.nth(i).boundingBox();
+      const row = navItems.nth(i)
+      await row.scrollIntoViewIfNeeded()
+      const box = await row.boundingBox();
+      expect(box).toBeTruthy()
       expect(box.height).toBeGreaterThanOrEqual(20); // Actual height is ~22px
     }
   });

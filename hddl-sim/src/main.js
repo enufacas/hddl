@@ -190,6 +190,7 @@ timeDisplay.textContent = formatSimTime(currentTime)
 
 const speedSelector = document.createElement('select')
 speedSelector.className = 'monaco-select'
+speedSelector.id = 'timeline-speed'
 speedSelector.style.cssText = 'background: var(--vscode-input-background); border: 1px solid var(--vscode-input-border); color: var(--vscode-input-foreground); padding: 2px 4px; font-size: 12px;'
 speedSelector.innerHTML = '<option value="1">1x</option><option value="2">2x</option><option value="3">3x</option><option value="4">4x</option>'
 speedSelector.value = '2'
