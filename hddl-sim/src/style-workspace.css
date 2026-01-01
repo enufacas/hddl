@@ -1034,6 +1034,7 @@ html {
 .page-container[data-testid="home-page"] {
     max-width: none;
     margin: 0;
+    padding-bottom: 0;
 }
 
 .page-container h1 {
@@ -2166,12 +2167,7 @@ body.aux-hidden .aux-peek {
 .aux-peek .codicon {
     font-size: 16px;
 }
-    writing-mode: vertical-rl;
-    text-orientation: mixed;
-    font-size: 10px;
-    letter-spacing: 0.8px;
-    text-transform: uppercase;
-}
+
 
 /* Bottom panel (Terminal) stays under editor only (not under auxiliary) */
 .part.panel {
@@ -3706,10 +3702,10 @@ body.sash-dragging.sash-horizontal-dragging * {
 }
 
 .layout-selector-dropdown {
-    position: absolute;
-    bottom: calc(100% + 4px);
-    right: 0;
-    z-index: 10000;
+    position: fixed;
+    bottom: var(--statusbar-height, 24px);
+    right: 12px;
+    z-index: 999999;
     min-width: 220px;
     max-width: 320px;
     padding: var(--space-2, 8px);

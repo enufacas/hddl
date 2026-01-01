@@ -394,12 +394,18 @@ export function createLayoutSelector(layoutManager) {
   function openDropdown() {
     dropdown.hidden = false
     button.setAttribute('aria-expanded', 'true')
+    // Append dropdown to body to escape statusbar stacking context
+    document.body.appendChild(dropdown)
     renderDropdown()
   }
   
   function closeDropdown() {
     dropdown.hidden = true
     button.setAttribute('aria-expanded', 'false')
+    // Remove from body when closed
+    if (dropdown.parentNode === document.body) {
+      document.body.removeChild(dropdown)
+    }
   }
   
   function toggleDropdown() {
@@ -431,7 +437,7 @@ export function createLayoutSelector(layoutManager) {
   })
   
   container.appendChild(button)
-  container.appendChild(dropdown)
+  // Don't append dropdown to container - it will be added to body when opened
   
   // Add highlight arrow
   const arrow = document.createElement('div')

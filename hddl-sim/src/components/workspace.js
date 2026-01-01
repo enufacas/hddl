@@ -17,6 +17,7 @@ import { getCurrentScenarioId } from '../sim/scenario-loader'
 import { initGlossaryInline } from './glossary'
 import { getStewardColor, toSemver } from '../sim/steward-colors'
 import { ResizablePanel, initPanelKeyboardShortcuts, PANEL_DEFAULTS, loadPanelWidth, savePanelWidth } from './resizable-panel'
+import { createEnvelopeDetailModal } from './envelope-detail'
 
 const STORAGE_KEY = 'hddl:layout'
 
@@ -96,7 +97,7 @@ const navItems = [
 
 const sidebarSections = [
   { id: 'primary', title: 'Primary', icon: 'eye', collapsed: false },
-  { id: 'secondary', title: 'Secondary', icon: 'layers', collapsed: false },
+  { id: 'secondary', title: 'Secondary', icon: 'layers', collapsed: true },
   { id: 'reference', title: 'Reference', icon: 'book', collapsed: true },
 ]
 
@@ -775,7 +776,7 @@ function createCollapsibleEnvelopeSection() {
   header.style.cssText = 'display: flex; align-items: center; gap: 6px; cursor: pointer; padding: 8px 0; border-bottom: 1px solid var(--vscode-sideBar-border);'
   
   const chevron = document.createElement('span')
-  chevron.className = `codicon codicon-chevron-${telemetrySectionState['Active Envelope'] ? 'down' : 'right'}`
+  chevron.className = `codicon codicon-chevron-${telemetrySectionState['Active Envelopes'] ? 'down' : 'right'}`
   chevron.style.cssText = 'font-size: 12px;'
   
   const icon = document.createElement('span')
@@ -783,7 +784,7 @@ function createCollapsibleEnvelopeSection() {
   icon.style.cssText = 'font-size: 14px;'
   
   const title = document.createElement('h3')
-  title.textContent = 'Active Envelope'
+  title.textContent = 'Active Envelopes'
   title.style.cssText = 'font-size: 11px; font-weight: 600; text-transform: uppercase; margin: 0; letter-spacing: 0.5px; flex: 1;'
   
   const meta = document.createElement('span')
@@ -800,12 +801,12 @@ function createCollapsibleEnvelopeSection() {
   const content = document.createElement('div')
   content.className = 'sidebar-envelope__body'
   content.setAttribute('data-testid', 'envelope-details')
-  content.style.cssText = telemetrySectionState['Active Envelope'] ? 'display: block; padding-top: 8px;' : 'display: none;'
+  content.style.cssText = telemetrySectionState['Active Envelopes'] ? 'display: block; padding-top: 8px;' : 'display: none;'
   
   // Toggle collapse on header click
   header.addEventListener('click', () => {
-    telemetrySectionState['Active Envelope'] = !telemetrySectionState['Active Envelope']
-    const isCollapsed = !telemetrySectionState['Active Envelope']
+    telemetrySectionState['Active Envelopes'] = !telemetrySectionState['Active Envelopes']
+    const isCollapsed = !telemetrySectionState['Active Envelopes']
     chevron.className = `codicon codicon-chevron-${isCollapsed ? 'right' : 'down'}`
     content.style.display = isCollapsed ? 'none' : 'block'
   })
@@ -831,98 +832,113 @@ function renderEnvelopeDetails(panelEl, scenario, timeHour, stewardFilter) {
 
   if (!activeEnvelopes.length) {
     body.innerHTML = `<div class="sidebar-envelope__empty">No active envelopes at current time.</div>`
-    // Clear background tint when no active envelope
-    const sectionEl = body.closest('.sidebar-envelope-section')
-    if (sectionEl) {
-      sectionEl.style.backgroundColor = ''
-      sectionEl.style.borderLeft = ''
-    }
     return
   }
 
-  // Clear section-level tint (we'll tint each envelope card individually)
-  const sectionEl = body.closest('.sidebar-envelope-section')
-  if (sectionEl) {
-    sectionEl.style.backgroundColor = ''
-    sectionEl.style.borderLeft = ''
+  // Helper to get prohibited constraints
+  const getProhibitedConstraints = (constraints) => {
+    const items = Array.isArray(constraints) ? constraints : []
+    return items.filter(c => {
+      const s = String(c || '')
+      return s.startsWith('No ') || s.includes('Not permitted') || s.startsWith('Human-only') || s.includes('Human-only')
+    })
   }
 
-  // Render all active envelopes with their steward colors
-  body.innerHTML = activeEnvelopes.map(envelope => {
-    const effective = getEnvelopeAtTime(scenario, envelope.envelopeId, timeHour) || envelope
-    const currentVersion = effective?.envelope_version ?? 1
-    const baseVersion = envelope?.envelope_version ?? 1
-    const semver = toSemver(currentVersion)
-    const isVersionBumped = currentVersion > baseVersion
+  // Render boundary badges
+  const renderBoundaryBadges = (envelopeId) => {
     const boundary = getBoundaryInteractionCounts(scenario, timeHour, 24)
-    const boundaryBucket = boundary?.byEnvelope?.get?.(envelope.envelopeId)
-    const boundaryEscalated = boundaryBucket?.escalated ?? 0
-    const boundaryOverridden = boundaryBucket?.overridden ?? 0
-    const boundaryDeferred = boundaryBucket?.deferred ?? 0
+    const bucket = boundary?.byEnvelope?.get?.(envelopeId)
+    if (!bucket) return ''
+    const escalated = bucket.escalated ?? 0
+    const overridden = bucket.overridden ?? 0
+    const deferred = bucket.deferred ?? 0
+    if (!escalated && !overridden && !deferred) return ''
 
-    const diff = getRevisionDiffAtTime(scenario, envelope.envelopeId, timeHour)
-    const hasChanges = diff && ((diff.assumptions?.added?.length ?? 0) > 0 || (diff.assumptions?.removed?.length ?? 0) > 0 || (diff.constraints?.added?.length ?? 0) > 0 || (diff.constraints?.removed?.length ?? 0) > 0)
+    const parts = []
+    if (escalated) parts.push(`<span style="border: 1px solid var(--vscode-sideBar-border); border-left: 3px solid var(--status-warning); background: var(--vscode-editor-background); color: var(--vscode-statusBar-foreground); padding: 2px 8px; border-radius: 999px;" title="Boundary escalations (last 24h)">Esc ${escalated}</span>`)
+    if (overridden) parts.push(`<span style="border: 1px solid var(--vscode-sideBar-border); border-left: 3px solid var(--status-error); background: var(--vscode-editor-background); color: var(--vscode-statusBar-foreground); padding: 2px 8px; border-radius: 999px;" title="Boundary overrides (last 24h)">Ovr ${overridden}</span>`)
+    if (deferred) parts.push(`<span style="border: 1px solid var(--vscode-sideBar-border); border-left: 3px solid var(--status-info); background: var(--vscode-editor-background); color: var(--vscode-statusBar-foreground); padding: 2px 8px; border-radius: 999px;" title="Boundary deferrals (last 24h)">Def ${deferred}</span>`)
+    return parts.join('')
+  }
 
-    const stewardColor = getStewardColor(envelope.ownerRole)
+  // Render all active envelopes using the superior card format from home.js
+  body.innerHTML = activeEnvelopes.map(env => {
+    const effective = getEnvelopeAtTime(scenario, env.envelopeId, timeHour) || env
+    const status = 'active' // We know they're all active since we filtered
+    const statusIcon = 'pass-filled'
+    const statusColor = 'var(--status-success)'
+    const statusLabel = 'Active at selected time'
+
+    const version = effective?.envelope_version ?? 1
+    const baseVersion = env?.envelope_version ?? 1
+    const semver = toSemver(version)
+    const isVersionBumped = version > baseVersion
+    const revisionId = effective?.revision_id || '-'
+    const prohibitedAll = getProhibitedConstraints(effective?.constraints)
+    const hardStopCount = prohibitedAll.length
+    const hardStopPreview = prohibitedAll.slice(0, 3)
+    const boundaryBadges = renderBoundaryBadges(env.envelopeId)
+    
+    // Get steward color for visual correlation with map
+    const stewardColor = getStewardColor(env.ownerRole)
+    const borderStyle = `3px solid ${stewardColor}`
+    const accentBar = `<div style="position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: ${stewardColor}; border-radius: 6px 0 0 6px;"></div>`
     
     // Version badge with bump indicator
     const versionBadge = isVersionBumped
-      ? `<span style="background: var(--status-warning); color: var(--vscode-editor-background); padding: 3px 8px; border-radius: 3px; font-weight: 600;">↑ v${semver}</span>`
-      : `<span style="background: var(--vscode-badge-background); padding: 3px 8px; border-radius: 3px;">v${semver}</span>`
+      ? `<span style="background: var(--status-warning); color: var(--vscode-editor-background); padding: 2px 6px; border-radius: 3px; font-weight: 600;">↑ v${semver}</span>`
+      : `<span style="padding: 2px 6px;">v${semver}</span>`
 
     return `
-      <div class="envelope-detail-compact" style="margin-bottom: 16px; padding: 12px; border-radius: 6px; background: color-mix(in srgb, ${stewardColor} 10%, var(--vscode-sideBar-background)); border-left: 3px solid ${stewardColor};">
-        <div class="envelope-header" style="margin-bottom: 12px;">
-          <div style="font-family: monospace; font-size: 11px; color: var(--vscode-statusBar-foreground);">${envelope.envelopeId}</div>
-          <div style="font-size: 14px; font-weight: 600; margin: 4px 0;">${envelope.name}</div>
-          <div style="font-size: 11px; color: var(--vscode-statusBar-foreground); display: flex; align-items: center; gap: 6px;">
-            <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: ${stewardColor};"></span>
-            <span>${envelope.ownerRole}</span>
-          </div>
-        </div>
-
-        <div style="margin-bottom: 12px; padding: 8px; background: var(--vscode-input-background); border-radius: 4px; font-size: 11px;">
-          <div style="color: var(--vscode-statusBar-foreground); margin-bottom: 4px;">Domain: ${envelope.domain || '-'}</div>
-          <div style="color: var(--vscode-statusBar-foreground);">Window: ${formatSimTime(envelope.createdHour ?? 0)} → ${formatSimTime(envelope.endHour ?? 48)}</div>
-        </div>
-
-        <div style="margin-bottom: 12px;">
-          <div style="font-size: 11px; font-weight: 600; color: var(--vscode-statusBar-foreground); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Version Info</div>
-          <div style="display: flex; gap: 8px; font-size: 11px;">
-            ${versionBadge}
-            ${hasChanges ? '<span style="background: var(--status-warning); opacity: 0.2; padding: 3px 8px; border-radius: 3px;">Revised</span>' : ''}
-          </div>
-        </div>
-
-        ${(boundaryEscalated + boundaryOverridden + boundaryDeferred) > 0 ? `
-          <div style="margin-bottom: 12px;">
-            <div style="font-size: 11px; font-weight: 600; color: var(--vscode-statusBar-foreground); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Boundary (24h)</div>
-            <div style="display: flex; flex-wrap: wrap; gap: 6px; font-size: 10px;">
-              ${boundaryEscalated ? `<span style="background: var(--status-warning); opacity: 0.2; padding: 3px 6px; border-radius: 3px;">Esc: ${boundaryEscalated}</span>` : ''}
-              ${boundaryOverridden ? `<span style="background: var(--status-error); opacity: 0.2; padding: 3px 6px; border-radius: 3px;">Ovr: ${boundaryOverridden}</span>` : ''}
-              ${boundaryDeferred ? `<span style="background: var(--status-info); opacity: 0.2; padding: 3px 6px; border-radius: 3px;">Def: ${boundaryDeferred}</span>` : ''}
+      <div class="envelope-card" data-envelope="${env.envelopeId}" data-steward-color="${stewardColor}" style="--envelope-accent: ${stewardColor}; position: relative; background: var(--vscode-sideBar-background); border: ${borderStyle}; padding: 12px; padding-left: 16px; border-radius: 6px; cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s; margin-bottom: 12px;">
+        ${accentBar}
+        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+          <div>
+            <div style="font-family: monospace; font-size: 11px; color: var(--vscode-statusBar-foreground);">${env.envelopeId}</div>
+            <h3 style="margin: 4px 0; font-size: 13px;">${env.name}</h3>
+            <div style="display:flex; gap: 10px; flex-wrap: wrap; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; font-size: 11px; color: var(--vscode-statusBar-foreground);">
+              ${versionBadge}
+              <span>rev: ${revisionId}</span>
             </div>
           </div>
-        ` : ''}
-
-        <div style="margin-bottom: 8px;">
-          <div style="font-size: 11px; font-weight: 600; color: var(--vscode-statusBar-foreground); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Assumptions</div>
-          <div style="font-size: 11px; line-height: 1.4;">
-            ${(effective.assumptions ?? []).slice(0, 3).map(a => `<div style="margin-bottom: 4px; padding-left: 8px; border-left: 2px solid #00bcd4;">${escapeHtml(String(a))}</div>`).join('') || '<div style="color: var(--vscode-statusBar-foreground);">No assumptions</div>'}
-            ${(effective.assumptions ?? []).length > 3 ? `<div style="color: var(--vscode-statusBar-foreground); font-size: 10px; margin-top: 4px;">+${(effective.assumptions ?? []).length - 3} more</div>` : ''}
-          </div>
+          <span class="codicon codicon-${statusIcon}" style="color: ${statusColor};"></span>
         </div>
-
-        <div>
-          <div style="font-size: 11px; font-weight: 600; color: var(--vscode-statusBar-foreground); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Constraints</div>
-          <div style="font-size: 11px; line-height: 1.4;">
-            ${(effective.constraints ?? []).slice(0, 3).map(c => `<div style="margin-bottom: 4px; padding-left: 8px; border-left: 2px solid #ff6b6b;">${escapeHtml(String(c))}</div>`).join('') || '<div style="color: var(--vscode-statusBar-foreground);">No constraints</div>'}
-            ${(effective.constraints ?? []).length > 3 ? `<div style="color: var(--vscode-statusBar-foreground); font-size: 10px; margin-top: 4px;">+${(effective.constraints ?? []).length - 3} more</div>` : ''}
-          </div>
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 12px;">
+          <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: ${stewardColor};"></span>
+          <span>${env.ownerRole}</span>
+        </div>
+        <div style="font-size: 12px; color: var(--vscode-statusBar-foreground); margin-bottom: 12px;">${statusLabel}</div>
+        <div style="font-size: 12px; color: var(--vscode-statusBar-foreground); margin-bottom: 12px;">Window: ${formatSimTime(env.createdHour)} -> ${formatSimTime(env.endHour)}</div>
+        <div style="display: flex; gap: 6px; font-size: 11px; flex-wrap: wrap;">
+          <span style="border: 1px solid var(--vscode-sideBar-border); border-left: 3px solid var(--status-info); background: var(--vscode-editor-background); color: var(--vscode-statusBar-foreground); padding: 2px 8px; border-radius: 999px;" title="Total constraints">${(effective.constraints ?? []).length} constraints</span>
+          <span style="border: 1px solid var(--vscode-sideBar-border); background: var(--vscode-editor-background); color: var(--vscode-statusBar-foreground); padding: 2px 8px; border-radius: 999px;" title="Domain">${env.domain}</span>
+          ${hardStopCount ? `<span style="border: 1px solid var(--vscode-sideBar-border); border-left: 3px solid var(--status-warning); background: var(--vscode-editor-background); color: var(--vscode-statusBar-foreground); padding: 2px 8px; border-radius: 999px;" title="${escapeAttr(`Hard stop constraints:\n${hardStopPreview.join('\n')}${hardStopCount > hardStopPreview.length ? `\n+${hardStopCount - hardStopPreview.length} more` : ''}`)}">Hard stops: ${hardStopCount}</span>` : ''}
+          ${boundaryBadges ? `<span>${boundaryBadges}</span>` : ''}
         </div>
       </div>
     `
   }).join('')
+
+  // Attach handlers for hover and click
+  const envelopeCards = body.querySelectorAll('.envelope-card')
+  envelopeCards.forEach(card => {
+    const stewardColor = card.dataset.stewardColor || 'var(--status-info)'
+    card.addEventListener('mouseenter', () => {
+      card.style.borderColor = stewardColor
+      card.style.boxShadow = `0 0 8px ${stewardColor}40`
+    })
+    card.addEventListener('mouseleave', () => {
+      card.style.borderColor = stewardColor
+      card.style.boxShadow = 'none'
+    })
+    card.addEventListener('click', (e) => {
+      e.stopPropagation()
+      const envelopeId = card.dataset.envelope
+      const modal = createEnvelopeDetailModal(envelopeId)
+      const app = document.querySelector('#app')
+      app.appendChild(modal)
+    })
+  })
 }
 
 function createStewardFleetsPanel() {
@@ -1168,7 +1184,7 @@ function createAuxiliaryBar() {
 
 // Update telemetry display with collapsible sections
 const telemetrySectionState = {
-  'Active Envelope': true,
+  'Active Envelopes': true,
   'Live Metrics': true,
   'Decision Quality': true,
   'Stewardship': true,

@@ -120,9 +120,9 @@ export function createEnvelopeDetailModal(envelopeId) {
         <div style="display:flex; flex-direction: column; gap: 6px; min-width: 220px;">
           <div style="font-size: 10px; color: var(--vscode-statusBar-foreground); letter-spacing: 0.6px;">BOUNDARY (LAST 24H)</div>
           <div style="display:flex; gap: 8px; flex-wrap: wrap; font-size: 11px;">
-            <span style="background: var(--status-warning); opacity: 0.18; padding: 2px 6px; border-radius: 3px;">Escalated: ${boundaryEscalated}</span>
-            <span style="background: var(--status-error); opacity: 0.18; padding: 2px 6px; border-radius: 3px;">Overridden: ${boundaryOverridden}</span>
-            <span style="background: var(--status-info); opacity: 0.18; padding: 2px 6px; border-radius: 3px;">Deferred: ${boundaryDeferred}</span>
+            <span style="border: 1px solid var(--vscode-sideBar-border); border-left: 3px solid var(--status-warning); background: var(--vscode-editor-background); color: var(--vscode-statusBar-foreground); padding: 2px 8px; border-radius: 999px;">Escalated: ${boundaryEscalated}</span>
+            <span style="border: 1px solid var(--vscode-sideBar-border); border-left: 3px solid var(--status-error); background: var(--vscode-editor-background); color: var(--vscode-statusBar-foreground); padding: 2px 8px; border-radius: 999px;">Overridden: ${boundaryOverridden}</span>
+            <span style="border: 1px solid var(--vscode-sideBar-border); border-left: 3px solid var(--status-info); background: var(--vscode-editor-background); color: var(--vscode-statusBar-foreground); padding: 2px 8px; border-radius: 999px;">Deferred: ${boundaryDeferred}</span>
           </div>
         </div>
       </div>

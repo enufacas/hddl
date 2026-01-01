@@ -384,8 +384,8 @@ export function render(container) {
         
         const card = document.createElement('div');
         card.style.cssText = `
-          background: ${isProhibited ? 'color-mix(in srgb, var(--status-error) 10%, var(--vscode-input-background))' : (isAvailable ? 'var(--vscode-sideBar-background)' : 'var(--vscode-sideBar-background)')};
-          border: 1px solid ${isProhibited ? 'var(--status-error)' : (isAvailable ? stewardColor : 'var(--vscode-sideBar-border)')};
+          background: ${isProhibited ? 'color-mix(in srgb, var(--status-warning) 10%, var(--vscode-input-background))' : (isAvailable ? 'var(--vscode-sideBar-background)' : 'var(--vscode-sideBar-background)')};
+          border: 1px solid ${isProhibited ? 'var(--status-warning)' : (isAvailable ? stewardColor : 'var(--vscode-sideBar-border)')};
           padding: 12px;
           border-radius: 4px;
           opacity: ${isAvailable ? '1' : '0.6'};
@@ -409,7 +409,7 @@ export function render(container) {
           });
         }
 
-        const iconColor = isProhibited ? 'var(--status-error)' : (isAvailable ? stewardColor : 'var(--vscode-statusBar-foreground)');
+        const iconColor = isProhibited ? 'var(--status-warning)' : (isAvailable ? stewardColor : 'var(--vscode-statusBar-foreground)');
 
         card.innerHTML = `
           <div style="display: flex; align-items: start; justify-content: space-between; gap: 8px;">
@@ -417,7 +417,7 @@ export function render(container) {
               <span class="codicon codicon-${action.icon}" style="font-size: 20px; color: ${iconColor}; flex-shrink: 0;"></span>
               <strong style="font-size: 13px; line-height: 1.3;">${action.label}</strong>
             </div>
-            ${isProhibited ? '<span title="Stewards cannot perform this action. Domain Engineers handle implementation." style="font-size: 10px; padding: 2px 6px; background: var(--status-error); color: var(--vscode-editor-background); border-radius: 3px; font-weight: 600; cursor: help;">PROHIBITED</span>' : ''}
+            ${isProhibited ? '<span title="Stewards cannot perform this action. Domain Engineers handle implementation." style="font-size: 10px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--vscode-sideBar-border); border-left: 3px solid var(--status-warning); background: var(--vscode-editor-background); color: var(--vscode-statusBar-foreground); font-weight: 600; cursor: help;">OUT OF SCOPE</span>' : ''}
           </div>
           <p style="margin: 0; font-size: 11px; color: var(--vscode-statusBar-foreground); line-height: 1.4;">${action.description}</p>
           <div style="font-size: 11px; padding: 6px 8px; background: var(--vscode-input-background); border-radius: 3px; font-style: italic; color: var(--vscode-statusBar-foreground); line-height: 1.4;">

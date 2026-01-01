@@ -140,6 +140,9 @@ function navigate(path) {
   
   route(editorArea)
   
+  // Ensure peek handles exist after navigation (in case they weren't preserved)
+  ensurePeekHandles()
+  
   // Update active state in navigation
   updateActiveNav(normalized)
 
