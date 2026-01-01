@@ -130,10 +130,12 @@ async function measurePerformance() {
     timeout: 30000 
   });
   
+  const networkIdleTime = Date.now() - startTime;
   console.log('  Page loaded, checking for errors...');
   
-  // Wait a bit for async scenario loading
-  await page.waitForTimeout(2000);
+  // Wait a bit for async scenario loading (test methodology pause, not real load time)
+  const ASYNC_SETTLE_PAUSE = 2000;
+  await page.waitForTimeout(ASYNC_SETTLE_PAUSE);
   
   if (consoleMessages.length > 0) {
     console.log('  Browser console:');
@@ -174,9 +176,10 @@ async function measurePerformance() {
   
   // Wait for initial render - be more generous with timeout
   await page.waitForSelector('#hddl-map-container svg', { timeout: 30000 });
-  const loadTime = Date.now() - startTime;
+  const totalLoadTime = Date.now() - startTime;
+  const actualLoadTime = totalLoadTime - ASYNC_SETTLE_PAUSE;
   
-  console.log(`  ✅ Loaded in ${loadTime}ms`);
+  console.log(`  ✅ Loaded in ${actualLoadTime}ms (+ ${ASYNC_SETTLE_PAUSE}ms test settle pause = ${totalLoadTime}ms total)`);
 
   // ============================================================================
   // SVG COMPLEXITY - Count DOM nodes
@@ -316,8 +319,10 @@ async function measurePerformance() {
   console.log(`  Starting playback from this position...`);
   
   // Let particles render from the advanced timeline position
-  console.log('  Waiting for particles to render...');
-  await new Promise(resolve => setTimeout(resolve, 3000)); // Extended wait for particle spawn
+  // (test methodology pause - ensures particles have time to spawn before FPS measurement)
+  const PARTICLE_SPAWN_PAUSE = 3000;
+  console.log(`  Waiting for particles to render... (${PARTICLE_SPAWN_PAUSE}ms test pause)`);
+  await new Promise(resolve => setTimeout(resolve, PARTICLE_SPAWN_PAUSE));
   
   // Verify particles are animating
   const animationCheck = await page.evaluate(() => {
@@ -505,9 +510,9 @@ async function measurePerformance() {
   
   const summary = {
     'Initial Load Time': {
-      value: `${loadTime}ms`,
+      value: `${actualLoadTime}ms`,
       target: '< 2000ms',
-      status: loadTime < 2000 ? '✅' : '⚠️'
+      status: actualLoadTime < 2000 ? '✅' : '⚠️'
     },
     'First Contentful Paint': {
       value: `${paintMetrics.firstContentfulPaint.toFixed(0)}ms`,

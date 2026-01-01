@@ -1,0 +1,328 @@
+﻿
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+HDDL SCENARIO ANALYSIS: INSURANCE-UNDERWRITING
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+
+≡ƒôè SCENARIO STRUCTURE
+ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+Title: Insurance Underwriting ΓÇö Risk Assessment & Claims
+Duration: 120 hours
+Total Events: 70
+Envelopes: 9 (unique: 4)
+Steward Roles: 4
+Total Agents: 19
+
+≡ƒôê EVENT TYPE DISTRIBUTION
+ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  embedding                  29 (41.4%)
+  decision                   11 (15.7%)
+  retrieval                   8 (11.4%)
+  revision                    7 (10.0%)
+  boundary_interaction        6 (8.6%)
+  envelope_promoted           4 (5.7%)
+  signal                      4 (5.7%)
+  dsg_session                 1 (1.4%)
+
+ΓÅ░ TEMPORAL ANALYSIS
+ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+First Event: Hour -48 (embedding)
+Last Event: Hour 120 (signal)
+Historical Baseline: 4 events (hour < 0)
+Main Window: 66 events (0 to 120)
+
+Event Density by 12-hour Window:
+   -48--36 ΓûêΓûê 4
+     0-12  ΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûêΓûê 18
+    12-24  ΓûêΓûêΓûêΓûêΓûê 10
+    24-36  ΓûêΓûêΓûêΓûê 8
+    36-48  ΓûêΓûê 5
+    48-60  ΓûêΓûêΓûê 7
+    60-72  ΓûêΓûêΓûê 7
+    72-84  ΓûêΓûêΓûêΓûê 9
+    96-108  1
+   120-132  1
+
+≡ƒöä FEEDBACK LOOP ANALYSIS
+ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+Boundary Interactions: 6
+Revisions: 7
+Embeddings: 29
+Retrievals: 8
+
+Embeddings by Type:
+  decision                  14
+  boundary_interaction      7
+  revision                  7
+  session_artifact          1
+
+Boundary Interaction ΓåÆ Embedding Coverage:
+  Γ£à 6/6 boundaries have embeddings
+
+Revision ΓåÆ Embedding Coverage:
+  Γ£à 7/7 revisions have embeddings
+
+≡ƒÄ» COMPLETE FEEDBACK CYCLES (Boundary ΓåÆ Decision ΓåÆ Revision)
+ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+Complete Cycles: 6/6
+
+Cycle 1: High-risk application escalated
+  ΓÅ░ Timeline:
+     Hour 5.25: Retrieval by ThresholdEscalator
+     Hour 5.30: Boundary (escalated) by ThresholdEscalator
+     Hour 5.50: Boundary Embedding (EMB-INS-005)
+     Hour 5.70: Decision (allowed) by Senior Underwriter #12
+     Hour 6.20: Revision (constraint_addition)
+     Hour 6.70: Revision Embedding (EMB-INS-005)
+  ≡ƒôè Cycle Duration: 0.90 hours
+  ≡ƒÄ» Resolved: Codify manual underwriter decision pattern for flood risk properties to improve consistency.
+
+Cycle 2: Fraud indicators detected
+  ΓÅ░ Timeline:
+     Hour 12.35: Retrieval by FraudDetector
+     Hour 12.40: Boundary (escalated) by FraudDetector
+     Hour 13.00: Boundary Embedding (EMB-INS-002)
+     Hour 18.20: Decision (allowed) by Claims Adjuster #47
+     Hour 19.10: Revision (assumption_refinement)
+     Hour 19.60: Revision Embedding (EMB-INS-006)
+  ≡ƒôè Cycle Duration: 6.70 hours
+  ≡ƒÄ» Resolved: Reduce false positives in fraud detection by improving vehicle tracking logic.
+
+Cycle 3: Premium increase exceeds threshold
+  ΓÅ░ Timeline:
+     Hour 28.20: Retrieval by QuoteGenerator
+     Hour 28.70: Boundary (escalated) by QuoteGenerator
+     Hour 29.00: Boundary Embedding (EMB-INS-009)
+     Hour 29.10: Decision (allowed) by Alicia Rodriguez
+     Hour 30.50: Revision (constraint_relaxation)
+     Hour 31.00: Revision Embedding (EMB-INS-007)
+  ≡ƒôè Cycle Duration: 1.80 hours
+  ≡ƒÄ» Resolved: Enable competitive retention strategies while maintaining customer transparency and satisfaction.
+
+Cycle 4: Explainability gap identified
+  ΓÅ░ Timeline:
+     Hour 47.80: Retrieval by ExplainabilityEngine
+     Hour 48.30: Boundary (escalated) by ExplainabilityEngine
+     Hour 49.00: Boundary Embedding (EMB-INS-012)
+     Hour 52.80: Decision (allowed) by Diana Patel
+     Hour 54.20: Revision (constraint_addition)
+     Hour 54.70: Revision Embedding (EMB-INS-008)
+  ≡ƒôè Cycle Duration: 5.90 hours
+  ≡ƒÄ» Resolved: Prevent explainability gaps by enforcing structured documentation at decision time.
+
+Cycle 5: Confirmed fraud case escalated
+  ΓÅ░ Timeline:
+     Hour 62.00: Retrieval by FraudDetector
+     Hour 62.50: Boundary (escalated) by FraudDetector
+     Hour 63.00: Boundary Embedding (EMB-INS-009)
+     Hour 65.30: Decision (denied) by SIU Lead Investigator
+     Hour 66.80: Revision (assumption_expansion)
+     Hour 67.30: Revision Embedding (EMB-INS-010)
+  ≡ƒôè Cycle Duration: 4.30 hours
+  ≡ƒÄ» Resolved: Strengthen fraud detection capabilities based on organized fraud ring patterns.
+
+Cycle 6: Excessive renewal increase flagged
+  ΓÅ░ Timeline:
+     Hour 77.90: Retrieval by QuoteGenerator
+     Hour 78.40: Boundary (escalated) by QuoteGenerator
+     Hour 78.90: Boundary Embedding (EMB-INS-011)
+     Hour 79.20: Decision (denied) by Alicia Rodriguez
+     Hour 80.50: Revision (constraint_addition)
+     Hour 81.00: Revision Embedding (EMB-INS-012)
+  ≡ƒôè Cycle Duration: 2.10 hours
+  ≡ƒÄ» Resolved: Provide clear guidance for handling extreme risk profile changes while maintaining regulatory compliance.
+
+≡ƒæÑ ACTOR ANALYSIS
+ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+Most Active Actors:
+  Alicia Rodriguez                9 events: envelope_promoted(1), decision(2), embedding(4), revision(2)
+  RiskScorer                      8 events: embedding(4), retrieval(1), decision(2), signal(1)
+  FraudDetector                   7 events: embedding(3), retrieval(2), boundary_interaction(2)
+  Rebecca Foster                  7 events: envelope_promoted(1), revision(2), embedding(3), dsg_session(1)
+  QuoteGenerator                  6 events: retrieval(2), boundary_interaction(2), embedding(2)
+  Marcus Chen                     5 events: envelope_promoted(1), revision(2), embedding(2)
+  Diana Patel                     5 events: envelope_promoted(1), decision(1), embedding(2), revision(1)
+  ThresholdEscalator              4 events: embedding(2), retrieval(1), boundary_interaction(1)
+  ClaimTriager                    4 events: retrieval(1), decision(1), embedding(1), signal(1)
+  ExplainabilityEngine            3 events: retrieval(1), boundary_interaction(1), embedding(1)
+
+≡ƒôª ENVELOPE TIMELINE
+ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+ENV-INS-001: Policy Risk Assessment
+  v4: Hour 0-48 (48h duration)
+  v5: Hour 60-120 (60h duration)
+    ΓÜá∩╕Å  GAP: 12 hours between v4 and v5
+
+ENV-INS-002: Claims Triage & Fraud Detection
+  v3: Hour 0-36 (36h duration)
+  v4: Hour 60-96 (36h duration)
+  v5: Hour 108-120 (12h duration)
+    ΓÜá∩╕Å  GAP: 24 hours between v3 and v4
+    ΓÜá∩╕Å  GAP: 12 hours between v4 and v5
+
+ENV-INS-003: Premium Pricing & Quote Generation
+  v2: Hour 12-48 (36h duration)
+  v3: Hour 72-108 (36h duration)
+    ΓÜá∩╕Å  GAP: 24 hours between v2 and v3
+
+ENV-INS-004: Regulatory Compliance & Reporting
+  v1: Hour 0-48 (48h duration)
+  v2: Hour 60-120 (60h duration)
+    ΓÜá∩╕Å  GAP: 12 hours between v1 and v2
+
+≡ƒîè PARTICLE FLOW PATTERNS
+ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+Expected Particle Behaviors:
+
+SIGNAL (4 events)
+  Source: External ΓåÆ Envelope
+  Behavior: Curves down, fades immediately
+
+DECISION (ALLOWED) (8 events)
+  Source: Agent ΓåÆ Envelope
+  Behavior: Curves to envelope, orbits (18 ticks)
+
+DECISION (DENIED) (3 events)
+  Source: Agent ΓåÆ Envelope ΓåÆ Steward
+  Behavior: Curves to envelope, PULSES (3x), continues to steward
+    - Hour 10.3: RiskScorer ΓåÆ High-risk policy denied
+    - Hour 65.3: SIU Lead Investigator ΓåÆ Claims denied - fraud confirmed
+    - Hour 79.2: Alicia Rodriguez ΓåÆ Renewal exception denied
+
+BOUNDARY_INTERACTION (6 events)
+  Source: Agent ΓåÆ Envelope ΓåÆ Steward
+  Behavior: Curves to envelope, pulses (0.5s), continues to steward, ORBITS steward
+    - Hour 5.3: ThresholdEscalator ΓåÆ escalated (orbit: 23 ticks)
+    - Hour 12.4: FraudDetector ΓåÆ escalated (orbit: 168 ticks)
+    - Hour 28.7: QuoteGenerator ΓåÆ escalated (orbit: 45 ticks)
+    - Hour 48.3: ExplainabilityEngine ΓåÆ escalated (orbit: 148 ticks)
+    - Hour 62.5: FraudDetector ΓåÆ escalated (orbit: 107 ticks)
+    - Hour 78.4: QuoteGenerator ΓåÆ escalated (orbit: 52 ticks)
+
+REVISION (7 events)
+  Source: Steward ΓåÆ Envelope
+  Behavior: Curves from steward (lower arc), fades at envelope
+
+RETRIEVAL (8 events)
+  Source: Embedding Store ΓåÆ Agent
+  Behavior: Dotted curve from embedding store, fades at agent
+    - Hour 2.75: RiskScorer retrieves 1 embeddings (top: 94%)
+    - Hour 5.25: ThresholdEscalator retrieves 1 embeddings (top: 89%)
+    - Hour 8.05: ClaimTriager retrieves 1 embeddings (top: 87%)
+    - Hour 12.35: FraudDetector retrieves 1 embeddings (top: 91%)
+    - Hour 28.2: QuoteGenerator retrieves 2 embeddings (top: 89%)
+    - Hour 47.8: ExplainabilityEngine retrieves 2 embeddings (top: 92%)
+    - Hour 62: FraudDetector retrieves 2 embeddings (top: 94%)
+    - Hour 77.9: QuoteGenerator retrieves 2 embeddings (top: 91%)
+
+
+≡ƒöì PARTICLE FLOW VALIDATION (Visual Correctness)
+ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+Γ£à All particle flows have required fields for visualization
+
+
+≡ƒºá SEMANTIC COHERENCE & LEARNING
+ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+Embeddings with semantic vectors: 29/29
+Semantic diversity: 62% (vectors spread across quadrants)
+
+Retrieval-Query Alignment:
+  Retrievals with queries: 8/8
+
+Relevance Score Analysis:
+  Average relevance: 88%
+  Perfect scores (ΓëÑ95%): 0%
+
+Historical Baseline: 4 embeddings before hour 0
+  Referenced in retrievals: 7/8 (88%)
+
+ΓÜá∩╕Å  Found 4 semantic issues
+
+
+≡ƒöä FEEDBACK LOOP EFFECTIVENESS
+ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+Revision-Boundary Alignment: 3/6 revisions semantically address their boundaries
+Learning Evidence: 2/7 revision embeddings retrieved in future decisions
+Recurring Boundary Patterns: 1 boundary types occur multiple times
+
+ΓÜá∩╕Å  Found 3 effectiveness issues
+
+
+ΓÅ▒∩╕Å  TEMPORAL REALISM
+ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+Embedding Delays: 25/25 have realistic timing (0.2-2h after source)
+Retrieval-to-Action Timing: 5/8 have realistic gap (0.05-0.7h)
+
+Decision Latency Patterns:
+  Escalated decisions: 4
+  Routine decisions: 7
+  Note: Escalated decisions should show deliberation time
+
+ΓÜá∩╕Å  Found 3 temporal realism issues
+
+
+≡ƒæñ ACTOR BEHAVIOR PATTERNS
+ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+Agent Specialization: 0 events where agents operated outside their designated envelopes
+
+Decision Patterns:
+
+Retrieval Usage:
+  3 agents make complex decisions without using retrieval
+
+ΓÜá∩╕Å  Found 3 behavior pattern issues
+
+
+ΓÜá∩╕Å  POTENTIAL ISSUES & IMPROVEMENTS
+ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+Γ£à No issues found!
+
+
+≡ƒôï SUMMARY METRICS
+ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+Closed Loop Compliance:
+  Γ£à Revisions with embeddings      7/7 [REQUIRED]
+  Γ£à Boundaries with embeddings     6/6 [REQUIRED]
+  Γ£à Time paradoxes                 0 [REQUIRED]
+  ΓÜá∩╕Å Boundaries with retrieval      6/6 [RECOMMENDED]
+
+Particle Flow Validation:
+  Γ£à Missing boundary_kind          0
+  Γ£à Missing agent lookups          0
+  Γ£à Missing envelope targets       0
+  Γ£à Unresolved boundaries          0
+
+Semantic Coherence:
+  Γ£à Semantic vector validity       0
+  Γ£à Semantic diversity             Validated
+  Γ£à Historical baseline usage      Present
+
+Feedback Effectiveness:
+  ΓÜá∩╕Å Revision-boundary alignment    3/6
+  Γ£à Learning evidence              2/7 reused
+
+Temporal Realism:
+  Γ£à Embedding timing               25/25 realistic
+  ΓÜá∩╕Å Retrieval-to-action gaps       5/8 realistic
+
+Actor Behavior:
+  Γ£à Agent scope violations         0
+  Γ£à Decision variety               Validated
+
+Scenario Health:
+   Total events                   70
+   Event types                    8
+   Complete feedback cycles       6/6
+   Historical baseline events     4
+
+Identified Issues:
+  Γ£à Errors                         0
+  ΓÜá∩╕Å Warnings                       10
+   Suggestions                    3
+   Info                           0
+
+
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+ANALYSIS COMPLETE
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+

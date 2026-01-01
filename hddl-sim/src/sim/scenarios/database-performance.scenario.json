@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "id": "scenario-database-performance-001",
+  "id": "database-performance",
   "title": "Database Performance Monitoring — Observability & SLAs",
   "durationHours": 72,
   "envelopes": [
@@ -259,6 +259,23 @@
       "actorName": "Maya Chen"
     },
     {
+      "eventId": "embedding:0_1:ENV-DB-001:hist",
+      "hour": 0.1,
+      "type": "embedding",
+      "envelopeId": "ENV-DB-001",
+      "severity": "info",
+      "label": "Historical baseline embedding",
+      "detail": "Baseline embedding for database performance scenario.",
+      "actorRole": "Performance Steward",
+      "actorName": "System",
+      "embeddingId": "EMB-DB-HIST-001",
+      "embeddingType": "historical",
+      "vectorDimensions": 2,
+      "sourceEventId": "historical-baseline",
+      "semanticContext": "database performance baseline",
+      "semanticVector": [0.5, 0.5]
+    },
+    {
       "eventId": "envelope_promoted:0:ENV-DB-002:1",
       "hour": 0,
       "type": "envelope_promoted",
@@ -305,6 +322,20 @@
       "actorName": "AlertRouter"
     },
     {
+      "eventId": "retrieval:6_6:ENV-DB-001:4a",
+      "hour": 6.6,
+      "type": "retrieval",
+      "envelopeId": "ENV-DB-001",
+      "severity": "info",
+      "label": "Retrieving PII optimization patterns",
+      "detail": "QueryOptimizer checking historical PII table optimization protocols before escalation.",
+      "actorRole": "Performance Steward",
+      "actorName": "QueryOptimizer",
+      "queryText": "PII table optimization security review patterns",
+      "retrievedEmbeddings": ["EMB-DB-HIST-001"],
+      "relevanceScores": [0.87]
+    },
+    {
       "eventId": "boundary_interaction:6_8:ENV-DB-001:5",
       "hour": 6.8,
       "type": "boundary_interaction",
@@ -314,7 +345,8 @@
       "detail": "QueryOptimizer identified optimization on customer_profiles table (contains PII). Escalated to security review per constraints.",
       "actorRole": "Performance Steward",
       "actorName": "QueryOptimizer",
-      "boundaryType": "security_review_required"
+      "boundaryType": "security_review_required",
+      "boundary_kind": "escalated"
     },
     {
       "eventId": "envelope_promoted:12:ENV-DB-003:6",
@@ -399,6 +431,20 @@
       "sessionId": "DSG-PERF-001-W2"
     },
     {
+      "eventId": "retrieval:36_5:ENV-DB-003:12a",
+      "hour": 36.5,
+      "type": "retrieval",
+      "envelopeId": "ENV-DB-003",
+      "severity": "info",
+      "label": "Retrieving capacity buffer protocols",
+      "detail": "CostOptimizer checking historical capacity constraint patterns before cost optimization recommendation.",
+      "actorRole": "Infrastructure Steward",
+      "actorName": "CostOptimizer",
+      "queryText": "capacity buffer constraint cost optimization",
+      "retrievedEmbeddings": ["EMB-DB-HIST-001"],
+      "relevanceScores": [0.82]
+    },
+    {
       "eventId": "boundary_interaction:36_7:ENV-DB-003:13",
       "hour": 36.7,
       "type": "boundary_interaction",
@@ -408,7 +454,21 @@
       "detail": "CostOptimizer recommended downsizing test environment to save costs, but current utilization at 82% (buffer constraint: 20%).",
       "actorRole": "Infrastructure Steward",
       "actorName": "CostOptimizer",
-      "boundaryType": "constraint_approached"
+      "boundaryType": "constraint_approached",
+      "boundary_kind": "escalated"
+    },
+    {
+      "eventId": "embedding:37_2:boundary:36_7",
+      "hour": 37.2,
+      "type": "embedding",
+      "embeddingType": "boundary_interaction",
+      "sourceEventId": "boundary_interaction:36_7:ENV-DB-003:13",
+      "embeddingId": "EMB-DB-013",
+      "context": "Cost optimization conflicting with capacity buffer constraint on test environment",
+      "semanticVector": [0.72, 0.75],
+      "chunkText": "CostOptimizer recommended downsizing but current 82% utilization approaches 20% buffer constraint. Escalated for capacity review.",
+      "actorRole": "Infrastructure Steward",
+      "actorName": "CostOptimizer"
     },
     {
       "eventId": "signal:48:ENV-DB-002:14",
@@ -582,6 +642,82 @@
       "sourceEventId": "decision:52_1:ENV-DB-004:15",
       "semanticContext": "monthly SLA compliance report generation for 127 customers",
       "semanticVector": [0.65, 0.28]
+    },
+    {
+      "eventId": "revision:10:ENV-DB-001:26a",
+      "hour": 10,
+      "type": "revision",
+      "envelopeId": "ENV-DB-001",
+      "severity": "info",
+      "label": "PII optimization procedures updated",
+      "detail": "Performance Steward added explicit security review requirement for all PII table optimizations with audit trail.",
+      "actorRole": "Performance Steward",
+      "actorName": "Maya Chen",
+      "revisionType": "constraint_addition",
+      "reason": "Ensure security compliance for all PII-related query optimizations.",
+      "resolvesEventId": "boundary_interaction:6_8:ENV-DB-001:5"
+    },
+    {
+      "eventId": "embedding:10_5:ENV-DB-001:26b",
+      "hour": 10.5,
+      "type": "embedding",
+      "envelopeId": "ENV-DB-001",
+      "severity": "info",
+      "label": "PII optimization revision embedded",
+      "detail": "Updated PII table optimization security requirements stored.",
+      "actorRole": "Performance Steward",
+      "actorName": "Maya Chen",
+      "embeddingId": "EMB-DB-REV-001",
+      "embeddingType": "revision",
+      "vectorDimensions": 768,
+      "sourceEventId": "revision:10:ENV-DB-001:26a",
+      "semanticContext": "PII table optimization security review requirement",
+      "semanticVector": [0.65, 0.80]
+    },
+    {
+      "eventId": "retrieval:11_0:ENV-DB-001:26e",
+      "hour": 11.0,
+      "type": "retrieval",
+      "envelopeId": "ENV-DB-001",
+      "severity": "info",
+      "label": "Retrieve PII optimization revision",
+      "detail": "DecisionMemory retrieves the PII optimization revision embedding for query planning.",
+      "actorRole": "Performance Steward",
+      "actorName": "DecisionMemory",
+      "queryText": "PII optimization security revision",
+      "retrievedEmbeddings": ["EMB-DB-REV-001"],
+      "relevanceScores": [0.9]
+    },
+    {
+      "eventId": "revision:40:ENV-DB-003:26c",
+      "hour": 40,
+      "type": "revision",
+      "envelopeId": "ENV-DB-003",
+      "severity": "info",
+      "label": "Capacity buffer constraints refined",
+      "detail": "Infrastructure Steward adjusted capacity buffer threshold from 20% to 15% for non-production environments after cost analysis.",
+      "actorRole": "Infrastructure Steward",
+      "actorName": "Priya Patel",
+      "revisionType": "constraint_relaxation",
+      "reason": "Balance cost optimization with safety margins in test environments.",
+      "resolvesEventId": "boundary_interaction:36_7:ENV-DB-003:13"
+    },
+    {
+      "eventId": "embedding:40_5:ENV-DB-003:26d",
+      "hour": 40.5,
+      "type": "embedding",
+      "envelopeId": "ENV-DB-003",
+      "severity": "info",
+      "label": "Capacity buffer revision embedded",
+      "detail": "Refined capacity buffer thresholds for non-production environments stored.",
+      "actorRole": "Infrastructure Steward",
+      "actorName": "Priya Patel",
+      "embeddingId": "EMB-DB-REV-002",
+      "embeddingType": "revision",
+      "vectorDimensions": 768,
+      "sourceEventId": "revision:40:ENV-DB-003:26c",
+      "semanticContext": "capacity buffer threshold adjustment for cost optimization",
+      "semanticVector": [0.72, 0.55]
     },
     {
       "eventId": "embedding:62:ENV-DB-003:27",

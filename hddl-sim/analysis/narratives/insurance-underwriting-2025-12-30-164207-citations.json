@@ -1,0 +1,97 @@
+{
+  "narrativeFile": "insurance-underwriting-2025-12-30-164207.md",
+  "scenarioId": "scenario-insurance-underwriting-001",
+  "model": "gemini-3-flash-preview",
+  "method": "llm-full-context",
+  "tokensIn": 18105,
+  "tokensOut": 808,
+  "cost": 0.011477,
+  "generatedAt": "2025-12-30T21:42:20.790Z",
+  "citations": [
+    {
+      "eventId": "decision:8_1:ENV-INS-002:6",
+      "offset": 1722,
+      "context": "...the minor auto claim fast-tracked early on day one^[decision:8_1:ENV-INS-002:6], while escalating complex or suspicious cases for...",
+      "hour": 8.1,
+      "type": "decision",
+      "envelopeId": "ENV-INS-002"
+    },
+    {
+      "eventId": "boundary_interaction:5_3:ENV-INS-001:4",
+      "offset": 2094,
+      "context": "... for elevated flood risk, triggering an escalation^[boundary_interaction:5_3:ENV-INS-001:4]. After a senior underwriter approved the policy w...",
+      "hour": 5.3,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-INS-001"
+    },
+    {
+      "eventId": "revision:6_2:ENV-INS-001:5a",
+      "offset": 2360,
+      "context": "...properties, improving consistency across the fleet^[revision:6_2:ENV-INS-001:5a]. A second cycle occurred early on day two when th...",
+      "hour": 6.2,
+      "type": "revision",
+      "envelopeId": "ENV-INS-001"
+    },
+    {
+      "eventId": "boundary_interaction:28_7:ENV-INS-003:12",
+      "offset": 2557,
+      "context": "...ulated renewal increase exceeded the 15% threshold^[boundary_interaction:28_7:ENV-INS-003:12]. Pricing Steward Alicia Rodriguez reviewed the ca...",
+      "hour": 28.7,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-INS-003"
+    },
+    {
+      "eventId": "revision:30_5:ENV-INS-003:13a",
+      "offset": 2777,
+      "context": "...fic retention incentives like accident forgiveness^[revision:30_5:ENV-INS-003:13a]. Later, midway through day three, the FraudDetect...",
+      "hour": 30.5,
+      "type": "revision",
+      "envelopeId": "ENV-INS-003"
+    },
+    {
+      "eventId": "boundary_interaction:62_5:ENV-INS-002:17a",
+      "offset": 2896,
+      "context": "...e FraudDetector identified an organized fraud ring^[boundary_interaction:62_5:ENV-INS-002:17a], leading Marcus Chen to revise the envelope’s ass...",
+      "hour": 62.5,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-INS-002"
+    },
+    {
+      "eventId": "revision:66_8:ENV-INS-002:17c",
+      "offset": 3066,
+      "context": "...claim network analysis and GPS timeline validation^[revision:66_8:ENV-INS-002:17c].  By the end of the week, this HDDL-driven approa...",
+      "hour": 66.8,
+      "type": "revision",
+      "envelopeId": "ENV-INS-002"
+    },
+    {
+      "eventId": "signal:120:ENV-INS-001:25",
+      "offset": 3313,
+      "context": "...igh efficiency, with 72% of policies auto-approved^[signal:120:ENV-INS-001:25], yet every critical decision remained traceable t...",
+      "hour": 120,
+      "type": "signal",
+      "envelopeId": "ENV-INS-001"
+    },
+    {
+      "eventId": "boundary_interaction:48_3:ENV-INS-004:16",
+      "offset": 3539,
+      "context": "...tation gap in high-risk denials early on day three^[boundary_interaction:48_3:ENV-INS-004:16], Compliance Steward Diana Patel was able to immed...",
+      "hour": 48.3,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-INS-004"
+    },
+    {
+      "eventId": "revision:54_2:ENV-INS-004:16b",
+      "offset": 3704,
+      "context": "...lope to require structured justification templates^[revision:54_2:ENV-INS-004:16b], ensuring the fleet remained aligned with regulat...",
+      "hour": 54.2,
+      "type": "revision",
+      "envelopeId": "ENV-INS-004"
+    }
+  ],
+  "coverage": {
+    "eventsTotal": 73,
+    "eventsCited": 10,
+    "citationsTotal": 10
+  }
+}

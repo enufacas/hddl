@@ -24,9 +24,71 @@ const routes = {
   '/specification': renderSpecification,
 }
 
+// Create peek handles for collapsed panels
+function ensurePeekHandles() {
+  const editorArea = document.querySelector('#editor-area')
+  if (!editorArea) return
+  
+  // Check if peek handles already exist
+  if (editorArea.querySelector('.sidebar-peek') && editorArea.querySelector('.aux-peek')) {
+    return
+  }
+  
+  // Create sidebar peek handle
+  const sidebarPeek = document.createElement('div')
+  sidebarPeek.className = 'sidebar-peek'
+  sidebarPeek.setAttribute('role', 'button')
+  sidebarPeek.setAttribute('tabindex', '0')
+  sidebarPeek.setAttribute('aria-label', 'Open HDDL Simulation panel')
+  sidebarPeek.innerHTML = `
+    <span class="codicon codicon-chevron-right" aria-hidden="true"></span>
+    <span class="sidebar-peek__label">HDDL SIMULATION</span>
+  `.trim()
+  sidebarPeek.addEventListener('click', () => {
+    document.body.classList.remove('sidebar-hidden')
+    const state = JSON.parse(localStorage.getItem('hddl:layout') || '{}')
+    localStorage.setItem('hddl:layout', JSON.stringify({ ...state, sidebarCollapsed: false }))
+  })
+  sidebarPeek.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      sidebarPeek.click()
+    }
+  })
+  
+  // Create aux peek handle
+  const auxPeek = document.createElement('div')
+  auxPeek.className = 'aux-peek'
+  auxPeek.setAttribute('role', 'button')
+  auxPeek.setAttribute('tabindex', '0')
+  auxPeek.setAttribute('aria-label', 'Open AI Narrative panel')
+  auxPeek.innerHTML = `
+    <span class="codicon codicon-chevron-left" aria-hidden="true"></span>
+    <span class="aux-peek__label">AI NARRATIVE</span>
+  `.trim()
+  auxPeek.addEventListener('click', () => {
+    document.body.classList.remove('aux-hidden')
+    const state = JSON.parse(localStorage.getItem('hddl:layout') || '{}')
+    localStorage.setItem('hddl:layout', JSON.stringify({ ...state, auxCollapsed: false }))
+  })
+  auxPeek.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      auxPeek.click()
+    }
+  })
+  
+  // Append to editor area (will be preserved during navigations)
+  editorArea.appendChild(sidebarPeek)
+  editorArea.appendChild(auxPeek)
+}
+
 export function initRouter() {
   // Handle initial load
   navigate(normalizePath(window.location.pathname))
+  
+  // Create peek handles after initial navigation
+  ensurePeekHandles()
 
   // Handle back/forward
   window.addEventListener('popstate', () => {
@@ -43,10 +105,15 @@ export function initRouter() {
 }
 
 export function navigateTo(path) {
-  const normalized = normalizePath(path)
+  // Extract hash before normalization
+  const hashIndex = path.indexOf('#')
+  const hash = hashIndex >= 0 ? path.slice(hashIndex) : ''
+  const pathWithoutHash = hashIndex >= 0 ? path.slice(0, hashIndex) : path
+  
+  const normalized = normalizePath(pathWithoutHash)
   // Use base-aware path for pushState
   const base = import.meta.env.BASE_URL
-  const fullPath = base !== '/' ? base.slice(0, -1) + normalized : normalized
+  const fullPath = base !== '/' ? base.slice(0, -1) + normalized + hash : normalized + hash
   history.pushState(null, null, fullPath)
   navigate(normalized)
 }
@@ -61,7 +128,16 @@ function navigate(path) {
     return
   }
   
+  // Preserve peek handles before clearing
+  const sidebarPeek = editorArea.querySelector('.sidebar-peek')
+  const auxPeek = editorArea.querySelector('.aux-peek')
+  
   editorArea.innerHTML = ''
+  
+  // Restore peek handles
+  if (sidebarPeek) editorArea.appendChild(sidebarPeek)
+  if (auxPeek) editorArea.appendChild(auxPeek)
+  
   route(editorArea)
   
   // Update active state in navigation

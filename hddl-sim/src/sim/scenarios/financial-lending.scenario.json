@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "id": "scenario-financial-lending-001",
+  "id": "financial-lending",
   "title": "Consumer Lending Decisions — Fairness & Compliance",
   "durationHours": 120,
   "envelopes": [
@@ -302,6 +302,23 @@
       "actorName": "Patricia Nguyen"
     },
     {
+      "eventId": "embedding:0_1:ENV-FIN-BASE:hist",
+      "hour": 0.1,
+      "type": "embedding",
+      "envelopeId": "ENV-FIN-001",
+      "severity": "info",
+      "label": "Historical baseline embedding",
+      "detail": "Baseline historical embeddings for lending scenario.",
+      "actorRole": "Lending Steward",
+      "actorName": "System",
+      "embeddingId": "EMB-FIN-HIST-001",
+      "embeddingType": "historical",
+      "vectorDimensions": 2,
+      "sourceEventId": "historical-baseline",
+      "semanticContext": "historical lending baseline",
+      "semanticVector": [0.5, 0.5]
+    },
+    {
       "eventId": "decision:2_5:ENV-FIN-001:3",
       "hour": 2.5,
       "type": "decision",
@@ -313,6 +330,20 @@
       "actorName": "CreditScorer"
     },
     {
+      "eventId": "retrieval:5_6:ENV-FIN-001:3a",
+      "hour": 5.6,
+      "type": "retrieval",
+      "envelopeId": "ENV-FIN-001",
+      "severity": "info",
+      "label": "Borderline case retrieval",
+      "detail": "BorderlineReviewer retrieved similar borderline applications and approval patterns before escalation.",
+      "actorRole": "Lending Steward",
+      "actorName": "BorderlineReviewer",
+      "queryText": "borderline applications near threshold requiring manual review",
+      "retrievedEmbeddings": ["EMB-FIN-HIST-001"],
+      "relevanceScores": [0.88]
+    },
+    {
       "eventId": "boundary_interaction:5_8:ENV-FIN-001:4",
       "hour": 5.8,
       "type": "boundary_interaction",
@@ -322,7 +353,8 @@
       "detail": "BorderlineReviewer escalated application to human underwriter. Score: 682 (threshold: 680±5%). Manual review required.",
       "actorRole": "Lending Steward",
       "actorName": "BorderlineReviewer",
-      "boundaryType": "manual_review_required"
+      "boundaryType": "manual_review_required",
+      "boundary_kind": "escalated"
     },
     {
       "eventId": "decision:6_1:ENV-FIN-001:5",
@@ -349,6 +381,20 @@
       "value": 0.92
     },
     {
+      "eventId": "retrieval:12_3:ENV-FIN-001:6a",
+      "hour": 12.3,
+      "type": "retrieval",
+      "envelopeId": "ENV-FIN-001",
+      "severity": "info",
+      "label": "Denial precedent retrieval",
+      "detail": "CreditScorer retrieved similar high debt-to-income ratio cases and adverse action requirements.",
+      "actorRole": "Lending Steward",
+      "actorName": "CreditScorer",
+      "queryText": "debt-to-income ratio denials adverse action requirements",
+      "retrievedEmbeddings": ["EMB-FIN-HIST-001"],
+      "relevanceScores": [0.86]
+    },
+    {
       "eventId": "boundary_interaction:12_5:ENV-FIN-001:7",
       "hour": 12.5,
       "type": "boundary_interaction",
@@ -358,7 +404,8 @@
       "detail": "CreditScorer denied application due to debt-to-income ratio (58%, threshold: 45%). Adverse action notice generated.",
       "actorRole": "Lending Steward",
       "actorName": "CreditScorer",
-      "boundaryType": "hard_constraint"
+      "boundaryType": "hard_constraint",
+      "boundary_kind": "escalated"
     },
     {
       "eventId": "decision:12_6:ENV-FIN-001:8",
@@ -394,6 +441,20 @@
       "actorName": "HardshipEvaluator"
     },
     {
+      "eventId": "retrieval:36_5:ENV-FIN-002:10a",
+      "hour": 36.5,
+      "type": "retrieval",
+      "envelopeId": "ENV-FIN-002",
+      "severity": "info",
+      "label": "Fraud dispute retrieval",
+      "detail": "AppealProcessor retrieved similar international transaction disputes and resolution patterns.",
+      "actorRole": "Risk Steward",
+      "actorName": "AppealProcessor",
+      "queryText": "international transaction fraud disputes customer appeals",
+      "retrievedEmbeddings": [],
+      "relevanceScores": []
+    },
+    {
       "eventId": "boundary_interaction:36_7:ENV-FIN-002:11",
       "hour": 36.7,
       "type": "boundary_interaction",
@@ -403,7 +464,8 @@
       "detail": "Customer disputed fraud flag on international transaction. AppealProcessor reviewing travel documentation.",
       "actorRole": "Risk Steward",
       "actorName": "AppealProcessor",
-      "boundaryType": "customer_dispute"
+      "boundaryType": "customer_dispute",
+      "boundary_kind": "escalated"
     },
     {
       "eventId": "decision:38_1:ENV-FIN-002:12",
@@ -413,6 +475,19 @@
       "severity": "allowed",
       "label": "Fraud flag reversed",
       "detail": "AppealProcessor validated travel itinerary. Fraud flag removed, transaction approved retroactively. Customer notified.",
+      "actorRole": "Risk Steward",
+      "actorName": "AppealProcessor"
+    },
+    {
+      "eventId": "embedding:37_2:boundary:36_7",
+      "hour": 37.2,
+      "type": "embedding",
+      "embeddingType": "boundary_interaction",
+      "sourceEventId": "boundary_interaction:36_7:ENV-FIN-002:11",
+      "embeddingId": "EMB-FIN-011",
+      "context": "Customer disputed international transaction fraud alert, providing travel documentation as evidence",
+      "semanticVector": [0.75, 0.68],
+      "chunkText": "Fraud alert disputed by customer with documented international travel. Appeal processor reviewing evidence of legitimate transaction pattern.",
       "actorRole": "Risk Steward",
       "actorName": "AppealProcessor"
     },
@@ -455,6 +530,20 @@
       "reason": "Increase human oversight for marginal cases to improve fairness outcomes and customer experience."
     },
     {
+      "eventId": "retrieval:96_3:ENV-FIN-003:15a",
+      "hour": 96.3,
+      "type": "retrieval",
+      "envelopeId": "ENV-FIN-003",
+      "severity": "info",
+      "label": "Collections compliance retrieval",
+      "detail": "OutreachScheduler retrieved FDCPA contact time restrictions and violation prevention patterns.",
+      "actorRole": "Recovery Steward",
+      "actorName": "OutreachScheduler",
+      "queryText": "portfolio drift precedents",
+      "retrievedEmbeddings": ["EMB-FIN-HIST-001"],
+      "relevanceScores": [0.8]
+    },
+    {
       "eventId": "boundary_interaction:96_5:ENV-FIN-003:16",
       "hour": 96.5,
       "type": "boundary_interaction",
@@ -464,7 +553,49 @@
       "detail": "OutreachScheduler prevented contact attempt at 10:15pm customer local time. FDCPA violation avoided. Rescheduled for next business day.",
       "actorRole": "Recovery Steward",
       "actorName": "OutreachScheduler",
-      "boundaryType": "regulatory_constraint"
+      "boundaryType": "regulatory_constraint",
+      "boundary_kind": "escalated"
+    },
+    {
+      "eventId": "revision:97:ENV-FIN-003:16a",
+      "hour": 97,
+      "type": "revision",
+      "envelopeId": "ENV-FIN-003",
+      "severity": "info",
+      "label": "Enhanced contact time restrictions",
+      "detail": "Recovery Steward strengthened automated FDCPA compliance checks after near-violation. Added customer timezone validation.",
+      "actorRole": "Recovery Steward",
+      "actorName": "Patricia Nguyen",
+      "revisionType": "constraint_tightening",
+      "reason": "Prevent FDCPA violations through improved timezone and contact hour validation.",
+      "resolvesEventId": "boundary_interaction:96_5:ENV-FIN-003:16"
+    },
+    {
+      "eventId": "embedding:97_5:revision:97",
+      "hour": 97.5,
+      "type": "embedding",
+      "embeddingType": "revision",
+      "sourceEventId": "revision:97:ENV-FIN-003:16a",
+      "embeddingId": "EMB-FIN-017",
+      "context": "Enhanced FDCPA contact time restrictions with timezone validation",
+      "semanticVector": [0.22, 0.78],
+      "chunkText": "Recovery Steward enhanced automated compliance checks after collections contact blocked due to late-hour attempt. Added customer timezone validation to prevent FDCPA violations.",
+      "actorRole": "Recovery Steward",
+      "actorName": "Patricia Nguyen"
+    },
+    {
+      "eventId": "retrieval:98_0:ENV-FIN-003:16b",
+      "hour": 98.0,
+      "type": "retrieval",
+      "envelopeId": "ENV-FIN-003",
+      "severity": "info",
+      "label": "Retrieve FDCPA revision",
+      "detail": "DecisionMemory retrieves the FDCPA contact time restriction revision embedding for collections logic.",
+      "actorRole": "Recovery Steward",
+      "actorName": "DecisionMemory",
+      "queryText": "FDCPA contact time restriction revision timezone validation",
+      "retrievedEmbeddings": ["EMB-FIN-017"],
+      "relevanceScores": [0.91]
     },
     {
       "eventId": "embedding:7:ENV-FIN-001:18",

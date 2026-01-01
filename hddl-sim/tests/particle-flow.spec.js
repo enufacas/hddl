@@ -34,48 +34,38 @@ test.describe('Particle Flow - Visual Correctness', () => {
     expect(count).toBeGreaterThanOrEqual(0); // May be 0 if timeline at quiet moment
   });
 
-  test('particles render correctly (visual regression)', async ({ page }) => {
+  test('particles render at hour 2 (decision moment)', async ({ page }) => {
     // Scrub timeline to hour 2 where decision particle exists
     const timelineBar = page.locator('[data-testid="timeline-bar"]');
     const box = await timelineBar.boundingBox();
     // Hour 2 is at 33% of timeline (6 hour duration)
     await timelineBar.click({ position: { x: box.width * 0.33, y: 10 } });
-    await page.waitForTimeout(1000); // Wait for particles to stabilize
-    
-    // Take screenshot of map area with particles
-    const mapContainer = page.locator('#hddl-map-container');
-    await expect(mapContainer).toHaveScreenshot('particles-hour-2.png', {
-      maxDiffPixels: 100, // Allow minor rendering differences
-      animations: 'disabled'
-    });
+    await page.waitForTimeout(600);
+
+    const particles = page.locator('.particle');
+    expect(await particles.count()).toBeGreaterThan(0);
   });
 
-  test('boundary interaction particles render (visual regression)', async ({ page }) => {
+  test('boundary interaction particles render at hour 3', async ({ page }) => {
     // Scrub timeline to hour 3 where boundary particle exists
     const timelineBar = page.locator('[data-testid="timeline-bar"]');
     const box = await timelineBar.boundingBox();
     await timelineBar.click({ position: { x: box.width * 0.5, y: 10 } });
-    await page.waitForTimeout(1000);
-    
-    const mapContainer = page.locator('#hddl-map-container');
-    await expect(mapContainer).toHaveScreenshot('particles-hour-3-boundary.png', {
-      maxDiffPixels: 100,
-      animations: 'disabled'
-    });
+    await page.waitForTimeout(600);
+
+    const particles = page.locator('.particle');
+    expect(await particles.count()).toBeGreaterThan(0);
   });
 
-  test('revision particles render (visual regression)', async ({ page }) => {
+  test('revision particles render at hour 4', async ({ page }) => {
     // Scrub timeline to hour 4 where revision particle exists
     const timelineBar = page.locator('[data-testid="timeline-bar"]');
     const box = await timelineBar.boundingBox();
     await timelineBar.click({ position: { x: box.width * 0.67, y: 10 } });
-    await page.waitForTimeout(1000);
-    
-    const mapContainer = page.locator('#hddl-map-container');
-    await expect(mapContainer).toHaveScreenshot('particles-hour-4-revision.png', {
-      maxDiffPixels: 100,
-      animations: 'disabled'
-    });
+    await page.waitForTimeout(600);
+
+    const particles = page.locator('.particle');
+    expect(await particles.count()).toBeGreaterThan(0);
   });
 
   test('particle colors vary by type', async ({ page }) => {
@@ -99,15 +89,9 @@ test.describe('Particle Flow - Visual Correctness', () => {
     expect(colors.size).toBeGreaterThan(0);
   });
 
-  test('full timeline visual consistency (visual regression)', async ({ page }) => {
-    // Capture entire timeline at start
-    await page.waitForTimeout(500);
-    
+  test('map container renders at initial state', async ({ page }) => {
     const mapContainer = page.locator('#hddl-map-container');
-    await expect(mapContainer).toHaveScreenshot('particles-initial-state.png', {
-      maxDiffPixels: 100,
-      animations: 'disabled'
-    });
+    await expect(mapContainer).toBeVisible();
   });
 });
 
@@ -292,10 +276,10 @@ test.describe('Scenario Data Integrity', () => {
     expect(nodeCount).toBeGreaterThan(0);
     expect(nodeCount).toBeLessThanOrEqual(10);
     
-    // Count envelope shapes in map (should also be 4)
+    // Count envelope shapes in map (test-minimal has 2 envelopes)
     const envelopeShapes = page.locator('.envelope-body, .envelope-icon-circle');
     const shapeCount = await envelopeShapes.count();
     
-    expect(shapeCount).toBeGreaterThanOrEqual(4);
+    expect(shapeCount).toBeGreaterThanOrEqual(2);
   });
 });

@@ -11,6 +11,10 @@ export {
   getStewardFilter,
   setStewardFilter,
   onFilterChange,
+  setScrubbingState,
+  getIsScrubbing,
+  isWithinScrubCatchup,
+  triggerCatchupWindow,
 } from './store'
 
 export {

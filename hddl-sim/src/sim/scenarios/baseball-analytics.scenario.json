@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "id": "scenario-baseball-analytics-001",
+  "id": "baseball-analytics",
   "title": "Baseball Analytics — Performance & Strategy Optimization",
   "durationHours": 168,
   "envelopes": [
@@ -303,6 +303,20 @@
       "actorName": "Dr. Emily Rodriguez"
     },
     {
+      "eventId": "retrieval:18_5:ENV-BB-003:4a",
+      "hour": 18.5,
+      "type": "retrieval",
+      "envelopeId": "ENV-BB-003",
+      "severity": "info",
+      "label": "Pitcher injury risk patterns retrieved",
+      "detail": "BiomechanicsMonitor retrieved historical Tommy John risk patterns. Found 12 similar workload cases with arm slot deviations.",
+      "actorRole": "Health Steward",
+      "actorName": "BiomechanicsMonitor",
+      "queryText": "pitcher workload exceeded with biomechanics deviations and injury risk",
+      "retrievedEmbeddings": ["EMB-BB-002"],
+      "relevanceScores": [0.94]
+    },
+    {
       "eventId": "boundary_interaction:18_7:ENV-BB-003:5",
       "hour": 18.7,
       "type": "boundary_interaction",
@@ -312,7 +326,8 @@
       "detail": "BiomechanicsMonitor flagged ace pitcher: 4 starts in 15 days, 112 pitches last outing, arm slot deviation detected. Elevated Tommy John risk. Recommends 7-day rest.",
       "actorRole": "Health Steward",
       "actorName": "BiomechanicsMonitor",
-      "boundaryType": "injury_risk_elevated"
+      "boundaryType": "injury_risk_elevated",
+      "boundary_kind": "escalated"
     },
     {
       "eventId": "decision:19_1:ENV-BB-003:6",
@@ -326,6 +341,51 @@
       "actorName": "Dr. Emily Rodriguez"
     },
     {
+      "eventId": "revision:22:ENV-BB-003:16a",
+      "hour": 22,
+      "type": "revision",
+      "envelopeId": "ENV-BB-003",
+      "severity": "info",
+      "label": "Pitcher workload thresholds updated",
+      "detail": "Health Steward tightened biomechanics monitoring thresholds after ace pitcher risk. Arm slot deviation >5° now triggers mandatory evaluation.",
+      "actorRole": "Health Steward",
+      "actorName": "Dr. Emily Rodriguez",
+      "revisionType": "constraint_update",
+      "reason": "Proactive injury prevention by catching mechanical degradation earlier in workload cycle.",
+      "resolvesEventId": "boundary_interaction:18_7:ENV-BB-003:5"
+    },
+    {
+      "eventId": "embedding:22_5:ENV-BB-003:16b",
+      "hour": 22.5,
+      "type": "embedding",
+      "envelopeId": "ENV-BB-003",
+      "severity": "info",
+      "label": "Workload threshold revision embedded",
+      "detail": "Biomechanics threshold tightening stored with injury prevention rationale.",
+      "actorRole": "Health Steward",
+      "actorName": "Dr. Emily Rodriguez",
+      "embeddingId": "EMB-BB-016",
+      "embeddingType": "revision",
+      "vectorDimensions": 768,
+      "sourceEventId": "revision:22:ENV-BB-003:16a",
+      "semanticContext": "pitcher workload monitoring tightened with arm slot deviation threshold reduction",
+      "semanticVector": [0.20, 0.78]
+    },
+    {
+      "eventId": "retrieval:23_0:ENV-BB-003:16c",
+      "hour": 23.0,
+      "type": "retrieval",
+      "envelopeId": "ENV-BB-003",
+      "severity": "info",
+      "label": "Retrieve workload threshold revision",
+      "detail": "DecisionMemory retrieves the workload-threshold revision embedding for pitcher management.",
+      "actorRole": "Health Steward",
+      "actorName": "DecisionMemory",
+      "queryText": "workload threshold revision pitcher injury prevention",
+      "retrievedEmbeddings": ["EMB-BB-016"],
+      "relevanceScores": [0.89]
+    },
+    {
       "eventId": "decision:24_3:ENV-BB-002:7",
       "hour": 24.3,
       "type": "decision",
@@ -337,6 +397,20 @@
       "actorName": "ShiftAdvisor"
     },
     {
+      "eventId": "retrieval:36_3:ENV-BB-002:7a",
+      "hour": 36.3,
+      "type": "retrieval",
+      "envelopeId": "ENV-BB-002",
+      "severity": "info",
+      "label": "Bullpen usage patterns retrieved",
+      "detail": "BullpenManager retrieved historical reliever overuse patterns. Found 18 cases where rest prevented performance decline.",
+      "actorRole": "Strategy Steward",
+      "actorName": "BullpenManager",
+      "queryText": "closer overuse patterns with rest recommendations and substitution strategies",
+      "retrievedEmbeddings": ["EMB-BB-001", "EMB-BB-003"],
+      "relevanceScores": [0.89, 0.82]
+    },
+    {
       "eventId": "boundary_interaction:36_5:ENV-BB-002:8",
       "hour": 36.5,
       "type": "boundary_interaction",
@@ -346,7 +420,39 @@
       "detail": "BullpenManager flagged closer: 4 appearances in 5 days, 62 pitches thrown. Violates 3-in-5 usage policy. Recommends rest, setup man to close tonight.",
       "actorRole": "Strategy Steward",
       "actorName": "BullpenManager",
-      "boundaryType": "usage_limit_exceeded"
+      "boundaryType": "usage_limit_exceeded",
+      "boundary_kind": "escalated"
+    },
+    {
+      "eventId": "revision:40:ENV-BB-002:16c",
+      "hour": 40,
+      "type": "revision",
+      "envelopeId": "ENV-BB-002",
+      "severity": "info",
+      "label": "Closer usage policy refined",
+      "detail": "Strategy Steward added pitch count limits to 3-in-5 policy: max 55 pitches over 5-day window for closers to reduce overuse risk.",
+      "actorRole": "Strategy Steward",
+      "actorName": "Marcus Johnson",
+      "revisionType": "constraint_update",
+      "reason": "Appearance frequency alone insufficient — cumulative pitch count better predictor of fatigue.",
+      "resolvesEventId": "boundary_interaction:36_5:ENV-BB-002:8"
+    },
+    {
+      "eventId": "embedding:40_5:ENV-BB-002:16d",
+      "hour": 40.5,
+      "type": "embedding",
+      "envelopeId": "ENV-BB-002",
+      "severity": "info",
+      "label": "Closer usage revision embedded",
+      "detail": "Bullpen workload policy update stored with pitch count rationale.",
+      "actorRole": "Strategy Steward",
+      "actorName": "Marcus Johnson",
+      "embeddingId": "EMB-BB-017",
+      "embeddingType": "revision",
+      "vectorDimensions": 768,
+      "sourceEventId": "revision:40:ENV-BB-002:16c",
+      "semanticContext": "closer usage policy enhanced with cumulative pitch count limits over 5 days",
+      "semanticVector": [0.25, 0.70]
     },
     {
       "eventId": "decision:48_8:ENV-BB-004:9",
@@ -360,6 +466,20 @@
       "actorName": "TradeEvaluator"
     },
     {
+      "eventId": "retrieval:52:ENV-BB-004:9a",
+      "hour": 52,
+      "type": "retrieval",
+      "envelopeId": "ENV-BB-004",
+      "severity": "info",
+      "label": "Salary cap patterns retrieved",
+      "detail": "ContractOptimizer retrieved historical luxury tax threshold cases. Found 9 trades requiring restructuring with salary offsets.",
+      "actorRole": "Roster Steward",
+      "actorName": "ContractOptimizer",
+      "queryText": "luxury tax violations with trade restructuring and salary offset solutions",
+      "retrievedEmbeddings": ["EMB-BB-007"],
+      "relevanceScores": [0.91]
+    },
+    {
       "eventId": "boundary_interaction:52_2:ENV-BB-004:10",
       "hour": 52.2,
       "type": "boundary_interaction",
@@ -369,7 +489,8 @@
       "detail": "ContractOptimizer blocked proposed trade: would exceed luxury tax threshold by $1.2M. Requires restructuring or GM override for tax penalty acceptance.",
       "actorRole": "Roster Steward",
       "actorName": "ContractOptimizer",
-      "boundaryType": "budget_constraint"
+      "boundaryType": "budget_constraint",
+      "boundary_kind": "escalated"
     },
     {
       "eventId": "decision:54_1:ENV-BB-004:11",
@@ -381,6 +502,37 @@
       "detail": "GM approved modified trade with salary offset: acquiring team covers $800K. Now under luxury tax by $200K. Trade executed.",
       "actorRole": "Roster Steward",
       "actorName": "GM David Park"
+    },
+    {
+      "eventId": "revision:56:ENV-BB-004:16e",
+      "hour": 56,
+      "type": "revision",
+      "envelopeId": "ENV-BB-004",
+      "severity": "info",
+      "label": "Salary offset approval process added",
+      "detail": "Roster Steward formalized salary offset approval workflow: trades within $500K of tax threshold require pre-approval from both teams.",
+      "actorRole": "Roster Steward",
+      "actorName": "GM David Park",
+      "revisionType": "process_refinement",
+      "reason": "Prevent late-stage trade failures by establishing offset negotiation framework upfront.",
+      "resolvesEventId": "boundary_interaction:52_2:ENV-BB-004:10"
+    },
+    {
+      "eventId": "embedding:56_5:ENV-BB-004:16f",
+      "hour": 56.5,
+      "type": "embedding",
+      "envelopeId": "ENV-BB-004",
+      "severity": "info",
+      "label": "Salary offset revision embedded",
+      "detail": "Trade salary offset workflow stored with tax threshold prevention approach.",
+      "actorRole": "Roster Steward",
+      "actorName": "GM David Park",
+      "embeddingId": "EMB-BB-018",
+      "embeddingType": "revision",
+      "vectorDimensions": 768,
+      "sourceEventId": "revision:56:ENV-BB-004:16e",
+      "semanticContext": "salary offset pre-approval process for trades near luxury tax threshold",
+      "semanticVector": [0.28, 0.72]
     },
     {
       "eventId": "dsg_session:72:ENV-BB-001:12",
@@ -432,6 +584,20 @@
       "actorName": "PitchingAnalyzer"
     },
     {
+      "eventId": "retrieval:120_1:ENV-BB-001:15a",
+      "hour": 120.1,
+      "type": "retrieval",
+      "envelopeId": "ENV-BB-001",
+      "severity": "info",
+      "label": "Defensive decline patterns retrieved",
+      "detail": "DefenseEvaluator retrieved historical age-related performance decline patterns. Found 14 similar cases with late-inning substitutions.",
+      "actorRole": "Performance Steward",
+      "actorName": "DefenseEvaluator",
+      "queryText": "veteran defensive decline with sprint speed and range factor regression",
+      "retrievedEmbeddings": ["EMB-BB-002", "EMB-BB-011"],
+      "relevanceScores": [0.87, 0.81]
+    },
+    {
       "eventId": "boundary_interaction:120_3:ENV-BB-001:16",
       "hour": 120.3,
       "type": "boundary_interaction",
@@ -441,7 +607,39 @@
       "detail": "DefenseEvaluator detected veteran 1B: sprint speed down 12%, range factor declined. Recommends defensive replacement in late innings of close games.",
       "actorRole": "Performance Steward",
       "actorName": "DefenseEvaluator",
-      "boundaryType": "performance_threshold"
+      "boundaryType": "performance_threshold",
+      "boundary_kind": "escalated"
+    },
+    {
+      "eventId": "revision:124:ENV-BB-001:16g",
+      "hour": 124,
+      "type": "revision",
+      "envelopeId": "ENV-BB-001",
+      "severity": "info",
+      "label": "Late-inning defense protocol added",
+      "detail": "Performance Steward established defensive replacement triggers: sprint speed decline >10% or range factor <0.85 activates late-inning subs in close games.",
+      "actorRole": "Performance Steward",
+      "actorName": "Sarah Chen",
+      "revisionType": "capability_expansion",
+      "reason": "Quantify defensive decline thresholds to optimize win probability in high-leverage situations.",
+      "resolvesEventId": "boundary_interaction:120_3:ENV-BB-001:16"
+    },
+    {
+      "eventId": "embedding:124_5:ENV-BB-001:16h",
+      "hour": 124.5,
+      "type": "embedding",
+      "envelopeId": "ENV-BB-001",
+      "severity": "info",
+      "label": "Defensive protocol revision embedded",
+      "detail": "Late-inning substitution policy stored with performance threshold rationale.",
+      "actorRole": "Performance Steward",
+      "actorName": "Sarah Chen",
+      "embeddingId": "EMB-BB-019",
+      "embeddingType": "revision",
+      "vectorDimensions": 768,
+      "sourceEventId": "revision:124:ENV-BB-001:16g",
+      "semanticContext": "defensive replacement triggers based on sprint speed and range factor thresholds",
+      "semanticVector": [0.22, 0.68]
     },
     {
       "eventId": "decision:132_7:ENV-BB-002:17",

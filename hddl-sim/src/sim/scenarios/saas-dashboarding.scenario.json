@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "id": "scenario-saas-dashboarding-001",
+  "id": "saas-dashboarding",
   "title": "SaaS Dashboard Builder — Self-Service Analytics",
   "durationHours": 96,
   "envelopes": [
@@ -303,6 +303,20 @@
       "actorName": "NLQueryTranslator"
     },
     {
+      "eventId": "retrieval:5_6:ENV-DASH-002:4a",
+      "hour": 5.6,
+      "type": "retrieval",
+      "envelopeId": "ENV-DASH-002",
+      "severity": "info",
+      "label": "Historical scan patterns retrieved",
+      "detail": "QueryPerformanceGuard retrieved historical patterns for large row scans. Found 14 similar queries with date filters that reduced scan size by 80%.",
+      "actorRole": "Data Steward",
+      "actorName": "QueryPerformanceGuard",
+      "queryText": "large row scan queries with date filter optimizations",
+      "retrievedEmbeddings": ["EMB-DASH-005"],
+      "relevanceScores": [0.88]
+    },
+    {
       "eventId": "boundary_interaction:5_8:ENV-DASH-002:5",
       "hour": 5.8,
       "type": "boundary_interaction",
@@ -312,7 +326,8 @@
       "detail": "QueryPerformanceGuard blocked query scanning 2.4M rows. Suggested adding date filter or sampling. User prompted for explicit approval.",
       "actorRole": "Data Steward",
       "actorName": "QueryPerformanceGuard",
-      "boundaryType": "user_confirmation_required"
+      "boundaryType": "user_confirmation_required",
+      "boundary_kind": "escalated"
     },
     {
       "eventId": "decision:6_1:ENV-DASH-002:6",
@@ -337,6 +352,20 @@
       "actorName": "ChartAdvisor"
     },
     {
+      "eventId": "retrieval:10_1:ENV-DASH-001:7a",
+      "hour": 10.1,
+      "type": "retrieval",
+      "envelopeId": "ENV-DASH-001",
+      "severity": "info",
+      "label": "Accessibility patterns retrieved",
+      "detail": "ColorPaletteGuard retrieved historical accessibility violations. Found 8 similar contrast issues with WCAG-compliant resolutions.",
+      "actorRole": "UX Steward",
+      "actorName": "ColorPaletteGuard",
+      "queryText": "color contrast accessibility violations with WCAG alternatives",
+      "retrievedEmbeddings": ["EMB-DASH-001"],
+      "relevanceScores": [0.92]
+    },
+    {
       "eventId": "boundary_interaction:10_3:ENV-DASH-001:8",
       "hour": 10.3,
       "type": "boundary_interaction",
@@ -346,7 +375,8 @@
       "detail": "ColorPaletteGuard flagged color palette with insufficient contrast ratio (2.8:1, required: 4.5:1). Suggested WCAG-compliant alternative.",
       "actorRole": "UX Steward",
       "actorName": "ColorPaletteGuard",
-      "boundaryType": "compliance_issue"
+      "boundaryType": "compliance_issue",
+      "boundary_kind": "escalated"
     },
     {
       "eventId": "envelope_promoted:12:ENV-DASH-003:9",
@@ -371,6 +401,20 @@
       "actorName": "ExternalShareGuard"
     },
     {
+      "eventId": "retrieval:18:ENV-DASH-002:10a",
+      "hour": 18,
+      "type": "retrieval",
+      "envelopeId": "ENV-DASH-002",
+      "severity": "info",
+      "label": "PII redaction patterns retrieved",
+      "detail": "PIIRedactor retrieved historical PII blocking patterns. Found 23 similar customer data queries with approved anonymization approaches.",
+      "actorRole": "Data Steward",
+      "actorName": "PIIRedactor",
+      "queryText": "PII field blocking in customer data queries with anonymization",
+      "retrievedEmbeddings": ["EMB-DASH-005", "EMB-DASH-006"],
+      "relevanceScores": [0.91, 0.85]
+    },
+    {
       "eventId": "boundary_interaction:18_2:ENV-DASH-002:11",
       "hour": 18.2,
       "type": "boundary_interaction",
@@ -380,7 +424,115 @@
       "detail": "PIIRedactor blocked query attempting to display customer_email and phone_number fields. User notified of data privacy constraints.",
       "actorRole": "Data Steward",
       "actorName": "PIIRedactor",
-      "boundaryType": "hard_constraint"
+      "boundaryType": "hard_constraint",
+      "boundary_kind": "escalated"
+    },
+    {
+      "eventId": "revision:12:ENV-DASH-001:11c",
+      "hour": 12,
+      "type": "revision",
+      "envelopeId": "ENV-DASH-001",
+      "severity": "info",
+      "label": "Color palette library updated",
+      "detail": "UX Steward added 8 new WCAG AAA-compliant color palettes to auto-suggestion library after accessibility issues detected.",
+      "actorRole": "UX Steward",
+      "actorName": "Emma Wilson",
+      "revisionType": "constraint_update",
+      "reason": "Proactive accessibility compliance by expanding palette library reduces future contrast violations.",
+      "resolvesEventId": "boundary_interaction:10_3:ENV-DASH-001:8"
+    },
+    {
+      "eventId": "embedding:12_5:ENV-DASH-001:11d",
+      "hour": 12.5,
+      "type": "embedding",
+      "envelopeId": "ENV-DASH-001",
+      "severity": "info",
+      "label": "Color palette revision embedded",
+      "detail": "Accessibility palette library expansion stored with WCAG compliance rationale.",
+      "actorRole": "UX Steward",
+      "actorName": "Emma Wilson",
+      "embeddingId": "EMB-DASH-014",
+      "embeddingType": "revision",
+      "vectorDimensions": 768,
+      "sourceEventId": "revision:12:ENV-DASH-001:11c",
+      "semanticContext": "WCAG AAA color palette library expansion to prevent accessibility violations",
+      "semanticVector": [0.18, 0.72]
+    },
+    {
+      "eventId": "revision:8:ENV-DASH-002:11a",
+      "hour": 8,
+      "type": "revision",
+      "envelopeId": "ENV-DASH-002",
+      "severity": "info",
+      "label": "Query scan threshold updated",
+      "detail": "Data Steward refined large query scan threshold from 1M rows to 2.5M rows based on user approval patterns and performance data.",
+      "actorRole": "Data Steward",
+      "actorName": "Alex Kumar",
+      "revisionType": "boundary_adjustment",
+      "reason": "Users frequently approve 2-3M row scans that complete within timeout. Threshold adjustment reduces friction for legitimate queries.",
+      "resolvesEventId": "boundary_interaction:5_8:ENV-DASH-002:5"
+    },
+    {
+      "eventId": "embedding:8_5:ENV-DASH-002:11b",
+      "hour": 8.5,
+      "type": "embedding",
+      "envelopeId": "ENV-DASH-002",
+      "severity": "info",
+      "label": "Query threshold revision embedded",
+      "detail": "Query scan threshold adjustment stored with user approval pattern analysis.",
+      "actorRole": "Data Steward",
+      "actorName": "Alex Kumar",
+      "embeddingId": "EMB-DASH-013",
+      "embeddingType": "revision",
+      "vectorDimensions": 768,
+      "sourceEventId": "revision:8:ENV-DASH-002:11a",
+      "semanticContext": "query scan threshold increased from 1M to 2.5M rows based on approval patterns",
+      "semanticVector": [0.25, 0.68]
+    },
+    {
+      "eventId": "retrieval:9_0:ENV-DASH-002:11c",
+      "hour": 9.0,
+      "type": "retrieval",
+      "envelopeId": "ENV-DASH-002",
+      "severity": "info",
+      "label": "Retrieve query threshold revision",
+      "detail": "DecisionMemory retrieves the query threshold revision embedding for future query checks.",
+      "actorRole": "Data Steward",
+      "actorName": "DecisionMemory",
+      "queryText": "query scan threshold revision 1M to 2.5M",
+      "retrievedEmbeddings": ["EMB-DASH-013"],
+      "relevanceScores": [0.9]
+    },
+    {
+      "eventId": "revision:20:ENV-DASH-002:11e",
+      "hour": 20,
+      "type": "revision",
+      "envelopeId": "ENV-DASH-002",
+      "severity": "info",
+      "label": "PII anonymization functions added",
+      "detail": "Data Steward added hash_email() and truncate_phone() SQL functions for approved PII display with anonymization.",
+      "actorRole": "Data Steward",
+      "actorName": "Alex Kumar",
+      "revisionType": "capability_expansion",
+      "reason": "Provide privacy-preserving alternatives when users need PII-adjacent analysis without exposing raw personal data.",
+      "resolvesEventId": "boundary_interaction:18_2:ENV-DASH-002:11"
+    },
+    {
+      "eventId": "embedding:20_5:ENV-DASH-002:11f",
+      "hour": 20.5,
+      "type": "embedding",
+      "envelopeId": "ENV-DASH-002",
+      "severity": "info",
+      "label": "PII anonymization revision embedded",
+      "detail": "PII anonymization function addition stored with privacy-preserving approach.",
+      "actorRole": "Data Steward",
+      "actorName": "Alex Kumar",
+      "embeddingId": "EMB-DASH-015",
+      "embeddingType": "revision",
+      "vectorDimensions": 768,
+      "sourceEventId": "revision:20:ENV-DASH-002:11e",
+      "semanticContext": "PII anonymization SQL functions for privacy-preserving customer analysis",
+      "semanticVector": [0.32, 0.75]
     },
     {
       "eventId": "revision:24:ENV-DASH-001:12",

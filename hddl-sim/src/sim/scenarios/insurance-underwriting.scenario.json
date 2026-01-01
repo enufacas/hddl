@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "id": "scenario-insurance-underwriting-001",
+  "id": "insurance-underwriting",
   "title": "Insurance Underwriting — Risk Assessment & Claims",
   "durationHours": 120,
   "envelopes": [
@@ -215,6 +215,18 @@
           "name": "ThresholdEscalator",
           "role": "high-risk case routing to underwriters",
           "envelopeIds": ["ENV-INS-001"]
+        },
+        {
+          "agentId": "AG-UW-04",
+          "name": "Rebecca Foster",
+          "role": "underwriting policy steward and decision calibration",
+          "envelopeIds": ["ENV-INS-001"]
+        },
+        {
+          "agentId": "AG-UW-05",
+          "name": "Senior Underwriter #12",
+          "role": "senior underwriter for complex risk assessment",
+          "envelopeIds": ["ENV-INS-001"]
         }
       ]
     },
@@ -237,6 +249,24 @@
           "agentId": "AG-CLM-03",
           "name": "EvidenceLinker",
           "role": "supporting documentation validation",
+          "envelopeIds": ["ENV-INS-002"]
+        },
+        {
+          "agentId": "AG-CLM-04",
+          "name": "Marcus Chen",
+          "role": "claims policy steward and fraud investigation oversight",
+          "envelopeIds": ["ENV-INS-002"]
+        },
+        {
+          "agentId": "AG-CLM-05",
+          "name": "Claims Adjuster #47",
+          "role": "senior claims adjuster for complex investigations",
+          "envelopeIds": ["ENV-INS-002"]
+        },
+        {
+          "agentId": "AG-CLM-06",
+          "name": "SIU Lead Investigator",
+          "role": "special investigations unit lead for fraud cases",
           "envelopeIds": ["ENV-INS-002"]
         }
       ]
@@ -261,6 +291,12 @@
           "name": "CompetitivenessMonitor",
           "role": "market rate comparison",
           "envelopeIds": ["ENV-INS-003"]
+        },
+        {
+          "agentId": "AG-PRICE-04",
+          "name": "Alicia Rodriguez",
+          "role": "pricing policy steward and competitive strategy oversight",
+          "envelopeIds": ["ENV-INS-003"]
         }
       ]
     },
@@ -283,6 +319,12 @@
           "agentId": "AG-COMP-03",
           "name": "ExplainabilityEngine",
           "role": "decision rationale documentation",
+          "envelopeIds": ["ENV-INS-004"]
+        },
+        {
+          "agentId": "AG-COMP-04",
+          "name": "Diana Patel",
+          "role": "compliance policy steward and regulatory oversight",
           "envelopeIds": ["ENV-INS-004"]
         }
       ]
@@ -443,6 +485,20 @@
       "boundary_reason": "high_risk_threshold"
     },
     {
+      "eventId": "retrieval:5_5:ENV-INS-001:5_pre",
+      "hour": 5.5,
+      "type": "retrieval",
+      "envelopeId": "ENV-INS-001",
+      "severity": "info",
+      "label": "Underwriter reviewed flood risk policy",
+      "detail": "Senior Underwriter #12 retrieved historical flood risk underwriting decisions and mitigation strategies before approval.",
+      "actorRole": "Underwriting Steward",
+      "actorName": "Senior Underwriter #12",
+      "queryText": "flood risk coastal property high threshold mitigation requirement underwriting",
+      "retrievedEmbeddings": ["EMB-INS-HIST-001"],
+      "relevanceScores": [0.91]
+    },
+    {
       "eventId": "decision:5_7:ENV-INS-001:5",
       "hour": 5.7,
       "type": "decision",
@@ -486,18 +542,18 @@
       "semanticVector": [0.28, 0.58]
     },
     {
-      "eventId": "retrieval:28_65:ENV-INS-003:12a",
-      "hour": 28.65,
+      "eventId": "retrieval:7_2:ENV-INS-001:5c",
+      "hour": 7.2,
       "type": "retrieval",
-      "envelopeId": "ENV-INS-003",
+      "envelopeId": "ENV-INS-001",
       "severity": "info",
-      "label": "Queried pricing patterns",
-      "detail": "CompetitivenessMonitor retrieved baseline competitive pricing strategies plus recent renewal patterns.",
-      "actorRole": "Pricing Steward",
-      "actorName": "CompetitivenessMonitor",
-      "queryText": "large premium increase customer retention competitive",
-      "retrievedEmbeddings": ["EMB-INS-HIST-004", "EMB-INS-001"],
-      "relevanceScores": [0.93, 0.81]
+      "label": "Retrieve recent policy revisions",
+      "detail": "DecisionMemory retrieves recent revision embedding for flood mitigation policy update.",
+      "actorRole": "Underwriting Steward",
+      "actorName": "DecisionMemory",
+      "queryText": "flood mitigation verification policy revision",
+      "retrievedEmbeddings": ["EMB-INS-005"],
+      "relevanceScores": [0.92]
     },
     {
       "eventId": "retrieval:8_05:ENV-INS-002:5a",
@@ -536,6 +592,23 @@
       "detail": "RiskScorer evaluated commercial property in flood zone with no mitigation history. Risk score: 94/100 (uninsurable). Application declined with referral to specialty market.",
       "actorRole": "Underwriting Steward",
       "actorName": "RiskScorer"
+    },
+    {
+      "eventId": "embedding:10_8:ENV-INS-001:6a_emb",
+      "hour": 10.8,
+      "type": "embedding",
+      "envelopeId": "ENV-INS-001",
+      "severity": "error",
+      "label": "High-risk denial embedded",
+      "detail": "Stored uninsurable risk denial pattern for extreme flood risk without mitigation.",
+      "actorRole": "Underwriting Steward",
+      "actorName": "RiskScorer",
+      "embeddingId": "EMB-INS-014",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:10_3:ENV-INS-001:6a",
+      "semanticContext": "commercial property flood zone uninsurable risk denial specialty market referral",
+      "semanticVector": [0.82, 0.88]
     },
     {
       "eventId": "retrieval:12_35:ENV-INS-002:6a",
@@ -643,6 +716,20 @@
       "value": 0.97
     },
     {
+      "eventId": "retrieval:28_2:ENV-INS-003:12a",
+      "hour": 28.2,
+      "type": "retrieval",
+      "envelopeId": "ENV-INS-003",
+      "severity": "info",
+      "label": "Queried premium adjustment patterns",
+      "detail": "QuoteGenerator retrieved historical premium increase patterns and retention strategies before escalation.",
+      "actorRole": "Pricing Steward",
+      "actorName": "QuoteGenerator",
+      "queryText": "premium increase renewal threshold retention strategy",
+      "retrievedEmbeddings": ["EMB-INS-HIST-004", "EMB-INS-001"],
+      "relevanceScores": [0.89, 0.76]
+    },
+    {
       "eventId": "boundary_interaction:28_7:ENV-INS-003:12",
       "hour": 28.7,
       "type": "boundary_interaction",
@@ -654,6 +741,20 @@
       "actorName": "QuoteGenerator",
       "boundary_kind": "escalated",
       "boundary_reason": "price_threshold_exceeded"
+    },
+    {
+      "eventId": "retrieval:28_9:ENV-INS-003:13_pre",
+      "hour": 28.9,
+      "type": "retrieval",
+      "envelopeId": "ENV-INS-003",
+      "severity": "info",
+      "label": "Steward reviewed pricing exception policy",
+      "detail": "Alicia Rodriguez retrieved pricing threshold exceptions and retention strategy guidelines before approving the 18% increase.",
+      "actorRole": "Pricing Steward",
+      "actorName": "Alicia Rodriguez",
+      "queryText": "pricing threshold exception retention strategy claims history renewal increase",
+      "retrievedEmbeddings": ["EMB-INS-HIST-004", "EMB-INS-001"],
+      "relevanceScores": [0.88, 0.81]
     },
     {
       "eventId": "decision:29_1:ENV-INS-003:13",
@@ -674,12 +775,12 @@
       "envelopeId": "ENV-INS-003",
       "severity": "info",
       "label": "Premium threshold policy update",
-      "detail": "Pricing Steward updated envelope to allow up to 20% increases when paired with retention incentives (accident forgiveness, payment plans).",
+      "detail": "Pricing Steward updated envelope to allow up to 20% renewal increases (beyond the 15% threshold) when paired with retention incentives like accident forgiveness programs and flexible payment plans.",
       "actorRole": "Pricing Steward",
       "actorName": "Alicia Rodriguez",
       "revisionType": "constraint_relaxation",
       "resolvesEventId": "boundary_interaction:28_7:ENV-INS-003:12",
-      "reason": "Enable competitive retention strategies while maintaining customer transparency and satisfaction."
+      "reason": "Address premium increase threshold boundary by enabling competitive retention strategies while maintaining customer transparency."
     },
     {
       "eventId": "embedding:31:ENV-INS-003:13b",
@@ -688,14 +789,14 @@
       "envelopeId": "ENV-INS-003",
       "severity": "info",
       "label": "Policy update: Pricing flexibility with retention",
-      "detail": "Stored policy revision allowing 20% premium increases when paired with retention incentives.",
+      "detail": "Stored policy revision allowing 20% premium increases (above 15% threshold) when paired with retention incentives.",
       "actorRole": "Pricing Steward",
       "actorName": "Alicia Rodriguez",
       "embeddingId": "EMB-INS-007",
       "embeddingType": "revision",
       "vectorDimensions": 768,
       "sourceEventId": "revision:30_5:ENV-INS-003:13a",
-      "semanticContext": "pricing premium increase retention incentive accident forgiveness payment plan",
+      "semanticContext": "pricing premium increase renewal threshold retention incentive accident forgiveness payment plan",
       "semanticVector": [0.32, 0.45]
     },
     {
@@ -724,6 +825,20 @@
       "reason": "Refine escalation criteria to focus underwriter attention on truly complex cases."
     },
     {
+      "eventId": "retrieval:48_1:ENV-INS-004:16a",
+      "hour": 48.1,
+      "type": "retrieval",
+      "envelopeId": "ENV-INS-004",
+      "severity": "info",
+      "label": "Queried explainability standards",
+      "detail": "ExplainabilityEngine retrieved regulatory explainability requirements and documentation patterns before escalation.",
+      "actorRole": "Compliance Steward",
+      "actorName": "ExplainabilityEngine",
+      "queryText": "denial documentation structured justification regulatory explainability audit trail",
+      "retrievedEmbeddings": ["EMB-INS-HIST-002", "EMB-INS-008"],
+      "relevanceScores": [0.92, 0.85]
+    },
+    {
       "eventId": "boundary_interaction:48_3:ENV-INS-004:16",
       "hour": 48.3,
       "type": "boundary_interaction",
@@ -747,6 +862,23 @@
       "detail": "Compliance Steward reviewed cases and added detailed rationale documentation. All denials now meet regulatory explainability standards.",
       "actorRole": "Compliance Steward",
       "actorName": "Diana Patel"
+    },
+    {
+      "eventId": "embedding:53_3:ENV-INS-004:16a_emb",
+      "hour": 53.3,
+      "type": "embedding",
+      "envelopeId": "ENV-INS-004",
+      "severity": "info",
+      "label": "Documentation review embedded",
+      "detail": "Stored compliance review pattern for addressing explainability gaps in denial documentation.",
+      "actorRole": "Compliance Steward",
+      "actorName": "Diana Patel",
+      "embeddingId": "EMB-INS-015",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:52_8:ENV-INS-004:16a",
+      "semanticContext": "compliance documentation explainability gap resolution regulatory standards",
+      "semanticVector": [0.32, 0.61]
     },
     {
       "eventId": "revision:54_2:ENV-INS-004:16b",
@@ -793,6 +925,20 @@
       "value": 0.68
     },
     {
+      "eventId": "retrieval:62_3:ENV-INS-002:17a_pre",
+      "hour": 62.3,
+      "type": "retrieval",
+      "envelopeId": "ENV-INS-002",
+      "severity": "info",
+      "label": "Queried fraud network patterns",
+      "detail": "FraudDetector retrieved organized fraud patterns and historical network analysis before escalation.",
+      "actorRole": "Claims Steward",
+      "actorName": "FraudDetector",
+      "queryText": "fraud vehicle registration false positive tracking network claims history",
+      "retrievedEmbeddings": ["EMB-INS-HIST-003", "EMB-INS-006"],
+      "relevanceScores": [0.94, 0.83]
+    },
+    {
       "eventId": "boundary_interaction:62_5:ENV-INS-002:17a",
       "hour": 62.5,
       "type": "boundary_interaction",
@@ -823,6 +969,20 @@
       "semanticVector": [0.82, 0.89]
     },
     {
+      "eventId": "retrieval:65_1:ENV-INS-002:17b_pre",
+      "hour": 65.1,
+      "type": "retrieval",
+      "envelopeId": "ENV-INS-002",
+      "severity": "error",
+      "label": "SIU reviewed fraud investigation protocols",
+      "detail": "SIU Lead Investigator retrieved organized fraud case precedents and criminal referral procedures before final denial.",
+      "actorRole": "Claims Steward",
+      "actorName": "SIU Lead Investigator",
+      "queryText": "organized fraud network criminal referral investigation denial claims collusion",
+      "retrievedEmbeddings": ["EMB-INS-HIST-003", "EMB-INS-009"],
+      "relevanceScores": [0.93, 0.87]
+    },
+    {
       "eventId": "decision:65_3:ENV-INS-002:17b",
       "hour": 65.3,
       "type": "decision",
@@ -833,6 +993,23 @@
       "detail": "Special Investigations Unit completed review. All 7 claims denied based on evidence of coordinated fraud. Total exposure prevented: $127,000. Criminal referral submitted to law enforcement.",
       "actorRole": "Claims Steward",
       "actorName": "SIU Lead Investigator"
+    },
+    {
+      "eventId": "embedding:65_8:ENV-INS-002:17b_emb",
+      "hour": 65.8,
+      "type": "embedding",
+      "envelopeId": "ENV-INS-002",
+      "severity": "error",
+      "label": "Fraud confirmation embedded",
+      "detail": "Stored confirmed fraud case with network analysis and criminal referral patterns.",
+      "actorRole": "Claims Steward",
+      "actorName": "SIU Lead Investigator",
+      "embeddingId": "EMB-INS-016",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:65_3:ENV-INS-002:17b",
+      "semanticContext": "organized fraud confirmed criminal referral coordinated claims network investigation",
+      "semanticVector": [0.88, 0.92]
     },
     {
       "eventId": "revision:66_8:ENV-INS-002:17c",
@@ -878,6 +1055,20 @@
       "actorName": "RegulatoryChecker"
     },
     {
+      "eventId": "retrieval:78_2:ENV-INS-003:18a_pre",
+      "hour": 78.2,
+      "type": "retrieval",
+      "envelopeId": "ENV-INS-003",
+      "severity": "info",
+      "label": "Queried extreme increase patterns",
+      "detail": "QuoteGenerator retrieved pricing policy limits and non-renewal patterns for extreme rate increases before escalation.",
+      "actorRole": "Pricing Steward",
+      "actorName": "QuoteGenerator",
+      "queryText": "pricing premium increase retention incentive payment plan accident forgiveness",
+      "retrievedEmbeddings": ["EMB-INS-007", "EMB-INS-001"],
+      "relevanceScores": [0.91, 0.79]
+    },
+    {
       "eventId": "boundary_interaction:78_4:ENV-INS-003:18a",
       "hour": 78.4,
       "type": "boundary_interaction",
@@ -918,6 +1109,23 @@
       "detail": "Pricing Steward denied exception request. 28% increase exceeds regulatory fairness thresholds and company retention policy. Policy non-renewed with 60-day notice and alternative carrier referrals.",
       "actorRole": "Pricing Steward",
       "actorName": "Alicia Rodriguez"
+    },
+    {
+      "eventId": "embedding:79_7:ENV-INS-003:18b_emb",
+      "hour": 79.7,
+      "type": "embedding",
+      "envelopeId": "ENV-INS-003",
+      "severity": "error",
+      "label": "Non-renewal decision embedded",
+      "detail": "Stored non-renewal decision pattern for extreme risk profile changes exceeding regulatory thresholds.",
+      "actorRole": "Pricing Steward",
+      "actorName": "Alicia Rodriguez",
+      "embeddingId": "EMB-INS-017",
+      "embeddingType": "decision",
+      "vectorDimensions": 768,
+      "sourceEventId": "decision:79_2:ENV-INS-003:18b",
+      "semanticContext": "non-renewal exception denial extreme rate increase regulatory threshold customer communication",
+      "semanticVector": [0.75, 0.85]
     },
     {
       "eventId": "revision:80_5:ENV-INS-003:18c",

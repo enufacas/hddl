@@ -1,0 +1,41 @@
+{
+  "narrativeFile": "test-refactor.md",
+  "scenarioId": "scenario-insurance-underwriting-001",
+  "model": "gemini-3-flash-preview",
+  "method": "llm-full-context",
+  "tokensIn": 18105,
+  "tokensOut": 82,
+  "cost": 0.009298,
+  "generatedAt": "2025-12-30T21:34:25.099Z",
+  "citations": [
+    {
+      "eventId": "decision:2_8:ENV-INS-001:3",
+      "offset": 46,
+      "context": "...RiskScorer evaluated a policy early on day one^[decision:2_8:ENV-INS-001:3]. ThresholdEscalator flagged a coastal property^[b...",
+      "hour": 2.8,
+      "type": "decision",
+      "envelopeId": "ENV-INS-001"
+    },
+    {
+      "eventId": "boundary_interaction:5_3:ENV-INS-001:4",
+      "offset": 122,
+      "context": "...:3]. ThresholdEscalator flagged a coastal property^[boundary_interaction:5_3:ENV-INS-001:4]. Senior Underwriter #12 accepted with conditions^...",
+      "hour": 5.3,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-INS-001"
+    },
+    {
+      "eventId": "decision:5_7:ENV-INS-001:5",
+      "offset": 212,
+      "context": "...]. Senior Underwriter #12 accepted with conditions^[decision:5_7:ENV-INS-001:5].      ...",
+      "hour": 5.7,
+      "type": "decision",
+      "envelopeId": "ENV-INS-001"
+    }
+  ],
+  "coverage": {
+    "eventsTotal": 73,
+    "eventsCited": 3,
+    "citationsTotal": 3
+  }
+}

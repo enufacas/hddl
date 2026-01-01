@@ -9,9 +9,9 @@ const STORAGE_PREFIX = 'hddl:panel:'
  * Panel configuration defaults
  */
 const PANEL_DEFAULTS = {
-  sidebar: { min: 180, max: 500, default: 300 },
-  auxiliary: { min: 200, max: 600, default: 350 },
-  bottom: { min: 100, max: 400, default: 200 }
+  sidebar: { min: 180, max: 2000, default: 300 },
+  auxiliary: { min: 200, max: 2000, default: 350 },
+  bottom: { min: 100, max: 2000, default: 200 }
 }
 
 /**
@@ -82,7 +82,7 @@ export class ResizablePanel {
     this.edge = options.edge || 'right'
     this.isVertical = this.edge === 'left' || this.edge === 'right'
     
-    const defaults = PANEL_DEFAULTS[this.id] || { min: 100, max: 600, default: 300 }
+    const defaults = PANEL_DEFAULTS[this.id] || { min: 100, max: 2000, default: 300 }
     this.min = options.min ?? defaults.min
     this.max = options.max ?? defaults.max
     this.defaultSize = options.default ?? defaults.default

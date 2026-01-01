@@ -1965,6 +1965,14 @@ html {
 }
 
 /* Default-collapsed panels (persisted via body classes) */
+body.sidebar-hidden {
+    --sidebar-width: 0px;
+}
+
+body.sidebar-hidden .part.sidebar {
+    display: none !important;
+}
+
 body.aux-hidden {
     --auxiliarybar-width: 0px;
 }
@@ -2001,6 +2009,7 @@ body.panel-hidden .part.panel {
     grid-column: 3;
     grid-row: 1;
     min-width: 0;
+    position: relative;
 }
 
 .part.auxiliarybar {
@@ -2013,41 +2022,109 @@ body.aux-hidden .part.auxiliarybar {
     display: none;
 }
 
+/* Discoverability handle for collapsed sidebar */
+.sidebar-peek {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 28px;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: transparent;
+    border-right: 2px solid transparent;
+    color: var(--vscode-activityBar-inactiveForeground);
+    cursor: pointer;
+    user-select: none;
+    z-index: 100;
+    transition: all 0.2s ease;
+    box-shadow: none;
+}
+
+body.sidebar-hidden .sidebar-peek {
+    display: flex !important;
+}
+
+.sidebar-peek:hover {
+    background: var(--vscode-activityBar-inactiveForeground);
+    width: 32px;
+    border-right-color: var(--vscode-activityBarBadge-background);
+    color: var(--vscode-activityBar-background);
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.4);
+}
+
+.sidebar-peek:focus {
+    outline: 2px solid var(--vscode-focusBorder);
+    outline-offset: -2px;
+}
+
+.sidebar-peek__label {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.sidebar-peek .codicon {
+    font-size: 16px;
+}
+
 /* Discoverability handle for collapsed auxiliary bar */
 .aux-peek {
     position: absolute;
     top: 0;
     right: 0;
     bottom: 0;
-    width: 16px;
+    width: 28px;
     display: none;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 10px;
-    background: var(--vscode-sideBar-background);
-    border-left: 1px solid var(--vscode-sideBar-border);
-    color: var(--vscode-statusBar-foreground);
+    gap: 8px;
+    background: transparent;
+    border-left: 2px solid transparent;
+    color: var(--vscode-activityBar-inactiveForeground);
     cursor: pointer;
     user-select: none;
-    z-index: 2;
+    z-index: 100;
+    transition: all 0.2s ease;
+    box-shadow: none;
 }
 
 body.aux-hidden .aux-peek {
-    display: flex;
+    display: flex !important;
 }
 
 .aux-peek:hover {
-    background: var(--vscode-list-hoverBackground);
-    color: var(--vscode-editor-foreground);
+    background: var(--vscode-activityBar-inactiveForeground);
+    width: 32px;
+    border-left-color: var(--vscode-activityBarBadge-background);
+    color: var(--vscode-activityBar-background);
+    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.4);
 }
 
 .aux-peek:focus {
-    outline: 1px solid var(--vscode-focusBorder);
-    outline-offset: -1px;
+    outline: 2px solid var(--vscode-focusBorder);
+    outline-offset: -2px;
 }
 
 .aux-peek__label {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.aux-peek .codicon {
+    font-size: 16px;
+}
     writing-mode: vertical-rl;
     text-orientation: mixed;
     font-size: 10px;
@@ -2877,8 +2954,29 @@ body.mobile-nav-open .mobile-nav-overlay {
         background: var(--vscode-sideBar-background, #252526) !important;
     }
     
-    /* Slide sidebar in when open */
-    body.mobile-sidebar-open .part.sidebar {
+    /* Slide sidebar in when open (use sidebar-hidden for consistency) */
+    body:not(.sidebar-hidden) .part.sidebar {
+        transform: translateX(0) !important;
+    }
+
+    /* Auxiliarybar positioned off-screen to the right, slides in when opened */
+    .part.auxiliarybar {
+        display: block !important;
+        position: fixed !important;
+        top: 0 !important;
+        right: 0 !important;
+        width: 85% !important;
+        max-width: 350px !important;
+        height: 100vh !important;
+        z-index: 1000 !important;
+        transform: translateX(100%);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: -4px 0 12px rgba(0, 0, 0, 0.5);
+        background: var(--vscode-sideBar-background, #252526) !important;
+    }
+    
+    /* Slide auxiliarybar in when open */
+    body:not(.aux-hidden) .part.auxiliarybar {
         transform: translateX(0) !important;
     }
 
@@ -3793,4 +3891,143 @@ body.sidebar-collapsed .part.sidebar .sidebar-content {
     display: flex;
     align-items: center;
     z-index: 100;
+}
+
+/* ===== MOBILE RESPONSIVENESS ===== */
+
+/* Tablet and below: Adjust panel widths and peek handles */
+@media (max-width: 1024px) {
+    :root {
+        --sidebar-width: 280px;
+        --auxiliarybar-width: 300px;
+    }
+    
+    /* Slightly wider peek handles for easier touch targets */
+    .sidebar-peek,
+    .aux-peek {
+        width: 36px;
+        gap: 10px;
+    }
+    
+    .sidebar-peek:hover,
+    .aux-peek:hover {
+        width: 40px;
+    }
+    
+    .sidebar-peek .codicon,
+    .aux-peek .codicon {
+        font-size: 18px;
+    }
+    
+    /* Don't override panel visibility on tablet - respect collapsed state */
+    .part.sidebar,
+    .part.auxiliarybar {
+        position: absolute;
+    }
+}
+
+/* Mobile: Stack panels and use overlay behavior */
+@media (max-width: 768px) {
+    :root {
+        --sidebar-width: 100%;
+        --auxiliarybar-width: 100%;
+    }
+    
+    /* Hide panels when collapsed */
+    body.sidebar-hidden .part.sidebar,
+    body.aux-hidden .part.auxiliarybar {
+        display: none;
+    }
+    
+    /* Make panels overlay the main editor on mobile when visible */
+    body:not(.sidebar-hidden) .part.sidebar,
+    body:not(.aux-hidden) .part.auxiliarybar {
+        position: fixed !important;
+        width: 85vw !important;
+        max-width: 320px;
+        height: 100vh !important;
+        top: 0 !important;
+        bottom: 0 !important;
+        z-index: 200;
+        box-shadow: 2px 0 16px rgba(0, 0, 0, 0.5);
+    }
+    
+    body:not(.sidebar-hidden) .part.sidebar {
+        left: 0 !important;
+        right: auto !important;
+    }
+    
+    body:not(.aux-hidden) .part.auxiliarybar {
+        right: 0 !important;
+        left: auto !important;
+        box-shadow: -2px 0 16px rgba(0, 0, 0, 0.5);
+    }
+    
+    /* Editor takes full width on mobile */
+    .part.editor {
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+    }
+    
+    /* Peek handles larger for touch on mobile (48px min touch target) */
+    .sidebar-peek,
+    .aux-peek {
+        width: 48px;
+        gap: 12px;
+    }
+    
+    .sidebar-peek:hover,
+    .aux-peek:hover {
+        width: 48px; /* No expand on mobile */
+        border-width: 3px;
+    }
+    
+    .sidebar-peek .codicon,
+    .aux-peek .codicon {
+        font-size: 20px;
+    }
+    
+    .sidebar-peek__label,
+    .aux-peek__label {
+        font-size: 11px;
+    }
+    
+    /* Add backdrop overlay when panels are open on mobile */
+    body:not(.sidebar-hidden)::before,
+    body:not(.aux-hidden)::after {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 150;
+        animation: fadeIn 0.2s ease;
+    }
+    
+    body:not(.sidebar-hidden)::before {
+        left: min(85vw, 320px);
+    }
+    
+    body:not(.aux-hidden)::after {
+        right: min(85vw, 320px);
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Small mobile: Full width panels */
+@media (max-width: 480px) {
+    body:not(.sidebar-hidden) .part.sidebar,
+    body:not(.aux-hidden) .part.auxiliarybar {
+        width: 100vw !important;
+        max-width: 100vw;
+    }
+    
+    body:not(.sidebar-hidden)::before,
+    body:not(.aux-hidden)::after {
+        display: none; /* No backdrop on small screens - full width panel */
+    }
 }

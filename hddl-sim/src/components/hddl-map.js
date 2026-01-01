@@ -1,7 +1,8 @@
 import * as d3 from 'd3'
-import { getScenario, getEnvelopeAtTime, getEventsNearTime, getTimeHour, onTimeChange, onScenarioChange, getEnvelopeStatus, setStewardFilter } from '../sim/sim-state'
+import { getScenario, getEnvelopeAtTime, getEventsNearTime, getTimeHour, onTimeChange, onScenarioChange, getEnvelopeStatus, setStewardFilter, getIsScrubbing, isWithinScrubCatchup } from '../sim/sim-state'
 import { getStewardColor, STEWARD_PALETTE, toSemver, getEventColor } from '../sim/steward-colors'
 import { navigateTo } from '../router'
+import { createEnvelopeDetailModal } from './envelope-detail'
 
 /**
  * Detail levels for responsive SVG rendering
@@ -263,7 +264,7 @@ export function createHDDLMap(container, options = {}) {
     .attr('width', '100%')
     .attr('height', height)
     .attr('viewBox', [0, 0, width, height])
-    .style('background', 'var(--vscode-editor-background)')
+    .style('background', 'linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.75)), url(/dark-bg.png) center/cover no-repeat')
     .style('border', '1px solid var(--vscode-widget-border)')
     .style('border-radius', '6px')
 
@@ -706,128 +707,6 @@ export function createHDDLMap(container, options = {}) {
     if (typeof autoHideMs === 'number' && autoHideMs > 0) {
       agentTooltipHideTimeout = setTimeout(() => hideAgentTooltip(), autoHideMs)
     }
-  }
-
-  function showEnvelopeAuthority(envelopeNode, scenario, hour) {
-    // Create modal overlay to show envelope decision authority details
-    const overlay = document.createElement('div')
-    overlay.style.cssText = `
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.7);
-      z-index: 10000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      backdrop-filter: blur(2px);
-    `
-    
-    const modal = document.createElement('div')
-    modal.style.cssText = `
-      background: var(--vscode-editor-background);
-      border: 2px solid var(--vscode-focusBorder);
-      border-radius: 8px;
-      padding: 24px;
-      max-width: 600px;
-      max-height: 80vh;
-      overflow-y: auto;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-    `
-    
-    const envelope = getEnvelopeAtTime(scenario, envelopeNode.id, hour) || 
-                     scenario?.envelopes?.find(e => e.envelopeId === envelopeNode.id)
-    
-    if (!envelope) {
-      modal.innerHTML = '<p>Envelope not found</p>'
-      overlay.appendChild(modal)
-      document.body.appendChild(overlay)
-      overlay.addEventListener('click', () => overlay.remove())
-      return
-    }
-    
-    const status = envelopeNode.status || 'unknown'
-    const version = envelope.envelope_version || 1
-    const semver = toSemver(version)
-    const revision = envelope.revision_id || 'Initial'
-    
-    modal.innerHTML = `
-      <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 20px;">
-        <div>
-          <h2 style="margin: 0 0 4px 0; font-size: 18px;">${envelopeNode.label}</h2>
-          <div style="font-size: 14px; color: var(--vscode-statusBar-foreground);">${envelope.name}</div>
-        </div>
-        <button id="close-modal" style="background: none; border: none; color: var(--vscode-editor-foreground); font-size: 20px; cursor: pointer; padding: 4px 8px;">&times;</button>
-      </div>
-      
-      <div style="display: flex; gap: 12px; margin-bottom: 20px;">
-        <span style="background: var(--vscode-badge-background); padding: 4px 10px; border-radius: 12px; font-size: 13px; font-weight: 600;">
-          ${status.toUpperCase()}
-        </span>
-        <span style="background: var(--vscode-input-background); padding: 4px 10px; border-radius: 12px; font-size: 13px; font-family: monospace;">
-          v${semver}
-        </span>
-        <span style="background: var(--vscode-input-background); padding: 4px 10px; border-radius: 12px; font-size: 13px;">
-          ${envelopeNode.ownerRole}
-        </span>
-      </div>
-      
-      <div style="margin-bottom: 20px;">
-        <h3 style="font-size: 15px; font-weight: 600; text-transform: uppercase; color: var(--vscode-statusBar-foreground); margin-bottom: 8px; letter-spacing: 0.5px;">Domain</h3>
-        <div style="padding: 8px; background: var(--vscode-input-background); border-radius: 4px;">${envelope.domain || 'Not specified'}</div>
-      </div>
-      
-      <div style="margin-bottom: 20px;">
-        <h3 style="font-size: 15px; font-weight: 600; text-transform: uppercase; color: var(--vscode-statusBar-foreground); margin-bottom: 8px; letter-spacing: 0.5px;">Decision Authority (Assumptions)</h3>
-        <div style="display: flex; flex-direction: column; gap: 8px;">
-          ${(envelope.assumptions || []).map(a => `
-            <div style="padding: 10px; background: var(--vscode-input-background); border-left: 3px solid var(--vscode-focusBorder); border-radius: 3px; font-size: 14px;">
-              ${a}
-            </div>
-          `).join('') || '<div style="color: var(--vscode-statusBar-foreground); font-style: italic;">No assumptions defined</div>'}
-        </div>
-      </div>
-      
-      <div style="margin-bottom: 20px;">
-        <h3 style="font-size: 15px; font-weight: 600; text-transform: uppercase; color: var(--vscode-statusBar-foreground); margin-bottom: 8px; letter-spacing: 0.5px;">Constraints</h3>
-        <div style="display: flex; flex-direction: column; gap: 8px;">
-          ${(envelope.constraints || []).map(c => `
-            <div style="padding: 10px; background: var(--vscode-input-background); border-left: 3px solid var(--status-warning); border-radius: 3px; font-size: 14px;">
-              ${c}
-            </div>
-          `).join('') || '<div style="color: var(--vscode-statusBar-foreground); font-style: italic;">No constraints defined</div>'}
-        </div>
-      </div>
-      
-      <div style="margin-bottom: 0;">
-        <h3 style="font-size: 15px; font-weight: 600; text-transform: uppercase; color: var(--vscode-statusBar-foreground); margin-bottom: 8px; letter-spacing: 0.5px;">Time Window</h3>
-        <div style="padding: 8px; background: var(--vscode-input-background); border-radius: 4px; font-family: monospace; font-size: 14px;">
-          Created: Day ${Math.floor((envelope.createdHour || 0) / 24)}, ${String(Math.floor((envelope.createdHour || 0) % 24)).padStart(2, '0')}:00<br>
-          Ends: Day ${Math.floor((envelope.endHour || 48) / 24)}, ${String(Math.floor((envelope.endHour || 48) % 24)).padStart(2, '0')}:00
-        </div>
-      </div>
-    `
-    
-    overlay.appendChild(modal)
-    document.body.appendChild(overlay)
-    
-    // Close handlers
-    overlay.addEventListener('click', (e) => {
-      if (e.target === overlay) overlay.remove()
-    })
-    
-    modal.querySelector('#close-modal').addEventListener('click', () => overlay.remove())
-    
-    // Escape key
-    const handleEscape = (e) => {
-      if (e.key === 'Escape') {
-        overlay.remove()
-        document.removeEventListener('keydown', handleEscape)
-      }
-    }
-    document.addEventListener('keydown', handleEscape)
   }
 
   function getStewardEnvelopeInteractionCount(scenario, hour, envelopeId, stewardRole, windowHours = 24) {
@@ -1874,6 +1753,7 @@ export function createHDDLMap(container, options = {}) {
     linkSelection.exit().remove()
 
     // --- Open Exception Links (rendered on top) ---
+    // HIDDEN: Temporarily disabled for cleaner visualization
     const exceptionSel = exceptionLinkLayer.selectAll('line')
       .data(exceptionLinks, d => d.id)
 
@@ -1883,12 +1763,12 @@ export function createHDDLMap(container, options = {}) {
       .attr('stroke-width', 15)
       .attr('opacity', 0.0)
       .transition().duration(200)
-      .attr('opacity', 0.85)
+      .attr('opacity', 0.0)  // Hidden
 
     exceptionSel
       .attr('stroke', 'red')
       .attr('stroke-width', 15)
-      .attr('opacity', 0.85)
+      .attr('opacity', 0.0)  // Hidden
 
     exceptionSel.exit().transition().duration(200).attr('opacity', 0).remove()
 
@@ -1934,9 +1814,13 @@ export function createHDDLMap(container, options = {}) {
       })
       .on('click', function(event, d) {
         event.stopPropagation()
-        // Touch / coarse pointers: use click-to-peek tooltip, but still open the modal.
+        // Touch / coarse pointers: use click-to-peek tooltip with short duration
         if (!canHoverTooltip()) showEnvelopeTooltip(d, event, event.currentTarget, { scenario: getScenario(), hour: getTimeHour(), autoHideMs: 1500 })
-        showEnvelopeAuthority(d, getScenario(), getTimeHour())
+        
+        // Open the envelope detail modal
+        const modal = createEnvelopeDetailModal(d.id)
+        const app = document.querySelector('#app')
+        if (app) app.appendChild(modal)
       })
     
     // Don't set pointer-events: none on children - let them receive events normally
@@ -2232,6 +2116,8 @@ export function createHDDLMap(container, options = {}) {
       .attr('class', 'agent-bot')
       .attr('data-testid', d => `agent-${d.id}`)
       .attr('data-agent-active', d => d.isRecentlyActive ? 'true' : 'false')
+      .attr('stroke', d => d.fleetColor || 'var(--vscode-sideBar-border)')
+      .attr('fill', d => d.fleetColor || 'var(--vscode-statusBar-foreground)')
       .attr('tabindex', 0)
       .style('pointer-events', 'all')
       .style('cursor', 'pointer')
@@ -3420,7 +3306,7 @@ export function createHDDLMap(container, options = {}) {
   let embeddingElements = []
   let embeddingCount = 0
 
-  function createFloatingEmbedding(event) {
+  function createFloatingEmbedding(event, skipAnimation = false) {
     // Find source node position
     const sourceNode = nodes.find(n => n.id === event.primarySteward || n.id === event.actorRole)
     const sourceX = sourceNode ? sourceNode.x : width / 2
@@ -3765,11 +3651,18 @@ export function createHDDLMap(container, options = {}) {
       .text('</>')
 
     // Animate to target with rotation, scale, and depth-based opacity
-    chipGroup.transition()
-      .duration(2500)
-      .ease(d3.easeCubicOut)
-      .attr('transform', `translate(${targetX}, ${targetY}) scale(${perspectiveScale}) rotate(${rotateAngle})`)
-      .attr('opacity', depthOpacity)
+    // Skip animation during catch-up window for instant placement
+    if (skipAnimation) {
+      chipGroup
+        .attr('transform', `translate(${targetX}, ${targetY}) scale(${perspectiveScale}) rotate(${rotateAngle})`)
+        .attr('opacity', depthOpacity)
+    } else {
+      chipGroup.transition()
+        .duration(2500)
+        .ease(d3.easeCubicOut)
+        .attr('transform', `translate(${targetX}, ${targetY}) scale(${perspectiveScale}) rotate(${rotateAngle})`)
+        .attr('opacity', depthOpacity)
+    }
 
     embeddingElements.push({ element: chipGroup, event, timestamp: Date.now() })
     embeddingCount++
@@ -3778,8 +3671,14 @@ export function createHDDLMap(container, options = {}) {
   }
 
   function renderEmbeddings() {
+    // Skip rendering during active scrubbing for performance
+    if (getIsScrubbing()) {
+      return
+    }
+    
     const scenario = getScenario()
     const currentHour = getTimeHour()
+    const skipAnimation = isWithinScrubCatchup()
 
     const embeddingEvents = scenario.events
       .filter(e => e.type === 'embedding' && e.hour <= currentHour)
@@ -3809,11 +3708,18 @@ export function createHDDLMap(container, options = {}) {
     //   })
     // }
 
-    newEvents.forEach((event, index) => {
-      setTimeout(() => {
-        createFloatingEmbedding(event)
-      }, index * 150)
-    })
+    // During catch-up window, create all embeddings instantly without stagger
+    if (skipAnimation && newEvents.length > 0) {
+      newEvents.forEach((event) => {
+        createFloatingEmbedding(event, true) // skipAnimation = true
+      })
+    } else {
+      newEvents.forEach((event, index) => {
+        setTimeout(() => {
+          createFloatingEmbedding(event, false)
+        }, index * 150)
+      })
+    }
   }
 
   renderEmbeddings()

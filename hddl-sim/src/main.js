@@ -1,10 +1,9 @@
 import './design-tokens.css'
 import './style-workspace.css'
-import 'intro.js/introjs.css'
 import { initRouter, navigateTo } from './router'
 import { createWorkspace } from './components/workspace'
 import { createScenarioSelector } from './components/scenario-selector'
-import { formatSimTime, getEnvelopeAtTime, getScenario, getTimeHour, onScenarioChange, onTimeChange, setTimeHour, getStewardFilter, onFilterChange } from './sim/sim-state'
+import { formatSimTime, getEnvelopeAtTime, getScenario, getTimeHour, onScenarioChange, onTimeChange, setTimeHour, getStewardFilter, onFilterChange, setScrubbingState, triggerCatchupWindow } from './sim/sim-state'
 import { getStewardColor } from './sim/steward-colors'
 import { getStoryModeEnabled, onStoryModeChange, setStoryModeEnabled } from './story-mode'
 import { initReviewHarness, isReviewModeEnabled, setReviewModeEnabled } from './review-harness'
@@ -167,17 +166,18 @@ if (!isTestEnv) {
   const params = new URLSearchParams(window.location.search)
   const scenarioParam = params.get('scenario')
   if (scenarioParam) {
-    // Load from scenario catalog
+    // Load from scenario catalog (async)
     Promise.all([
       import('./sim/scenario-loader.js'),
       import('./sim/store.js')
-    ]).then(([loaderModule, storeModule]) => {
-      const scenario = loaderModule.SCENARIOS[scenarioParam]
-      if (scenario) {
-        storeModule.setScenario(scenario.data)
+    ]).then(async ([loaderModule, storeModule]) => {
+      try {
+        const scenarioData = await loaderModule.loadScenarioAsync(scenarioParam)
+        storeModule.setScenario(scenarioData)
+        const scenario = loaderModule.SCENARIOS[scenarioParam]
         console.log(`✓ Loaded test scenario: ${scenarioParam} (${scenario.title})`)
-      } else {
-        console.error(`Scenario '${scenarioParam}' not found in catalog`)
+      } catch (err) {
+        console.error(`Failed to load scenario '${scenarioParam}':`, err)
       }
     }).catch(err => console.error(`Failed to load scenario ${scenarioParam}:`, err))
   }
@@ -190,6 +190,7 @@ timeDisplay.textContent = formatSimTime(currentTime)
 
 const speedSelector = document.createElement('select')
 speedSelector.className = 'monaco-select'
+speedSelector.id = 'timeline-speed'
 speedSelector.style.cssText = 'background: var(--vscode-input-background); border: 1px solid var(--vscode-input-border); color: var(--vscode-input-foreground); padding: 2px 4px; font-size: 12px;'
 speedSelector.innerHTML = '<option value="1">1x</option><option value="2">2x</option><option value="3">3x</option><option value="4">4x</option>'
 speedSelector.value = '2'
@@ -586,6 +587,7 @@ renderMismatchMarkers()
 let isDragging = false
 scrubberHandle.addEventListener('mousedown', (e) => {
   isDragging = true
+  setScrubbingState(true)
   e.preventDefault()
 })
 
@@ -596,14 +598,19 @@ document.addEventListener('mousemove', (e) => {
   const percent = x / rect.width
   const duration = getScenario()?.durationHours ?? 48
   currentTime = Math.round(percent * duration)
-  setTimeHour(currentTime)
+  setTimeHour(currentTime, { throttle: true })
 })
 
 document.addEventListener('mouseup', () => {
+  if (isDragging) {
+    setScrubbingState(false)
+  }
   isDragging = false
 })
 
 scrubberContainer.addEventListener('click', (e) => {
+  // Trigger catch-up window for click-to-jump (instant embedding placement)
+  triggerCatchupWindow()
   const rect = scrubberContainer.getBoundingClientRect()
   const x = e.clientX - rect.left
   const percent = x / rect.width
@@ -661,6 +668,15 @@ onTimeChange((t) => {
 
 // Create workspace layout
 const workbench = createWorkspace()
+
+// Preload all scenarios in background after initial render (non-blocking)
+// This ensures zero delay when users switch scenarios
+if (!isTestEnv) {
+  setTimeout(async () => {
+    const { preloadScenarios } = await import('./sim/scenario-loader.js')
+    await preloadScenarios()
+  }, 1000) // Wait 1s after initial load
+}
 
 // Create statusbar with proper status indicators
 const statusbar = document.createElement('div')
@@ -732,6 +748,9 @@ layoutManager.init({
   sidebar: document.querySelector('.sidebar'),
   auxiliary: document.querySelector('.auxiliarybar'),
   bottom: document.querySelector('.panel'),
+  setSidebarCollapsed: (collapsed) => {
+    document.body.classList.toggle('sidebar-hidden', Boolean(collapsed))
+  },
   setAuxCollapsed: (collapsed) => {
     document.body.classList.toggle('aux-hidden', Boolean(collapsed))
   },

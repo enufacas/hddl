@@ -1,4 +1,20 @@
-import introJs from 'intro.js'
+// intro.js is lazy-loaded when tour starts to reduce initial bundle size
+let introJsModule = null
+let introJsCssLoaded = false
+
+async function loadIntroJs() {
+  if (!introJsModule) {
+    // Load CSS if not already loaded
+    if (!introJsCssLoaded) {
+      await import('intro.js/introjs.css')
+      introJsCssLoaded = true
+    }
+    // Load the module
+    const module = await import('intro.js')
+    introJsModule = module.default
+  }
+  return introJsModule
+}
 
 export function createTourButton(tourFunction = startTour) {
   const button = document.createElement('button')
@@ -39,7 +55,8 @@ export function createTourButton(tourFunction = startTour) {
   return button
 }
 
-export function startTour() {
+export async function startTour() {
+  const introJs = await loadIntroJs()
   const intro = introJs()
   
   intro.setOptions({
@@ -194,7 +211,8 @@ export function startTour() {
   intro.start()
 }
 
-export function startDTSTour() {
+export async function startDTSTour() {
+  const introJs = await loadIntroJs()
   const intro = introJs()
   
   intro.setOptions({

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "id": "scenario-vertical-hydroponics-001",
+  "id": "vertical-hydroponics-farm",
   "title": "Vertical Hydroponics Farm — Sustainable Urban Agriculture",
   "durationHours": 240,
   "envelopes": [
@@ -433,6 +433,20 @@
       "actorName": "Emily Rodriguez"
     },
     {
+      "eventId": "retrieval:18_5:ENV-VH-002:4a",
+      "hour": 18.5,
+      "type": "retrieval",
+      "envelopeId": "ENV-VH-002",
+      "severity": "info",
+      "label": "HVAC failure patterns retrieved",
+      "detail": "ClimateController retrieved historical temperature variance cases. Found 9 compressor lag events with backup chiller solutions.",
+      "actorRole": "Environment Steward",
+      "actorName": "ClimateController",
+      "queryText": "temperature variance with HVAC failures and emergency cooling",
+      "retrievedEmbeddings": ["EMB-VH-001"],
+      "relevanceScores": [0.93]
+    },
+    {
       "eventId": "boundary_interaction:18_7:ENV-VH-002:5",
       "hour": 18.7,
       "type": "boundary_interaction",
@@ -442,7 +456,8 @@
       "detail": "ClimateController detected zone 5 temperature: 79.2°F (target: 72°F, threshold: 75°F). HVAC compressor lag suspected. Escalating to manual override.",
       "actorRole": "Environment Steward",
       "actorName": "ClimateController",
-      "boundaryType": "temperature_threshold"
+      "boundaryType": "temperature_threshold",
+      "boundary_kind": "escalated"
     },
     {
       "eventId": "decision:19_3:ENV-VH-002:6",
@@ -454,6 +469,37 @@
       "detail": "Environment Steward approved backup chiller activation for zone 5. Temperature stabilized at 72.5°F within 40 minutes. Primary HVAC scheduled for maintenance.",
       "actorRole": "Environment Steward",
       "actorName": "Marcus Johnson"
+    },
+    {
+      "eventId": "revision:22:ENV-VH-002:21a",
+      "hour": 22,
+      "type": "revision",
+      "envelopeId": "ENV-VH-002",
+      "severity": "info",
+      "label": "HVAC preventive maintenance schedule updated",
+      "detail": "Environment Steward implemented quarterly compressor diagnostics (up from annual) and automated temperature variance alerts at 73°F threshold.",
+      "actorRole": "Environment Steward",
+      "actorName": "Marcus Johnson",
+      "revisionType": "maintenance_protocol",
+      "reason": "Proactive detection of compressor degradation prevents crop stress and backup chiller reliance.",
+      "resolvesEventId": "boundary_interaction:18_7:ENV-VH-002:5"
+    },
+    {
+      "eventId": "embedding:22_5:ENV-VH-002:21b",
+      "hour": 22.5,
+      "type": "embedding",
+      "envelopeId": "ENV-VH-002",
+      "severity": "info",
+      "label": "HVAC maintenance revision embedded",
+      "detail": "Preventive maintenance schedule update stored with proactive monitoring rationale.",
+      "actorRole": "Environment Steward",
+      "actorName": "Marcus Johnson",
+      "embeddingId": "EMB-VH-015",
+      "embeddingType": "revision",
+      "vectorDimensions": 768,
+      "sourceEventId": "revision:22:ENV-VH-002:21a",
+      "semanticContext": "HVAC compressor diagnostics increased with temperature alert threshold tightening",
+      "semanticVector": [0.22, 0.70]
     },
     {
       "eventId": "envelope_promoted:24:ENV-VH-006:7",
@@ -478,6 +524,20 @@
       "actorName": "NutrientBalancer"
     },
     {
+      "eventId": "retrieval:48_6:ENV-VH-003:8a",
+      "hour": 48.6,
+      "type": "retrieval",
+      "envelopeId": "ENV-VH-003",
+      "severity": "info",
+      "label": "Pest control patterns retrieved",
+      "detail": "PestMonitor retrieved historical aphid infestation cases. Found 14 biocontrol interventions with 96% success rate.",
+      "actorRole": "Nutrition Steward",
+      "actorName": "PestMonitor",
+      "queryText": "aphid threshold exceeded with biocontrol release strategies",
+      "retrievedEmbeddings": ["EMB-VH-002", "EMB-VH-003"],
+      "relevanceScores": [0.91, 0.87]
+    },
+    {
       "eventId": "boundary_interaction:48_8:ENV-VH-003:9",
       "hour": 48.8,
       "type": "boundary_interaction",
@@ -500,8 +560,37 @@
       "actorRole": "Nutrition Steward",
       "actorName": "Ana Martinez"
     },
+    {      "eventId": "revision:52:ENV-VH-003:21c",
+      "hour": 52,
+      "type": "revision",
+      "envelopeId": "ENV-VH-003",
+      "severity": "info",
+      "label": "Biocontrol release protocol automated",
+      "detail": "Nutrition Steward lowered aphid threshold from 8 to 6 adults/plant and automated ladybug release upon detection for faster intervention.",
+      "actorRole": "Nutrition Steward",
+      "actorName": "Ana Martinez",
+      "revisionType": "threshold_adjustment",
+      "reason": "Early biocontrol intervention prevents exponential pest growth and crop damage.",
+      "resolvesEventId": "boundary_interaction:48_8:ENV-VH-003:9"
+    },
     {
-      "eventId": "decision:72_1:ENV-VH-001:11",
+      "eventId": "embedding:52_5:ENV-VH-003:21d",
+      "hour": 52.5,
+      "type": "embedding",
+      "envelopeId": "ENV-VH-003",
+      "severity": "info",
+      "label": "Biocontrol protocol revision embedded",
+      "detail": "Aphid threshold reduction with automated ladybug release stored with early intervention rationale.",
+      "actorRole": "Nutrition Steward",
+      "actorName": "Ana Martinez",
+      "embeddingId": "EMB-VH-016",
+      "embeddingType": "revision",
+      "vectorDimensions": 768,
+      "sourceEventId": "revision:52:ENV-VH-003:21c",
+      "semanticContext": "aphid threshold lowered with automated biocontrol for preventive pest management",
+      "semanticVector": [0.25, 0.72]
+    },
+    {      "eventId": "decision:72_1:ENV-VH-001:11",
       "hour": 72.1,
       "type": "decision",
       "envelopeId": "ENV-VH-001",
@@ -523,6 +612,20 @@
       "actorName": "MaturityAssessor"
     },
     {
+      "eventId": "retrieval:102_2:ENV-VH-004:12a",
+      "hour": 102.2,
+      "type": "retrieval",
+      "envelopeId": "ENV-VH-004",
+      "severity": "info",
+      "label": "Quality defect patterns retrieved",
+      "detail": "QualityInspector retrieved historical tip burn cases. Found 11 calcium deficiency resolutions with nutrient protocol adjustments.",
+      "actorRole": "Harvest Steward",
+      "actorName": "QualityInspector",
+      "queryText": "lettuce tip burn with calcium deficiency corrections",
+      "retrievedEmbeddings": ["EMB-VH-005"],
+      "relevanceScores": [0.89]
+    },
+    {
       "eventId": "boundary_interaction:102_4:ENV-VH-004:13",
       "hour": 102.4,
       "type": "boundary_interaction",
@@ -532,7 +635,8 @@
       "detail": "QualityInspector detected 7.2% tip burn in zone 6 lettuce (threshold: 5%). Suspected calcium deficiency. Recommends nutrient adjustment for next cycle.",
       "actorRole": "Harvest Steward",
       "actorName": "QualityInspector",
-      "boundaryType": "quality_threshold"
+      "boundaryType": "quality_threshold",
+      "boundary_kind": "escalated"
     },
     {
       "eventId": "revision:108:ENV-VH-003:14",
@@ -545,7 +649,25 @@
       "actorRole": "Nutrition Steward",
       "actorName": "Ana Martinez",
       "revisionType": "nutrient_protocol",
-      "reason": "Field data shows calcium deficiency correlation with tip burn in lettuce crops."
+      "reason": "Field data shows calcium deficiency correlation with tip burn in lettuce crops.",
+      "resolvesEventId": "boundary_interaction:102_4:ENV-VH-004:13"
+    },
+    {
+      "eventId": "embedding:108_5:ENV-VH-003:14a",
+      "hour": 108.5,
+      "type": "embedding",
+      "envelopeId": "ENV-VH-003",
+      "severity": "info",
+      "label": "Calcium protocol revision embedded",
+      "detail": "Nutrient protocol calcium increase stored with tip burn prevention rationale.",
+      "actorRole": "Nutrition Steward",
+      "actorName": "Ana Martinez",
+      "embeddingId": "EMB-VH-017",
+      "embeddingType": "revision",
+      "vectorDimensions": 768,
+      "sourceEventId": "revision:108:ENV-VH-003:14",
+      "semanticContext": "lettuce calcium supplementation increased for tip burn defect prevention",
+      "semanticVector": [0.20, 0.68]
     },
     {
       "eventId": "decision:120_5:ENV-VH-005:15",
@@ -559,6 +681,20 @@
       "actorName": "LoadOptimizer"
     },
     {
+      "eventId": "retrieval:144:ENV-VH-005:15a",
+      "hour": 144,
+      "type": "retrieval",
+      "envelopeId": "ENV-VH-005",
+      "severity": "info",
+      "label": "Carbon reduction patterns retrieved",
+      "detail": "CarbonTracker retrieved historical emissions reduction cases. Found 7 battery expansion projects with 22% average carbon reduction.",
+      "actorRole": "Energy Steward",
+      "actorName": "CarbonTracker",
+      "queryText": "carbon intensity exceeded with battery expansion solutions",
+      "retrievedEmbeddings": ["EMB-VH-007"],
+      "relevanceScores": [0.90]
+    },
+    {
       "eventId": "boundary_interaction:144_2:ENV-VH-005:16",
       "hour": 144.2,
       "type": "boundary_interaction",
@@ -568,7 +704,8 @@
       "detail": "CarbonTracker reported weekly carbon footprint: 0.34 kg CO2e/kg produce (target: <0.30). Grid electricity 72% during cloudy week. Recommends battery expansion.",
       "actorRole": "Energy Steward",
       "actorName": "CarbonTracker",
-      "boundaryType": "carbon_target"
+      "boundaryType": "emissions_threshold",
+      "boundary_kind": "escalated"
     },
     {
       "eventId": "dsg_session:168:ENV-VH-001:17",
@@ -595,8 +732,37 @@
       "revisionType": "lighting_protocol",
       "reason": "DSG findings show microgreens require higher red spectrum for optimal growth."
     },
+    {      "eventId": "revision:148:ENV-VH-005:21e",
+      "hour": 148,
+      "type": "revision",
+      "envelopeId": "ENV-VH-005",
+      "severity": "info",
+      "label": "Battery storage expansion approved",
+      "detail": "Energy Steward approved 50 kWh battery addition. Projected solar capture increase from 62% to 78%, carbon intensity target met (0.28 kg CO2e/kg).",
+      "actorRole": "Energy Steward",
+      "actorName": "Sarah Chen",
+      "revisionType": "infrastructure_investment",
+      "reason": "Battery expansion enables higher renewable penetration and achieves carbon footprint targets.",
+      "resolvesEventId": "boundary_interaction:144_2:ENV-VH-005:16"
+    },
     {
-      "eventId": "signal:192:ENV-VH-006:19",
+      "eventId": "embedding:148_5:ENV-VH-005:21f",
+      "hour": 148.5,
+      "type": "embedding",
+      "envelopeId": "ENV-VH-005",
+      "severity": "info",
+      "label": "Battery expansion revision embedded",
+      "detail": "Energy storage infrastructure investment stored with carbon reduction rationale.",
+      "actorRole": "Energy Steward",
+      "actorName": "Sarah Chen",
+      "embeddingId": "EMB-VH-018",
+      "embeddingType": "revision",
+      "vectorDimensions": 768,
+      "sourceEventId": "revision:148:ENV-VH-005:21e",
+      "semanticContext": "battery storage expansion for renewable capture and carbon footprint reduction",
+      "semanticVector": [0.28, 0.75]
+    },
+    {      "eventId": "signal:192:ENV-VH-006:19",
       "hour": 192,
       "type": "signal",
       "envelopeId": "ENV-VH-006",
@@ -629,7 +795,8 @@
       "detail": "CertificationMonitor flagged USDA Organic certification expires in 45 days. Requires renewal documentation and inspector visit scheduling.",
       "actorRole": "Compliance Steward",
       "actorName": "CertificationMonitor",
-      "boundaryType": "certification_expiring"
+      "boundaryType": "certification_expiring",
+      "boundary_kind": "escalated"
     },
     {
       "eventId": "decision:230_1:ENV-VH-006:22",
@@ -642,8 +809,37 @@
       "actorRole": "Compliance Steward",
       "actorName": "David Park"
     },
+    {      "eventId": "revision:232:ENV-VH-006:21g",
+      "hour": 232,
+      "type": "revision",
+      "envelopeId": "ENV-VH-006",
+      "severity": "info",
+      "label": "Certification renewal calendar automated",
+      "detail": "Compliance Steward implemented 60-day renewal alerts with automated documentation generation and inspector availability pre-check.",
+      "actorRole": "Compliance Steward",
+      "actorName": "David Park",
+      "revisionType": "process_automation",
+      "reason": "Eliminate last-minute certification lapses by proactive scheduling and documentation preparation.",
+      "resolvesEventId": "boundary_interaction:228_6:ENV-VH-006:21"
+    },
     {
-      "eventId": "signal:240:ENV-VH-001:23",
+      "eventId": "embedding:232_5:ENV-VH-006:21h",
+      "hour": 232.5,
+      "type": "embedding",
+      "envelopeId": "ENV-VH-006",
+      "severity": "info",
+      "label": "Certification renewal revision embedded",
+      "detail": "Automated certification calendar stored with proactive renewal management rationale.",
+      "actorRole": "Compliance Steward",
+      "actorName": "David Park",
+      "embeddingId": "EMB-VH-019",
+      "embeddingType": "revision",
+      "vectorDimensions": 768,
+      "sourceEventId": "revision:232:ENV-VH-006:21g",
+      "semanticContext": "organic certification renewal automated with 60-day alerts and documentation",
+      "semanticVector": [0.22, 0.72]
+    },
+    {      "eventId": "signal:240:ENV-VH-001:23",
       "hour": 240,
       "type": "signal",
       "envelopeId": "ENV-VH-001",

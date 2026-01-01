@@ -3,6 +3,9 @@ hddl-sim/dist/
 hddl-sim/node_modules/
 hddl-sim/.vite/
 
+# Playwright MCP browser state
+.playwright-mcp/
+
 # Legacy build output
 site/
 

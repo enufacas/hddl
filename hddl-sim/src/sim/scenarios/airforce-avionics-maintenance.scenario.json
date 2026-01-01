@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "id": "scenario-airforce-avionics-001",
+  "id": "airforce-avionics-maintenance",
   "title": "Air Force Avionics Maintenance Backshop — Mission Readiness",
   "durationHours": 336,
   "envelopes": [
@@ -257,48 +257,6 @@
           "name": "ComponentTracker",
           "role": "LRU lifecycle and traceability management",
           "envelopeIds": ["ENV-AF-001"]
-        },
-        {
-          "agentId": "AG-MAINT-04",
-          "name": "E4MafiaLeader",
-          "role": "strategic tool room disappearances",
-          "envelopeIds": ["ENV-AF-001"]
-        },
-        {
-          "agentId": "AG-MAINT-05",
-          "name": "SnackFundManager",
-          "role": "snack bar inventory optimization",
-          "envelopeIds": ["ENV-AF-001"]
-        },
-        {
-          "agentId": "AG-MAINT-06",
-          "name": "DormLawyerBot",
-          "role": "AFI interpretation for max benefit",
-          "envelopeIds": ["ENV-AF-001"]
-        },
-        {
-          "agentId": "AG-MAINT-07",
-          "name": "WaffleHouseNavigator",
-          "role": "optimal 24hr shift fueling routes",
-          "envelopeIds": ["ENV-AF-001"]
-        },
-        {
-          "agentId": "AG-MAINT-08",
-          "name": "ProfileWarrior",
-          "role": "permanent light duty optimization",
-          "envelopeIds": ["ENV-AF-001"]
-        },
-        {
-          "agentId": "AG-MAINT-09",
-          "name": "DeploymentDodger",
-          "role": "Leave Web timing strategist",
-          "envelopeIds": ["ENV-AF-001"]
-        },
-        {
-          "agentId": "AG-MAINT-10",
-          "name": "CrewChiefSupreme",
-          "role": "aircraft ownership enforcement",
-          "envelopeIds": ["ENV-AF-001"]
         }
       ]
     },
@@ -321,36 +279,6 @@
           "agentId": "AG-SUPPLY-03",
           "name": "ShelfLifeMonitor",
           "role": "time-sensitive component tracking",
-          "envelopeIds": ["ENV-AF-002"]
-        },
-        {
-          "agentId": "AG-SUPPLY-04",
-          "name": "FormFillerExtraordinaire",
-          "role": "DD Form 1348 completion speed records",
-          "envelopeIds": ["ENV-AF-002"]
-        },
-        {
-          "agentId": "AG-SUPPLY-05",
-          "name": "NINEONEWANNABETracker",
-          "role": "stock number memorization champion",
-          "envelopeIds": ["ENV-AF-002"]
-        },
-        {
-          "agentId": "AG-SUPPLY-06",
-          "name": "BXDeliveryOptimizer",
-          "role": "BX run scheduling during duty hours",
-          "envelopeIds": ["ENV-AF-002"]
-        },
-        {
-          "agentId": "AG-SUPPLY-07",
-          "name": "TurnInTuesday",
-          "role": "equipment hand receipt cleansing",
-          "envelopeIds": ["ENV-AF-002"]
-        },
-        {
-          "agentId": "AG-SUPPLY-08",
-          "name": "ExcessPropertyFlipper",
-          "role": "DRMO treasure identification",
           "envelopeIds": ["ENV-AF-002"]
         }
       ]
@@ -377,12 +305,6 @@
           "envelopeIds": ["ENV-AF-003"]
         },
         {
-          "agentId": "AG-SAFETY-04",
-          "name": "ReflectiveBeltEnforcer",
-          "role": "PT belt visibility compliance 24/7",
-          "envelopeIds": ["ENV-AF-003"]
-        },
-        {
           "agentId": "AG-SAFETY-05",
           "name": "TripHazardHunter",
           "role": "floor cord incident prevention",
@@ -392,24 +314,6 @@
           "agentId": "AG-SAFETY-06",
           "name": "CBTReminderBot",
           "role": "computer-based training deadline alerts",
-          "envelopeIds": ["ENV-AF-003"]
-        },
-        {
-          "agentId": "AG-SAFETY-07",
-          "name": "GreenDotAdvocate",
-          "role": "bystander intervention promotion",
-          "envelopeIds": ["ENV-AF-003"]
-        },
-        {
-          "agentId": "AG-SAFETY-08",
-          "name": "PilotWaveProtector",
-          "role": "hand salute enforcement in FOD areas",
-          "envelopeIds": ["ENV-AF-003"]
-        },
-        {
-          "agentId": "AG-SAFETY-09",
-          "name": "WeeklyWingReporter",
-          "role": "mundane incident write-up automation",
           "envelopeIds": ["ENV-AF-003"]
         }
       ]
@@ -433,48 +337,6 @@
           "agentId": "AG-OPS-03",
           "name": "ShiftOptimizer",
           "role": "crew scheduling and labor hour management",
-          "envelopeIds": ["ENV-AF-004"]
-        },
-        {
-          "agentId": "AG-OPS-04",
-          "name": "TDYTravelAgent",
-          "role": "per diem maximization strategies",
-          "envelopeIds": ["ENV-AF-004"]
-        },
-        {
-          "agentId": "AG-OPS-05",
-          "name": "MidShiftGhost",
-          "role": "graveyard shift staffing illusions",
-          "envelopeIds": ["ENV-AF-004"]
-        },
-        {
-          "agentId": "AG-OPS-06",
-          "name": "ChangeOfCommandCoordinator",
-          "role": "coin ceremony logistics expert",
-          "envelopeIds": ["ENV-AF-004"]
-        },
-        {
-          "agentId": "AG-OPS-07",
-          "name": "WeekendDutySwapper",
-          "role": "duty roster negotiation optimizer",
-          "envelopeIds": ["ENV-AF-004"]
-        },
-        {
-          "agentId": "AG-OPS-08",
-          "name": "LongLunchLiaison",
-          "role": "meal period extension justifications",
-          "envelopeIds": ["ENV-AF-004"]
-        },
-        {
-          "agentId": "AG-OPS-09",
-          "name": "CommandPostCoffeeBot",
-          "role": "break room resource allocation",
-          "envelopeIds": ["ENV-AF-004"]
-        },
-        {
-          "agentId": "AG-OPS-10",
-          "name": "FirstShirtDiplomatAI",
-          "role": "CC-enlisted communication bridge",
           "envelopeIds": ["ENV-AF-004"]
         }
       ]
@@ -501,51 +363,9 @@
           "envelopeIds": ["ENV-AF-005"]
         },
         {
-          "agentId": "AG-TRAIN-04",
-          "name": "SKTStudyGroupBot",
-          "role": "Specialty Knowledge Test cramming",
-          "envelopeIds": ["ENV-AF-005"]
-        },
-        {
-          "agentId": "AG-TRAIN-05",
-          "name": "EPRBulletGenerator",
-          "role": "enlisted performance report impact statements",
-          "envelopeIds": ["ENV-AF-005"]
-        },
-        {
-          "agentId": "AG-TRAIN-06",
-          "name": "PMEProcrastinator",
-          "role": "last-minute Professional Military Education",
-          "envelopeIds": ["ENV-AF-005"]
-        },
-        {
-          "agentId": "AG-TRAIN-07",
-          "name": "CDCFinisher",
-          "role": "Career Development Course volume speedruns",
-          "envelopeIds": ["ENV-AF-005"]
-        },
-        {
-          "agentId": "AG-TRAIN-08",
-          "name": "DistanceLearningChamp",
-          "role": "CCAF credit transfer strategist",
-          "envelopeIds": ["ENV-AF-005"]
-        },
-        {
-          "agentId": "AG-TRAIN-09",
-          "name": "VolunteerHourTracker",
-          "role": "EPR bullet ammunition collector",
-          "envelopeIds": ["ENV-AF-005"]
-        },
-        {
           "agentId": "AG-TRAIN-10",
           "name": "PT TestScheduler",
           "role": "fitness assessment weather optimization",
-          "envelopeIds": ["ENV-AF-005"]
-        },
-        {
-          "agentId": "AG-TRAIN-11",
-          "name": "TAPSNavigator",
-          "role": "transition assistance program maximizer",
           "envelopeIds": ["ENV-AF-005"]
         }
       ]
@@ -608,6 +428,20 @@
       "actorName": "Capt Thompson"
     },
     {
+      "eventId": "retrieval:18_1:ENV-AF-004:4a",
+      "hour": 18.1,
+      "type": "retrieval",
+      "envelopeId": "ENV-AF-004",
+      "severity": "info",
+      "label": "Workload violation patterns retrieved",
+      "detail": "ShiftOptimizer retrieved historical labor hour limit cases. Found 11 previous surge events with cross-shop support solutions.",
+      "actorRole": "Operations Steward",
+      "actorName": "ShiftOptimizer",
+      "queryText": "technician workload exceeded with cross-training support strategies",
+      "retrievedEmbeddings": ["EMB-AF-001"],
+      "relevanceScores": [0.90]
+    },
+    {
       "eventId": "boundary_interaction:18_3:ENV-AF-004:5",
       "hour": 18.3,
       "type": "boundary_interaction",
@@ -617,7 +451,8 @@
       "detail": "ShiftOptimizer flagged 4 technicians approaching 58-hour workweek limit. Projected to exceed 60-hour constraint by Friday. Recommends cross-training support from adjacent shops.",
       "actorRole": "Operations Steward",
       "actorName": "ShiftOptimizer",
-      "boundaryType": "labor_hour_limit"
+      "boundaryType": "labor_hour_limit",
+      "boundary_kind": "escalated"
     },
     {
       "eventId": "decision:19_1:ENV-AF-004:6",
@@ -629,6 +464,37 @@
       "detail": "MOO approved 3 comm/nav technicians to support avionics backshop. Assignments: IFF testing, cable harness inspection. Maintains labor compliance.",
       "actorRole": "Operations Steward",
       "actorName": "Capt Thompson"
+    },
+    {
+      "eventId": "revision:22:ENV-AF-004:21a",
+      "hour": 22,
+      "type": "revision",
+      "envelopeId": "ENV-AF-004",
+      "severity": "info",
+      "label": "Cross-shop support protocol formalized",
+      "detail": "Operations Steward established cross-training approval matrix: comm/nav techs authorized for IFF/cable tasks without additional certification during surge.",
+      "actorRole": "Operations Steward",
+      "actorName": "Capt Thompson",
+      "revisionType": "capability_expansion",
+      "reason": "Reduce friction in cross-shop support during high-tempo operations while maintaining quality.",
+      "resolvesEventId": "boundary_interaction:18_3:ENV-AF-004:5"
+    },
+    {
+      "eventId": "embedding:22_5:ENV-AF-004:21b",
+      "hour": 22.5,
+      "type": "embedding",
+      "envelopeId": "ENV-AF-004",
+      "severity": "info",
+      "label": "Cross-shop protocol revision embedded",
+      "detail": "Cross-training approval matrix stored with surge operations rationale.",
+      "actorRole": "Operations Steward",
+      "actorName": "Capt Thompson",
+      "embeddingId": "EMB-AF-020",
+      "embeddingType": "revision",
+      "vectorDimensions": 768,
+      "sourceEventId": "revision:22:ENV-AF-004:21a",
+      "semanticContext": "cross-shop support formalized with comm/nav tech authorization for surge operations",
+      "semanticVector": [0.28, 0.70]
     },
     {
       "eventId": "envelope_promoted:24:ENV-AF-005:7",
@@ -686,7 +552,25 @@
       "actorRole": "Safety Steward",
       "actorName": "MSgt Patel",
       "revisionType": "safety_policy",
-      "reason": "Prevent recurrence of ESD events due to expired equipment. Aligns with AFI 21-123 best practices."
+      "reason": "Prevent recurrence of ESD events due to expired equipment. Aligns with AFI 21-123 best practices.",
+      "resolvesEventId": "boundary_interaction:48_6:ENV-AF-003:9"
+    },
+    {
+      "eventId": "embedding:52_5:ENV-AF-003:11a",
+      "hour": 52.5,
+      "type": "embedding",
+      "envelopeId": "ENV-AF-003",
+      "severity": "info",
+      "label": "ESD policy revision embedded",
+      "detail": "ESD prevention procedure update stored with equipment expiration prevention rationale.",
+      "actorRole": "Safety Steward",
+      "actorName": "MSgt Patel",
+      "embeddingId": "EMB-AF-024",
+      "embeddingType": "revision",
+      "vectorDimensions": 768,
+      "sourceEventId": "revision:52:ENV-AF-003:11",
+      "semanticContext": "ESD wrist strap testing frequency increased with digital tracking for safety compliance",
+      "semanticVector": [0.20, 0.75]
     },
     {
       "eventId": "boundary_interaction:68_5:ENV-AF-002:12",
@@ -698,7 +582,39 @@
       "detail": "ShelfLifeMonitor flagged 8 radar magnetron tubes approaching 6-month shelf life. Value: $124K. Current mission demand: low. Recommends installation on training aircraft or return to depot.",
       "actorRole": "Supply Steward",
       "actorName": "ShelfLifeMonitor",
-      "boundaryType": "expiration_threshold"
+      "boundaryType": "expiration_threshold",
+      "boundary_kind": "escalated"
+    },
+    {
+      "eventId": "revision:72:ENV-AF-002:21c",
+      "hour": 72,
+      "type": "revision",
+      "envelopeId": "ENV-AF-002",
+      "severity": "info",
+      "label": "Shelf-life alert thresholds updated",
+      "detail": "Supply Steward moved magnetron tube alerts from 30 days to 60 days before expiration to allow time for training aircraft installation planning.",
+      "actorRole": "Supply Steward",
+      "actorName": "Lt Williams",
+      "revisionType": "constraint_update",
+      "reason": "30-day window insufficient for coordinating training aircraft maintenance schedules.",
+      "resolvesEventId": "boundary_interaction:68_5:ENV-AF-002:12"
+    },
+    {
+      "eventId": "embedding:72_5:ENV-AF-002:21d",
+      "hour": 72.5,
+      "type": "embedding",
+      "envelopeId": "ENV-AF-002",
+      "severity": "info",
+      "label": "Shelf-life alert revision embedded",
+      "detail": "Magnetron tube alert threshold extension stored with coordination rationale.",
+      "actorRole": "Supply Steward",
+      "actorName": "Lt Williams",
+      "embeddingId": "EMB-AF-021",
+      "embeddingType": "revision",
+      "vectorDimensions": 768,
+      "sourceEventId": "revision:72:ENV-AF-002:21c",
+      "semanticContext": "shelf-life alert window extended to 60 days for training aircraft coordination",
+      "semanticVector": [0.25, 0.68]
     },
     {
       "eventId": "decision:84_2:ENV-AF-004:13",
@@ -712,6 +628,37 @@
       "actorName": "PriorityAdjuster"
     },
     {
+      "eventId": "revision:72:ENV-AF-002:21c",
+      "hour": 72,
+      "type": "revision",
+      "envelopeId": "ENV-AF-002",
+      "severity": "info",
+      "label": "Shelf-life alert thresholds updated",
+      "detail": "Supply Steward moved magnetron tube alerts from 30 days to 60 days before expiration to allow time for training aircraft installation planning.",
+      "actorRole": "Supply Steward",
+      "actorName": "Lt Williams",
+      "revisionType": "constraint_update",
+      "reason": "30-day window insufficient for coordinating training aircraft maintenance schedules.",
+      "resolvesEventId": "boundary_interaction:68_5:ENV-AF-002:12"
+    },
+    {
+      "eventId": "embedding:72_5:ENV-AF-002:21d",
+      "hour": 72.5,
+      "type": "embedding",
+      "envelopeId": "ENV-AF-002",
+      "severity": "info",
+      "label": "Shelf-life alert revision embedded",
+      "detail": "Magnetron tube alert threshold extension stored with coordination rationale.",
+      "actorRole": "Supply Steward",
+      "actorName": "Lt Williams",
+      "embeddingId": "EMB-AF-021",
+      "embeddingType": "revision",
+      "vectorDimensions": 768,
+      "sourceEventId": "revision:72:ENV-AF-002:21c",
+      "semanticContext": "shelf-life alert window extended to 60 days for training aircraft coordination",
+      "semanticVector": [0.25, 0.68]
+    },
+    {
       "eventId": "decision:96_3:ENV-AF-005:14",
       "hour": 96.3,
       "type": "decision",
@@ -723,6 +670,20 @@
       "actorName": "SkillProgressionTracker"
     },
     {
+      "eventId": "retrieval:108_5:ENV-AF-005:14a",
+      "hour": 108.5,
+      "type": "retrieval",
+      "envelopeId": "ENV-AF-005",
+      "severity": "info",
+      "label": "Certification expiration patterns retrieved",
+      "detail": "CertificationScheduler retrieved historical cert expiration cases. Found 9 surge period renewals with weekend VTC training sessions.",
+      "actorRole": "Training Steward",
+      "actorName": "CertificationScheduler",
+      "queryText": "certification expirations during surge with accelerated refresher training",
+      "retrievedEmbeddings": ["EMB-AF-008"],
+      "relevanceScores": [0.89]
+    },
+    {
       "eventId": "boundary_interaction:108_7:ENV-AF-005:15",
       "hour": 108.7,
       "type": "boundary_interaction",
@@ -732,7 +693,8 @@
       "detail": "CertificationScheduler identified 6 technicians with radar certifications expiring in 30 days. Current ops tempo limits training availability. Requires expedited refresher scheduling.",
       "actorRole": "Training Steward",
       "actorName": "CertificationScheduler",
-      "boundaryType": "certification_expiring"
+      "boundaryType": "certification_expiring",
+      "boundary_kind": "escalated"
     },
     {
       "eventId": "decision:110_5:ENV-AF-005:16",
@@ -744,6 +706,68 @@
       "detail": "Training Steward coordinated weekend refresher sessions with depot instructors via VTC. All 6 technicians scheduled. Maintains certification compliance during surge operations.",
       "actorRole": "Training Steward",
       "actorName": "SSgt Kim"
+    },
+    {
+      "eventId": "revision:114:ENV-AF-005:21e",
+      "hour": 114,
+      "type": "revision",
+      "envelopeId": "ENV-AF-005",
+      "severity": "info",
+      "label": "Certification renewal streamlined",
+      "detail": "Training Steward established VTC refresher protocol: depot instructors conduct weekend remote training for surge-period renewals without travel delays.",
+      "actorRole": "Training Steward",
+      "actorName": "SSgt Kim",
+      "revisionType": "process_refinement",
+      "reason": "Eliminate 2-week TDY requirement for refresher training during high-ops tempo periods.",
+      "resolvesEventId": "boundary_interaction:108_7:ENV-AF-005:15"
+    },
+    {
+      "eventId": "embedding:114_5:ENV-AF-005:21f",
+      "hour": 114.5,
+      "type": "embedding",
+      "envelopeId": "ENV-AF-005",
+      "severity": "info",
+      "label": "Certification renewal revision embedded",
+      "detail": "VTC refresher training protocol stored with surge period rationale.",
+      "actorRole": "Training Steward",
+      "actorName": "SSgt Kim",
+      "embeddingId": "EMB-AF-022",
+      "embeddingType": "revision",
+      "vectorDimensions": 768,
+      "sourceEventId": "revision:114:ENV-AF-005:21e",
+      "semanticContext": "certification refresher streamlined with VTC for surge operations without TDY",
+      "semanticVector": [0.22, 0.72]
+    },
+    {
+      "eventId": "revision:114:ENV-AF-005:21e",
+      "hour": 114,
+      "type": "revision",
+      "envelopeId": "ENV-AF-005",
+      "severity": "info",
+      "label": "Certification renewal streamlined",
+      "detail": "Training Steward established VTC refresher protocol: depot instructors conduct weekend remote training for surge-period renewals without travel delays.",
+      "actorRole": "Training Steward",
+      "actorName": "SSgt Kim",
+      "revisionType": "process_refinement",
+      "reason": "Eliminate 2-week TDY requirement for refresher training during high-ops tempo periods.",
+      "resolvesEventId": "boundary_interaction:108_7:ENV-AF-005:15"
+    },
+    {
+      "eventId": "embedding:114_5:ENV-AF-005:21f",
+      "hour": 114.5,
+      "type": "embedding",
+      "envelopeId": "ENV-AF-005",
+      "severity": "info",
+      "label": "Certification renewal revision embedded",
+      "detail": "VTC refresher training protocol stored with surge period rationale.",
+      "actorRole": "Training Steward",
+      "actorName": "SSgt Kim",
+      "embeddingId": "EMB-AF-022",
+      "embeddingType": "revision",
+      "vectorDimensions": 768,
+      "sourceEventId": "revision:114:ENV-AF-005:21e",
+      "semanticContext": "certification refresher streamlined with VTC for surge operations without TDY",
+      "semanticVector": [0.22, 0.72]
     },
     {
       "eventId": "dsg_session:144:ENV-AF-001:17",
@@ -795,6 +819,20 @@
       "actorName": "InventoryForecaster"
     },
     {
+      "eventId": "retrieval:216_6:ENV-AF-003:20a",
+      "hour": 216.6,
+      "type": "retrieval",
+      "envelopeId": "ENV-AF-003",
+      "severity": "info",
+      "label": "TCTO compliance patterns retrieved",
+      "detail": "TOComplianceChecker retrieved historical deadline management cases. Found 6 similar TCTOs with accelerated schedules and dedicated crews.",
+      "actorRole": "Safety Steward",
+      "actorName": "TOComplianceChecker",
+      "queryText": "TCTO deadline management with accelerated completion strategies",
+      "retrievedEmbeddings": ["EMB-AF-010", "EMB-AF-012"],
+      "relevanceScores": [0.91, 0.86]
+    },
+    {
       "eventId": "boundary_interaction:216_8:ENV-AF-003:21",
       "hour": 216.8,
       "type": "boundary_interaction",
@@ -804,7 +842,39 @@
       "detail": "TOComplianceChecker flagged Time Compliance Technical Order 1F-16C-606: cockpit display software upgrade. 22 aircraft remaining, 45 days to deadline. Current completion rate: insufficient.",
       "actorRole": "Safety Steward",
       "actorName": "TOComplianceChecker",
-      "boundaryType": "compliance_deadline"
+      "boundaryType": "compliance_deadline",
+      "boundary_kind": "escalated"
+    },
+    {
+      "eventId": "revision:220:ENV-AF-003:21g",
+      "hour": 220,
+      "type": "revision",
+      "envelopeId": "ENV-AF-003",
+      "severity": "info",
+      "label": "TCTO surge completion plan activated",
+      "detail": "Safety Steward established dedicated TCTO crew: 3 technicians assigned full-time to cockpit display upgrades, 2 aircraft/day target rate to meet 45-day deadline.",
+      "actorRole": "Safety Steward",
+      "actorName": "MSgt Patel",
+      "revisionType": "resource_allocation",
+      "reason": "Current distributed approach insufficient for deadline compliance. Dedicated crew ensures focus and efficiency.",
+      "resolvesEventId": "boundary_interaction:216_8:ENV-AF-003:21"
+    },
+    {
+      "eventId": "embedding:220_5:ENV-AF-003:21h",
+      "hour": 220.5,
+      "type": "embedding",
+      "envelopeId": "ENV-AF-003",
+      "severity": "info",
+      "label": "TCTO surge plan revision embedded",
+      "detail": "Dedicated TCTO crew allocation stored with compliance deadline rationale.",
+      "actorRole": "Safety Steward",
+      "actorName": "MSgt Patel",
+      "embeddingId": "EMB-AF-023",
+      "embeddingType": "revision",
+      "vectorDimensions": 768,
+      "sourceEventId": "revision:220:ENV-AF-003:21g",
+      "semanticContext": "TCTO dedicated crew with accelerated completion for compliance deadline",
+      "semanticVector": [0.30, 0.75]
     },
     {
       "eventId": "decision:240_1:ENV-AF-004:22",

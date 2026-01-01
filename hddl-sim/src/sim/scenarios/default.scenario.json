@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "id": "scenario-default-002-simplified",
+  "id": "default",
   "title": "HDDL Replay (Simplified) — Four Fleets",
   "durationHours": 48,
   "envelopes": [
@@ -408,6 +408,27 @@
       "artifactOutput": []
     },
     {
+      "eventId": "retrieval:12_1:ENV-001:8",
+      "hour": 12.1,
+      "type": "retrieval",
+      "envelopeId": "ENV-001",
+      "severity": "info",
+      "label": "Retrieve refund precedents",
+      "detail": "Decision memory retrieval for recent refund > $100 decisions and related boundary interactions.",
+      "actorRole": "Customer Steward",
+      "actorName": "DecisionMemory",
+      "queryText": "refund > $100 escalation precedents",
+      "retrievedEmbeddings": ["EMB-DEF-001"],
+      "assumptionRefs": [],
+      "nextAssumptions": [],
+      "nextConstraints": [],
+      "boundary_refs": [],
+      "involvedEnvelopeIds": [],
+      "impactSummary": [],
+      "resolutionPolicy": [],
+      "artifactOutput": []
+    },
+    {
       "eventId": "BI-ENV-001-001",
       "hour": 12.6,
       "type": "boundary_interaction",
@@ -416,6 +437,7 @@
       "label": "Refund boundary touched",
       "detail": "A refund over $100 triggered the human-review boundary.",
       "actorRole": "Customer Steward",
+      "actorName": "Customer Steward",
       "assumptionRefs": [],
       "nextAssumptions": [],
       "nextConstraints": [],
@@ -493,6 +515,7 @@
       "resolutionPolicy": [],
       "artifactOutput": []
     },
+    
     {
       "eventId": "BI-ENV-003-001",
       "hour": 16.4,
@@ -502,6 +525,7 @@
       "label": "Discount boundary touched",
       "detail": "A requested discount exceeded allowed bounds and triggered a steward escalation.",
       "actorRole": "Sales Steward",
+      "actorName": "Sales Steward",
       "assumptionRefs": [],
       "nextAssumptions": [],
       "nextConstraints": [],
@@ -539,6 +563,18 @@
       "impactSummary": [],
       "resolutionPolicy": [],
       "artifactOutput": []
+    },
+    {
+      "eventId": "embedding:17_5:revision:17",
+      "hour": 17.5,
+      "type": "embedding",
+      "embeddingType": "revision",
+      "sourceEventId": "revision:17:ENV-003:13",
+      "embeddingId": "EMB-DEF-017",
+      "context": "Discount evidence packet requirements clarified for large discounts requiring steward approval",
+      "semanticVector": [0.28, 0.68],
+      "chunkText": "Revision clarifies evidence required for large discounts. Authority remains explicit with 15% threshold requiring evidence packet and steward approval.",
+      "actorRole": "Sales Steward"
     },
     {
       "eventId": "signal:20:ENV-004:14",
@@ -794,6 +830,20 @@
       "sourceEventId": "revision:13_1:ENV-001:9",
       "semanticContext": "refund escalation evidence packet requirements policy update",
       "semanticVector": [0.20, 0.75]
+    },
+    {
+      "eventId": "retrieval:15_5:ENV-001:29a",
+      "hour": 15.5,
+      "type": "retrieval",
+      "envelopeId": "ENV-001",
+      "severity": "info",
+      "label": "Retrieve refund revision",
+      "detail": "DecisionMemory retrieves the refund escalation revision embedding for future adjudications.",
+      "actorRole": "Customer Steward",
+      "actorName": "DecisionMemory",
+      "queryText": "refund escalation evidence packet requirements revision",
+      "retrievedEmbeddings": ["EMB-DEF-004"],
+      "relevanceScores": [0.9]
     },
     {
       "eventId": "embedding:17:ENV-003:29",

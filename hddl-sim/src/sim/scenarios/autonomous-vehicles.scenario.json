@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "id": "scenario-autonomous-vehicles-001",
+  "id": "autonomous-vehicles",
   "title": "Autonomous Vehicle Operations — Fleet Safety & Ethics",
   "durationHours": 96,
   "envelopes": [
@@ -281,6 +281,23 @@
       "actorName": "CollisionPredictor"
     },
     {
+      "eventId": "embedding:0_1:ENV-AV-001:hist",
+      "hour": 0.1,
+      "type": "embedding",
+      "envelopeId": "ENV-AV-001",
+      "severity": "info",
+      "label": "Historical baseline embedding",
+      "detail": "Baseline embedding for autonomous vehicles scenario.",
+      "actorRole": "Safety Steward",
+      "actorName": "System",
+      "embeddingId": "EMB-AV-HIST-001",
+      "embeddingType": "historical",
+      "vectorDimensions": 2,
+      "sourceEventId": "historical-baseline",
+      "semanticContext": "autonomous vehicles baseline",
+      "semanticVector": [0.5, 0.5]
+    },
+    {
       "eventId": "signal:6_5:ENV-AV-002:3",
       "hour": 6.5,
       "type": "signal",
@@ -305,6 +322,20 @@
       "actorName": "Aisha Patel"
     },
     {
+      "eventId": "retrieval:15_6:ENV-AV-001:4a",
+      "hour": 15.6,
+      "type": "retrieval",
+      "envelopeId": "ENV-AV-001",
+      "severity": "info",
+      "label": "Retrieving edge case patterns",
+      "detail": "EdgeCaseDetector querying historical construction zone navigation patterns before escalation.",
+      "actorRole": "Safety Steward",
+      "actorName": "EdgeCaseDetector",
+      "queryText": "construction zone conflicting signage resolution",
+      "retrievedEmbeddings": [],
+      "relevanceScores": []
+    },
+    {
       "eventId": "boundary_interaction:15_8:ENV-AV-001:5",
       "hour": 15.8,
       "type": "boundary_interaction",
@@ -314,7 +345,8 @@
       "detail": "EdgeCaseDetector flagged unusual scenario: construction zone with conflicting signage. Vehicle stopped, requested remote operator guidance.",
       "actorRole": "Safety Steward",
       "actorName": "EdgeCaseDetector",
-      "boundaryType": "ambiguous_constraint"
+      "boundaryType": "ambiguous_constraint",
+      "boundary_kind": "escalated"
     },
     {
       "eventId": "decision:15_9:ENV-AV-001:6",
@@ -377,6 +409,20 @@
       "reason": "New school opened mid-semester; community requested traffic precautions."
     },
     {
+      "eventId": "retrieval:41_9:ENV-AV-004:10a",
+      "hour": 41.9,
+      "type": "retrieval",
+      "envelopeId": "ENV-AV-004",
+      "severity": "info",
+      "label": "Retrieving safety fault protocols",
+      "detail": "DiagnosticsMonitor checking historical brake system fault handling before grounding vehicle.",
+      "actorRole": "Engineering Steward",
+      "actorName": "DiagnosticsMonitor",
+      "queryText": "brake system anomaly safe grounding procedures",
+      "retrievedEmbeddings": [],
+      "relevanceScores": []
+    },
+    {
       "eventId": "boundary_interaction:42_1:ENV-AV-004:11",
       "hour": 42.1,
       "type": "boundary_interaction",
@@ -386,7 +432,8 @@
       "detail": "DiagnosticsMonitor detected brake system anomaly on Vehicle #1288. Vehicle directed to safe stop, grounded pending inspection.",
       "actorRole": "Engineering Steward",
       "actorName": "DiagnosticsMonitor",
-      "boundaryType": "hard_constraint"
+      "boundaryType": "hard_constraint",
+      "boundary_kind": "escalated"
     },
     {
       "eventId": "decision:48:ENV-AV-003:12",
@@ -468,6 +515,51 @@
       "semanticVector": [0.80, 0.75]
     },
     {
+      "eventId": "revision:20:ENV-AV-001:15c",
+      "hour": 20,
+      "type": "revision",
+      "envelopeId": "ENV-AV-001",
+      "severity": "info",
+      "label": "Construction zone handling updated",
+      "detail": "Safety Steward added guidance for conflicting signage scenarios: prioritize temporary signage over permanent when both visible.",
+      "actorRole": "Safety Steward",
+      "actorName": "Marcus Rodriguez",
+      "revisionType": "boundary_adjustment",
+      "reason": "Reduce remote operator escalations for common construction zone patterns.",
+      "resolvesEventId": "boundary_interaction:15_8:ENV-AV-001:5"
+    },
+    {
+      "eventId": "embedding:20_5:ENV-AV-001:15d",
+      "hour": 20.5,
+      "type": "embedding",
+      "envelopeId": "ENV-AV-001",
+      "severity": "info",
+      "label": "Construction zone revision embedded",
+      "detail": "Updated conflicting signage guidance stored for future reference.",
+      "actorRole": "Safety Steward",
+      "actorName": "Marcus Rodriguez",
+      "embeddingId": "EMB-AV-REV-001",
+      "embeddingType": "revision",
+      "vectorDimensions": 768,
+      "sourceEventId": "revision:20:ENV-AV-001:15c",
+      "semanticContext": "construction zone conflicting signage prioritization rule",
+      "semanticVector": [0.78, 0.85]
+    },
+    {
+      "eventId": "retrieval:21_0:ENV-AV-001:15d",
+      "hour": 21.0,
+      "type": "retrieval",
+      "envelopeId": "ENV-AV-001",
+      "severity": "info",
+      "label": "Retrieve construction signage revision",
+      "detail": "DecisionMemory retrieves the construction signage revision embedding for routing decisions.",
+      "actorRole": "Safety Steward",
+      "actorName": "DecisionMemory",
+      "queryText": "construction signage prioritization revision",
+      "retrievedEmbeddings": ["EMB-AV-REV-001"],
+      "relevanceScores": [0.9]
+    },
+    {
       "eventId": "embedding:30:ENV-AV-004:16",
       "hour": 30,
       "type": "embedding",
@@ -535,8 +627,37 @@
       "semanticContext": "safety-critical brake fault grounding decision with vehicle #1288",
       "semanticVector": [0.92, 0.90]
     },
+    {      "eventId": "revision:46:ENV-AV-004:16f",
+      "hour": 46,
+      "type": "revision",
+      "envelopeId": "ENV-AV-004",
+      "severity": "info",
+      "label": "Brake fault thresholds refined",
+      "detail": "Engineering Steward lowered brake system anomaly detection threshold after Vehicle #1288 incident. Earlier grounding prevents escalation.",
+      "actorRole": "Engineering Steward",
+      "actorName": "Chen Liu",
+      "revisionType": "constraint_tightening",
+      "reason": "Proactive safety: detect brake degradation earlier to avoid mid-trip grounding.",
+      "resolvesEventId": "boundary_interaction:42_1:ENV-AV-004:11"
+    },
     {
-      "eventId": "embedding:50:ENV-AV-003:16e",
+      "eventId": "embedding:46_5:ENV-AV-004:16g",
+      "hour": 46.5,
+      "type": "embedding",
+      "envelopeId": "ENV-AV-004",
+      "severity": "info",
+      "label": "Brake fault revision embedded",
+      "detail": "Refined brake anomaly detection thresholds stored for fleet-wide application.",
+      "actorRole": "Engineering Steward",
+      "actorName": "Chen Liu",
+      "embeddingId": "EMB-AV-REV-002",
+      "embeddingType": "revision",
+      "vectorDimensions": 768,
+      "sourceEventId": "revision:46:ENV-AV-004:16f",
+      "semanticContext": "brake system anomaly threshold refinement for proactive safety",
+      "semanticVector": [0.88, 0.92]
+    },
+    {      "eventId": "embedding:50:ENV-AV-003:16e",
       "hour": 50,
       "type": "embedding",
       "envelopeId": "ENV-AV-003",
