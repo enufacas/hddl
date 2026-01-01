@@ -39,10 +39,10 @@ function ensurePeekHandles() {
   sidebarPeek.className = 'sidebar-peek'
   sidebarPeek.setAttribute('role', 'button')
   sidebarPeek.setAttribute('tabindex', '0')
-  sidebarPeek.setAttribute('aria-label', 'Open HDDL Simulation panel')
+  sidebarPeek.setAttribute('aria-label', 'Open Navigation panel')
   sidebarPeek.innerHTML = `
     <span class="codicon codicon-chevron-right" aria-hidden="true"></span>
-    <span class="sidebar-peek__label">HDDL SIMULATION</span>
+    <span class="sidebar-peek__label">NAVIGATION</span>
   `.trim()
   sidebarPeek.addEventListener('click', () => {
     document.body.classList.remove('sidebar-hidden')

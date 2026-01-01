@@ -86,13 +86,12 @@ const navItems = [
 
   // Secondary
   { id: 'fleets', label: 'Agent Fleets', icon: 'organization', route: '/steward-fleets', section: 'secondary' },
-  { id: 'dsg-artifact', label: 'DSG Artifact', icon: 'file-binary', route: '/dsg-event', section: 'secondary' },
-  { id: 'interactive', label: 'Interactive', icon: 'debug-start', route: '/interactive', section: 'secondary', experimental: true },
+  { id: 'dsg-artifact', label: 'Domain Steward Group', icon: 'file-binary', route: '/dsg-event', section: 'secondary', disabled: true },
+  { id: 'interactive', label: 'Interactive', icon: 'debug-start', route: '/interactive', section: 'secondary', disabled: true },
 
   // Reference
   { id: 'docs', label: 'Docs', icon: 'book', route: '/docs', section: 'reference' },
   { id: 'specification', label: 'Specification', icon: 'json', route: '/specification', section: 'reference' },
-  { id: 'authority', label: 'Authority Order', icon: 'law', route: '/authority', section: 'reference', disabled: true },
 ]
 
 const sidebarSections = [
@@ -695,7 +694,7 @@ function createSidebar() {
   titleContainer.style.cssText = 'display: flex; align-items: center; justify-content: space-between; width: 100%;';
   
   const title = document.createElement('h3');
-  title.textContent = 'HDDL SIMULATION';
+  title.textContent = 'NAVIGATION';
   title.style.cssText = 'font-size: 11px; font-weight: 600; margin: 0;';
   
   const minimizeButton = document.createElement('a');
@@ -731,6 +730,8 @@ function createSidebar() {
     sectionItems.forEach(item => {
       const listRow = createListRow(item);
       listRow.dataset.section = section.id;
+      // Set initial visibility based on section collapsed state
+      listRow.style.display = section.collapsed ? 'none' : 'flex';
       listContainer.appendChild(listRow);
     });
   });
@@ -2381,7 +2382,7 @@ function createMobileNavDrawer() {
   header.innerHTML = `
     <div class="mobile-nav-brand">
       <span class="codicon codicon-pulse" style="font-size: 20px; color: var(--status-info);"></span>
-      <span class="mobile-nav-title">HDDL Simulation</span>
+      <span class="mobile-nav-title">Navigation</span>
     </div>
     <button class="mobile-nav-close" aria-label="Close navigation">
       <span class="codicon codicon-close"></span>

@@ -18,101 +18,26 @@ export function render(container) {
   const root = document.createElement('div')
   root.className = 'page-container'
   root.innerHTML = `
-    <div style="display:flex; align-items:center; gap: 12px; margin-bottom: 12px;">
-      <span class="codicon codicon-debug-start" style="font-size: 28px;"></span>
+    <div style="display:flex; align-items:center; gap: 12px; margin-bottom: 24px;">
+      <span class="codicon codicon-debug-start" style="font-size: 28px; opacity: 0.5;"></span>
       <div>
-        <h1 style="margin: 0;">Interactive Scenario (Experimental)</h1>
-        <p style="margin: 0;">Action-driven progression • Phase 2 semantics</p>
+        <h1 style="margin: 0;">Interactive Scenario</h1>
+        <p style="margin: 0; opacity: 0.7;">Action-driven scenario progression</p>
       </div>
     </div>
 
-    <div style="margin: 10px 0 12px; font-size: 12px; color: var(--vscode-statusBar-foreground);">
-      Terms:
-      <a class="glossary-term" href="#" data-glossary-term="Decision Envelope">Decision Envelope</a>,
-      <a class="glossary-term" href="#" data-glossary-term="Revision">Revision</a>,
-      <a class="glossary-term" href="#" data-glossary-term="Boundary Interaction">Boundary Interaction</a>
-    </div>
-
-    <div id="glossary-inline" style="display:none; background: var(--vscode-sideBar-background); border: 1px solid var(--vscode-sideBar-border); padding: 12px; border-radius: 6px; margin-bottom: 12px;"></div>
-
-    <div style="padding: 12px; margin-bottom: 16px; border: 1px solid var(--status-warning); border-radius: 6px; background: var(--vscode-inputValidation-warningBackground); color: var(--vscode-inputValidation-warningForeground);">
-      <div style="display:flex; align-items:start; gap: 8px;">
-        <span class="codicon codicon-warning" style="font-size: 16px; margin-top: 2px;"></span>
-        <div>
-          <div style="font-weight: 700; margin-bottom: 4px;">Phase 2 - Experimental</div>
-          <div style="font-size: 12px;">
-            Interactive scenario semantics are not yet stable. The action log schema exists, but:
-            <ul style="margin: 8px 0 0; padding-left: 20px;">
-              <li>Reducer/transition logic is not yet implemented</li>
-              <li>Authorization semantics are not yet defined</li>
-              <li>Conformance fixtures do not yet exist</li>
-            </ul>
-            See <a href="#" data-navigate="/docs" style="color: inherit; text-decoration: underline;">docs/spec/Drift_Gap_Analysis.md</a> for status.
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
-      <div style="padding: 12px; border: 1px solid var(--vscode-sideBar-border); border-radius: 6px; background: var(--vscode-sideBar-background);">
-        <div style="font-weight: 700; margin-bottom: 8px;">Current State</div>
-        <div id="interactive-state" style="font-size: 12px; color: var(--vscode-statusBar-foreground);"></div>
-      </div>
-
-      <div style="padding: 12px; border: 1px solid var(--vscode-sideBar-border); border-radius: 6px; background: var(--vscode-sideBar-background);">
-        <div style="font-weight: 700; margin-bottom: 8px;">Session Config</div>
-        <div style="display:flex; flex-direction: column; gap: 8px;">
-          <label style="display:flex; align-items:center; gap: 8px; font-size: 12px;">
-            <span>Seed:</span>
-            <input type="number" id="interactive-seed" value="${getSeed()}" style="flex: 1; padding: 4px 6px; background: var(--vscode-input-background); border: 1px solid var(--vscode-input-border); color: var(--vscode-input-foreground); border-radius: 4px;" />
-          </label>
-          <button type="button" id="interactive-reset" class="monaco-button monaco-text-button" style="padding: 4px 10px;">Reset State</button>
-        </div>
-      </div>
-    </div>
-
-    <div style="margin-bottom: 20px;">
-      <h2 style="margin-bottom: 12px;">Available Actions</h2>
-      <div id="interactive-actions" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px;"></div>
-    </div>
-
-    <div>
-      <h2 style="margin-bottom: 12px;">Action Log</h2>
-      <div id="interactive-log" style="display:flex; flex-direction: column; gap: 8px;"></div>
+    <div style="padding: 24px; border: 1px solid var(--vscode-widget-border); border-radius: 6px; background: var(--vscode-editor-background); text-align: center;">
+      <span class="codicon codicon-info" style="font-size: 48px; opacity: 0.3; display: block; margin-bottom: 16px;"></span>
+      <h2 style="margin: 0 0 8px 0; font-size: 16px;">Not Yet Implemented</h2>
+      <p style="margin: 0; opacity: 0.7; font-size: 13px;">
+        Interactive scenario features are planned for a future release.<br>
+        This will allow action-driven progression through scenarios with real-time decision-making.
+      </p>
     </div>
   `
 
-  initGlossaryInline(root, {
-    panelSelector: '#glossary-inline',
-    openDocs: () => navigateTo('/docs'),
-  })
-
-  // Wire up navigation
-  root.querySelectorAll('[data-navigate]').forEach(el => {
-    el.addEventListener('click', (e) => {
-      e.preventDefault()
-      const path = el.getAttribute('data-navigate')
-      if (path) navigateTo(path)
-    })
-  })
-
-  // Seed control
-  const seedInput = root.querySelector('#interactive-seed')
-  if (seedInput) {
-    seedInput.addEventListener('change', () => {
-      const val = parseInt(seedInput.value, 10)
-      if (Number.isFinite(val)) setSeed(val)
-    })
-  }
-
-  // Reset button
-  const resetBtn = root.querySelector('#interactive-reset')
-  if (resetBtn) {
-    resetBtn.addEventListener('click', () => {
-      resetInteractiveState()
-      window.dispatchEvent(new CustomEvent('hddl:status', { detail: { message: 'Interactive state reset', kind: 'info' } }))
-    })
-  }
+  container.appendChild(root)
+}
 
   // Render functions
   function renderState() {
