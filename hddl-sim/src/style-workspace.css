@@ -4100,4 +4100,14 @@ body.sidebar-collapsed .part.sidebar .sidebar-content {
     body:not(.aux-hidden)::after {
         display: none; /* No backdrop on small screens - full width panel */
     }
+    
+    /* Fix AI narrative container to be fully visible on mobile */
+    .ai-narrative-container {
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+    
+    .part.auxiliarybar {
+        overflow-y: auto !important;
+    }
 }
