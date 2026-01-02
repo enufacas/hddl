@@ -25,7 +25,9 @@ if (fallbackId !== initialScenarioId) {
   loadScenarioAsync(initialScenarioId).then(scenarioData => {
     setScenario(normalizeScenario(scenarioData).scenario)
   }).catch(err => {
-    console.error(`Failed to load saved scenario ${initialScenarioId}:`, err)
+    console.warn(`Failed to load saved scenario ${initialScenarioId}, using default:`, err.message)
+    // Clear the invalid scenario ID from localStorage
+    localStorage.removeItem('hddl-current-scenario')
   })
 }
 

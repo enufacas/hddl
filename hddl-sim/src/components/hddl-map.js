@@ -720,6 +720,7 @@ export function createHDDLMap(container, options = {}) {
     if (wasHidden || prevKey !== agentKey) {
       const fleetRole = agentNode?.fleetRole || ''
       const fleetColor = agentNode?.fleetColor || 'var(--vscode-textLink-foreground)'
+      console.log(`[HDDL-MAP] Tooltip for ${agentNode.id}: name=${agentNode.name}, role=${agentNode.role}, fleetRole=${fleetRole}, fleetColor=${fleetColor}, isActive=${agentNode.isRecentlyActive}`)
       tooltipNode
         .attr('data-agent-key', agentKey)
         .html(`
@@ -868,16 +869,22 @@ export function createHDDLMap(container, options = {}) {
       const targetX = col2Center // Center of middle third
 
       if (existing) {
-        existing.isActive = isActive
-        existing.status = status
-        existing.isRecentlyRevised = recentlyRevisedEnvelopeIds.has(envelope.envelopeId)
-        existing.version = currentVersion
-        existing.semver = toSemver(currentVersion)
-        existing.isVersionBumped = isVersionBumped
-        existing.targetX = targetX
-        existing.targetY = targetY
-        existing.envDims = envDims  // Update dimensions on existing nodes
-        return existing
+        // Create new object to force D3 data binding to update
+        return {
+          ...existing,
+          name: envelope.name,
+          ownerRole: envelope.ownerRole,
+          ownerColor: undefined,  // Will be set below after stewardColorByRole is built
+          isActive: isActive,
+          status: status,
+          isRecentlyRevised: recentlyRevisedEnvelopeIds.has(envelope.envelopeId),
+          version: currentVersion,
+          semver: toSemver(currentVersion),
+          isVersionBumped: isVersionBumped,
+          targetX: targetX,
+          targetY: targetY,
+          envDims: envDims
+        }
       }
 
       return {
@@ -928,14 +935,19 @@ export function createHDDLMap(container, options = {}) {
       // Use shared steward color utility for consistency across views
       const color = getStewardColor(fleet.stewardRole)
       stewardColorByRole.set(fleet.stewardRole, color)
+      console.log(`[HDDL-MAP] Steward color mapping: ${fleet.stewardRole} -> ${color}`)
 
       const existing = nodes.find(n => n.id === stewardId)
       if (existing) {
-          existing.targetX = targetX
-          existing.targetY = targetY
-          existing.r = stewardR
-          existing.color = color
-          newNodes.push(existing)
+          // Create new object to force D3 data binding to update
+          newNodes.push({
+            ...existing,
+            name: fleet.stewardRole,
+            targetX: targetX,
+            targetY: targetY,
+            r: stewardR,
+            color: color
+          })
       } else {
         newNodes.push({
           id: stewardId,
@@ -1192,21 +1204,26 @@ export function createHDDLMap(container, options = {}) {
 
         const existing = nodes.find(n => n.id === agent.agentId)
         if (existing) {
-          existing.targetX = targetX
-          existing.targetY = targetY
-          existing.w = agentW
-          existing.h = agentH
-          existing.name = agent.name
-          existing.role = agent.role
-          existing.isRecentlyActive = true
-          existing.lastActiveHour = agent.lastActiveHour
-          existing.fleetRole = fleet.stewardRole
-          existing.fleetColor = agent.fleetColor
-          existing.r = agentR
-          existing.gridScale = gridPos.iconScale
-          existing.showName = gridPos.showName
-          newNodes.push(existing)
+          // Create new object to force D3 data binding to update
+          console.log(`[HDDL-MAP] Updating working agent: ${agent.agentId} (${agent.name}) fleet=${fleet.stewardRole} color=${fleetColor} (existing.fleetColor=${existing.fleetColor})`)
+          newNodes.push({
+            ...existing,
+            targetX: targetX,
+            targetY: targetY,
+            w: agentW,
+            h: agentH,
+            name: agent.name,
+            role: agent.role,
+            isRecentlyActive: true,
+            lastActiveHour: agent.lastActiveHour,
+            fleetRole: fleet.stewardRole,
+            fleetColor: fleetColor,
+            r: agentR,
+            gridScale: gridPos.iconScale,
+            showName: gridPos.showName
+          })
         } else if (!newNodes.find(n => n.id === agent.agentId)) {
+          console.log(`[HDDL-MAP] Creating NEW working agent: ${agent.agentId} (${agent.name}) fleet=${fleet.stewardRole} color=${fleetColor}`)
           newNodes.push({
             id: agent.agentId,
             type: 'agent',
@@ -1215,7 +1232,7 @@ export function createHDDLMap(container, options = {}) {
             isRecentlyActive: true,
             lastActiveHour: agent.lastActiveHour,
             fleetRole: fleet.stewardRole,
-            fleetColor: agent.fleetColor,
+            fleetColor: fleetColor,
             w: agentW,
             h: agentH,
             r: agentR,
@@ -1239,21 +1256,26 @@ export function createHDDLMap(container, options = {}) {
 
         const existing = nodes.find(n => n.id === agent.agentId)
         if (existing) {
-          existing.targetX = targetX
-          existing.targetY = targetY
-          existing.w = agentW
-          existing.h = agentH
-          existing.name = agent.name
-          existing.role = agent.role
-          existing.isRecentlyActive = false
-          existing.lastActiveHour = agent.lastActiveHour
-          existing.fleetRole = fleet.stewardRole
-          existing.fleetColor = agent.fleetColor
-          existing.r = agentR
-          existing.gridScale = gridPos.iconScale
-          existing.showName = gridPos.showName
-          newNodes.push(existing)
+          // Create new object to force D3 data binding to update
+          console.log(`[HDDL-MAP] Updating idle agent: ${agent.agentId} (${agent.name}) fleet=${fleet.stewardRole} color=${fleetColor} (existing.fleetColor=${existing.fleetColor})`)
+          newNodes.push({
+            ...existing,
+            targetX: targetX,
+            targetY: targetY,
+            w: agentW,
+            h: agentH,
+            name: agent.name,
+            role: agent.role,
+            isRecentlyActive: false,
+            lastActiveHour: agent.lastActiveHour,
+            fleetRole: fleet.stewardRole,
+            fleetColor: fleetColor,
+            r: agentR,
+            gridScale: gridPos.iconScale,
+            showName: gridPos.showName
+          })
         } else if (!newNodes.find(n => n.id === agent.agentId)) {
+          console.log(`[HDDL-MAP] Creating NEW idle agent: ${agent.agentId} (${agent.name}) fleet=${fleet.stewardRole} color=${fleetColor}`)
           newNodes.push({
             id: agent.agentId,
             type: 'agent',
@@ -1262,7 +1284,7 @@ export function createHDDLMap(container, options = {}) {
             isRecentlyActive: false,
             lastActiveHour: agent.lastActiveHour,
             fleetRole: fleet.stewardRole,
-            fleetColor: agent.fleetColor,
+            fleetColor: fleetColor,
             w: agentW,
             h: agentH,
             r: agentR,
@@ -2017,6 +2039,15 @@ export function createHDDLMap(container, options = {}) {
     // Merge selection for updates
     const nodeUpdate = nodeSelection.merge(nodeEnter)
 
+    // Keep agent bot glyph styling in sync on updates.
+    // This matters when switching scenarios without a full reload (e.g., AI-generated scenarios)
+    // because agentIds are often reused and D3 will reuse existing DOM nodes.
+    nodeUpdate.select('g.agent-bot')
+      .attr('stroke', d => d?.fleetColor || 'var(--vscode-sideBar-border)')
+      .attr('fill', d => d?.fleetColor || 'var(--vscode-statusBar-foreground)')
+      .attr('data-agent-active', d => d?.isRecentlyActive ? 'true' : 'false')
+      .attr('transform', d => `scale(${(d?.gridScale || 1.0) * currentAgentDensity.botScale})`)
+
     // Steward Circle
     nodeEnter.filter(d => d.type === 'steward')
       .append('circle')
@@ -2582,13 +2613,33 @@ export function createHDDLMap(container, options = {}) {
       .attr('stroke', d => d.color || 'var(--status-warning)')
 
     // Bot glyph styling (active agents read brighter)
-    nodeUpdate.selectAll('g.agent-bot').selectAll('rect.agent-bot-head, line.agent-bot-antenna')
-      .attr('stroke', d => d.fleetColor || 'var(--vscode-sideBar-border)')
-      .attr('opacity', d => d.isRecentlyActive ? 1 : 0.45)
+    // IMPORTANT: When switching scenarios without a full reload, D3 may reuse
+    // existing DOM nodes for the same agentId. Child shapes can retain old bound
+    // data, so style them from the bot group's current datum.
+    nodeUpdate.selectAll('g.agent-bot')
+      .datum(function() {
+        // Ensure bot group uses the parent node's latest datum
+        return d3.select(this.parentNode).datum()
+      })
+      .each(function(d) {
+        const bot = d3.select(this)
+        const fleetColor = d?.fleetColor || 'var(--vscode-sideBar-border)'
+        const eyeColor = d?.fleetColor || 'var(--vscode-statusBar-foreground)'
+        const isActive = Boolean(d?.isRecentlyActive)
 
-    nodeUpdate.selectAll('g.agent-bot').selectAll('circle.agent-bot-eye')
-      .attr('fill', d => d.fleetColor || 'var(--vscode-statusBar-foreground)')
-      .attr('opacity', d => d.isRecentlyActive ? 1 : 0.35)
+        bot
+          .attr('stroke', fleetColor)
+          .attr('fill', eyeColor)
+          .attr('data-agent-active', isActive ? 'true' : 'false')
+
+        bot.selectAll('rect.agent-bot-head, line.agent-bot-antenna')
+          .attr('stroke', fleetColor)
+          .attr('opacity', isActive ? 1 : 0.45)
+
+        bot.selectAll('circle.agent-bot-eye')
+          .attr('fill', eyeColor)
+          .attr('opacity', isActive ? 1 : 0.35)
+      })
 
     // Activity halo styling
     nodeUpdate.selectAll('circle.agent-activity-halo')
@@ -3765,6 +3816,7 @@ export function createHDDLMap(container, options = {}) {
 
   // Subscribe to scenario changes
   scenarioUnsubscribe = onScenarioChange(() => {
+    console.log('[HDDL-MAP] Scenario changed - clearing all nodes/links/particles')
     embeddingIconsLayer.selectAll('*').remove()
     embeddingElements = []
     embeddingCount = 0
@@ -3772,6 +3824,14 @@ export function createHDDLMap(container, options = {}) {
     layoutEmbeddingHeader()
     tooltip.style('display', 'none')
     renderEmbeddings()
+    // CRITICAL: Clear node/link state to prevent stale data (especially colors) from previous scenario
+    nodes = []
+    links = []
+    exceptionLinks = []
+    particles = []
+    fleetBounds = []
+    console.log('[HDDL-MAP] Calling update() to rebuild with new scenario')
+    update() // CRITICAL: Rebuild stewardColorByRole map with new scenario
   })
 
   // Subscribe to time changes for embeddings (only when embedding is visible)

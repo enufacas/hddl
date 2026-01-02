@@ -165,7 +165,7 @@ export function createScenarioSelector() {
         animation: slideInRight 0.3s ease-out;
       `
       const scenarioMeta = scenarios.find(s => s.id === newScenarioId)
-      notification.textContent = `Loaded: ${scenarioMeta.title}`
+      notification.textContent = `Loaded: ${scenarioMeta?.title || newScenarioId}`
       document.body.appendChild(notification)
       setTimeout(() => {
         notification.style.opacity = '0'
@@ -182,6 +182,37 @@ export function createScenarioSelector() {
   
   container.appendChild(label)
   container.appendChild(select)
+  
+  // Listen for custom event to refresh the selector
+  const refreshHandler = () => {
+    const scenarios = getScenarioList()
+    const currentId = getCurrentScenarioId()
+    
+    // Save current selection
+    const previousValue = select.value
+    
+    // Rebuild options
+    select.innerHTML = ''
+    scenarios.forEach(scenario => {
+      const option = document.createElement('option')
+      option.value = scenario.id
+      option.textContent = scenario.title
+      option.selected = scenario.id === currentId
+      select.appendChild(option)
+    })
+    
+    // Restore or set current selection
+    if (currentId && Array.from(select.options).some(opt => opt.value === currentId)) {
+      select.value = currentId
+    }
+  }
+  
+  window.addEventListener('scenario-list-updated', refreshHandler)
+  
+  // Store cleanup function on the container
+  container._cleanup = () => {
+    window.removeEventListener('scenario-list-updated', refreshHandler)
+  }
   
   return container
 }

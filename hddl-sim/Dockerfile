@@ -16,6 +16,8 @@ COPY . .
 # Set environment variables
 ENV NODE_ENV=production
 ENV PORT=8080
+# Note: GOOGLE_CLOUD_PROJECT must be provided at runtime via -e flag
+# Example: docker run -e GOOGLE_CLOUD_PROJECT=your-project-id ...
 
 # Expose port
 EXPOSE 8080

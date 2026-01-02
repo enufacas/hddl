@@ -1,0 +1,136 @@
+{
+  "scenarioId": "financial-lending",
+  "scenarioName": "financial-lending",
+  "title": "Consumer Lending Decisions — Fairness & Compliance",
+  "narrative": "# Consumer Lending Decisions — Fairness & Compliance\n\nInside the busy digital lending center, the team worked to balance rapid loan processing with rigorous fairness standards. Early on the first day, Lending Steward Rachel Thompson activated the latest version of the credit underwriting envelope, which established clear constraints against using protected class attributes and required human review for all denials^[envelope_promoted:0:ENV-FIN-001:0]. While the CreditScorer agent autonomously approved standard applications, such as a $15,000 personal loan for a well-qualified applicant^[decision:2_5:ENV-FIN-001:3], it operated within a strict decision envelope that mandated escalation for any borderline cases. This boundary was hit just hours later when the BorderlineReviewer agent flagged an application with a 682 score, which fell within the required manual review threshold^[boundary_interaction:5_8:ENV-FIN-001:4]. A senior human underwriter then took over the process, granting a conditional approval pending income verification to ensure the applicant was treated fairly beyond a simple numerical cutoff^[decision:6_1:ENV-FIN-001:5].\n\nAs the week progressed, the interaction between agents and stewards created a dynamic feedback loop that refined the bank’s risk and recovery operations. Midway through the second day, the AppealProcessor agent handled a boundary interaction when a customer disputed a fraud flag on an international transaction^[boundary_interaction:36_7:ENV-FIN-002:11]. After the agent validated the customer's travel documentation, the flag was reversed and the transaction was approved retroactively^[decision:38_1:ENV-FIN-002:12]. Meanwhile, in the recovery department, the HardshipEvaluator agent began proactively offering payment deferrals to customers facing job loss^[decision:30_2:ENV-FIN-003:10]. By the time the Lending Stewardship Group met for their quarterly review on day two, they determined that increasing human oversight for marginal cases would further improve customer outcomes^[dsg_session:48:ENV-FIN-001:13]. Consequently, early on day four, Rachel Thompson revised the credit underwriting envelope to expand the borderline review range from ±5% to ±7%^[revision:84:ENV-FIN-001:15].\n\nThe governance framework proved its value again late on day four when a potential regulatory violation was averted. The OutreachScheduler agent, operating under the collections envelope, blocked an automated contact attempt at 10:15pm to ensure compliance with FDCPA restricted hours^[boundary_interaction:96_5:ENV-FIN-003:16]. Recognizing this as a critical signal for systemic improvement, Recovery Steward Patricia Nguyen immediately revised the envelope to include mandatory customer timezone validation to prevent future near-misses^[revision:97:ENV-FIN-003:16a]. This revision was indexed into the system's decision memory, allowing the logic to be retrieved and applied to all future collections outreach^[retrieval:98_0:ENV-FIN-003:16b]. By the end of the week, the bank had successfully processed over 1,800 applications with zero compliance violations^[signal:120:ENV-FIN-001:21]. This outcome demonstrates how the HDDL framework allows stewards to scale autonomous execution through versioned envelopes while ensuring that every significant boundary interaction triggers the human review necessary to evolve the system.",
+  "citations": [
+    {
+      "eventId": "envelope_promoted:0:ENV-FIN-001:0",
+      "offset": 417,
+      "context": "...tributes and required human review for all denials^[envelope_promoted:0:ENV-FIN-001:0]. While the CreditScorer agent autonomously approv...",
+      "hour": 0,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-FIN-001",
+      "actorRole": "Lending Steward"
+    },
+    {
+      "eventId": "decision:2_5:ENV-FIN-001:3",
+      "offset": 591,
+      "context": "...5,000 personal loan for a well-qualified applicant^[decision:2_5:ENV-FIN-001:3], it operated within a strict decision envelope th...",
+      "hour": 2.5,
+      "type": "decision",
+      "envelopeId": "ENV-FIN-001",
+      "actorRole": "Lending Steward"
+    },
+    {
+      "eventId": "boundary_interaction:5_8:ENV-FIN-001:4",
+      "offset": 887,
+      "context": "...h fell within the required manual review threshold^[boundary_interaction:5_8:ENV-FIN-001:4]. A senior human underwriter then took over the pr...",
+      "hour": 5.8,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-FIN-001",
+      "actorRole": "Lending Steward"
+    },
+    {
+      "eventId": "decision:6_1:ENV-FIN-001:5",
+      "offset": 1120,
+      "context": "...as treated fairly beyond a simple numerical cutoff^[decision:6_1:ENV-FIN-001:5].  As the week progressed, the interaction between...",
+      "hour": 6.1,
+      "type": "decision",
+      "envelopeId": "ENV-FIN-001",
+      "actorRole": "Lending Steward"
+    },
+    {
+      "eventId": "boundary_interaction:36_7:ENV-FIN-002:11",
+      "offset": 1463,
+      "context": "...puted a fraud flag on an international transaction^[boundary_interaction:36_7:ENV-FIN-002:11]. After the agent validated the customer's travel ...",
+      "hour": 36.7,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-FIN-002",
+      "actorRole": "Risk Steward"
+    },
+    {
+      "eventId": "decision:38_1:ENV-FIN-002:12",
+      "offset": 1639,
+      "context": "...sed and the transaction was approved retroactively^[decision:38_1:ENV-FIN-002:12]. Meanwhile, in the recovery department, the Hards...",
+      "hour": 38.1,
+      "type": "decision",
+      "envelopeId": "ENV-FIN-002",
+      "actorRole": "Risk Steward"
+    },
+    {
+      "eventId": "decision:30_2:ENV-FIN-003:10",
+      "offset": 1812,
+      "context": "...ing payment deferrals to customers facing job loss^[decision:30_2:ENV-FIN-003:10]. By the time the Lending Stewardship Group met fo...",
+      "hour": 30.2,
+      "type": "decision",
+      "envelopeId": "ENV-FIN-003",
+      "actorRole": "Recovery Steward"
+    },
+    {
+      "eventId": "dsg_session:48:ENV-FIN-001:13",
+      "offset": 2036,
+      "context": "...inal cases would further improve customer outcomes^[dsg_session:48:ENV-FIN-001:13]. Consequently, early on day four, Rachel Thompson...",
+      "hour": 48,
+      "type": "dsg_session",
+      "envelopeId": "ENV-FIN-001",
+      "actorRole": "Lending Steward"
+    },
+    {
+      "eventId": "revision:84:ENV-FIN-001:15",
+      "offset": 2213,
+      "context": "...expand the borderline review range from ±5% to ±7%^[revision:84:ENV-FIN-001:15].  The governance framework proved its value again...",
+      "hour": 84,
+      "type": "revision",
+      "envelopeId": "ENV-FIN-001",
+      "actorRole": "Lending Steward"
+    },
+    {
+      "eventId": "boundary_interaction:96_5:ENV-FIN-003:16",
+      "offset": 2528,
+      "context": "...m to ensure compliance with FDCPA restricted hours^[boundary_interaction:96_5:ENV-FIN-003:16]. Recognizing this as a critical signal for system...",
+      "hour": 96.5,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-FIN-003",
+      "actorRole": "Recovery Steward"
+    },
+    {
+      "eventId": "revision:97:ENV-FIN-003:16a",
+      "offset": 2782,
+      "context": "... timezone validation to prevent future near-misses^[revision:97:ENV-FIN-003:16a]. This revision was indexed into the system's deci...",
+      "hour": 97,
+      "type": "revision",
+      "envelopeId": "ENV-FIN-003",
+      "actorRole": "Recovery Steward"
+    },
+    {
+      "eventId": "retrieval:98_0:ENV-FIN-003:16b",
+      "offset": 2956,
+      "context": "...ved and applied to all future collections outreach^[retrieval:98_0:ENV-FIN-003:16b]. By the end of the week, the bank had successfull...",
+      "hour": 98,
+      "type": "retrieval",
+      "envelopeId": "ENV-FIN-003",
+      "actorRole": "Recovery Steward"
+    },
+    {
+      "eventId": "signal:120:ENV-FIN-001:21",
+      "offset": 3106,
+      "context": "...1,800 applications with zero compliance violations^[signal:120:ENV-FIN-001:21]. This outcome demonstrates how the HDDL framework...",
+      "hour": 120,
+      "type": "signal",
+      "envelopeId": "ENV-FIN-001",
+      "actorRole": "Lending Steward"
+    }
+  ],
+  "metadata": {
+    "model": "gemini-3-flash-preview",
+    "method": "llm-full-context",
+    "tokensIn": 11979,
+    "tokensOut": 743,
+    "cost": 0.008219,
+    "generatedAt": "2026-01-02T19:42:38.485Z",
+    "generatedBy": "scripts/generate-narratives.mjs",
+    "scenarioVersion": 2,
+    "duration": 15500
+  }
+}

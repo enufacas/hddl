@@ -17,12 +17,58 @@ import { readFile } from 'fs/promises';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { generateNarrative } from './narrative-generator-lib.mjs';
+import { handleGenerateScenario } from './scenario-generator.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const app = express();
+app.set('trust proxy', 1); // Trust first proxy for accurate client IP in rate limiting
 const PORT = process.env.PORT || 3000;
+
+// Abuse protection: Request size limit (1MB max)
+app.use(express.json({ limit: '1mb' }));
+
+// Abuse protection: Simple in-memory rate limiter
+const rateLimitMap = new Map();
+const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+const MAX_REQUESTS_PER_WINDOW = 20;
+
+function rateLimit(req, res, next) {
+  const clientId = req.ip || req.headers['x-forwarded-for'] || 'unknown';
+  const now = Date.now();
+  
+  if (!rateLimitMap.has(clientId)) {
+    rateLimitMap.set(clientId, []);
+  }
+  
+  const timestamps = rateLimitMap.get(clientId);
+  // Remove timestamps outside the window
+  const validTimestamps = timestamps.filter(t => now - t < RATE_LIMIT_WINDOW_MS);
+  
+  if (validTimestamps.length >= MAX_REQUESTS_PER_WINDOW) {
+    return res.status(429).json({
+      error: 'Rate limit exceeded',
+      limit: MAX_REQUESTS_PER_WINDOW,
+      window: '1 hour',
+      retryAfter: Math.ceil((validTimestamps[0] + RATE_LIMIT_WINDOW_MS - now) / 1000)
+    });
+  }
+  
+  validTimestamps.push(now);
+  rateLimitMap.set(clientId, validTimestamps);
+  
+  // Cleanup old entries periodically
+  if (Math.random() < 0.01) {
+    for (const [key, times] of rateLimitMap.entries()) {
+      if (times.length === 0 || now - times[times.length - 1] > RATE_LIMIT_WINDOW_MS) {
+        rateLimitMap.delete(key);
+      }
+    }
+  }
+  
+  next();
+}
 
 // Middleware
 app.use(cors({
@@ -31,7 +77,10 @@ app.use(cors({
     'https://enufacas.github.io'       // GitHub Pages (update with your domain)
   ]
 }));
-app.use(express.json());
+
+// Apply rate limiting to generation endpoints only (not health check)
+app.use('/generate', rateLimit);
+app.use('/generate-scenario', rateLimit);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -61,8 +110,18 @@ app.post('/generate', async (req, res) => {
   try {
     const { scenario, fullContext = true } = req.body;
     
+    // Input validation
     if (!scenario) {
       return res.status(400).json({ error: 'Missing required field: scenario' });
+    }
+    
+    if (typeof scenario !== 'string' || scenario.length > 200) {
+      return res.status(400).json({ error: 'Invalid scenario name (max 200 characters)' });
+    }
+    
+    // Sanitize input (prevent path traversal)
+    if (scenario.includes('..') || scenario.includes('/') || scenario.includes('\\')) {
+      return res.status(400).json({ error: 'Invalid characters in scenario name' });
     }
     
     console.log(`[${new Date().toISOString()}] Generating narrative for: ${scenario}`);
@@ -99,16 +158,25 @@ app.post('/generate', async (req, res) => {
   }
 });
 
+// Generate scenario endpoint
+app.post('/generate-scenario', handleGenerateScenario);
+
 // Start server
 app.listen(PORT, () => {
   console.log(`Narrative Generation API running on port ${PORT}`);
   console.log(`  Health check: http://localhost:${PORT}/health`);
   console.log(`  List scenarios: http://localhost:${PORT}/scenarios`);
-  console.log(`  Generate: POST http://localhost:${PORT}/generate`);
-  console.log(`\nExample request:`);
+  console.log(`  Generate narrative: POST http://localhost:${PORT}/generate`);
+  console.log(`  Generate scenario: POST http://localhost:${PORT}/generate-scenario`);
+  console.log(`\nExample requests:`);
+  console.log(`  # Generate narrative`);
   console.log(`  curl -X POST http://localhost:${PORT}/generate \\`);
   console.log(`    -H "Content-Type: application/json" \\`);
   console.log(`    -d '{"scenario":"insurance-underwriting"}'`);
+  console.log(`\n  # Generate new scenario`);
+  console.log(`  curl -X POST http://localhost:${PORT}/generate-scenario \\`);
+  console.log(`    -H "Content-Type: application/json" \\`);
+  console.log(`    -d '{"prompt":"Insurance agent learning bundle discount approval","domain":"insurance"}'`);
 }).on('error', (err) => {
   console.error('Server error:', err);
   process.exit(1);

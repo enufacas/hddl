@@ -462,7 +462,7 @@ async function generateLLMNarrative(analysis, scenario, options = {}) {
     const model = vertexAI.getGenerativeModel({
       model: 'gemini-3-flash-preview',
       generationConfig: {
-        maxOutputTokens: 2048,
+        maxOutputTokens: 8192,
         temperature: 0.7,
         topP: 0.9,
       },
@@ -471,7 +471,7 @@ async function generateLLMNarrative(analysis, scenario, options = {}) {
     // Build constrained prompt
     const contextMode = options.fullContext ? 'full' : 'summarized';
     console.error(`Building ${contextMode} context prompt...`);
-    const prompt = buildNarrativePrompt(analysis, scenario, options.fullContext);
+    const prompt = buildNarrativePrompt(analysis, scenario, options.fullContext, options.userAddendum);
     
     console.error('Generating narrative with Gemini 3 Flash Preview...');
     const result = await model.generateContent(prompt);
@@ -879,4 +879,4 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   });
 }
 
-export { analyzeScenario, generateTemplateNarrative, buildNarrativePrompt, parseCitations };
+export { analyzeScenario, generateTemplateNarrative, generateLLMNarrative, buildNarrativePrompt, parseCitations };

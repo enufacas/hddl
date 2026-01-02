@@ -1,0 +1,73 @@
+{
+  "scenarioId": "test-minimal",
+  "scenarioName": "test-minimal",
+  "title": "Test Minimal — Fast Test Harness",
+  "narrative": "# Test Minimal — Fast Test Harness\n\nInside the automated testing lab, the team relied on a set of standard procedures to manage high-velocity software checks. Early in the test run, TestBot Alpha operated smoothly within its assigned envelope constraints, approving a standard test case that aligned with the historical baseline^[decision-test-1]. This baseline provided the initial semantic context for what constituted a \"safe\" pass, allowing the automation to handle routine validations without human intervention while the stewards focused on higher-level oversight.\n\nMidway through the session, the system hit a friction point when a specific test case exceeded the predefined safety thresholds. This boundary interaction triggered an immediate escalation to the policy steward, as the agent recognized the situation fell outside its authorized decision envelope^[boundary-test-1]. The steward stepped in to review the specific context of the escalation, weighing the risks against the operational needs, and ultimately decided that the exception was valid, allowing the test to proceed^[decision-test-2]. This moment of human judgment ensured that the rigid rules of the automation did not stall progress when a nuanced exception was required.\n\nToward the end of the day, the steward closed the feedback loop by formalizing this judgment into a structural change. They revised the test policy envelope, raising the threshold to prevent similar routine escalations from occurring in the future^[revision-test-1]. Shortly after, the system's Decision Memory retrieved this recent policy revision to ensure the new logic was available for ongoing operations^[retrieval:4_8:env-test-policy:rev]. Even with these updates, the governance remained firm; TestBot Beta later denied a separate test case that failed to meet the necessary criteria, demonstrating that the agents continued to enforce strict boundaries even as the envelope evolved^[decision-test-3].\n\nThis scenario illustrates the power of the HDDL framework in maintaining human authority at scale. By making decision boundaries explicit, the stewards were able to let the agents handle the bulk of the work while remaining ready to arbitrate when the system reached its limits. The transition from an escalated boundary interaction to a formal envelope revision shows how governance is a living process that learns from operational experience. This ensures that while the speed of execution remains high, the ultimate direction and safety of the system remain firmly in human hands.",
+  "citations": [
+    {
+      "eventId": "decision-test-1",
+      "offset": 328,
+      "context": "...est case that aligned with the historical baseline^[decision-test-1]. This baseline provided the initial semantic cont...",
+      "hour": 1,
+      "type": "decision",
+      "envelopeId": "env-test-policy",
+      "actorRole": "policy"
+    },
+    {
+      "eventId": "boundary-test-1",
+      "offset": 867,
+      "context": "...tion fell outside its authorized decision envelope^[boundary-test-1]. The steward stepped in to review the specific co...",
+      "hour": 2,
+      "type": "boundary_interaction",
+      "envelopeId": "env-test-policy",
+      "actorRole": "policy"
+    },
+    {
+      "eventId": "decision-test-2",
+      "offset": 1091,
+      "context": "... exception was valid, allowing the test to proceed^[decision-test-2]. This moment of human judgment ensured that the r...",
+      "hour": 3,
+      "type": "decision",
+      "envelopeId": "env-test-policy",
+      "actorRole": "policy"
+    },
+    {
+      "eventId": "revision-test-1",
+      "offset": 1498,
+      "context": "...r routine escalations from occurring in the future^[revision-test-1]. Shortly after, the system's Decision Memory retr...",
+      "hour": 4,
+      "type": "revision",
+      "envelopeId": "env-test-policy",
+      "actorRole": "policy"
+    },
+    {
+      "eventId": "retrieval:4_8:env-test-policy:rev",
+      "offset": 1660,
+      "context": "...the new logic was available for ongoing operations^[retrieval:4_8:env-test-policy:rev]. Even with these updates, the governance remained...",
+      "hour": 4.8,
+      "type": "retrieval",
+      "envelopeId": "env-test-policy",
+      "actorRole": "policy"
+    },
+    {
+      "eventId": "decision-test-3",
+      "offset": 1941,
+      "context": "...rce strict boundaries even as the envelope evolved^[decision-test-3].  This scenario illustrates the power of the HDDL...",
+      "hour": 5,
+      "type": "decision",
+      "envelopeId": "env-test-policy",
+      "actorRole": "policy"
+    }
+  ],
+  "metadata": {
+    "model": "gemini-3-flash-preview",
+    "method": "llm-full-context",
+    "tokensIn": 3044,
+    "tokensOut": 465,
+    "cost": 0.002917,
+    "generatedAt": "2026-01-02T19:11:05.283Z",
+    "generatedBy": "scripts/generate-narratives.mjs",
+    "scenarioVersion": 2,
+    "duration": 12993
+  }
+}

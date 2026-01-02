@@ -23,8 +23,8 @@
     "cognitive-load": "node ./analysis/cognitive-load-metrics.mjs",
     "performance": "node ./analysis/performance-metrics.mjs",
     "performance:suite": "node ./scripts/run-perf-suite.mjs",
-    "api:dev": "NODE_ENV=development node analysis/api-server.mjs",
-    "api:start": "node analysis/api-server.mjs"
+    "generate:narratives": "node ./scripts/generate-narratives.mjs",
+    "generate:narratives:dry-run": "node ./scripts/generate-narratives.mjs --dry-run"
   },
   "devDependencies": {
     "@istanbuljs/nyc-config-typescript": "^1.0.2",

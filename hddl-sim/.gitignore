@@ -26,6 +26,10 @@ analysis/perf-runs/*.json
 # UX review harness artifacts
 review/artifacts
 
+# Environment variables (contains sensitive GCP project ID)
+.env
+.env.local
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

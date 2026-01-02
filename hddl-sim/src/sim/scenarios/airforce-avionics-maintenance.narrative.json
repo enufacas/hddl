@@ -1,0 +1,145 @@
+{
+  "scenarioId": "airforce-avionics-maintenance",
+  "scenarioName": "airforce-avionics-maintenance",
+  "title": "Air Force Avionics Maintenance Backshop — Mission Readiness",
+  "narrative": "# Air Force Avionics Maintenance Backshop — Mission Readiness\n\nInside the Air Force avionics maintenance backshop, the air was thick with the hum of test benches and the focused energy of a team preparing for the high-tempo Red Flag exercise. At the start of the two-week rotation, MSgt Garcia and TSgt Rodriguez promoted the initial decision envelopes, setting the boundaries for how autonomous agents would assist in fault detection and inventory forecasting. Early on day one, the AvionicsDiagnostic agent identified a failed radar transmitter on a Code 1 aircraft and immediately prioritized it for repair, while the MICAPResolver agent initiated emergency procurement for necessary power modules via airlift^[decision:2_5:ENV-AF-001:2]^[decision:6_8:ENV-AF-002:3]. These agents operated within envelope constraints that prioritized mission-critical systems, but they were designed to escalate whenever human judgment was required to balance workload or safety.\n\nThe strength of the HDDL framework became clear through several feedback loops where boundary interactions triggered crucial steward reviews. Late on day one, the ShiftOptimizer agent flagged a boundary interaction because four technicians were projected to exceed their 60-hour workweek limit due to the exercise surge^[boundary_interaction:18_3:ENV-AF-004:5]. Capt Thompson, the Operations Steward, reviewed the decision memory of past surge events and approved a cross-shop support strategy^[retrieval:18_1:ENV-AF-004:4a]. He then revised the scheduling envelope to formalize a protocol allowing comm/nav technicians to support specific avionics tasks during surges, effectively updating the agent's operating logic for future high-tempo operations^[revision:22:ENV-AF-004:21a]. A similar evolution occurred on day three when the ESDMonitor detected a safety violation during hardware handling^[boundary_interaction:48_6:ENV-AF-003:9]. MSgt Patel, the Safety Steward, investigated the equipment failure and revised the safety envelope to increase the frequency of wrist strap testing, ensuring the automated monitoring system would prevent a recurrence^[revision:52:ENV-AF-003:11].\n\nAs the Red Flag surge intensified on day five, the system encountered another critical boundary when the CertificationScheduler identified six technicians whose radar certifications were set to expire, a situation complicated by the limited training availability during the exercise^[boundary_interaction:108_7:ENV-AF-005:15]. SSgt Kim, acting as Training Steward, utilized the feedback loop to approve an accelerated refresher training session via VTC with depot instructors^[decision:110_5:ENV-AF-005:16]. She revised the training envelope to include this remote instruction protocol, eliminating the need for a two-week travel period and keeping the technicians on the line^[revision:114:ENV-AF-005:21e]. Later, on day ten, a boundary interaction regarding a cockpit display software upgrade deadline led MSgt Patel to establish a dedicated TCTO crew, ensuring the shop met compliance deadlines without stalling routine repairs^[boundary_interaction:216_8:ENV-AF-003:21]^[revision:220:ENV-AF-003:21g]. \n\nBy the end of the second week, the backshop achieved a 96% mission success rate, maintaining 18 Code 1 aircraft throughout the exercise. This success was not just a result of automation, but of how stewards used boundary signals to refine envelopes. For instance, six days into the rotation, MSgt Garcia held a stewardship group session to review diagnostic accuracy, leading to a revision that refined FLIR sensor thresholds to reduce false positives by 35%^[dsg_session:144:ENV-AF-001:17]^[revision:148:ENV-AF-001:18]. By making decision authority explicit and revisable, the HDDL framework allowed the maintenance team to scale their operations safely, ensuring that every autonomous action remained anchored in human expertise and mission requirements.",
+  "citations": [
+    {
+      "eventId": "decision:2_5:ENV-AF-001:2",
+      "offset": 712,
+      "context": "...rocurement for necessary power modules via airlift^[decision:2_5:ENV-AF-001:2]^[decision:6_8:ENV-AF-002:3]. These agents operate...",
+      "hour": 2.5,
+      "type": "decision",
+      "envelopeId": "ENV-AF-001",
+      "actorRole": "Maintenance Steward"
+    },
+    {
+      "eventId": "decision:6_8:ENV-AF-002:3",
+      "offset": 740,
+      "context": "...er modules via airlift^[decision:2_5:ENV-AF-001:2]^[decision:6_8:ENV-AF-002:3]. These agents operated within envelope constraint...",
+      "hour": 6.8,
+      "type": "decision",
+      "envelopeId": "ENV-AF-002",
+      "actorRole": "Supply Steward"
+    },
+    {
+      "eventId": "boundary_interaction:18_3:ENV-AF-004:5",
+      "offset": 1286,
+      "context": "...r 60-hour workweek limit due to the exercise surge^[boundary_interaction:18_3:ENV-AF-004:5]. Capt Thompson, the Operations Steward, reviewed ...",
+      "hour": 18.3,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-AF-004",
+      "actorRole": "Operations Steward"
+    },
+    {
+      "eventId": "retrieval:18_1:ENV-AF-004:4a",
+      "offset": 1460,
+      "context": "... events and approved a cross-shop support strategy^[retrieval:18_1:ENV-AF-004:4a]. He then revised the scheduling envelope to forma...",
+      "hour": 18.1,
+      "type": "retrieval",
+      "envelopeId": "ENV-AF-004",
+      "actorRole": "Operations Steward"
+    },
+    {
+      "eventId": "revision:22:ENV-AF-004:21a",
+      "offset": 1718,
+      "context": "...s operating logic for future high-tempo operations^[revision:22:ENV-AF-004:21a]. A similar evolution occurred on day three when t...",
+      "hour": 22,
+      "type": "revision",
+      "envelopeId": "ENV-AF-004",
+      "actorRole": "Operations Steward"
+    },
+    {
+      "eventId": "boundary_interaction:48_6:ENV-AF-003:9",
+      "offset": 1863,
+      "context": "...tected a safety violation during hardware handling^[boundary_interaction:48_6:ENV-AF-003:9]. MSgt Patel, the Safety Steward, investigated the...",
+      "hour": 48.6,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-AF-003",
+      "actorRole": "Safety Steward"
+    },
+    {
+      "eventId": "revision:52:ENV-AF-003:11",
+      "offset": 2122,
+      "context": "...mated monitoring system would prevent a recurrence^[revision:52:ENV-AF-003:11].  As the Red Flag surge intensified on day five, ...",
+      "hour": 52,
+      "type": "revision",
+      "envelopeId": "ENV-AF-003",
+      "actorRole": "Safety Steward"
+    },
+    {
+      "eventId": "boundary_interaction:108_7:ENV-AF-005:15",
+      "offset": 2435,
+      "context": "... limited training availability during the exercise^[boundary_interaction:108_7:ENV-AF-005:15]. SSgt Kim, acting as Training Steward, utilized t...",
+      "hour": 108.7,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-AF-005",
+      "actorRole": "Training Steward"
+    },
+    {
+      "eventId": "decision:110_5:ENV-AF-005:16",
+      "offset": 2628,
+      "context": "...er training session via VTC with depot instructors^[decision:110_5:ENV-AF-005:16]. She revised the training envelope to include thi...",
+      "hour": 110.5,
+      "type": "decision",
+      "envelopeId": "ENV-AF-005",
+      "actorRole": "Training Steward"
+    },
+    {
+      "eventId": "revision:114:ENV-AF-005:21e",
+      "offset": 2829,
+      "context": "...vel period and keeping the technicians on the line^[revision:114:ENV-AF-005:21e]. Later, on day ten, a boundary interaction regard...",
+      "hour": 114,
+      "type": "revision",
+      "envelopeId": "ENV-AF-005",
+      "actorRole": "Training Steward"
+    },
+    {
+      "eventId": "boundary_interaction:216_8:ENV-AF-003:21",
+      "offset": 3083,
+      "context": "...pliance deadlines without stalling routine repairs^[boundary_interaction:216_8:ENV-AF-003:21]^[revision:220:ENV-AF-003:21g].   By the end of th...",
+      "hour": 216.8,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-AF-003",
+      "actorRole": "Safety Steward"
+    },
+    {
+      "eventId": "revision:220:ENV-AF-003:21g",
+      "offset": 3126,
+      "context": "...repairs^[boundary_interaction:216_8:ENV-AF-003:21]^[revision:220:ENV-AF-003:21g].   By the end of the second week, the backshop ac...",
+      "hour": 220,
+      "type": "revision",
+      "envelopeId": "ENV-AF-003",
+      "actorRole": "Safety Steward"
+    },
+    {
+      "eventId": "dsg_session:144:ENV-AF-001:17",
+      "offset": 3618,
+      "context": "...sensor thresholds to reduce false positives by 35%^[dsg_session:144:ENV-AF-001:17]^[revision:148:ENV-AF-001:18]. By making decision ...",
+      "hour": 144,
+      "type": "dsg_session",
+      "envelopeId": "ENV-AF-001",
+      "actorRole": "Maintenance Steward"
+    },
+    {
+      "eventId": "revision:148:ENV-AF-001:18",
+      "offset": 3650,
+      "context": "...e positives by 35%^[dsg_session:144:ENV-AF-001:17]^[revision:148:ENV-AF-001:18]. By making decision authority explicit and revisa...",
+      "hour": 148,
+      "type": "revision",
+      "envelopeId": "ENV-AF-001",
+      "actorRole": "Maintenance Steward"
+    }
+  ],
+  "metadata": {
+    "model": "gemini-3-flash-preview",
+    "method": "llm-full-context",
+    "tokensIn": 18098,
+    "tokensOut": 874,
+    "cost": 0.011671,
+    "generatedAt": "2026-01-02T19:41:34.496Z",
+    "generatedBy": "scripts/generate-narratives.mjs",
+    "scenarioVersion": 2,
+    "duration": 20845
+  }
+}

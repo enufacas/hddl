@@ -1,0 +1,136 @@
+{
+  "scenarioId": "database-performance",
+  "scenarioName": "database-performance",
+  "title": "Database Performance Monitoring — Observability & SLAs",
+  "narrative": "# Database Performance Monitoring — Observability & SLAs\n\nInside the performance engineering lab, Maya Chen and Carlos Rodriguez activated the initial decision envelopes to manage the database's growing complexity. Early on the first day, the QueryOptimizer agent operated within its envelope constraints to recommend a composite index on the users table, projecting a seventy-eight percent reduction in query time^[decision:2_5:ENV-DB-001:2]. Simultaneously, the AnomalyDetector identified a surge in connection pool saturation from a specific API endpoint^[signal:4_2:ENV-DB-002:3]. This triggered an immediate escalation by the AlertRouter, providing the on-call team with remediation guidance to scale the pool or throttle traffic^[decision:4_3:ENV-DB-002:4]. A few hours later, a boundary interaction occurred when the QueryOptimizer flagged an optimization on the `customer_profiles` table; because this table contained PII, the agent deferred the action for a human security review as mandated by its constraints^[boundary_interaction:6_8:ENV-DB-001:5].\n\nThe system's evolution was driven by these boundary signals, leading to several key envelope revisions. By mid-morning on day one, Maya Chen performed a revision of the query optimization envelope, adding an explicit constraint that all PII-related changes require an audit trail and security review^[revision:10:ENV-DB-001:26a]. Late that evening, Carlos Rodriguez adjusted the anomaly detection envelope, raising the connection pool alert threshold from eighty-five percent to ninety-two percent to minimize false positives during known traffic spikes^[revision:20:ENV-DB-002:8]. As the week progressed into day two, Jordan Lee activated the customer SLA envelope, which quickly flagged a risk for ACME-Corp when uptime dipped to 99.85 percent^[signal:28_3:ENV-DB-004:10]. This led the BreachNotifier to escalate the issue to the account team and calculate potential credits before any automated report was delivered^[decision:28_4:ENV-DB-004:11].\n\nMidway through the week, the infrastructure team encountered a conflict between cost savings and system safety. The CostOptimizer agent reached a boundary when it recommended downsizing a test environment, an action that would have violated the required twenty-percent capacity buffer^[boundary_interaction:36_7:ENV-DB-003:13]. In response, Priya Patel revised the infrastructure envelope to relax the buffer to fifteen percent specifically for non-production environments, balancing cost optimization with necessary safety margins^[revision:40:ENV-DB-003:26c]. By day three, the ReportGenerator successfully compiled the monthly SLA compliance report for 127 customers, identifying only three who required credits^[decision:52_1:ENV-DB-004:15]. To prepare for future volatility, Priya Patel further revised the capacity model to incorporate non-linear growth patterns expected from an upcoming product launch, adjusting projections from forty to fifty-five percent^[revision:60:ENV-DB-003:16].\n\nBy the end of the week, the HDDL framework had enabled the database team to scale their operations while preserving human authority. The QueryOptimizer reported that thirty-eight deployed optimizations had reduced average query time by forty-two percent without a single production incident^[signal:72:ENV-DB-001:23]. This success was built on a robust feedback loop where boundary interactions triggered steward review, leading to envelope revisions that refined agent behavior based on real operational experience. By making authority explicit through versioned envelopes, the stewards ensured that agents could handle routine performance tuning while escalating high-stakes security and capacity decisions. This approach transformed governance from a static set of rules into a dynamic decision memory that evolved alongside the system's needs.",
+  "citations": [
+    {
+      "eventId": "decision:2_5:ENV-DB-001:2",
+      "offset": 414,
+      "context": "...ng a seventy-eight percent reduction in query time^[decision:2_5:ENV-DB-001:2]. Simultaneously, the AnomalyDetector identified a...",
+      "hour": 2.5,
+      "type": "decision",
+      "envelopeId": "ENV-DB-001",
+      "actorRole": "Performance Steward"
+    },
+    {
+      "eventId": "signal:4_2:ENV-DB-002:3",
+      "offset": 557,
+      "context": "...ction pool saturation from a specific API endpoint^[signal:4_2:ENV-DB-002:3]. This triggered an immediate escalation by the Al...",
+      "hour": 4.2,
+      "type": "signal",
+      "envelopeId": "ENV-DB-002",
+      "actorRole": "Operations Steward"
+    },
+    {
+      "eventId": "decision:4_3:ENV-DB-002:4",
+      "offset": 734,
+      "context": "...ion guidance to scale the pool or throttle traffic^[decision:4_3:ENV-DB-002:4]. A few hours later, a boundary interaction occurr...",
+      "hour": 4.3,
+      "type": "decision",
+      "envelopeId": "ENV-DB-002",
+      "actorRole": "Operations Steward"
+    },
+    {
+      "eventId": "boundary_interaction:6_8:ENV-DB-001:5",
+      "offset": 1019,
+      "context": "...man security review as mandated by its constraints^[boundary_interaction:6_8:ENV-DB-001:5].  The system's evolution was driven by these boun...",
+      "hour": 6.8,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-DB-001",
+      "actorRole": "Performance Steward"
+    },
+    {
+      "eventId": "revision:10:ENV-DB-001:26a",
+      "offset": 1361,
+      "context": "...changes require an audit trail and security review^[revision:10:ENV-DB-001:26a]. Late that evening, Carlos Rodriguez adjusted the...",
+      "hour": 10,
+      "type": "revision",
+      "envelopeId": "ENV-DB-001",
+      "actorRole": "Performance Steward"
+    },
+    {
+      "eventId": "revision:20:ENV-DB-002:8",
+      "offset": 1615,
+      "context": "...nimize false positives during known traffic spikes^[revision:20:ENV-DB-002:8]. As the week progressed into day two, Jordan Lee ...",
+      "hour": 20,
+      "type": "revision",
+      "envelopeId": "ENV-DB-002",
+      "actorRole": "Operations Steward"
+    },
+    {
+      "eventId": "signal:28_3:ENV-DB-004:10",
+      "offset": 1807,
+      "context": "... for ACME-Corp when uptime dipped to 99.85 percent^[signal:28_3:ENV-DB-004:10]. This led the BreachNotifier to escalate the issu...",
+      "hour": 28.3,
+      "type": "signal",
+      "envelopeId": "ENV-DB-004",
+      "actorRole": "Customer Success Steward"
+    },
+    {
+      "eventId": "decision:28_4:ENV-DB-004:11",
+      "offset": 1980,
+      "context": "... credits before any automated report was delivered^[decision:28_4:ENV-DB-004:11].  Midway through the week, the infrastructure tea...",
+      "hour": 28.4,
+      "type": "decision",
+      "envelopeId": "ENV-DB-004",
+      "actorRole": "Customer Success Steward"
+    },
+    {
+      "eventId": "boundary_interaction:36_7:ENV-DB-003:13",
+      "offset": 2297,
+      "context": "...olated the required twenty-percent capacity buffer^[boundary_interaction:36_7:ENV-DB-003:13]. In response, Priya Patel revised the infrastruct...",
+      "hour": 36.7,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-DB-003",
+      "actorRole": "Infrastructure Steward"
+    },
+    {
+      "eventId": "revision:40:ENV-DB-003:26c",
+      "offset": 2544,
+      "context": "...ng cost optimization with necessary safety margins^[revision:40:ENV-DB-003:26c]. By day three, the ReportGenerator successfully c...",
+      "hour": 40,
+      "type": "revision",
+      "envelopeId": "ENV-DB-003",
+      "actorRole": "Infrastructure Steward"
+    },
+    {
+      "eventId": "decision:52_1:ENV-DB-004:15",
+      "offset": 2727,
+      "context": "...omers, identifying only three who required credits^[decision:52_1:ENV-DB-004:15]. To prepare for future volatility, Priya Patel fu...",
+      "hour": 52.1,
+      "type": "decision",
+      "envelopeId": "ENV-DB-004",
+      "actorRole": "Customer Success Steward"
+    },
+    {
+      "eventId": "revision:60:ENV-DB-003:16",
+      "offset": 2978,
+      "context": "...sting projections from forty to fifty-five percent^[revision:60:ENV-DB-003:16].  By the end of the week, the HDDL framework had ...",
+      "hour": 60,
+      "type": "revision",
+      "envelopeId": "ENV-DB-003",
+      "actorRole": "Infrastructure Steward"
+    },
+    {
+      "eventId": "signal:72:ENV-DB-001:23",
+      "offset": 3299,
+      "context": "...y-two percent without a single production incident^[signal:72:ENV-DB-001:23]. This success was built on a robust feedback loop...",
+      "hour": 72,
+      "type": "signal",
+      "envelopeId": "ENV-DB-001",
+      "actorRole": "Performance Steward"
+    }
+  ],
+  "metadata": {
+    "model": "gemini-3-flash-preview",
+    "method": "llm-full-context",
+    "tokensIn": 10966,
+    "tokensOut": 823,
+    "cost": 0.007952,
+    "generatedAt": "2026-01-02T19:42:22.961Z",
+    "generatedBy": "scripts/generate-narratives.mjs",
+    "scenarioVersion": 2,
+    "duration": 20421
+  }
+}

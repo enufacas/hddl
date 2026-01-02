@@ -39,24 +39,34 @@ Write-Host ""
 Write-Host "Deploying..."
 Write-Host ""
 
-# Deploy to Cloud Run
-gcloud run deploy narrative-api `
-  --source . `
-  --region us-central1 `
-  --platform managed `
-  --allow-unauthenticated `
-  --max-instances=2 `
-  --concurrency=2 `
-  --memory=1Gi `
-  --timeout=300s `
-  --cpu=1 `
-  --min-instances=0 `
-  --set-env-vars "GCP_PROJECT=$PROJECT_ID"
+# Change to parent directory (hddl-sim) for deployment
+$parentDir = Split-Path -Parent $PSScriptRoot
+Write-Host "Deploying from: $parentDir"
+Write-Host ""
+Push-Location $parentDir
 
-# Get the service URL
-$SERVICE_URL = gcloud run services describe narrative-api `
-  --region us-central1 `
-  --format 'value(status.url)' 2>$null
+try {
+  # Deploy to Cloud Run
+  gcloud run deploy narrative-api `
+    --source . `
+    --region us-central1 `
+    --platform managed `
+    --allow-unauthenticated `
+    --max-instances=2 `
+    --concurrency=2 `
+    --memory=1Gi `
+    --timeout=300s `
+    --cpu=1 `
+    --min-instances=0 `
+    --set-env-vars "GOOGLE_CLOUD_PROJECT=$PROJECT_ID,GCP_PROJECT=$PROJECT_ID"
+
+  # Get the service URL
+  $SERVICE_URL = gcloud run services describe narrative-api `
+    --region us-central1 `
+    --format 'value(status.url)' 2>$null
+} finally {
+  Pop-Location
+}
 
 Write-Host ""
 Write-Host "======================================"
@@ -74,8 +84,19 @@ Write-Host "  curl -X POST $SERVICE_URL/generate \"
 Write-Host "    -H 'Content-Type: application/json' \"
 Write-Host "    -d '{`"scenario`":`"insurance-underwriting`"}'"
 Write-Host ""
-Write-Host "Rate limits:"
-Write-Host "  - 20 requests per hour per user"
+Write-Host "Generate scenario:"
+Write-Host "  curl -X POST $SERVICE_URL/generate-scenario \"
+Write-Host "    -H 'Content-Type: application/json' \"
+Write-Host "    -d '{`"prompt`":`"Insurance agent learning bundle discount approval`",`"domain`":`"insurance`"}'"
+Write-Host ""
+Write-Host "Abuse protection:"
+Write-Host "  - 20 requests per hour per IP (application-level)"
+Write-Host "  - 1MB request size limit"
+Write-Host "  - 120s timeout for scenario generation"
+Write-Host "  - Input sanitization (path traversal, injection)"
+Write-Host ""
+Write-Host "Cost protection:"
 Write-Host "  - 2 max instances (cost ceiling: ~`$46/month)"
+Write-Host "  - 2 concurrent requests per instance"
 Write-Host "  - Scales to zero when idle"
 Write-Host ""

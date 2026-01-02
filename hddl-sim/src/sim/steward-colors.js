@@ -27,6 +27,20 @@ export const STEWARD_PALETTE = [
   '#dcdcaa', // Business - Tan
 ]
 
+// Distinct envelope color palette (different from steward colors)
+export const ENVELOPE_PALETTE = [
+  '#3794ff', // Blue
+  '#89d185', // Green
+  '#b180d7', // Purple
+  '#f14c4c', // Red
+  '#4ec9b0', // Teal
+  '#cca700', // Gold
+  '#ce9178', // Orange
+  '#dcdcaa', // Tan
+  '#ff6b9d', // Pink
+  '#76b9ed', // Sky Blue
+]
+
 /**
  * Get color for a steward role
  * @param {string} role - The steward role name
@@ -34,6 +48,20 @@ export const STEWARD_PALETTE = [
  */
 export function getStewardColor(role) {
   return STEWARD_COLORS[role] || STEWARD_PALETTE[hashRole(role) % STEWARD_PALETTE.length]
+}
+
+/**
+ * Get distinct color for an envelope based on its ID
+ * Envelopes get unique colors regardless of their owner steward
+ * @param {string} envelopeId - The envelope ID (e.g., "DE-001", "ENV-001")
+ * @param {number} [index] - Optional index for predictable coloring
+ * @returns {string} CSS color value
+ */
+export function getEnvelopeColor(envelopeId, index) {
+  if (typeof index === 'number') {
+    return ENVELOPE_PALETTE[index % ENVELOPE_PALETTE.length]
+  }
+  return ENVELOPE_PALETTE[hashRole(envelopeId) % ENVELOPE_PALETTE.length]
 }
 
 /**
