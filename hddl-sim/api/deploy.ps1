@@ -39,24 +39,34 @@ Write-Host ""
 Write-Host "Deploying..."
 Write-Host ""
 
-# Deploy to Cloud Run
-gcloud run deploy narrative-api `
-  --source . `
-  --region us-central1 `
-  --platform managed `
-  --allow-unauthenticated `
-  --max-instances=2 `
-  --concurrency=2 `
-  --memory=1Gi `
-  --timeout=300s `
-  --cpu=1 `
-  --min-instances=0 `
-  --set-env-vars "GCP_PROJECT=$PROJECT_ID"
+# Change to parent directory (hddl-sim) for deployment
+$parentDir = Split-Path -Parent $PSScriptRoot
+Write-Host "Deploying from: $parentDir"
+Write-Host ""
+Push-Location $parentDir
 
-# Get the service URL
-$SERVICE_URL = gcloud run services describe narrative-api `
-  --region us-central1 `
-  --format 'value(status.url)' 2>$null
+try {
+  # Deploy to Cloud Run
+  gcloud run deploy narrative-api `
+    --source . `
+    --region us-central1 `
+    --platform managed `
+    --allow-unauthenticated `
+    --max-instances=2 `
+    --concurrency=2 `
+    --memory=1Gi `
+    --timeout=300s `
+    --cpu=1 `
+    --min-instances=0 `
+    --set-env-vars "GOOGLE_CLOUD_PROJECT=$PROJECT_ID,GCP_PROJECT=$PROJECT_ID"
+
+  # Get the service URL
+  $SERVICE_URL = gcloud run services describe narrative-api `
+    --region us-central1 `
+    --format 'value(status.url)' 2>$null
+} finally {
+  Pop-Location
+}
 
 Write-Host ""
 Write-Host "======================================"
