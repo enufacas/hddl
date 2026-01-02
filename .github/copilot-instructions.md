@@ -21,7 +21,12 @@ The narrative generation API runs as a Docker container locally and requires Goo
 ```bash
 cd hddl-sim
 docker build -t narrative-api .
-docker run -d -p 8080:8080 -v "$env:APPDATA\gcloud:/root/.config/gcloud:ro" narrative-api
+docker run -d -p 8080:8080 \
+  -v "$env:APPDATA\gcloud:/root/.config/gcloud:ro" \
+  -e GOOGLE_CLOUD_PROJECT=your-gcp-project-id \
+  -e GOOGLE_CLOUD_LOCATION=us-central1 \
+  --name narrative-api-test \
+  narrative-api
 ```
 
 **Key points:**

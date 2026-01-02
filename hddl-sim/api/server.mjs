@@ -8,7 +8,10 @@
  * 
  * Usage:
  *   docker build -t narrative-api .
- *   docker run -p 8080:8080 narrative-api
+ *   docker run -d -p 8080:8080 \
+ *     -v "$APPDATA\gcloud:/root/.config/gcloud:ro" \
+ *     -e GOOGLE_CLOUD_PROJECT=your-gcp-project-id \
+ *     --name narrative-api-test narrative-api
  */
 
 import express from 'express';
@@ -17,7 +20,7 @@ import rateLimit from 'express-rate-limit';
 import { readFile } from 'fs/promises';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { generateNarrative } from './narrative-lib.mjs';
+import { generateLLMNarrative, analyzeScenario } from './narrative-generator.mjs';
 import { handleGenerateScenario } from './scenario-generator.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -73,11 +76,27 @@ const validateOrigin = (req, res, next) => {
 
 // Rate limiting: 20 requests per hour per IP
 // Generous for demo use, but prevents script abuse
+// NOTE: Bypassed for localhost to enable local testing
 const limiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
   max: 20, // 20 requests per hour per instance
   standardHeaders: true,
   legacyHeaders: false,
+  skip: (req) => {
+    // Bypass rate limiting for localhost/127.0.0.1 (Docker container testing)
+    // NEVER bypasses in production (Cloud Run uses external IPs)
+    const clientIp = req.ip || req.connection.remoteAddress;
+    const isLocalhost = clientIp === '127.0.0.1' || 
+                        clientIp === '::1' || 
+                        clientIp === '::ffff:127.0.0.1' ||
+                        req.hostname === 'localhost';
+    
+    if (isLocalhost) {
+      console.log('[Rate Limiter] Bypassing for localhost testing');
+    }
+    
+    return isLocalhost;
+  },
   message: { 
     error: 'Rate limit reached',
     limit: '20 narratives per hour',
@@ -140,8 +159,11 @@ app.post('/generate', validateOrigin, limiter, async (req, res) => {
       console.log(`[${new Date().toISOString()}] Prompt: ${userAddendum.slice(0, 500).replace(/\n/g, ' ')}${userAddendum.length > 500 ? '...' : ''}`);
     }
     
-    // Generate narrative
-    const result = await generateNarrative(scenarioData, { fullContext, userAddendum });
+    // Analyze scenario structure
+    const analysis = analyzeScenario(scenarioData);
+    
+    // Generate narrative using LLM method
+    const result = await generateLLMNarrative(analysis, scenarioData, { fullContext, userAddendum });
     
     const duration = Date.now() - startTime;
     console.log(`[${new Date().toISOString()}] Completed in ${duration}ms - ${result.citations.length} citations, cost: $${result.metadata.cost}`);
@@ -151,13 +173,18 @@ app.post('/generate', validateOrigin, limiter, async (req, res) => {
     console.log(`Generation Metadata:`);
     console.log(`Model: ${m.model} | Cost: $${m.cost.toFixed(6)} | Tokens: ${m.tokensIn} in / ${m.tokensOut} out | Duration: ${(duration / 1000).toFixed(2)}s`);
     
-    if (result.narrative) {
+    // generateLLMNarrative returns { markdown, citations, metadata }
+    // Map to { narrative, citations, metadata } for API clients
+    const narrative = result.markdown || result.narrative || '';
+    
+    if (narrative) {
       // Log a preview of the generated narrative
-      console.log(`[${new Date().toISOString()}] Response: ${result.narrative.slice(0, 200).replace(/\n/g, ' ')}...`);
+      console.log(`[${new Date().toISOString()}] Response: ${narrative.slice(0, 200).replace(/\n/g, ' ')}...`);
     }
 
     res.json({
-      ...result,
+      narrative,
+      citations: result.citations,
       metadata: {
         ...result.metadata,
         duration

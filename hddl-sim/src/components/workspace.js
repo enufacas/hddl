@@ -474,7 +474,7 @@ const generateAINarrative = async (containerEl) => {
     aiNarrativeCitations = data.citations || []
 
     // Render markdown with clickable citations
-    let html = renderNarrativeMarkdown(data.markdown)
+    let html = renderNarrativeMarkdown(data.narrative || data.markdown)
 
     // Event type color mapping
     const eventColors = {
@@ -583,8 +583,8 @@ const generateAINarrative = async (containerEl) => {
         const bgColor = stewardColor
           ? `color-mix(in srgb, ${stewardColor} 20%, transparent)`
           : `color-mix(in srgb, ${color} 20%, transparent)`
-        // Wrap citation + punctuation in a colored span
-        const colored = `<span class=\"cited-citation\" style=\"background: ${bgColor}; padding: 2px 4px; border-radius: 2px; box-shadow: -3px 0 0 ${color}; white-space: nowrap;\">${citationLink}${trailingPunct}</span>`
+        // Wrap citation + punctuation in a colored span with margin-left to prevent box-shadow overlap
+        const colored = `<span class=\"cited-citation\" style=\"background: ${bgColor}; padding: 2px 4px; border-radius: 2px; box-shadow: -3px 0 0 ${color}; white-space: nowrap; margin-left: 4px;\">${citationLink}${trailingPunct}</span>`
         workingContent = workingContent.replace(placeholder, colored)
       })
 

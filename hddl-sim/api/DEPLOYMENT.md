@@ -19,11 +19,36 @@
 
 ## Local Testing
 
+### Prerequisites
+1. Install Google Cloud SDK: https://cloud.google.com/sdk/docs/install
+2. Authenticate: `gcloud auth login`
+3. Set your GCP project: `gcloud config set project YOUR-PROJECT-ID`
+4. Enable Vertex AI API: `gcloud services enable aiplatform.googleapis.com`
+5. **Create `.env` file:**
+   ```bash
+   cd hddl-sim
+   cp .env.example .env
+   # Edit .env and set GOOGLE_CLOUD_PROJECT=your-actual-project-id
+   ```
+
 ### Test with Docker (Recommended)
 ```bash
 cd hddl-sim
+
+# Load environment variables from .env file
+source .env  # Linux/Mac
+# OR for PowerShell:
+Get-Content .env | ForEach-Object { if ($_ -match '^([^=]+)=(.*)$') { [Environment]::SetEnvironmentVariable($matches[1], $matches[2]) } }
+
 docker build -t narrative-api .
-docker run -p 8080:8080 -v "$env:APPDATA\gcloud:/root/.config/gcloud:ro" narrative-api
+
+# Run with env vars from .env
+docker run -d -p 8080:8080 \
+  -v "$env:APPDATA\gcloud:/root/.config/gcloud:ro" \
+  -e GOOGLE_CLOUD_PROJECT=$env:GOOGLE_CLOUD_PROJECT \
+  -e GOOGLE_CLOUD_LOCATION=us-central1 \
+  --name narrative-api-test \
+  narrative-api
 ```
 
 Visit: `http://localhost:8080/health`
@@ -45,9 +70,17 @@ done
 # Build image
 docker build -t narrative-api .
 
+# Load .env file into shell
+Get-Content .env | ForEach-Object { 
+  if ($_ -match '^([^=]+)=(.*)$') { 
+    [Environment]::SetEnvironmentVariable($matches[1], $matches[2]) 
+  } 
+}
+
 # Run locally
 docker run -p 8080:8080 \
   -v "$env:APPDATA\gcloud:/root/.config/gcloud:ro" \
+  -e GOOGLE_CLOUD_PROJECT=$env:GOOGLE_CLOUD_PROJECT \
   narrative-api
 
 # Test
