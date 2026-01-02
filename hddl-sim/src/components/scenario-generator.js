@@ -465,7 +465,13 @@ function showScenarioGeneratorModal() {
     const toast = createToast('Generating scenario with AI...', 'loading')
     
     try {
-      const response = await fetch('http://localhost:8080/generate-scenario', {
+      // Use Cloud Run in production (GitHub Pages), localhost in development
+      const isProduction = window.location.hostname === 'enufacas.github.io'
+      const apiUrl = isProduction 
+        ? 'https://narrative-api-alm36fcxzq-uc.a.run.app/generate-scenario'
+        : 'http://localhost:8080/generate-scenario'
+      
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
