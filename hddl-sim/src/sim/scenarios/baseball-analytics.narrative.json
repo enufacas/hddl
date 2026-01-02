@@ -1,0 +1,154 @@
+{
+  "scenarioId": "baseball-analytics",
+  "scenarioName": "baseball-analytics",
+  "title": "Baseball Analytics — Performance & Strategy Optimization",
+  "narrative": "# Baseball Analytics — Performance & Strategy Optimization\n\nInside the high-tech command center of the front office, the analytics team watched as the season’s first data streams began to flow. Performance Steward Sarah Chen and Strategy Steward Marcus Johnson opened the year by activating updated envelopes for player analysis and bullpen usage, ensuring that automated agents like the BattingAnalyzer and LineupOptimizer operated within strict, human-defined constraints^[envelope_promoted:0:ENV-BB-001:0]^[envelope_promoted:0:ENV-BB-002:1]. Early on day one, the BiomechanicsMonitor flagged a critical boundary interaction when the team’s ace pitcher exceeded workload thresholds, showing a dangerous arm slot deviation after a 112-pitch outing^[boundary_interaction:18_7:ENV-BB-003:5]. Health Steward Dr. Emily Rodriguez reviewed the escalation and approved a mandatory seven-day rest period to prevent a Tommy John injury^[decision:19_1:ENV-BB-003:6]. This event triggered an immediate feedback loop; Dr. Rodriguez revised the health envelope to tighten biomechanics thresholds, ensuring that any mechanical degradation over five degrees would now trigger a mandatory medical evaluation^[revision:22:ENV-BB-003:16a].\n\nOn day two, the focus shifted to the field and the trade desk, where the system’s decision memory helped stewards refine operational strategy. The BullpenManager agent flagged a potential overuse of the closer, who had appeared in four of the last five games^[boundary_interaction:36_5:ENV-BB-002:8]. Marcus Johnson responded by revising the strategy envelope to include cumulative pitch count limits, recognizing that frequency alone didn't capture the full fatigue profile of a reliever^[revision:40:ENV-BB-002:16c]. Simultaneously, early on day three, the ContractOptimizer blocked a proposed trade for a veteran outfielder because the acquisition would have pushed the team $1.2 million over the luxury tax threshold^[boundary_interaction:52_2:ENV-BB-004:10]. GM David Park, acting as the Roster Steward, negotiated a restructured deal where the opposing team covered a portion of the salary, allowing the trade to proceed while staying under the cap^[decision:54_1:ENV-BB-004:11]. To prevent similar late-stage friction, Park revised the roster envelope to formalize a new salary offset approval workflow for all future trades near the tax limit^[revision:56:ENV-BB-004:16e].\n\nBy the end of the week, the governance framework had evolved significantly through continuous steward intervention and model refinement. Four days into the season, Sarah Chen conducted a mid-season review and revised the performance envelope to weight exit velocity more heavily, improving home run projection accuracy by twelve percent^[revision:76:ENV-BB-001:13]. Later, the DefenseEvaluator flagged a veteran first baseman whose declining sprint speed had become a liability^[boundary_interaction:120_3:ENV-BB-001:16]. Chen used this signal to revise the envelope again, establishing specific performance triggers that now automatically activate late-inning defensive substitutions^[revision:124:ENV-BB-001:16g]. As the team prepared for the postseason, Marcus Johnson made a final authoritative change, relaxing pitcher rest requirements to account for playoff urgency while maintaining high-frequency medical monitoring^[revision:144:ENV-BB-002:18]. This HDDL-driven approach allowed the team to scale its analytical depth across 162 games, finishing with 94 wins and a roster kept healthy and efficient through the precise calibration of human judgment and machine execution^[signal:168:ENV-BB-001:34].",
+  "citations": [
+    {
+      "eventId": "envelope_promoted:0:ENV-BB-001:0",
+      "offset": 473,
+      "context": "... operated within strict, human-defined constraints^[envelope_promoted:0:ENV-BB-001:0]^[envelope_promoted:0:ENV-BB-002:1]. Early on day ...",
+      "hour": 0,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-BB-001",
+      "actorRole": "Performance Steward"
+    },
+    {
+      "eventId": "envelope_promoted:0:ENV-BB-002:1",
+      "offset": 508,
+      "context": "...ned constraints^[envelope_promoted:0:ENV-BB-001:0]^[envelope_promoted:0:ENV-BB-002:1]. Early on day one, the BiomechanicsMonitor flagge...",
+      "hour": 0,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-BB-002",
+      "actorRole": "Strategy Steward"
+    },
+    {
+      "eventId": "boundary_interaction:18_7:ENV-BB-003:5",
+      "offset": 748,
+      "context": "...gerous arm slot deviation after a 112-pitch outing^[boundary_interaction:18_7:ENV-BB-003:5]. Health Steward Dr. Emily Rodriguez reviewed the ...",
+      "hour": 18.7,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-BB-003",
+      "actorRole": "Health Steward"
+    },
+    {
+      "eventId": "decision:19_1:ENV-BB-003:6",
+      "offset": 927,
+      "context": "...ven-day rest period to prevent a Tommy John injury^[decision:19_1:ENV-BB-003:6]. This event triggered an immediate feedback loop;...",
+      "hour": 19.1,
+      "type": "decision",
+      "envelopeId": "ENV-BB-003",
+      "actorRole": "Health Steward"
+    },
+    {
+      "eventId": "revision:22:ENV-BB-003:16a",
+      "offset": 1192,
+      "context": "...s would now trigger a mandatory medical evaluation^[revision:22:ENV-BB-003:16a].  On day two, the focus shifted to the field and ...",
+      "hour": 22,
+      "type": "revision",
+      "envelopeId": "ENV-BB-003",
+      "actorRole": "Health Steward"
+    },
+    {
+      "eventId": "boundary_interaction:36_5:ENV-BB-002:8",
+      "offset": 1482,
+      "context": "...r, who had appeared in four of the last five games^[boundary_interaction:36_5:ENV-BB-002:8]. Marcus Johnson responded by revising the strateg...",
+      "hour": 36.5,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-BB-002",
+      "actorRole": "Strategy Steward"
+    },
+    {
+      "eventId": "revision:40:ENV-BB-002:16c",
+      "offset": 1712,
+      "context": "...n't capture the full fatigue profile of a reliever^[revision:40:ENV-BB-002:16c]. Simultaneously, early on day three, the Contract...",
+      "hour": 40,
+      "type": "revision",
+      "envelopeId": "ENV-BB-002",
+      "actorRole": "Strategy Steward"
+    },
+    {
+      "eventId": "boundary_interaction:52_2:ENV-BB-004:10",
+      "offset": 1944,
+      "context": "...he team $1.2 million over the luxury tax threshold^[boundary_interaction:52_2:ENV-BB-004:10]. GM David Park, acting as the Roster Steward, neg...",
+      "hour": 52.2,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-BB-004",
+      "actorRole": "Roster Steward"
+    },
+    {
+      "eventId": "decision:54_1:ENV-BB-004:11",
+      "offset": 2178,
+      "context": "...g the trade to proceed while staying under the cap^[decision:54_1:ENV-BB-004:11]. To prevent similar late-stage friction, Park rev...",
+      "hour": 54.1,
+      "type": "decision",
+      "envelopeId": "ENV-BB-004",
+      "actorRole": "Roster Steward"
+    },
+    {
+      "eventId": "revision:56:ENV-BB-004:16e",
+      "offset": 2374,
+      "context": "... workflow for all future trades near the tax limit^[revision:56:ENV-BB-004:16e].  By the end of the week, the governance framewor...",
+      "hour": 56,
+      "type": "revision",
+      "envelopeId": "ENV-BB-004",
+      "actorRole": "Roster Steward"
+    },
+    {
+      "eventId": "revision:76:ENV-BB-001:13",
+      "offset": 2742,
+      "context": "...ing home run projection accuracy by twelve percent^[revision:76:ENV-BB-001:13]. Later, the DefenseEvaluator flagged a veteran fi...",
+      "hour": 76,
+      "type": "revision",
+      "envelopeId": "ENV-BB-001",
+      "actorRole": "Performance Steward"
+    },
+    {
+      "eventId": "boundary_interaction:120_3:ENV-BB-001:16",
+      "offset": 2883,
+      "context": "...hose declining sprint speed had become a liability^[boundary_interaction:120_3:ENV-BB-001:16]. Chen used this signal to revise the envelope aga...",
+      "hour": 120.3,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-BB-001",
+      "actorRole": "Performance Steward"
+    },
+    {
+      "eventId": "revision:124:ENV-BB-001:16g",
+      "offset": 3090,
+      "context": "...cally activate late-inning defensive substitutions^[revision:124:ENV-BB-001:16g]. As the team prepared for the postseason, Marcus ...",
+      "hour": 124,
+      "type": "revision",
+      "envelopeId": "ENV-BB-001",
+      "actorRole": "Performance Steward"
+    },
+    {
+      "eventId": "revision:144:ENV-BB-002:18",
+      "offset": 3330,
+      "context": "...hile maintaining high-frequency medical monitoring^[revision:144:ENV-BB-002:18]. This HDDL-driven approach allowed the team to sc...",
+      "hour": 144,
+      "type": "revision",
+      "envelopeId": "ENV-BB-002",
+      "actorRole": "Strategy Steward"
+    },
+    {
+      "eventId": "signal:168:ENV-BB-001:34",
+      "offset": 3586,
+      "context": "...alibration of human judgment and machine execution^[signal:168:ENV-BB-001:34]....",
+      "hour": 168,
+      "type": "signal",
+      "envelopeId": "ENV-BB-001",
+      "actorRole": "Performance Steward"
+    }
+  ],
+  "metadata": {
+    "model": "gemini-3-flash-preview",
+    "method": "llm-full-context",
+    "tokensIn": 14290,
+    "tokensOut": 821,
+    "cost": 0.009608,
+    "generatedAt": "2026-01-02T19:42:02.518Z",
+    "generatedBy": "scripts/generate-narratives.mjs",
+    "scenarioVersion": 2,
+    "duration": 13340
+  }
+}

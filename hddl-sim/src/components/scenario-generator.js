@@ -45,7 +45,7 @@ export function createScenarioGeneratorButton() {
   const button = document.createElement('button')
   button.innerHTML = `
     <span class="codicon codicon-sparkle"></span>
-    <span>Generate Scenario</span>
+    <span class="scenario-gen-button-text">Generate Scenario</span>
   `
   button.className = 'scenario-gen-button'
   button.title = 'Generate a new scenario from a prompt'
@@ -410,10 +410,10 @@ function showScenarioGeneratorModal() {
       <textarea 
         id="scenario-prompt" 
         class="scenario-gen-input scenario-gen-textarea" 
-        placeholder="E.g., 'Create a scenario where agents handle decisions that sometimes require escalation to human stewards'"
+        placeholder="E.g., 'You're a Safety Steward at SpaceX managing cargo drones' or 'Agricultural robots in rural Kenya' or 'Hospital ER in São Paulo where AI triages patients' or 'Wall Street trading desk, 1980s style but with modern AI'…"
       ></textarea>
       <div class="scenario-gen-hint">
-        Describe the agents, policies, and decision patterns you want to explore
+        Keep it simple and just name an industry, or get more detailed with a time period, specific company, actors, and decision patterns. Start with the big picture, then add what agents decide, when they escalate, and who oversees them.
       </div>
     </div>
     

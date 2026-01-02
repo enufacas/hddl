@@ -1,0 +1,181 @@
+{
+  "scenarioId": "insurance-underwriting",
+  "scenarioName": "insurance-underwriting",
+  "title": "Insurance Underwriting — Risk Assessment & Claims",
+  "narrative": "# Insurance Underwriting — Risk Assessment & Claims\n\nInside the bustling headquarters of the regional insurance carrier, human stewards spent the week managing a fleet of autonomous agents through a series of versioned decision envelopes. Early on the first day, Underwriting Steward Rebecca Foster activated a new risk assessment envelope designed to ensure that while the RiskScorer agent handled standard applications, any complex cases would be escalated for human review^[envelope_promoted:0:ENV-INS-001:0]. This boundary was tested almost immediately when the ThresholdEscalator agent flagged a homeowner’s policy with a high risk score due to coastal flood concerns^[boundary_interaction:5_3:ENV-INS-001:4]. Senior Underwriter #12 reviewed the case and applied human judgment, approving the policy only on the condition that the owner install a sump pump^[decision:5_7:ENV-INS-001:5]. Seeing the value in this specific mitigation strategy, Foster performed a revision to the envelope to codify flood mitigation verification as a requirement for all similar high-risk coastal properties, allowing the agent to apply this logic autonomously in the future^[revision:6_2:ENV-INS-001:5a].\n\nBy the middle of the week, the governance framework was actively refining how the system handled fraud and pricing pressures. Claims Steward Marcus Chen observed a boundary interaction when the FraudDetector agent flagged a claim because of a history of multiple filings^[boundary_interaction:12_4:ENV-INS-002:7]. After a human claims adjuster validated that the prior claims involved different vehicles and were legitimate, Chen updated the envelope's assumptions to refine vehicle tracking logic, reducing future false positives^[revision:19_1:ENV-INS-002:10a]. Simultaneously, in the pricing domain, Pricing Steward Alicia Rodriguez managed a threshold escalation when the QuoteGenerator agent calculated an 18% renewal increase^[boundary_interaction:28_7:ENV-INS-003:12]. Rodriguez approved the exception by pairing the increase with an accident forgiveness offer to maintain customer loyalty^[decision:29_1:ENV-INS-003:13], subsequently revising the pricing envelope to allow increases up to 20% specifically when accompanied by such retention incentives^[revision:30_5:ENV-INS-003:13a].\n\nAs the week progressed into day three, the stewards used boundary signals to harden the system against regulatory gaps and organized crime. Compliance Steward Diana Patel addressed an explainability gap after the ExplainabilityEngine agent identified three denials with insufficient documentation^[boundary_interaction:48_3:ENV-INS-004:16]. Patel revised the compliance envelope to mandate the use of structured justification templates for all high-risk denials, ensuring every decision was audit-ready^[revision:54_2:ENV-INS-004:16b]. This rigor proved essential when the FraudDetector identified a sophisticated fraud ring involving staged accidents and repair shop collusion^[boundary_interaction:62_5:ENV-INS-002:17a]. Using the agent's findings, the Special Investigations Unit denied seven coordinated claims and initiated a criminal referral^[decision:65_3:ENV-INS-002:17b]. Following this event, Marcus Chen expanded the envelope’s assumptions to include GPS timeline validation and cross-claim network analysis to proactively detect similar patterns^[revision:66_8:ENV-INS-002:17c].\n\nBy the end of the week, the operation demonstrated how the HDDL framework preserves human authority while allowing autonomous execution to scale. When a final extreme rate increase of 28% was flagged by the agents^[boundary_interaction:78_4:ENV-INS-003:18a], Alicia Rodriguez denied the renewal to remain within regulatory fairness limits^[decision:79_2:ENV-INS-003:18b], later clarifying these non-renewal thresholds within the pricing envelope to provide the fleet with clearer boundaries^[revision:80_5:ENV-INS-003:18c]. This continuous feedback loop—where real-world boundary interactions trigger steward review and authoritative revisions—enabled the system to process over 1,800 policies with a 72% auto-approval rate while maintaining a healthy 62% loss ratio^[signal:120:ENV-INS-001:25]. Through these envelopes, the stewards ensured that the AI agents operated not just as efficient tools, but as a governed extension of the company’s expertise and ethical commitments.",
+  "citations": [
+    {
+      "eventId": "envelope_promoted:0:ENV-INS-001:0",
+      "offset": 475,
+      "context": "... complex cases would be escalated for human review^[envelope_promoted:0:ENV-INS-001:0]. This boundary was tested almost immediately when...",
+      "hour": 0,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-INS-001",
+      "actorRole": "Underwriting Steward"
+    },
+    {
+      "eventId": "boundary_interaction:5_3:ENV-INS-001:4",
+      "offset": 672,
+      "context": "...th a high risk score due to coastal flood concerns^[boundary_interaction:5_3:ENV-INS-001:4]. Senior Underwriter #12 reviewed the case and app...",
+      "hour": 5.3,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-INS-001",
+      "actorRole": "Underwriting Steward"
+    },
+    {
+      "eventId": "decision:5_7:ENV-INS-001:5",
+      "offset": 861,
+      "context": "...n the condition that the owner install a sump pump^[decision:5_7:ENV-INS-001:5]. Seeing the value in this specific mitigation str...",
+      "hour": 5.7,
+      "type": "decision",
+      "envelopeId": "ENV-INS-001",
+      "actorRole": "Underwriting Steward"
+    },
+    {
+      "eventId": "revision:6_2:ENV-INS-001:5a",
+      "offset": 1159,
+      "context": "...ent to apply this logic autonomously in the future^[revision:6_2:ENV-INS-001:5a].  By the middle of the week, the governance frame...",
+      "hour": 6.2,
+      "type": "revision",
+      "envelopeId": "ENV-INS-001",
+      "actorRole": "Underwriting Steward"
+    },
+    {
+      "eventId": "boundary_interaction:12_4:ENV-INS-002:7",
+      "offset": 1462,
+      "context": "...d a claim because of a history of multiple filings^[boundary_interaction:12_4:ENV-INS-002:7]. After a human claims adjuster validated that the...",
+      "hour": 12.4,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-INS-002",
+      "actorRole": "Claims Steward"
+    },
+    {
+      "eventId": "revision:19_1:ENV-INS-002:10a",
+      "offset": 1722,
+      "context": "...le tracking logic, reducing future false positives^[revision:19_1:ENV-INS-002:10a]. Simultaneously, in the pricing domain, Pricing S...",
+      "hour": 19.1,
+      "type": "revision",
+      "envelopeId": "ENV-INS-002",
+      "actorRole": "Claims Steward"
+    },
+    {
+      "eventId": "boundary_interaction:28_7:ENV-INS-003:12",
+      "offset": 1923,
+      "context": "...Generator agent calculated an 18% renewal increase^[boundary_interaction:28_7:ENV-INS-003:12]. Rodriguez approved the exception by pairing the ...",
+      "hour": 28.7,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-INS-003",
+      "actorRole": "Pricing Steward"
+    },
+    {
+      "eventId": "decision:29_1:ENV-INS-003:13",
+      "offset": 2088,
+      "context": "...ent forgiveness offer to maintain customer loyalty^[decision:29_1:ENV-INS-003:13], subsequently revising the pricing envelope to al...",
+      "hour": 29.1,
+      "type": "decision",
+      "envelopeId": "ENV-INS-003",
+      "actorRole": "Pricing Steward"
+    },
+    {
+      "eventId": "revision:30_5:ENV-INS-003:13a",
+      "offset": 2251,
+      "context": "...ally when accompanied by such retention incentives^[revision:30_5:ENV-INS-003:13a].  As the week progressed into day three, the stew...",
+      "hour": 30.5,
+      "type": "revision",
+      "envelopeId": "ENV-INS-003",
+      "actorRole": "Pricing Steward"
+    },
+    {
+      "eventId": "boundary_interaction:48_3:ENV-INS-004:16",
+      "offset": 2582,
+      "context": "...fied three denials with insufficient documentation^[boundary_interaction:48_3:ENV-INS-004:16]. Patel revised the compliance envelope to mandate...",
+      "hour": 48.3,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-INS-004",
+      "actorRole": "Compliance Steward"
+    },
+    {
+      "eventId": "revision:54_2:ENV-INS-004:16b",
+      "offset": 2788,
+      "context": "...k denials, ensuring every decision was audit-ready^[revision:54_2:ENV-INS-004:16b]. This rigor proved essential when the FraudDetect...",
+      "hour": 54.2,
+      "type": "revision",
+      "envelopeId": "ENV-INS-004",
+      "actorRole": "Compliance Steward"
+    },
+    {
+      "eventId": "boundary_interaction:62_5:ENV-INS-002:17a",
+      "offset": 2963,
+      "context": "...volving staged accidents and repair shop collusion^[boundary_interaction:62_5:ENV-INS-002:17a]. Using the agent's findings, the Special Investig...",
+      "hour": 62.5,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-INS-002",
+      "actorRole": "Claims Steward"
+    },
+    {
+      "eventId": "decision:65_3:ENV-INS-002:17b",
+      "offset": 3134,
+      "context": "...ordinated claims and initiated a criminal referral^[decision:65_3:ENV-INS-002:17b]. Following this event, Marcus Chen expanded the e...",
+      "hour": 65.3,
+      "type": "decision",
+      "envelopeId": "ENV-INS-002",
+      "actorRole": "Claims Steward"
+    },
+    {
+      "eventId": "revision:66_8:ENV-INS-002:17c",
+      "offset": 3344,
+      "context": "...rk analysis to proactively detect similar patterns^[revision:66_8:ENV-INS-002:17c].  By the end of the week, the operation demonstra...",
+      "hour": 66.8,
+      "type": "revision",
+      "envelopeId": "ENV-INS-002",
+      "actorRole": "Claims Steward"
+    },
+    {
+      "eventId": "boundary_interaction:78_4:ENV-INS-003:18a",
+      "offset": 3592,
+      "context": "...eme rate increase of 28% was flagged by the agents^[boundary_interaction:78_4:ENV-INS-003:18a], Alicia Rodriguez denied the renewal to remain wi...",
+      "hour": 78.4,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-INS-003",
+      "actorRole": "Pricing Steward"
+    },
+    {
+      "eventId": "decision:79_2:ENV-INS-003:18b",
+      "offset": 3717,
+      "context": "...enewal to remain within regulatory fairness limits^[decision:79_2:ENV-INS-003:18b], later clarifying these non-renewal thresholds wi...",
+      "hour": 79.2,
+      "type": "decision",
+      "envelopeId": "ENV-INS-003",
+      "actorRole": "Pricing Steward"
+    },
+    {
+      "eventId": "revision:80_5:ENV-INS-003:18c",
+      "offset": 3869,
+      "context": "...elope to provide the fleet with clearer boundaries^[revision:80_5:ENV-INS-003:18c]. This continuous feedback loop—where real-world b...",
+      "hour": 80.5,
+      "type": "revision",
+      "envelopeId": "ENV-INS-003",
+      "actorRole": "Pricing Steward"
+    },
+    {
+      "eventId": "signal:120:ENV-INS-001:25",
+      "offset": 4145,
+      "context": "...al rate while maintaining a healthy 62% loss ratio^[signal:120:ENV-INS-001:25]. Through these envelopes, the stewards ensured th...",
+      "hour": 120,
+      "type": "signal",
+      "envelopeId": "ENV-INS-001",
+      "actorRole": "Underwriting Steward"
+    }
+  ],
+  "metadata": {
+    "model": "gemini-3-flash-preview",
+    "method": "llm-full-context",
+    "tokensIn": 20710,
+    "tokensOut": 979,
+    "cost": 0.013292,
+    "generatedAt": "2026-01-02T19:31:00.716Z",
+    "generatedBy": "scripts/generate-narratives.mjs",
+    "scenarioVersion": 2,
+    "duration": 19652
+  }
+}

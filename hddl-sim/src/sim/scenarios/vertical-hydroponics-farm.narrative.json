@@ -1,0 +1,136 @@
+{
+  "scenarioId": "vertical-hydroponics-farm",
+  "scenarioName": "vertical-hydroponics-farm",
+  "title": "Vertical Hydroponics Farm — Sustainable Urban Agriculture",
+  "narrative": "# Vertical Hydroponics Farm — Sustainable Urban Agriculture\n\nInside the vertical hydroponics farm, rows of vibrant leafy greens and herbs flourished under a precise orchestration of light and nutrients. On the first day, the system operated smoothly within the Crop Growth Optimization envelope, as the YieldPredictor agent scheduled a lettuce harvest at 97% maturity to align perfectly with market windows^[decision:4_2:ENV-VH-001:2]. However, the limits of automation were tested late that same day when the ClimateController detected a temperature spike in zone 5 that exceeded the established threshold^[boundary_interaction:18_7:ENV-VH-002:5]. Environment Steward Marcus Johnson stepped in to approve the activation of a backup chiller, stabilizing the zone within 40 minutes^[decision:19_3:ENV-VH-002:6]. Recognizing a pattern of compressor lag in the system’s decision memory, Marcus revised the envelope to mandate quarterly diagnostics and tightened the alert thresholds, ensuring the agents could detect hardware degradation before it reached a critical state^[revision:22:ENV-VH-002:21a].\n\nBy the third day, the farm’s delicate chemical balance required a steward’s intervention when the pHController flagged a dangerous drop in water acidity that threatened imminent root damage^[boundary_interaction:48_8:ENV-VH-003:9]. Nutrition Steward Ana Martinez made the difficult call to order a reservoir purge and quarantine 80 plants to preserve the health of the remaining crop^[decision:49_5:ENV-VH-003:10]. This incident triggered a feedback loop where Ana revised the envelope to lower the aphid threshold and automate ladybug releases, preventing pest-related stress from cascading into nutrient imbalances^[revision:52:ENV-VH-003:21c]. As the harvest cycle reached its peak on day five, the QualityInspector identified visual defects in the lettuce exceeding the 5% limit^[boundary_interaction:102_4:ENV-VH-004:13]. Ana responded by revising the nutrient management envelope to increase calcium supplementation by 20%, a decision that was immediately embedded into the system's memory to prevent tip burn in future cycles^[revision:108:ENV-VH-003:14].\n\nToward the end of the week, the farm's commitment to sustainability was challenged when the CarbonTracker reported that the weekly carbon footprint had exceeded the 0.30 kg CO2e target due to a period of heavy cloud cover^[boundary_interaction:144_2:ENV-VH-005:16]. Energy Steward Sarah Chen analyzed the retrieval data and authorized a 50 kWh battery expansion, revising the infrastructure constraints to enable higher renewable energy penetration^[revision:148:ENV-VH-005:21e]. Simultaneously, the Growth Stewardship Group identified underperforming microgreens, leading Marcus Johnson to revise the lighting envelope with a specialized red spectrum protocol to boost photosynthesis^[revision:172:ENV-VH-002:18]. By the end of the ten-day period, Compliance Steward David Park addressed a looming certification expiration by automating the renewal calendar, ensuring the farm’s organic status remained secure without the risk of human oversight^[revision:232:ENV-VH-006:21g].\n\nThis scenario illustrates the power of the HDDL framework in managing the complexities of urban agriculture at scale. By defining clear decision envelopes, the stewards ensured that agents like the ClimateController and NutrientBalancer could handle routine optimizations while escalating non-routine risks for human arbitration. These boundary interactions did not merely stop the clock; they acted as vital signals that triggered steward review and led to authoritative envelope revisions. This evolution of governance—where every intervention is captured in decision memory and used to refine future autonomous behavior—demonstrates how human judgment remains the stabilizing force in a highly automated, high-stakes environment.",
+  "citations": [
+    {
+      "eventId": "decision:4_2:ENV-VH-001:2",
+      "offset": 406,
+      "context": "...7% maturity to align perfectly with market windows^[decision:4_2:ENV-VH-001:2]. However, the limits of automation were tested la...",
+      "hour": 4.2,
+      "type": "decision",
+      "envelopeId": "ENV-VH-001",
+      "actorRole": "Growth Steward"
+    },
+    {
+      "eventId": "boundary_interaction:18_7:ENV-VH-002:5",
+      "offset": 606,
+      "context": "... in zone 5 that exceeded the established threshold^[boundary_interaction:18_7:ENV-VH-002:5]. Environment Steward Marcus Johnson stepped in to...",
+      "hour": 18.7,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-VH-002",
+      "actorRole": "Environment Steward"
+    },
+    {
+      "eventId": "decision:19_3:ENV-VH-002:6",
+      "offset": 780,
+      "context": "...up chiller, stabilizing the zone within 40 minutes^[decision:19_3:ENV-VH-002:6]. Recognizing a pattern of compressor lag in the s...",
+      "hour": 19.3,
+      "type": "decision",
+      "envelopeId": "ENV-VH-002",
+      "actorRole": "Environment Steward"
+    },
+    {
+      "eventId": "revision:22:ENV-VH-002:21a",
+      "offset": 1069,
+      "context": "...are degradation before it reached a critical state^[revision:22:ENV-VH-002:21a].  By the third day, the farm’s delicate chemical ...",
+      "hour": 22,
+      "type": "revision",
+      "envelopeId": "ENV-VH-002",
+      "actorRole": "Environment Steward"
+    },
+    {
+      "eventId": "boundary_interaction:48_8:ENV-VH-003:9",
+      "offset": 1290,
+      "context": "...water acidity that threatened imminent root damage^[boundary_interaction:48_8:ENV-VH-003:9]. Nutrition Steward Ana Martinez made the difficul...",
+      "hour": 48.8,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-VH-003",
+      "actorRole": "Nutrition Steward"
+    },
+    {
+      "eventId": "decision:49_5:ENV-VH-003:10",
+      "offset": 1484,
+      "context": "...lants to preserve the health of the remaining crop^[decision:49_5:ENV-VH-003:10]. This incident triggered a feedback loop where An...",
+      "hour": 49.5,
+      "type": "decision",
+      "envelopeId": "ENV-VH-003",
+      "actorRole": "Nutrition Steward"
+    },
+    {
+      "eventId": "revision:52:ENV-VH-003:21c",
+      "offset": 1717,
+      "context": "...ted stress from cascading into nutrient imbalances^[revision:52:ENV-VH-003:21c]. As the harvest cycle reached its peak on day fiv...",
+      "hour": 52,
+      "type": "revision",
+      "envelopeId": "ENV-VH-003",
+      "actorRole": "Nutrition Steward"
+    },
+    {
+      "eventId": "boundary_interaction:102_4:ENV-VH-004:13",
+      "offset": 1883,
+      "context": "...sual defects in the lettuce exceeding the 5% limit^[boundary_interaction:102_4:ENV-VH-004:13]. Ana responded by revising the nutrient managemen...",
+      "hour": 102.4,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-VH-004",
+      "actorRole": "Harvest Steward"
+    },
+    {
+      "eventId": "revision:108:ENV-VH-003:14",
+      "offset": 2133,
+      "context": "...stem's memory to prevent tip burn in future cycles^[revision:108:ENV-VH-003:14].  Toward the end of the week, the farm's commitme...",
+      "hour": 108,
+      "type": "revision",
+      "envelopeId": "ENV-VH-003",
+      "actorRole": "Nutrition Steward"
+    },
+    {
+      "eventId": "boundary_interaction:144_2:ENV-VH-005:16",
+      "offset": 2386,
+      "context": "...g CO2e target due to a period of heavy cloud cover^[boundary_interaction:144_2:ENV-VH-005:16]. Energy Steward Sarah Chen analyzed the retrieval...",
+      "hour": 144.2,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-VH-005",
+      "actorRole": "Energy Steward"
+    },
+    {
+      "eventId": "revision:148:ENV-VH-005:21e",
+      "offset": 2613,
+      "context": "...ints to enable higher renewable energy penetration^[revision:148:ENV-VH-005:21e]. Simultaneously, the Growth Stewardship Group ide...",
+      "hour": 148,
+      "type": "revision",
+      "envelopeId": "ENV-VH-005",
+      "actorRole": "Energy Steward"
+    },
+    {
+      "eventId": "revision:172:ENV-VH-002:18",
+      "offset": 2849,
+      "context": "...ized red spectrum protocol to boost photosynthesis^[revision:172:ENV-VH-002:18]. By the end of the ten-day period, Compliance Ste...",
+      "hour": 172,
+      "type": "revision",
+      "envelopeId": "ENV-VH-002",
+      "actorRole": "Environment Steward"
+    },
+    {
+      "eventId": "revision:232:ENV-VH-006:21g",
+      "offset": 3111,
+      "context": "...emained secure without the risk of human oversight^[revision:232:ENV-VH-006:21g].  This scenario illustrates the power of the HDDL...",
+      "hour": 232,
+      "type": "revision",
+      "envelopeId": "ENV-VH-006",
+      "actorRole": "Compliance Steward"
+    }
+  ],
+  "metadata": {
+    "model": "gemini-3-flash-preview",
+    "method": "llm-full-context",
+    "tokensIn": 16972,
+    "tokensOut": 835,
+    "cost": 0.010991,
+    "generatedAt": "2026-01-02T19:43:10.945Z",
+    "generatedBy": "scripts/generate-narratives.mjs",
+    "scenarioVersion": 2,
+    "duration": 17469
+  }
+}

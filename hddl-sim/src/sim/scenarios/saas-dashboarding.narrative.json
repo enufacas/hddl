@@ -1,0 +1,145 @@
+{
+  "scenarioId": "saas-dashboarding",
+  "scenarioName": "saas-dashboarding",
+  "title": "SaaS Dashboard Builder — Self-Service Analytics",
+  "narrative": "# SaaS Dashboard Builder — Self-Service Analytics\n\nInside the busy engineering hub of a growing analytics startup, the team launched their new self-service dashboard builder by handing over the reins to a fleet of specialized agents. Early on day one, Onboarding Steward Sofia Martinez activated the initial governance layer, allowing the TemplateRecommender agent to begin guiding new users through the setup process^[envelope_promoted:0:ENV-DASH-004:2]. The agent quickly proved its worth by suggesting a \"Sales Pipeline Tracker\" for an e-commerce client, operating within envelope constraints that required templates to be functional in under ten minutes^[decision:1_5:ENV-DASH-004:3]. Meanwhile, UX Steward Emma Wilson and Data Steward Alex Kumar stood up their respective envelopes, ensuring that as agents like ChartAdvisor and NLQueryTranslator began generating visualizations and SQL code, they did so within strict boundaries for accessibility and data privacy^[envelope_promoted:0:ENV-DASH-001:0]^[envelope_promoted:0:ENV-DASH-002:1].\n\nThe power of this framework became clear through the rapid feedback loops that evolved early in the week. Midday on day one, the QueryPerformanceGuard agent hit a boundary when it flagged a query attempting to scan 2.4 million rows—well over the initial one-million-row limit^[boundary_interaction:5_8:ENV-DASH-002:5]. However, the user provided explicit confirmation, and the query completed successfully within the required thirty-second window^[decision:6_1:ENV-DASH-002:6]. Seeing this pattern, Alex Kumar revised the envelope that afternoon to increase the scan threshold to 2.5 million rows, reducing unnecessary friction for users while maintaining system stability^[revision:8:ENV-DASH-002:11a]. A similar cycle occurred in the UX domain when the ColorPaletteGuard escalated a contrast violation^[boundary_interaction:10_3:ENV-DASH-001:8]. Emma Wilson immediately revised the envelope to include eight new WCAG AAA-compliant palettes, providing the agent with better tools to assist users without further manual intervention^[revision:12:ENV-DASH-001:11c].\n\nAs the week progressed, the stewards continued to refine these boundaries to balance utility with security. On day two, after the PIIRedactor agent blocked a query for sensitive customer emails^[boundary_interaction:18_2:ENV-DASH-002:11], Alex Kumar recognized a legitimate need for anonymized analysis. He revised the data access envelope to introduce specific hashing and truncation functions, allowing the agent to provide privacy-preserving alternatives instead of a hard block^[revision:20:ENV-DASH-002:11e]. By day three, Security Steward Jordan Hayes took a more restrictive stance on external sharing, revising the security envelope to shorten the default public link expiration from 30 days to 14 days following an audit recommendation^[revision:60:ENV-DASH-003:17]. These authoritative changes were captured in decision memory, allowing the system to learn from steward judgment while scaling autonomous execution.\n\nBy the end of the week, the platform was handling a massive surge in user activity, with dashboard creation spiking by over 300%^[signal:12_0:ENV-DASH-001:14a]. Despite the scale, the HDDL framework ensured that human authority remained the ultimate anchor. The agents operated efficiently within their versioned envelopes, but every time they hit a boundary, it served as a vital signal for steward review rather than a silent failure. When the AuditLogger finally generated a comprehensive compliance report, it reflected a system where every automated action was bounded by human intent and every policy evolution was a transparent, versioned revision^[decision:84:ENV-DASH-003:24]. This demonstrated a mature model of scaled autonomy where stewards are not bottlenecks, but the architects of the boundaries that make AI-driven growth possible.",
+  "citations": [
+    {
+      "eventId": "envelope_promoted:0:ENV-DASH-004:2",
+      "offset": 417,
+      "context": "... begin guiding new users through the setup process^[envelope_promoted:0:ENV-DASH-004:2]. The agent quickly proved its worth by suggesting...",
+      "hour": 0,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-DASH-004",
+      "actorRole": "Onboarding Steward"
+    },
+    {
+      "eventId": "decision:1_5:ENV-DASH-004:3",
+      "offset": 657,
+      "context": "...ed templates to be functional in under ten minutes^[decision:1_5:ENV-DASH-004:3]. Meanwhile, UX Steward Emma Wilson and Data Stewa...",
+      "hour": 1.5,
+      "type": "decision",
+      "envelopeId": "ENV-DASH-004",
+      "actorRole": "Onboarding Steward"
+    },
+    {
+      "eventId": "envelope_promoted:0:ENV-DASH-001:0",
+      "offset": 969,
+      "context": "...rict boundaries for accessibility and data privacy^[envelope_promoted:0:ENV-DASH-001:0]^[envelope_promoted:0:ENV-DASH-002:1].  The power ...",
+      "hour": 0,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-DASH-001",
+      "actorRole": "UX Steward"
+    },
+    {
+      "eventId": "envelope_promoted:0:ENV-DASH-002:1",
+      "offset": 1006,
+      "context": "... data privacy^[envelope_promoted:0:ENV-DASH-001:0]^[envelope_promoted:0:ENV-DASH-002:1].  The power of this framework became clear throug...",
+      "hour": 0,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-DASH-002",
+      "actorRole": "Data Steward"
+    },
+    {
+      "eventId": "boundary_interaction:5_8:ENV-DASH-002:5",
+      "offset": 1321,
+      "context": "...n rows—well over the initial one-million-row limit^[boundary_interaction:5_8:ENV-DASH-002:5]. However, the user provided explicit confirmation...",
+      "hour": 5.8,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-DASH-002",
+      "actorRole": "Data Steward"
+    },
+    {
+      "eventId": "decision:6_1:ENV-DASH-002:6",
+      "offset": 1492,
+      "context": "...cessfully within the required thirty-second window^[decision:6_1:ENV-DASH-002:6]. Seeing this pattern, Alex Kumar revised the enve...",
+      "hour": 6.1,
+      "type": "decision",
+      "envelopeId": "ENV-DASH-002",
+      "actorRole": "Data Steward"
+    },
+    {
+      "eventId": "revision:8:ENV-DASH-002:11a",
+      "offset": 1718,
+      "context": "...ction for users while maintaining system stability^[revision:8:ENV-DASH-002:11a]. A similar cycle occurred in the UX domain when t...",
+      "hour": 8,
+      "type": "revision",
+      "envelopeId": "ENV-DASH-002",
+      "actorRole": "Data Steward"
+    },
+    {
+      "eventId": "boundary_interaction:10_3:ENV-DASH-001:8",
+      "offset": 1849,
+      "context": "...e ColorPaletteGuard escalated a contrast violation^[boundary_interaction:10_3:ENV-DASH-001:8]. Emma Wilson immediately revised the envelope to ...",
+      "hour": 10.3,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-DASH-001",
+      "actorRole": "UX Steward"
+    },
+    {
+      "eventId": "revision:12:ENV-DASH-001:11c",
+      "offset": 2078,
+      "context": "...o assist users without further manual intervention^[revision:12:ENV-DASH-001:11c].  As the week progressed, the stewards continued ...",
+      "hour": 12,
+      "type": "revision",
+      "envelopeId": "ENV-DASH-001",
+      "actorRole": "UX Steward"
+    },
+    {
+      "eventId": "boundary_interaction:18_2:ENV-DASH-002:11",
+      "offset": 2305,
+      "context": "...gent blocked a query for sensitive customer emails^[boundary_interaction:18_2:ENV-DASH-002:11], Alex Kumar recognized a legitimate need for anon...",
+      "hour": 18.2,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-DASH-002",
+      "actorRole": "Data Steward"
+    },
+    {
+      "eventId": "revision:20:ENV-DASH-002:11e",
+      "offset": 2593,
+      "context": "...cy-preserving alternatives instead of a hard block^[revision:20:ENV-DASH-002:11e]. By day three, Security Steward Jordan Hayes took...",
+      "hour": 20,
+      "type": "revision",
+      "envelopeId": "ENV-DASH-002",
+      "actorRole": "Data Steward"
+    },
+    {
+      "eventId": "revision:60:ENV-DASH-003:17",
+      "offset": 2856,
+      "context": "... days to 14 days following an audit recommendation^[revision:60:ENV-DASH-003:17]. These authoritative changes were captured in dec...",
+      "hour": 60,
+      "type": "revision",
+      "envelopeId": "ENV-DASH-003",
+      "actorRole": "Security Steward"
+    },
+    {
+      "eventId": "signal:12_0:ENV-DASH-001:14a",
+      "offset": 3166,
+      "context": "...vity, with dashboard creation spiking by over 300%^[signal:12_0:ENV-DASH-001:14a]. Despite the scale, the HDDL framework ensured th...",
+      "hour": 12,
+      "type": "signal",
+      "envelopeId": "ENV-DASH-001",
+      "actorRole": "UX Steward"
+    },
+    {
+      "eventId": "decision:84:ENV-DASH-003:24",
+      "offset": 3692,
+      "context": "...cy evolution was a transparent, versioned revision^[decision:84:ENV-DASH-003:24]. This demonstrated a mature model of scaled auton...",
+      "hour": 84,
+      "type": "decision",
+      "envelopeId": "ENV-DASH-003",
+      "actorRole": "Security Steward"
+    }
+  ],
+  "metadata": {
+    "model": "gemini-3-flash-preview",
+    "method": "llm-full-context",
+    "tokensIn": 12399,
+    "tokensOut": 867,
+    "cost": 0.0088,
+    "generatedAt": "2026-01-02T19:42:53.464Z",
+    "generatedBy": "scripts/generate-narratives.mjs",
+    "scenarioVersion": 2,
+    "duration": 14955
+  }
+}

@@ -3359,6 +3359,38 @@ body.mobile-nav-open .mobile-nav-overlay {
         font-size: 16px !important;
     }
     
+    /* Hide generate narrative button text on mobile, show only icon */
+    #generate-ai-narrative .generate-narrative-text {
+        display: none !important;
+    }
+    
+    #generate-ai-narrative {
+        padding: 6px 8px !important;
+        min-width: 32px !important;
+        min-height: 32px !important;
+        gap: 0 !important;
+    }
+    
+    #generate-ai-narrative .codicon {
+        font-size: 16px !important;
+    }
+    
+    /* Hide generate scenario button text on mobile, show only icon */
+    .scenario-gen-button .scenario-gen-button-text {
+        display: none !important;
+    }
+    
+    .scenario-gen-button {
+        padding: 6px 8px !important;
+        min-width: 32px !important;
+        min-height: 32px !important;
+        gap: 0 !important;
+    }
+    
+    .scenario-gen-button .codicon {
+        font-size: 16px !important;
+    }
+    
     /* Ensure steward filter dropdown fits properly */
     #steward-filter {
         font-size: 12px !important;

@@ -1,0 +1,91 @@
+{
+  "scenarioId": "medical-diagnosis",
+  "scenarioName": "medical-diagnosis",
+  "title": "Medical Diagnosis Support — Healthcare Stewardship",
+  "narrative": "# Medical Diagnosis Support — Healthcare Stewardship\n\nBetween the humming diagnostic monitors and the sterile rows of the hospital pharmacy, the medical staff began integrating a new layer of autonomous support through versioned decision envelopes. Dr. Sarah Chen, acting as the Medical Steward, activated the clinical diagnostics envelope to provide a safety net for differential diagnosis suggestions. Early on the first day, the system processed lab results indicating an elevated white blood cell count for a patient. The DiagnosticAssist agent, operating under the constraint that it must never issue a final diagnosis, suggested pneumonia with 82% confidence and flagged the case for immediate physician review^[decision:2_5:ENV-MED-001:1]. This interaction was captured in decision memory, allowing the steward to see exactly how the agent used confidence levels and evidence sources to support the clinical team without overstepping its bounded authority.\n\nMidway through the first day, the pharmacy domain saw its first major test when the InteractionChecker reached a boundary, flagging a moderate risk between warfarin and aspirin^[boundary_interaction:8_2:ENV-MED-002:3]. Pharmacist Mike Torres reviewed the escalation and issued an override, allowing the medication to be dispensed with a specific monitoring plan after confirming the patient's history^[decision:8_3:ENV-MED-002:4]. Nearby in the emergency department, the VitalTrendMonitor agent detected a dangerous drop in blood pressure and oxygen saturation for patient #4472, triggering an immediate priority escalation recommendation^[signal:14_8:ENV-MED-003:6]. By late that evening, Dr. Chen reviewed the diagnostic system's performance and performed a revision on the clinical envelope, raising the minimum confidence threshold from 75% to 80% to ensure physicians were only being alerted to the most probable findings and to reduce false-positive fatigue^[revision:16_5:ENV-MED-001:7].\n\nAs the scenario moved into the second day, the AllergyGuard agent hit a hard constraint and blocked a prescription for a patient with a documented penicillin allergy^[boundary_interaction:22_1:ENV-MED-002:9]. This boundary interaction triggered a steward review that led Mike Torres to further refine the pharmacy safety envelope; he expanded the constraints to include cross-reactive cephalosporins and updated the warfarin protocols based on the previous day's overrides^[revision:26:ENV-MED-002:13]^[revision:27:ENV-MED-002:14]. By the end of the week, these feedback loops demonstrated how HDDL allows for scaled autonomy with preserved human authority. By treating every boundary interaction as a signal for steward review rather than just a technical error, the hospital ensured that its AI governance evolved based on real operational experience, keeping human judgment at the center of every critical medical decision.",
+  "citations": [
+    {
+      "eventId": "decision:2_5:ENV-MED-001:1",
+      "offset": 716,
+      "context": "...nd flagged the case for immediate physician review^[decision:2_5:ENV-MED-001:1]. This interaction was captured in decision memory...",
+      "hour": 2.5,
+      "type": "decision",
+      "envelopeId": "ENV-MED-001",
+      "actorRole": "Medical Steward"
+    },
+    {
+      "eventId": "boundary_interaction:8_2:ENV-MED-002:3",
+      "offset": 1141,
+      "context": "...gging a moderate risk between warfarin and aspirin^[boundary_interaction:8_2:ENV-MED-002:3]. Pharmacist Mike Torres reviewed the escalation a...",
+      "hour": 8.2,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-MED-002",
+      "actorRole": "Pharmacy Steward"
+    },
+    {
+      "eventId": "decision:8_3:ENV-MED-002:4",
+      "offset": 1365,
+      "context": "...toring plan after confirming the patient's history^[decision:8_3:ENV-MED-002:4]. Nearby in the emergency department, the VitalTre...",
+      "hour": 8.3,
+      "type": "decision",
+      "envelopeId": "ENV-MED-002",
+      "actorRole": "Pharmacy Steward"
+    },
+    {
+      "eventId": "signal:14_8:ENV-MED-003:6",
+      "offset": 1603,
+      "context": "...ng an immediate priority escalation recommendation^[signal:14_8:ENV-MED-003:6]. By late that evening, Dr. Chen reviewed the diag...",
+      "hour": 14.8,
+      "type": "signal",
+      "envelopeId": "ENV-MED-003",
+      "actorRole": "Emergency Steward"
+    },
+    {
+      "eventId": "revision:16_5:ENV-MED-001:7",
+      "offset": 1928,
+      "context": "...able findings and to reduce false-positive fatigue^[revision:16_5:ENV-MED-001:7].  As the scenario moved into the second day, the ...",
+      "hour": 16.5,
+      "type": "revision",
+      "envelopeId": "ENV-MED-001",
+      "actorRole": "Medical Steward"
+    },
+    {
+      "eventId": "boundary_interaction:22_1:ENV-MED-002:9",
+      "offset": 2126,
+      "context": "...for a patient with a documented penicillin allergy^[boundary_interaction:22_1:ENV-MED-002:9]. This boundary interaction triggered a steward re...",
+      "hour": 22.1,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-MED-002",
+      "actorRole": "Pharmacy Steward"
+    },
+    {
+      "eventId": "revision:26:ENV-MED-002:13",
+      "offset": 2433,
+      "context": "...in protocols based on the previous day's overrides^[revision:26:ENV-MED-002:13]^[revision:27:ENV-MED-002:14]. By the end of the w...",
+      "hour": 26,
+      "type": "revision",
+      "envelopeId": "ENV-MED-002",
+      "actorRole": "Pharmacy Steward"
+    },
+    {
+      "eventId": "revision:27:ENV-MED-002:14",
+      "offset": 2462,
+      "context": "...vious day's overrides^[revision:26:ENV-MED-002:13]^[revision:27:ENV-MED-002:14]. By the end of the week, these feedback loops dem...",
+      "hour": 27,
+      "type": "revision",
+      "envelopeId": "ENV-MED-002",
+      "actorRole": "Pharmacy Steward"
+    }
+  ],
+  "metadata": {
+    "model": "gemini-3-flash-preview",
+    "method": "llm-full-context",
+    "tokensIn": 8951,
+    "tokensOut": 595,
+    "cost": 0.006261,
+    "generatedAt": "2026-01-02T19:32:49.086Z",
+    "generatedBy": "scripts/generate-narratives.mjs",
+    "scenarioVersion": 2,
+    "duration": 30184
+  }
+}

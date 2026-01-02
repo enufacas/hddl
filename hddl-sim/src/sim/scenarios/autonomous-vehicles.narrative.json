@@ -1,0 +1,109 @@
+{
+  "scenarioId": "autonomous-vehicles",
+  "scenarioName": "autonomous-vehicles",
+  "title": "Autonomous Vehicle Operations — Fleet Safety & Ethics",
+  "narrative": "# Autonomous Vehicle Operations — Fleet Safety & Ethics\n\nInside the fleet operations center, the air hummed with the quiet efficiency of thousands of autonomous trips being managed in real-time. Marcus Rodriguez, the Safety Steward, began the week by activating the Collision Avoidance envelope, which operated on the core assumption that the fleet would always prioritize minimizing harm to all road users^[envelope_promoted:0:ENV-AV-001:0]. Early on day one, the system’s CollisionPredictor agent proved the value of these boundaries when it detected a pedestrian entering a crosswalk and executed emergency braking, staying perfectly within the envelope's deceleration constraints to avoid a collision^[decision:3_2:ENV-AV-001:2]. However, the complexity of the city soon pushed the agents to their limits. By late afternoon, an EdgeCaseDetector agent encountered a construction zone with conflicting signage that created an ambiguous constraint. Rather than making an unsafe guess, the agent triggered a boundary interaction and escalated the situation, stopping the vehicle until a remote operator could provide authoritative guidance^[boundary_interaction:15_8:ENV-AV-001:5]. The operator’s decision to follow the temporary detour was logged and stored in Decision Memory, ensuring the reasoning was preserved for steward review^[decision:15_9:ENV-AV-001:6].\n\nThis boundary interaction sparked a critical feedback loop that allowed the governance of the fleet to evolve. On day two, Marcus Rodriguez reviewed the construction zone escalation and revised the safety envelope to include a new prioritization rule: temporary signage must be prioritized over permanent markers in active work zones^[revision:20:ENV-AV-001:15c]. This revision allowed the agents to navigate similar future scenarios without needing to pause for human intervention. Meanwhile, Operations Steward Julia Kim responded to community needs by revising the Route Optimization envelope. After a new school opened mid-semester, she added a mandatory slow-zone constraint for Maple St Elementary to ensure the RouteOptimizer agent would automatically avoid the area during arrival and dismissal times^[revision:34:ENV-AV-002:10]. The Engineering Steward, Chen Liu, also utilized these feedback loops when the DiagnosticsMonitor agent hit a hard constraint and grounded a vehicle due to a brake system anomaly^[boundary_interaction:42_1:ENV-AV-004:11]. To prevent mid-trip groundings in the future, Chen revised the maintenance envelope to tighten the detection thresholds, forcing the system to catch sensor and brake degradation much earlier in the maintenance cycle^[revision:46:ENV-AV-004:16f].\n\nBy the end of the week, the fleet had successfully completed 10,000 autonomous trips with zero collisions, a testament to the strength of the human-derived decision layer^[signal:72:ENV-AV-001:17]. These results demonstrated that scaling autonomy does not require stewards to surrender authority; instead, it requires them to define the boundaries where AI operates and the mechanisms by which it escalates. When the DecisionMemory system retrieved the revised construction signage rules for subsequent trips, it wasn't just following a line of code—it was applying a refined piece of human judgment that had been tested by real-world friction^[retrieval:21_0:ENV-AV-001:15d]. This framework ensured that as the fleet grew, the stewards remained the ultimate architects of safety and ethics, using every boundary interaction as a signal to make the system more resilient and aligned with community values.",
+  "citations": [
+    {
+      "eventId": "envelope_promoted:0:ENV-AV-001:0",
+      "offset": 406,
+      "context": "...lways prioritize minimizing harm to all road users^[envelope_promoted:0:ENV-AV-001:0]. Early on day one, the system’s CollisionPredicto...",
+      "hour": 0,
+      "type": "envelope_promoted",
+      "envelopeId": "ENV-AV-001",
+      "actorRole": "Safety Steward"
+    },
+    {
+      "eventId": "decision:3_2:ENV-AV-001:2",
+      "offset": 704,
+      "context": "...pe's deceleration constraints to avoid a collision^[decision:3_2:ENV-AV-001:2]. However, the complexity of the city soon pushed ...",
+      "hour": 3.2,
+      "type": "decision",
+      "envelopeId": "ENV-AV-001",
+      "actorRole": "Safety Steward"
+    },
+    {
+      "eventId": "boundary_interaction:15_8:ENV-AV-001:5",
+      "offset": 1139,
+      "context": "...mote operator could provide authoritative guidance^[boundary_interaction:15_8:ENV-AV-001:5]. The operator’s decision to follow the temporary ...",
+      "hour": 15.8,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-AV-001",
+      "actorRole": "Safety Steward"
+    },
+    {
+      "eventId": "decision:15_9:ENV-AV-001:6",
+      "offset": 1334,
+      "context": "...ing the reasoning was preserved for steward review^[decision:15_9:ENV-AV-001:6].  This boundary interaction sparked a critical fe...",
+      "hour": 15.9,
+      "type": "decision",
+      "envelopeId": "ENV-AV-001",
+      "actorRole": "Safety Steward"
+    },
+    {
+      "eventId": "revision:20:ENV-AV-001:15c",
+      "offset": 1699,
+      "context": "...itized over permanent markers in active work zones^[revision:20:ENV-AV-001:15c]. This revision allowed the agents to navigate sim...",
+      "hour": 20,
+      "type": "revision",
+      "envelopeId": "ENV-AV-001",
+      "actorRole": "Safety Steward"
+    },
+    {
+      "eventId": "revision:34:ENV-AV-002:10",
+      "offset": 2174,
+      "context": "... avoid the area during arrival and dismissal times^[revision:34:ENV-AV-002:10]. The Engineering Steward, Chen Liu, also utilized...",
+      "hour": 34,
+      "type": "revision",
+      "envelopeId": "ENV-AV-002",
+      "actorRole": "Operations Steward"
+    },
+    {
+      "eventId": "boundary_interaction:42_1:ENV-AV-004:11",
+      "offset": 2382,
+      "context": "...d grounded a vehicle due to a brake system anomaly^[boundary_interaction:42_1:ENV-AV-004:11]. To prevent mid-trip groundings in the future, Ch...",
+      "hour": 42.1,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-AV-004",
+      "actorRole": "Engineering Steward"
+    },
+    {
+      "eventId": "revision:46:ENV-AV-004:16f",
+      "offset": 2641,
+      "context": "... degradation much earlier in the maintenance cycle^[revision:46:ENV-AV-004:16f].  By the end of the week, the fleet had successfu...",
+      "hour": 46,
+      "type": "revision",
+      "envelopeId": "ENV-AV-004",
+      "actorRole": "Engineering Steward"
+    },
+    {
+      "eventId": "signal:72:ENV-AV-001:17",
+      "offset": 2843,
+      "context": "...o the strength of the human-derived decision layer^[signal:72:ENV-AV-001:17]. These results demonstrated that scaling autonomy...",
+      "hour": 72,
+      "type": "signal",
+      "envelopeId": "ENV-AV-001",
+      "actorRole": "Safety Steward"
+    },
+    {
+      "eventId": "retrieval:21_0:ENV-AV-001:15d",
+      "offset": 3316,
+      "context": "...dgment that had been tested by real-world friction^[retrieval:21_0:ENV-AV-001:15d]. This framework ensured that as the fleet grew, t...",
+      "hour": 21,
+      "type": "retrieval",
+      "envelopeId": "ENV-AV-001",
+      "actorRole": "Safety Steward"
+    }
+  ],
+  "metadata": {
+    "model": "gemini-3-flash-preview",
+    "method": "llm-full-context",
+    "tokensIn": 10099,
+    "tokensOut": 746,
+    "cost": 0.007288,
+    "generatedAt": "2026-01-02T19:41:49.161Z",
+    "generatedBy": "scripts/generate-narratives.mjs",
+    "scenarioVersion": 2,
+    "duration": 14642
+  }
+}
