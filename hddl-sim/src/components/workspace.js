@@ -262,8 +262,8 @@ const renderNarrativeMarkdown = (markdown) => {
 
 const mountAINarrative = (containerEl) => {
   if (!containerEl) return
-  if (containerEl.querySelector('.ai-narrative-container')) return
-
+  // Remove early return - allow re-mounting to update layout
+  
   if (!aiNarrativeTimeHooked) {
     aiNarrativeTimeHooked = true
     onTimeChange(() => {
@@ -272,7 +272,7 @@ const mountAINarrative = (containerEl) => {
     })
   }
 
-  containerEl.style.padding = '20px 24px'
+  containerEl.style.padding = '16px 20px'
   containerEl.style.fontFamily = 'var(--vscode-font-family)'
   containerEl.style.overflow = 'hidden'
   containerEl.style.height = '100%'
@@ -281,71 +281,92 @@ const mountAINarrative = (containerEl) => {
 
   containerEl.innerHTML = `
     <div class="ai-narrative-container" style="display: flex; flex-direction: column; height: 100%;">
-      <div style="flex-shrink: 0;">
-        <p style="margin: 0 0 16px 0; font-size: 12px; line-height: 1.5; color: var(--vscode-descriptionForeground); opacity: 0.85;">
-          Generate a contextual explanation of the scenario timeline
-        </p>
+      ${aiNarrativeGenerated ? `
+        <!-- Narrative output at top (after generation) -->
+        <div id="ai-narrative-content" style="
+          flex: 1;
+          overflow-y: auto;
+          -webkit-overflow-scrolling: touch;
+          color: var(--vscode-foreground);
+          line-height: 1.8;
+          font-size: 14px;
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+          padding-bottom: 20px;
+          margin-bottom: 20px;
+        "></div>
         
-        <div style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 20px;">
-          <button id="generate-ai-narrative" style="
-            background: linear-gradient(135deg, var(--vscode-button-background) 0%, color-mix(in srgb, var(--vscode-button-background) 85%, black) 100%);
-            color: var(--vscode-button-foreground);
-            border: none;
-            border-radius: 5px;
-            padding: 8px 16px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-          " onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 2px 8px rgba(0, 0, 0, 0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 1px 4px rgba(0, 0, 0, 0.1)'">
-            <span class="codicon codicon-sparkle"></span>
-            <span>${aiNarrativeGenerated ? 'Regenerate' : 'Generate Narrative'}</span>
-          </button>
+        <!-- Controls at bottom (after generation) -->
+        <div style="flex-shrink: 0; border-top: 1px solid var(--vscode-panel-border); padding-top: 10px;">
+      ` : `
+        <!-- Controls at top (before generation) -->
+        <div style="flex-shrink: 0;">
+      `}
+          <p style="margin: 0 0 10px 0; font-size: 11px; line-height: 1.4; color: var(--vscode-descriptionForeground); opacity: 0.8;">
+            Generate a contextual explanation of the scenario timeline
+          </p>
           
-          <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--vscode-foreground); cursor: pointer; user-select: none;">
-            <input type="checkbox" id="sync-narrative-toggle" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--vscode-button-background);" ${aiNarrativeSyncEnabled ? 'checked' : ''}>
-            <span style="font-weight: 500;">Sync with Timeline</span>
-          </label>
+          <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px;">
+            <button id="generate-ai-narrative" style="
+              background: linear-gradient(135deg, var(--vscode-button-background) 0%, color-mix(in srgb, var(--vscode-button-background) 85%, black) 100%);
+              color: var(--vscode-button-foreground);
+              border: none;
+              border-radius: 4px;
+              padding: 6px 12px;
+              font-size: 11px;
+              font-weight: 600;
+              cursor: pointer;
+              transition: all 0.2s ease;
+              box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              gap: 5px;
+            " onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 2px 6px rgba(0, 0, 0, 0.12)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 1px 3px rgba(0, 0, 0, 0.08)'">
+              <span class="codicon codicon-sparkle"></span>
+              <span>${aiNarrativeGenerated ? 'Regenerate' : 'Generate Narrative'}</span>
+            </button>
+            
+            <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--vscode-foreground); cursor: pointer; user-select: none;">
+              <input type="checkbox" id="sync-narrative-toggle" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--vscode-button-background);" ${aiNarrativeSyncEnabled ? 'checked' : ''}>
+              <span style="font-weight: 500;">Sync with Timeline</span>
+            </label>
+          </div>
+          
+          <div style="margin-bottom: ${aiNarrativeGenerated ? '0' : '12px'};">
+            <label for="ai-narrative-user-addendum" style="display: block; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--vscode-descriptionForeground); margin-bottom: 6px;">
+              Additional instructions (optional)
+            </label>
+            <textarea id="ai-narrative-user-addendum" rows="2" placeholder="Add constraints like: focus on boundary interactions, emphasize day-by-day structure, keep it concise…" style="
+              width: 100%;
+              resize: vertical;
+              min-height: 52px;
+              max-height: 120px;
+              padding: 8px 10px;
+              border-radius: 6px;
+              border: 1px solid var(--vscode-input-border);
+              background: var(--vscode-input-background);
+              color: var(--vscode-input-foreground);
+              font-size: 13px;
+              line-height: 1.6;
+              font-family: var(--vscode-font-family);
+              outline: none;
+              transition: border-color 0.2s ease;
+            " onfocus="this.style.borderColor='var(--vscode-focusBorder)'" onblur="this.style.borderColor='var(--vscode-input-border)'"></textarea>
+          </div>
         </div>
-        
-        <div style="margin-bottom: 20px;">
-          <label for="ai-narrative-user-addendum" style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--vscode-descriptionForeground); margin-bottom: 8px;">
-            Additional instructions (optional)
-          </label>
-          <textarea id="ai-narrative-user-addendum" rows="3" placeholder="Add constraints like: focus on boundary interactions, emphasize day-by-day structure, keep it concise…" style="
-            width: 100%;
-            resize: vertical;
-            min-height: 72px;
-            max-height: 180px;
-            padding: 12px 14px;
-            border-radius: 6px;
-            border: 1px solid var(--vscode-input-border);
-            background: var(--vscode-input-background);
-            color: var(--vscode-input-foreground);
-            font-size: 13px;
-            line-height: 1.6;
-            font-family: var(--vscode-font-family);
-            outline: none;
-            transition: border-color 0.2s ease;
-          " onfocus="this.style.borderColor='var(--vscode-focusBorder)'" onblur="this.style.borderColor='var(--vscode-input-border)'"></textarea>
-        </div>
-      </div>
-      
-      <div id="ai-narrative-content" style="
-        flex: 1;
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
-        color: var(--vscode-foreground);
-        line-height: 1.8;
-        font-size: 14px;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-        padding-bottom: 20px;
-      "></div>
+      ${!aiNarrativeGenerated ? `
+        <!-- Narrative output at bottom (before generation) -->
+        <div id="ai-narrative-content" style="
+          flex: 1;
+          overflow-y: auto;
+          -webkit-overflow-scrolling: touch;
+          color: var(--vscode-foreground);
+          line-height: 1.8;
+          font-size: 14px;
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+          padding-bottom: 20px;
+        "></div>
+      ` : ''}
     </div>
   `.trim()
 
@@ -424,14 +445,25 @@ const generateAINarrative = async (containerEl) => {
       : 'http://localhost:8080/generate'
     
     const userAddendum = (addendumEl?.value || aiNarrativeUserAddendum || '').trim()
+    
+    // For generated scenarios, pass the full scenario JSON since it doesn't exist on disk
+    const isGeneratedScenario = scenarioKey.startsWith('generated-scenario-')
+    const requestBody = isGeneratedScenario 
+      ? {
+          scenarioData: scenario, // Send full scenario object
+          fullContext: true,
+          userAddendum
+        }
+      : {
+          scenario: scenarioKey, // Send filename-based ID for built-in scenarios
+          fullContext: true,
+          userAddendum
+        }
+    
     const response = await fetch(apiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        scenario: scenarioKey, // Use filename-based ID for API
-        fullContext: true,
-        userAddendum
-      })
+      body: JSON.stringify(requestBody)
     })
 
     if (!response.ok) {
@@ -641,16 +673,23 @@ const generateAINarrative = async (containerEl) => {
       #ai-narrative-content p:last-of-type {
         margin-bottom: 0;
       }
-      #ai-narrative-content h1,
-      #ai-narrative-content h2,
-      #ai-narrative-content h3 {
-        margin-top: 1.5em;
-        margin-bottom: 0.5em;
-      }
-      #ai-narrative-content h1:first-child,
-      #ai-narrative-content h2:first-child,
-      #ai-narrative-content h3:first-child {
+      #ai-narrative-content h1 {
+        font-size: 18px;
         margin-top: 0;
+        margin-bottom: 12px;
+        line-height: 1.3;
+      }
+      #ai-narrative-content h2 {
+        font-size: 15px;
+        margin-top: 16px;
+        margin-bottom: 8px;
+        line-height: 1.3;
+      }
+      #ai-narrative-content h3 {
+        font-size: 13px;
+        margin-top: 12px;
+        margin-bottom: 6px;
+        line-height: 1.3;
       }
       .cited-sentence {
         transition: opacity 0.5s ease, filter 0.5s ease;
@@ -670,8 +709,10 @@ const generateAINarrative = async (containerEl) => {
     }
 
     aiNarrativeGenerated = true
-    generateBtn.textContent = 'Regenerate'
-    generateBtn.disabled = false
+    
+    // Clear and re-mount the panel to apply the new layout (narrative at top, controls at bottom)
+    containerEl.innerHTML = ''
+    mountAINarrative(containerEl)
   } catch (err) {
     console.error('Failed to generate AI narrative:', err)
     const isProduction = window.location.hostname === 'enufacas.github.io'

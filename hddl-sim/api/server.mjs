@@ -18,6 +18,7 @@ import { readFile } from 'fs/promises';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { generateNarrative } from './narrative-lib.mjs';
+import { handleGenerateScenario } from './scenario-generator.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -40,11 +41,6 @@ app.use(express.json());
 const validateOrigin = (req, res, next) => {
   const origin = req.headers.origin || req.headers.referer;
   
-  // Allow localhost for local testing
-  if (process.env.NODE_ENV === 'development' && origin?.includes('localhost')) {
-    return next();
-  }
-  
   if (!origin) {
     console.warn('Blocked request: No origin header');
     return res.status(403).json({ error: 'Access denied: No origin header' });
@@ -52,6 +48,13 @@ const validateOrigin = (req, res, next) => {
   
   try {
     const originUrl = new URL(origin);
+    
+    // Allow localhost for local testing
+    if (originUrl.hostname === 'localhost' || originUrl.hostname === '127.0.0.1') {
+      console.log(`Allowed localhost request from: ${originUrl.origin}`);
+      return next();
+    }
+    
     const isAllowed = originUrl.href.startsWith('https://enufacas.github.io');
     
     if (!isAllowed) {
@@ -110,30 +113,43 @@ app.post('/generate', validateOrigin, limiter, async (req, res) => {
   const startTime = Date.now();
   
   try {
-    const { scenario, fullContext = true, userAddendum: rawUserAddendum = '' } = req.body;
+    const { scenario, scenarioData: providedScenarioData, fullContext = true, userAddendum: rawUserAddendum = '' } = req.body;
     const userAddendum = (typeof rawUserAddendum === 'string' ? rawUserAddendum : '')
       .replace(/\u0000/g, '')
       .slice(0, 4000);
     
-    if (!scenario) {
-      return res.status(400).json({ error: 'Missing required field: scenario' });
+    if (!scenario && !providedScenarioData) {
+      return res.status(400).json({ error: 'Missing required field: scenario or scenarioData' });
     }
     
-    console.log(`[${new Date().toISOString()}] Generating narrative for: ${scenario}`);
+    let scenarioData;
+    
+    // Accept either scenario ID (for built-in scenarios) or full scenario JSON (for generated scenarios)
+    if (providedScenarioData) {
+      scenarioData = providedScenarioData;
+      console.log(`[${new Date().toISOString()}] Generating narrative for provided scenario: ${scenarioData.id || scenarioData.title}`);
+    } else {
+      console.log(`[${new Date().toISOString()}] Generating narrative for: ${scenario}`);
+      // Load scenario from disk - path from api/ to src/sim/scenarios/
+      const scenarioPath = join(__dirname, '..', 'src', 'sim', 'scenarios', `${scenario}.scenario.json`);
+      scenarioData = JSON.parse(await readFile(scenarioPath, 'utf-8'));
+    }
+    
     if (userAddendum) {
       // Log the prompt (truncated to avoid massive logs)
       console.log(`[${new Date().toISOString()}] Prompt: ${userAddendum.slice(0, 500).replace(/\n/g, ' ')}${userAddendum.length > 500 ? '...' : ''}`);
     }
-    
-    // Load scenario - path from api/ to src/sim/scenarios/
-    const scenarioPath = join(__dirname, '..', 'src', 'sim', 'scenarios', `${scenario}.scenario.json`);
-    const scenarioData = JSON.parse(await readFile(scenarioPath, 'utf-8'));
     
     // Generate narrative
     const result = await generateNarrative(scenarioData, { fullContext, userAddendum });
     
     const duration = Date.now() - startTime;
     console.log(`[${new Date().toISOString()}] Completed in ${duration}ms - ${result.citations.length} citations, cost: $${result.metadata.cost}`);
+    
+    // Log generation metadata
+    const m = result.metadata;
+    console.log(`Generation Metadata:`);
+    console.log(`Model: ${m.model} | Cost: $${m.cost.toFixed(6)} | Tokens: ${m.tokensIn} in / ${m.tokensOut} out | Duration: ${(duration / 1000).toFixed(2)}s`);
     
     if (result.narrative) {
       // Log a preview of the generated narrative
@@ -162,16 +178,25 @@ app.post('/generate', validateOrigin, limiter, async (req, res) => {
   }
 });
 
+// Generate scenario endpoint (with origin validation and rate limiting)
+app.post('/generate-scenario', validateOrigin, limiter, handleGenerateScenario);
+
 // Start server
 app.listen(PORT, () => {
   console.log(`Narrative Generation API running on port ${PORT}`);
   console.log(`  Health check: http://localhost:${PORT}/health`);
   console.log(`  List scenarios: http://localhost:${PORT}/scenarios`);
-  console.log(`  Generate: POST http://localhost:${PORT}/generate`);
-  console.log(`\nExample request:`);
+  console.log(`  Generate narrative: POST http://localhost:${PORT}/generate`);
+  console.log(`  Generate scenario: POST http://localhost:${PORT}/generate-scenario`);
+  console.log(`\nExample requests:`);
+  console.log(`  # Generate narrative`);
   console.log(`  curl -X POST http://localhost:${PORT}/generate \\`);
   console.log(`    -H "Content-Type: application/json" \\`);
   console.log(`    -d '{"scenario":"insurance-underwriting"}'`);
+  console.log(`\n  # Generate new scenario`);
+  console.log(`  curl -X POST http://localhost:${PORT}/generate-scenario \\`);
+  console.log(`    -H "Content-Type: application/json" \\`);
+  console.log(`    -d '{"prompt":"Insurance agent learning bundle discount approval","domain":"insurance"}'`);
 }).on('error', (err) => {
   console.error('Server error:', err);
   process.exit(1);

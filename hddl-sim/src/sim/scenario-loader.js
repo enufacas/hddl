@@ -7,6 +7,37 @@ import testMinimalScenario from './scenarios/test-minimal.scenario.json'
 // Cache for dynamically loaded scenarios
 const scenarioCache = new Map()
 
+// Storage key for generated scenarios
+const GENERATED_SCENARIOS_KEY = 'hddl-generated-scenarios'
+
+/**
+ * Load generated scenarios from localStorage on startup
+ */
+function loadGeneratedScenariosFromStorage() {
+  try {
+    const stored = localStorage.getItem(GENERATED_SCENARIOS_KEY)
+    if (stored) {
+      const generatedScenarios = JSON.parse(stored)
+      Object.entries(generatedScenarios).forEach(([id, scenarioData]) => {
+        if (!SCENARIOS[id]) {
+          SCENARIOS[id] = {
+            id: id,
+            title: scenarioData.title || `Generated: ${id}`,
+            description: 'AI-generated scenario',
+            data: scenarioData,
+            tags: ['generated', 'custom'],
+            bundled: true,
+            generated: true
+          }
+          scenarioCache.set(id, scenarioData)
+        }
+      })
+    }
+  } catch (err) {
+    console.warn('Failed to load generated scenarios from storage:', err)
+  }
+}
+
 // Scenario metadata (no data bundled initially)
 export const SCENARIOS = {
   'default': {
@@ -89,6 +120,9 @@ export const SCENARIOS = {
     bundled: true
   }
 }
+
+// Load generated scenarios from storage after SCENARIOS is defined
+loadGeneratedScenariosFromStorage()
 
 /**
  * Get list of all available scenarios
@@ -173,6 +207,62 @@ export function getCurrentScenarioId() {
  */
 export function setCurrentScenarioId(scenarioId) {
   localStorage.setItem('hddl-current-scenario', scenarioId)
+}
+
+/**
+ * Register a generated scenario (from AI generation)
+ */
+export function registerGeneratedScenario(scenarioData) {
+  const id = scenarioData.id
+  const title = scenarioData.title || `Generated: ${id}`
+  
+  // Add to SCENARIOS catalog
+  SCENARIOS[id] = {
+    id: id,
+    title: title,
+    description: 'AI-generated scenario',
+    data: scenarioData,
+    tags: ['generated', 'custom'],
+    bundled: true,
+    generated: true
+  }
+  
+  // Add to cache
+  scenarioCache.set(id, scenarioData)
+  
+  // Persist to localStorage
+  try {
+    const stored = localStorage.getItem(GENERATED_SCENARIOS_KEY)
+    const generatedScenarios = stored ? JSON.parse(stored) : {}
+    generatedScenarios[id] = scenarioData
+    localStorage.setItem(GENERATED_SCENARIOS_KEY, JSON.stringify(generatedScenarios))
+  } catch (err) {
+    console.warn('Failed to persist generated scenario:', err)
+  }
+  
+  // Set as current scenario
+  setCurrentScenarioId(id)
+  
+  return id
+}
+
+/**
+ * Clear all generated scenarios from localStorage
+ */
+export function clearGeneratedScenarios() {
+  try {
+    localStorage.removeItem(GENERATED_SCENARIOS_KEY)
+    // Remove from catalog
+    Object.keys(SCENARIOS).forEach(id => {
+      if (SCENARIOS[id].generated) {
+        delete SCENARIOS[id]
+        scenarioCache.delete(id)
+      }
+    })
+    console.log('Cleared all generated scenarios')
+  } catch (err) {
+    console.warn('Failed to clear generated scenarios:', err)
+  }
 }
 
 /**

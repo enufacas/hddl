@@ -22,9 +22,7 @@
     "conformance": "node ./scripts/conformance.mjs",
     "cognitive-load": "node ./analysis/cognitive-load-metrics.mjs",
     "performance": "node ./analysis/performance-metrics.mjs",
-    "performance:suite": "node ./scripts/run-perf-suite.mjs",
-    "api:dev": "NODE_ENV=development node analysis/api-server.mjs",
-    "api:start": "node analysis/api-server.mjs"
+    "performance:suite": "node ./scripts/run-perf-suite.mjs"
   },
   "devDependencies": {
     "@istanbuljs/nyc-config-typescript": "^1.0.2",

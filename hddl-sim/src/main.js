@@ -150,6 +150,15 @@ playBtn.addEventListener('click', () => {
 // Auto-start playback on load (including hot reload for fast iteration)
 // Only skip in test environments
 const isTestEnv = window.navigator.webdriver || window.Playwright
+
+// Expose utility functions to window for console access
+import('./sim/scenario-loader.js').then(loaderModule => {
+  window.clearGeneratedScenarios = () => {
+    loaderModule.clearGeneratedScenarios()
+    console.log('✓ Cleared generated scenarios. Reload the page to see changes.')
+  }
+})
+
 if (!isTestEnv) {
   // Defer to ensure DOM is ready
   setTimeout(() => {

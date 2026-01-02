@@ -2,11 +2,13 @@ export const SCHEMA_VERSION = 2
 
 const VALID_EVENT_TYPES = new Set([
   'envelope_promoted',
+  'envelope_deprecated',
   'signal',
   'decision',
   'revision',
   'boundary_interaction',
   'escalation',
+  'retrieval',
   'dsg_session',
   'dsg_message',
   'annotation',
@@ -103,7 +105,10 @@ export function validateScenario(rawScenario) {
     }
     if (type === 'decision') {
       if (!asString(event.envelopeId)) errors.push(`Decision[${idx}] missing envelopeId.`)
-      if (!asString(event.agentId)) warnings.push(`Decision[${idx}] missing agentId.`)
+      // Decision must have either agentId (agent decision) or actorRole (steward decision)
+      if (!asString(event.agentId) && !asString(event.actorRole)) {
+        warnings.push(`Decision[${idx}] missing agentId or actorRole.`)
+      }
     }
     if (type === 'revision') {
       if (!asString(event.envelopeId)) errors.push(`Revision[${idx}] missing envelopeId.`)

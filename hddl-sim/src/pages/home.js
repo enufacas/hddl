@@ -6,6 +6,7 @@ import { createHDDLMap } from '../components/hddl-map'
 import { getStewardColor, toSemver } from '../sim/steward-colors'
 import { createTourButton } from '../components/tour'
 import { createStaticTimelineButton } from '../components/static-timeline-view'
+import { createScenarioGeneratorButton } from '../components/scenario-generator'
 
 // Track active map cleanup to prevent leaks
 let activeMapCleanup = null
@@ -152,6 +153,9 @@ export function renderHome(container) {
     
     const tourButton = createTourButton()
     tourButtonContainer.appendChild(tourButton)
+    
+    const scenarioGenButton = createScenarioGeneratorButton()
+    tourButtonContainer.appendChild(scenarioGenButton)
   }
 
   // Add static timeline button when filtered to single steward
