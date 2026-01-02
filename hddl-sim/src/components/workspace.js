@@ -473,13 +473,14 @@ const mountAINarrative = (containerEl) => {
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
           padding-bottom: 20px;
           margin-bottom: 20px;
+          min-height: 0;
         "></div>
         
         <!-- Controls at bottom (after generation) -->
-        <div style="flex-shrink: 0; border-top: 1px solid var(--vscode-panel-border); padding-top: 10px;">
+        <div class="ai-narrative-controls" style="flex-shrink: 0; border-top: 1px solid var(--vscode-panel-border); padding-top: 10px;">
       ` : `
         <!-- Controls at top (before generation) -->
-        <div style="flex-shrink: 0;">
+        <div class="ai-narrative-controls" style="flex-shrink: 0;">
       `}
           <p style="margin: 0 0 10px 0; font-size: 11px; line-height: 1.4; color: var(--vscode-descriptionForeground); opacity: 0.8;">
             Generate a contextual explanation of the scenario timeline
