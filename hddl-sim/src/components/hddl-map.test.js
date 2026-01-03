@@ -1,113 +1,15 @@
 import { describe, it, expect } from 'vitest'
+import {
+  DETAIL_LEVELS,
+  getDetailLevel,
+  getAdaptiveAgentName,
+  getAdaptiveEnvelopeLabel,
+  getAdaptiveStewardLabel,
+  getEnvelopeDimensions,
+  shouldRenderEnvelopeElement
+} from './map/detail-levels'
 
-// Import the functions we want to test
-// Note: These functions need to be exported from hddl-map.js first
-// For now, we'll copy the functions here for testing
-
-const DETAIL_LEVELS = {
-  FULL: 'full',
-  STANDARD: 'standard',
-  COMPACT: 'compact',
-  MINIMAL: 'minimal'
-}
-
-function getDetailLevel(width) {
-  if (width > 1000) return DETAIL_LEVELS.FULL
-  if (width > 600) return DETAIL_LEVELS.STANDARD
-  if (width > 400) return DETAIL_LEVELS.COMPACT
-  return DETAIL_LEVELS.MINIMAL
-}
-
-function getAdaptiveAgentName(name, level) {
-  if (!name) return ''
-  switch (level) {
-    case DETAIL_LEVELS.FULL:
-      return name
-    case DETAIL_LEVELS.STANDARD:
-      return name.split(/[\s-]/)[0]
-    case DETAIL_LEVELS.COMPACT:
-      return name.split(/[\s-]/).map(w => w[0]).join('').toUpperCase()
-    case DETAIL_LEVELS.MINIMAL:
-      return ''
-    default:
-      return name
-  }
-}
-
-function getAdaptiveEnvelopeLabel(label, name, level) {
-  switch (level) {
-    case DETAIL_LEVELS.FULL:
-      return { label, showName: true }
-    case DETAIL_LEVELS.STANDARD:
-      return { label, showName: false }
-    case DETAIL_LEVELS.COMPACT:
-      return { label: label.replace('DE-', ''), showName: false }
-    case DETAIL_LEVELS.MINIMAL:
-      return { label: '', showName: false }
-    default:
-      return { label, showName: true }
-  }
-}
-
-function getAdaptiveStewardLabel(name, version, level) {
-  switch (level) {
-    case DETAIL_LEVELS.FULL:
-      return { name, showVersion: true }
-    case DETAIL_LEVELS.STANDARD:
-      return { name: name.replace(' Steward', '').replace('Steward', ''), showVersion: false }
-    case DETAIL_LEVELS.COMPACT:
-      return { name: name.split(/[\s]/)[0], showVersion: false }
-    case DETAIL_LEVELS.MINIMAL:
-      return { name: '', showVersion: false }
-    default:
-      return { name, showVersion: true }
-  }
-}
-
-const ENVELOPE_DENSITY = {
-  [DETAIL_LEVELS.FULL]: 'detailed',
-  [DETAIL_LEVELS.STANDARD]: 'normal',
-  [DETAIL_LEVELS.COMPACT]: 'compact',
-  [DETAIL_LEVELS.MINIMAL]: 'icon'
-}
-
-const ENVELOPE_SIZES = {
-  detailed: { baseWidth: 140, baseHeight: 88, scale: 1.0 },
-  normal: { baseWidth: 110, baseHeight: 68, scale: 0.75 },
-  compact: { baseWidth: 80, baseHeight: 50, scale: 0.55 },
-  icon: { baseWidth: 48, baseHeight: 48, scale: 0.35, radius: 22 }
-}
-
-function getEnvelopeDimensions(level, baseR) {
-  const density = ENVELOPE_DENSITY[level] || 'normal'
-  const sizes = ENVELOPE_SIZES[density]
-  
-  const scaledWidth = Math.max(sizes.baseWidth * 0.7, Math.min(sizes.baseWidth, baseR * 3.2))
-  const scaledHeight = Math.max(sizes.baseHeight * 0.7, Math.min(sizes.baseHeight, baseR * 2.05))
-  
-  return {
-    width: scaledWidth,
-    height: scaledHeight,
-    scale: sizes.scale,
-    isIcon: density === 'icon',
-    radius: sizes.radius || 18,
-    density
-  }
-}
-
-function shouldRenderEnvelopeElement(element, density) {
-  const rules = {
-    glow: ['detailed'],
-    revisionBurst: ['detailed', 'normal'],
-    flap: ['detailed', 'normal'],
-    fold: ['detailed'],
-    status: ['detailed', 'normal'],
-    version: ['detailed', 'normal', 'compact'],
-    constraintBadges: ['detailed']
-  }
-  return (rules[element] || []).includes(density)
-}
-
+// Bezier curve functions - will be extracted to bezier-math.js in Task 1.2
 function bezierPoint(t, p0, p1, p2, p3) {
   const u = 1 - t
   return {
