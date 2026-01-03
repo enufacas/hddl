@@ -346,53 +346,91 @@ Phase 7: TypeScript Migration
 - [x] **Task 0.2:** Architecture doc created (2026-01-02)
 - [x] **Checkpoint:** `refactor-phase-0-complete` tag
 
-### Phase 1: Pure Functions
+### Phase 1: Pure Functions ✅
 - [x] **Task 1.1:** Extract detail-levels.js (2026-01-02)
   - ✅ Created src/components/map/detail-levels.js (221 lines)
   - ✅ hddl-map.js reduced from 3,866 → 3,329 lines (-537)
   - ✅ Tests updated to import from module (no copied functions)
   - ✅ All unit tests pass (66/66)
+  - ✅ Commit: b5dfcea
 - [x] **Task 1.2:** Extract bezier-math.js (2026-01-02)
   - ✅ Created src/components/map/bezier-math.js (57 lines)
   - ✅ hddl-map.js reduced from 3,329 → 3,303 lines (-26)
   - ✅ Added comprehensive unit tests (10 new tests)
   - ✅ All unit tests pass (72/72)
-- [ ] **Task 1.3:** Extract workspace/utils.js + glossary.js
-- [ ] **Task 1.4:** Validation gate
-- [ ] **Checkpoint:** `refactor-phase-1-complete` tag
+  - ✅ Commit: 3ca46bb
+- [x] **Task 1.3:** Extract workspace/utils.js + glossary.js (2026-01-02)
+  - ✅ Created src/components/workspace/utils.js (120 lines, 8 functions)
+  - ✅ Created src/components/workspace/glossary.js (15 lines)
+  - ✅ workspace.js reduced from 3,225 → 3,141 lines (-84)
+  - ✅ All unit tests pass (72/72)
+  - ✅ Commit: c9b55db
+- [x] **Task 1.4:** Validation gate
+  - ✅ All 72 unit tests passing
+  - ✅ Coverage maintained at 45%
+- [x] **Checkpoint:** `refactor-phase-1-complete` tag (commit ac944cd)
 
-### Phase 2: D3 Renderers
-- [ ] **Task 2.1:** Extract tooltip-manager.js
-- [ ] **Task 2.2:** Extract envelope-renderer.js
-- [ ] **Task 2.3:** Extract particle-engine.js ⚠️
-- [ ] **Task 2.4:** Extract embedding-renderer.js
-- [ ] **Task 2.5:** Validation gate
-- [ ] **Checkpoint:** `refactor-phase-2-complete` tag
+### Phase 2: D3 Renderers (PARTIAL - 2 of 4 tasks) ✅ 
+- [x] **Task 2.1:** Extract tooltip-manager.js (2026-01-02)
+  - ✅ Created src/components/map/tooltip-manager.js (429 lines)
+  - ✅ Extracted 9 functions: tooltip show/hide, hover detection
+  - ✅ hddl-map.js reduced from 3,624 → 3,051 lines (-573)
+  - ✅ All unit tests pass (72/72)
+  - ✅ Commit: 20f1782
+- [x] **Task 2.2:** envelope-renderer.js ⚠️ DEFERRED to Phase 5
+  - Reason: Tight D3 coupling (nodeEnter/nodeUpdate patterns)
+  - Size: ~700 lines spanning lines 1270-2050+
+  - Will revisit after D3 pattern refactoring
+  - Documented: 2026-01-02
+- [x] **Task 2.3:** particle-engine.js ⚠️ DEFERRED to Phase 5
+  - Reason: HIGHEST RISK - similar D3 coupling expected
+  - Will revisit after D3 pattern refactoring
+  - Documented: 2026-01-02
+- [x] **Task 2.4:** Extract embedding-renderer.js (2026-01-02)
+  - ✅ Created src/components/map/embedding-renderer.js (1,093 lines)
+  - ✅ 3D perspective memory visualization with semantic clustering
+  - ✅ Factory pattern: createEmbeddingRenderer(svg, options)
+  - ✅ All unit tests pass (72/72)
+  - ✅ Commit: 5958de5
+- [x] **Task 2.5:** Validation gate
+  - ✅ All 72 unit tests passing
+  - ✅ Coverage maintained at 45%
+  - ✅ Dev server verified at localhost:5173
+- [x] **Checkpoint:** Phase 2 partial complete (commit 5143b53)
 
-### Phase 3: hddl-map.js Core
-- [ ] **Task 3.1:** Refactor to coordinator pattern
-- [ ] **Task 3.2:** Validation gate
+### Phase 3: workspace.js Refactoring (CURRENT)
+- [ ] **Task 3.1:** Extract ai-narrative.js ← (Current task)
+  - Target: ~800 lines (lines 138-830+)
+  - Components: aiNarrative* state, updateNarrativeSync, renderNarrativeMarkdown, processNarrativeWithCitations, loadPreGeneratedNarrative, generateAINarrative
+- [ ] **Task 3.2:** Extract sidebar.js + panels.js
+- [ ] **Task 3.3:** Validation gate
 - [ ] **Checkpoint:** `refactor-phase-3-complete` tag
 
-### Phase 4: workspace.js
-- [ ] **Task 4.1:** Extract sidebar.js + panels.js
-- [ ] **Task 4.2:** Extract ai-narrative.js
-- [ ] **Task 4.3:** Validation gate
+### Phase 4: hddl-map.js Coordinator
+- [ ] **Task 4.1:** Refactor to coordinator pattern
+- [ ] **Task 4.2:** Validation gate
 - [ ] **Checkpoint:** `refactor-phase-4-complete` tag
 
-### Phase 5: Test Infrastructure
-- [ ] **Task 5.1:** Fix test imports
-- [ ] **Task 5.2:** Add unit tests for extracted modules
-- [ ] **Task 5.3:** Achieve 55%+ coverage
+### Phase 5: D3 Pattern Refactoring (DEFERRED)
+- [ ] **Task 5.1:** Refactor D3 update pattern (nodeEnter/nodeUpdate/nodeSelection)
+- [ ] **Task 5.2:** Revisit envelope-renderer.js extraction (~700 lines)
+- [ ] **Task 5.3:** Revisit particle-engine.js extraction
+- [ ] **Task 5.4:** Validation gate
 - [ ] **Checkpoint:** `refactor-phase-5-complete` tag
 
-### Phase 6: TypeScript Migration
-- [ ] **Task 6.1:** Add tsconfig.json
-- [ ] **Task 6.2:** Convert pure utilities to .ts
-- [ ] **Task 6.3:** Add D3 types, convert renderers
-- [ ] **Task 6.4:** Convert coordinators
-- [ ] **Task 6.5:** Enable strict mode
+### Phase 6: Test Infrastructure
+- [ ] **Task 6.1:** Fix test imports (no copied functions)
+- [ ] **Task 6.2:** Add unit tests for new modules
+- [ ] **Task 6.3:** Achieve 55%+ coverage
 - [ ] **Checkpoint:** `refactor-phase-6-complete` tag
+
+### Phase 7: TypeScript Migration
+- [ ] **Task 7.1:** Add tsconfig.json
+- [ ] **Task 7.2:** Convert pure utilities to .ts
+- [ ] **Task 7.3:** Add D3 types, convert renderers
+- [ ] **Task 7.4:** Convert coordinators
+- [ ] **Task 7.5:** Enable strict mode
+- [ ] **Checkpoint:** `refactor-phase-7-complete` tag
 
 ---
 
