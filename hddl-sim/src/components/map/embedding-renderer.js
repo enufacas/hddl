@@ -340,6 +340,97 @@ export function computeEmbeddingChipTransform({ x, y, perspectiveScale, rotateAn
   return `translate(${x}, ${y}) scale(${perspectiveScale}) rotate(${rotateAngle})`
 }
 
+export function computeEmbeddingChipShadowEllipseAttrs({ chipSize = 16, cx = 2, cyOffset = 2, ry = 3 }) {
+  const size = Number(chipSize || 0)
+  return {
+    cx: Number(cx || 0),
+    cy: size / 2 + Number(cyOffset || 0),
+    rx: size / 2,
+    ry: Number(ry || 0),
+    fill: 'rgba(0, 0, 0, 0.4)',
+    filter: 'blur(2px)',
+  }
+}
+
+export function computeEmbeddingChipFaceStyle({ kind, embeddingColor }) {
+  const color = embeddingColor || '#4B96FF'
+  if (kind === 'top') {
+    return {
+      fill: `color-mix(in srgb, ${color} 70%, white)`,
+      stroke: color,
+      strokeWidth: 0.5,
+      opacity: 0.9,
+    }
+  }
+  if (kind === 'right') {
+    return {
+      fill: `color-mix(in srgb, ${color} 50%, black)`,
+      stroke: color,
+      strokeWidth: 0.5,
+      opacity: 0.85,
+    }
+  }
+  return {
+    fill: color,
+    stroke: color,
+    strokeWidth: 0.5,
+    opacity: 0.9,
+  }
+}
+
+export function computeEmbeddingChipFrontRectAttrs({ chipSize = 16, rx = 2 }) {
+  const size = Number(chipSize || 0)
+  return {
+    x: -size / 2,
+    y: -size / 2,
+    width: size,
+    height: size,
+    rx: Number(rx || 0),
+  }
+}
+
+export function computeEmbeddingCircuitLineSpecs({ chipSize = 16, inset = 2, offsets = [-2, 2] }) {
+  const size = Number(chipSize || 0)
+  const half = size / 2
+  const safeOffsets = Array.isArray(offsets) ? offsets : [-2, 2]
+  const [o1, o2] = [Number(safeOffsets[0] ?? -2), Number(safeOffsets[1] ?? 2)]
+  return [
+    // Horizontal
+    { x1: -half + Number(inset || 0), y1: o1, x2: half - Number(inset || 0), y2: o1 },
+    { x1: -half + Number(inset || 0), y1: o2, x2: half - Number(inset || 0), y2: o2 },
+    // Vertical
+    { x1: o1, y1: -half + Number(inset || 0), x2: o1, y2: half - Number(inset || 0) },
+    { x1: o2, y1: -half + Number(inset || 0), x2: o2, y2: half - Number(inset || 0) },
+  ]
+}
+
+export function computeEmbeddingCircuitStrokeAttrs({ stroke = 'rgba(255,255,255,0.8)', strokeWidth = 0.5 }) {
+  return { stroke, strokeWidth: Number(strokeWidth || 0) }
+}
+
+export function computeEmbeddingChipCenterIconAttrs({ embeddingColor }) {
+  const color = embeddingColor || '#4B96FF'
+  return {
+    x: 0,
+    y: 0,
+    textAnchor: 'middle',
+    dominantBaseline: 'central',
+    fontSize: '8px',
+    fontFamily: 'monospace',
+    fontWeight: 'bold',
+    stroke: 'rgba(0,0,0,0.5)',
+    strokeWidth: 0.5,
+    filter: `drop-shadow(0 0 3px ${color})`,
+    fill: 'rgba(255,255,255,0.9)',
+    text: '</>',
+  }
+}
+
+export function computeEmbeddingBadgeCountText(count) {
+  const n = Number(count || 0)
+  return `${n} vector${n !== 1 ? 's' : ''}`
+}
+
 export function computeEmbeddingCompactBadgeTransform({ width, mapHeight, offsetY = 10 }) {
   return `translate(${Number(width || 0) / 2}, ${Number(mapHeight || 0) - Number(offsetY || 0)})`
 }
@@ -900,29 +991,32 @@ export function createEmbeddingRenderer(svg, options) {
     const chipFrontAttrs = computeEmbeddingChipFrontFaceAttrs({ embeddingColor, isHistorical })
     
     // Shadow underneath for grounding
+    const shadowAttrs = computeEmbeddingChipShadowEllipseAttrs({ chipSize, cx: 2, cyOffset: 2, ry: 3 })
     chipGroup.append('ellipse')
-      .attr('cx', 2)
-      .attr('cy', chipSize / 2 + 2)
-      .attr('rx', chipSize / 2)
-      .attr('ry', 3)
-      .attr('fill', 'rgba(0, 0, 0, 0.4)')
-      .attr('filter', 'blur(2px)')
+      .attr('cx', shadowAttrs.cx)
+      .attr('cy', shadowAttrs.cy)
+      .attr('rx', shadowAttrs.rx)
+      .attr('ry', shadowAttrs.ry)
+      .attr('fill', shadowAttrs.fill)
+      .attr('filter', shadowAttrs.filter)
     
     // Top face (lighter - catches "light")
+    const topFaceStyle = computeEmbeddingChipFaceStyle({ kind: 'top', embeddingColor })
     chipGroup.append('polygon')
       .attr('points', chipFacePoints.top)
-      .attr('fill', `color-mix(in srgb, ${embeddingColor} 70%, white)`)
-      .attr('stroke', embeddingColor)
-      .attr('stroke-width', 0.5)
-      .attr('opacity', 0.9)
+      .attr('fill', topFaceStyle.fill)
+      .attr('stroke', topFaceStyle.stroke)
+      .attr('stroke-width', topFaceStyle.strokeWidth)
+      .attr('opacity', topFaceStyle.opacity)
 
     // Right face (medium - side lighting)
+    const rightFaceStyle = computeEmbeddingChipFaceStyle({ kind: 'right', embeddingColor })
     chipGroup.append('polygon')
       .attr('points', chipFacePoints.right)
-      .attr('fill', `color-mix(in srgb, ${embeddingColor} 50%, black)`)
-      .attr('stroke', embeddingColor)
-      .attr('stroke-width', 0.5)
-      .attr('opacity', 0.85)
+      .attr('fill', rightFaceStyle.fill)
+      .attr('stroke', rightFaceStyle.stroke)
+      .attr('stroke-width', rightFaceStyle.strokeWidth)
+      .attr('opacity', rightFaceStyle.opacity)
 
     // Main front face with gradient
     const chipGradient = boxDefs.append('radialGradient')
@@ -936,12 +1030,13 @@ export function createEmbeddingRenderer(svg, options) {
       .attr('stop-color', `color-mix(in srgb, ${embeddingColor} 70%, black)`)
       .attr('stop-opacity', chipFrontAttrs.stopOpacityEnd) // Slightly faded for historical
 
+    const frontRect = computeEmbeddingChipFrontRectAttrs({ chipSize, rx: 2 })
     chipGroup.append('rect')
-      .attr('x', -chipSize / 2)
-      .attr('y', -chipSize / 2)
-      .attr('width', chipSize)
-      .attr('height', chipSize)
-      .attr('rx', 2)
+      .attr('x', frontRect.x)
+      .attr('y', frontRect.y)
+      .attr('width', frontRect.width)
+      .attr('height', frontRect.height)
+      .attr('rx', frontRect.rx)
       .attr('fill', `url(#${computeEmbeddingChipGradientId({ eventId: event.eventId })})`)
       .attr('stroke', embeddingColor)
       .attr('stroke-width', chipFrontAttrs.strokeWidth) // Thinner stroke for historical
@@ -951,55 +1046,34 @@ export function createEmbeddingRenderer(svg, options) {
     // Circuit pattern on chip
     const circuitGroup = chipGroup.append('g')
       .attr('opacity', 0.5)
-    
-    // Horizontal traces
-    circuitGroup.append('line')
-      .attr('x1', -chipSize / 2 + 2)
-      .attr('y1', -2)
-      .attr('x2', chipSize / 2 - 2)
-      .attr('y2', -2)
-      .attr('stroke', 'rgba(255,255,255,0.8)')
-      .attr('stroke-width', 0.5)
-    
-    circuitGroup.append('line')
-      .attr('x1', -chipSize / 2 + 2)
-      .attr('y1', 2)
-      .attr('x2', chipSize / 2 - 2)
-      .attr('y2', 2)
-      .attr('stroke', 'rgba(255,255,255,0.8)')
-      .attr('stroke-width', 0.5)
 
-    // Vertical traces
-    circuitGroup.append('line')
-      .attr('x1', -2)
-      .attr('y1', -chipSize / 2 + 2)
-      .attr('x2', -2)
-      .attr('y2', chipSize / 2 - 2)
-      .attr('stroke', 'rgba(255,255,255,0.8)')
-      .attr('stroke-width', 0.5)
-    
-    circuitGroup.append('line')
-      .attr('x1', 2)
-      .attr('y1', -chipSize / 2 + 2)
-      .attr('x2', 2)
-      .attr('y2', chipSize / 2 - 2)
-      .attr('stroke', 'rgba(255,255,255,0.8)')
-      .attr('stroke-width', 0.5)
+    const circuitStroke = computeEmbeddingCircuitStrokeAttrs({ stroke: 'rgba(255,255,255,0.8)', strokeWidth: 0.5 })
+    const circuitLines = computeEmbeddingCircuitLineSpecs({ chipSize, inset: 2, offsets: [-2, 2] })
+    circuitLines.forEach((line) => {
+      circuitGroup.append('line')
+        .attr('x1', line.x1)
+        .attr('y1', line.y1)
+        .attr('x2', line.x2)
+        .attr('y2', line.y2)
+        .attr('stroke', circuitStroke.stroke)
+        .attr('stroke-width', circuitStroke.strokeWidth)
+    })
 
     // Center icon
+    const centerIcon = computeEmbeddingChipCenterIconAttrs({ embeddingColor })
     chipGroup.append('text')
-      .attr('x', 0)
-      .attr('y', 0)
-      .attr('text-anchor', 'middle')
-      .attr('dominant-baseline', 'central')
-      .attr('font-size', '8px')
-      .attr('font-family', 'monospace')
-      .attr('font-weight', 'bold')
-      .attr('stroke', 'rgba(0,0,0,0.5)')
-      .attr('stroke-width', 0.5)
-      .attr('filter', `drop-shadow(0 0 3px ${embeddingColor})`)
-      .attr('fill', 'rgba(255,255,255,0.9)')
-      .text('</>')
+      .attr('x', centerIcon.x)
+      .attr('y', centerIcon.y)
+      .attr('text-anchor', centerIcon.textAnchor)
+      .attr('dominant-baseline', centerIcon.dominantBaseline)
+      .attr('font-size', centerIcon.fontSize)
+      .attr('font-family', centerIcon.fontFamily)
+      .attr('font-weight', centerIcon.fontWeight)
+      .attr('stroke', centerIcon.stroke)
+      .attr('stroke-width', centerIcon.strokeWidth)
+      .attr('filter', centerIcon.filter)
+      .attr('fill', centerIcon.fill)
+      .text(centerIcon.text)
 
     // Animate to target with rotation, scale, and depth-based opacity
     // Skip animation during catch-up window for instant placement
@@ -1017,7 +1091,7 @@ export function createEmbeddingRenderer(svg, options) {
 
     embeddingElements.push({ element: chipGroup, event, timestamp: Date.now() })
     embeddingCount++
-    embeddingBadgeText.text(`${embeddingCount} vector${embeddingCount !== 1 ? 's' : ''}`)
+    embeddingBadgeText.text(computeEmbeddingBadgeCountText(embeddingCount))
     layoutEmbeddingHeader()
   }
 

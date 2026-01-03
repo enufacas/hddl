@@ -31,6 +31,13 @@ import {
   computeEmbeddingEventsUpToHour,
   computeShouldClearEmbeddings,
   computeNewEmbeddingEvents,
+  computeEmbeddingChipShadowEllipseAttrs,
+  computeEmbeddingChipFaceStyle,
+  computeEmbeddingChipFrontRectAttrs,
+  computeEmbeddingCircuitLineSpecs,
+  computeEmbeddingCircuitStrokeAttrs,
+  computeEmbeddingChipCenterIconAttrs,
+  computeEmbeddingBadgeCountText,
 } from './embedding-renderer.js'
 
 describe('embedding-renderer helpers', () => {
@@ -349,5 +356,42 @@ describe('embedding-renderer helpers', () => {
     const embeddingElements = [{ event: { eventId: 'A', hour: 1 } }]
     const newEvents = computeNewEmbeddingEvents({ embeddingEvents: upTo2, embeddingElements })
     expect(newEvents).toEqual([])
+  })
+
+  it('chip design helpers compute deterministic attrs/specs', () => {
+    const shadow = computeEmbeddingChipShadowEllipseAttrs({ chipSize: 16, cx: 2, cyOffset: 2, ry: 3 })
+    expect(shadow).toEqual({ cx: 2, cy: 10, rx: 8, ry: 3, fill: 'rgba(0, 0, 0, 0.4)', filter: 'blur(2px)' })
+
+    const top = computeEmbeddingChipFaceStyle({ kind: 'top', embeddingColor: '#abc' })
+    expect(top.stroke).toBe('#abc')
+    expect(top.opacity).toBe(0.9)
+    expect(top.fill).toContain('#abc')
+
+    const right = computeEmbeddingChipFaceStyle({ kind: 'right', embeddingColor: '#abc' })
+    expect(right.stroke).toBe('#abc')
+    expect(right.opacity).toBe(0.85)
+    expect(right.fill).toContain('#abc')
+
+    const rect = computeEmbeddingChipFrontRectAttrs({ chipSize: 16, rx: 2 })
+    expect(rect).toEqual({ x: -8, y: -8, width: 16, height: 16, rx: 2 })
+
+    const lines = computeEmbeddingCircuitLineSpecs({ chipSize: 16, inset: 2, offsets: [-2, 2] })
+    expect(lines).toHaveLength(4)
+    expect(lines[0]).toEqual({ x1: -6, y1: -2, x2: 6, y2: -2 })
+    expect(lines[3]).toEqual({ x1: 2, y1: -6, x2: 2, y2: 6 })
+
+    const stroke = computeEmbeddingCircuitStrokeAttrs({ stroke: 'rgba(255,255,255,0.8)', strokeWidth: 0.5 })
+    expect(stroke).toEqual({ stroke: 'rgba(255,255,255,0.8)', strokeWidth: 0.5 })
+
+    const icon = computeEmbeddingChipCenterIconAttrs({ embeddingColor: '#abc' })
+    expect(icon.text).toBe('</>')
+    expect(icon.filter).toContain('#abc')
+    expect(icon.fontSize).toBe('8px')
+  })
+
+  it('computeEmbeddingBadgeCountText pluralizes', () => {
+    expect(computeEmbeddingBadgeCountText(0)).toBe('0 vectors')
+    expect(computeEmbeddingBadgeCountText(1)).toBe('1 vector')
+    expect(computeEmbeddingBadgeCountText(2)).toBe('2 vectors')
   })
 })
