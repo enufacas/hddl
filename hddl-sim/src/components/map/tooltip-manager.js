@@ -257,43 +257,38 @@ export function showEnvelopeTooltip(envelopeNode, mouseEvent, element, { scenari
   }
 }
 
-/**
- * Position tooltip relative to mouse cursor or anchor element.
- * @param {d3.Selection} tooltipNode - D3 selection of tooltip element
- * @param {MouseEvent} mouseEvent - Mouse event for positioning
- * @param {Element} anchorEl - DOM element for fallback positioning
- */
-function positionTooltip(tooltipNode, mouseEvent, anchorEl) {
-  const padding = 10
-  const offsetX = 12
-  const offsetY = 10
+export function computeTooltipFixedPosition({
+  pointer,
+  anchorRect,
+  tooltipSize,
+  viewport,
+  padding = 10,
+  offsetX = 12,
+  offsetY = 10,
+}) {
+  const tooltipWidth = tooltipSize?.width || 0
+  const tooltipHeight = tooltipSize?.height || 0
+  const vw = viewport?.width || 0
+  const vh = viewport?.height || 0
 
-  let x = null
-  let y = null
+  let x
+  let y
 
-  if (mouseEvent && typeof mouseEvent.clientX === 'number' && typeof mouseEvent.clientY === 'number') {
-    x = mouseEvent.clientX + offsetX
-    y = mouseEvent.clientY - offsetY
-  } else if (anchorEl && typeof anchorEl.getBoundingClientRect === 'function') {
-    const rect = anchorEl.getBoundingClientRect()
-    x = rect.left + rect.width / 2
-    y = rect.top
+  if (pointer && typeof pointer.x === 'number' && typeof pointer.y === 'number') {
+    x = pointer.x + offsetX
+    y = pointer.y - offsetY
+  } else if (anchorRect && typeof anchorRect.left === 'number' && typeof anchorRect.top === 'number') {
+    x = anchorRect.left + (anchorRect.width || 0) / 2
+    y = anchorRect.top
   } else {
     x = padding
     y = padding
   }
 
-  // Measure after content is set and display is enabled
-  const node = tooltipNode.node()
-  const tooltipWidth = node?.offsetWidth || 0
-  const tooltipHeight = node?.offsetHeight || 0
-  const vw = window.innerWidth || 0
-  const vh = window.innerHeight || 0
-
-  // Prefer above-cursor placement when we have a pointer event
-  if (mouseEvent && tooltipHeight) {
-    y = mouseEvent.clientY - tooltipHeight - 12
-  } else if (anchorEl && tooltipHeight) {
+  // Prefer above-cursor placement when we have a pointer
+  if (pointer && tooltipHeight) {
+    y = pointer.y - tooltipHeight - 12
+  } else if (anchorRect && tooltipHeight) {
     y = y - tooltipHeight - 10
   }
 
@@ -303,6 +298,28 @@ function positionTooltip(tooltipNode, mouseEvent, anchorEl) {
   if (tooltipHeight && vh) {
     y = Math.max(padding, Math.min(y, vh - tooltipHeight - padding))
   }
+
+  return { left: x, top: y }
+}
+
+/**
+ * Position tooltip relative to mouse cursor or anchor element.
+ * @param {d3.Selection} tooltipNode - D3 selection of tooltip element
+ * @param {MouseEvent} mouseEvent - Mouse event for positioning
+ * @param {Element} anchorEl - DOM element for fallback positioning
+ */
+function positionTooltip(tooltipNode, mouseEvent, anchorEl) {
+  const node = tooltipNode.node()
+  const { left: x, top: y } = computeTooltipFixedPosition({
+    pointer: mouseEvent && typeof mouseEvent.clientX === 'number' && typeof mouseEvent.clientY === 'number'
+      ? { x: mouseEvent.clientX, y: mouseEvent.clientY }
+      : null,
+    anchorRect: anchorEl && typeof anchorEl.getBoundingClientRect === 'function'
+      ? anchorEl.getBoundingClientRect()
+      : null,
+    tooltipSize: { width: node?.offsetWidth || 0, height: node?.offsetHeight || 0 },
+    viewport: { width: window.innerWidth || 0, height: window.innerHeight || 0 },
+  })
 
   tooltipNode
     .style('left', `${x}px`)

@@ -1,6 +1,7 @@
 import { beforeAll, afterAll, describe, expect, test } from 'vitest'
 
 let getStewardEnvelopeInteractionCount
+let computeTooltipFixedPosition
 
 function createLocalStorageMock() {
   const store = new Map()
@@ -16,7 +17,7 @@ beforeAll(async () => {
   // tooltip-manager imports sim-state, which pulls in store/scenario-loader.
   // Those read localStorage during module init, so provide a minimal mock.
   globalThis.localStorage = createLocalStorageMock()
-  ;({ getStewardEnvelopeInteractionCount } = await import('./tooltip-manager'))
+  ;({ getStewardEnvelopeInteractionCount, computeTooltipFixedPosition } = await import('./tooltip-manager'))
 })
 
 afterAll(() => {
@@ -68,5 +69,42 @@ describe('map/tooltip-manager', () => {
     const { count, hasEscalation } = getStewardEnvelopeInteractionCount(scenario, 10, 'ENV-1', 'Data Steward', 2)
     expect(count).toBe(0)
     expect(hasEscalation).toBe(false)
+  })
+
+  test('computeTooltipFixedPosition prefers above pointer and clamps to viewport', () => {
+    const pos = computeTooltipFixedPosition({
+      pointer: { x: 990, y: 10 },
+      tooltipSize: { width: 200, height: 120 },
+      viewport: { width: 1000, height: 800 },
+      padding: 10,
+    })
+
+    // Should clamp x to keep tooltip in viewport
+    expect(pos.left).toBe(1000 - 200 - 10)
+    // Pointer is near top; above-pointer y would be negative, so clamp to padding
+    expect(pos.top).toBe(10)
+  })
+
+  test('computeTooltipFixedPosition anchors above element when no pointer', () => {
+    const pos = computeTooltipFixedPosition({
+      anchorRect: { left: 100, top: 200, width: 80, height: 40 },
+      tooltipSize: { width: 160, height: 100 },
+      viewport: { width: 1000, height: 800 },
+      padding: 10,
+    })
+
+    // Centered on anchor
+    expect(pos.left).toBe(100 + 80 / 2)
+    // Above anchor (top - tooltipHeight - 10)
+    expect(pos.top).toBe(200 - 100 - 10)
+  })
+
+  test('computeTooltipFixedPosition falls back to padding when inputs missing', () => {
+    const pos = computeTooltipFixedPosition({
+      tooltipSize: { width: 0, height: 0 },
+      viewport: { width: 0, height: 0 },
+      padding: 12,
+    })
+    expect(pos).toEqual({ left: 12, top: 12 })
   })
 })

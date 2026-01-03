@@ -143,6 +143,81 @@ export function computeEmbeddingBoxBounds({ width, embeddingStoreHeight }) {
   }
 }
 
+export function getEmbeddingColorForRole(role, fallback = '#4B96FF') {
+  return getStewardColor(role, fallback)
+}
+
+export function computeEmbeddingNormalizedPosition({ event, scenario, typeDepthBias = TYPE_DEPTH_BIAS }) {
+  let normalizedX
+  let depthT
+  let usedSemanticVector = false
+
+  if (event?.semanticVector && Array.isArray(event.semanticVector) && event.semanticVector.length === 2) {
+    usedSemanticVector = true
+    normalizedX = 0.1 + event.semanticVector[0] * 0.8
+    depthT = 0.1 + event.semanticVector[1] * 0.8
+    return { normalizedX, depthT, usedSemanticVector }
+  }
+
+  const envelopes = scenario?.envelopes || []
+  const envelopeIds = [...new Set(envelopes.map(e => e?.envelopeId).filter(Boolean))]
+  const envelopeIndex = envelopeIds.indexOf(event?.envelopeId)
+  const envelopeCount = Math.max(envelopeIds.length, 1)
+
+  const envelopeBaseX = envelopeIndex >= 0
+    ? 0.15 + (envelopeIndex / Math.max(envelopeCount - 1, 1)) * 0.7
+    : 0.5
+
+  const semanticHash = (event?.semanticContext || event?.label || '').split('').reduce(
+    (acc, char, i) => acc + char.charCodeAt(0) * (i + 1), 0
+  )
+  const semanticOffsetX = ((semanticHash % 100) / 100 - 0.5) * 0.12
+  const semanticOffsetY = (((semanticHash * 7) % 100) / 100 - 0.5) * 0.15
+
+  normalizedX = Math.max(0.08, Math.min(0.92, envelopeBaseX + semanticOffsetX))
+
+  const scenarioDuration = scenario?.durationHours || 24
+  const normalizedTime = (typeof event?.hour === 'number' && event.hour < 0)
+    ? 0
+    : Math.min(1, (Number(event?.hour || 0) / scenarioDuration))
+
+  const baseDepthT = normalizedTime * 0.7 + 0.15
+  const typeBias = typeDepthBias?.[event?.embeddingType] || 0
+  depthT = Math.max(0.05, Math.min(0.95, baseDepthT + typeBias + semanticOffsetY))
+
+  return { normalizedX, depthT, usedSemanticVector }
+}
+
+export function computeEmbeddingTargetPosition({ normalizedX, depthT, box3DBounds, floorDepthRange }) {
+  const targetX = box3DBounds.getXAtDepth(normalizedX, depthT)
+  const targetY = box3DBounds.backY + depthT * floorDepthRange
+  const depthZ = depthT * 100
+  return { targetX, targetY, depthZ }
+}
+
+export function computeEmbeddingPerspectiveParams({ depthT, random = Math.random }) {
+  const perspectiveScale = 0.45 + depthT * 0.55
+  const depthOpacity = 0.5 + depthT * 0.5
+  const perspectiveTilt = -12 * (1 - depthT)
+  const randomWobble = (random() - 0.5) * 8
+  const rotateAngle = perspectiveTilt + randomWobble
+  return { perspectiveScale, depthOpacity, rotateAngle, perspectiveTilt, randomWobble }
+}
+
+export function buildEmbeddingTooltipData(event) {
+  const isHistorical = (typeof event?.hour === 'number') ? event.hour < 0 : false
+  return {
+    type: getEmbeddingTypeLabel(event?.embeddingType) || 'Unknown',
+    label: event?.label || 'Embedding',
+    steward: event?.actorRole || 'Unknown',
+    envelope: event?.envelopeId || 'N/A',
+    id: event?.embeddingId || event?.eventId || 'N/A',
+    context: event?.semanticContext || event?.detail || 'No context available',
+    hour: event?.hour,
+    isHistorical,
+  }
+}
+
 /**
  * Create embedding renderer for the 3D memory visualization
  * 
@@ -573,7 +648,7 @@ export function createEmbeddingRenderer(svg, options) {
     const sourceX = sourceNode ? sourceNode.x : width / 2
     const sourceY = sourceNode ? sourceNode.y : mapHeight / 2
 
-    const embeddingColor = STEWARD_COLORS[event.actorRole] || '#4B96FF'
+    const embeddingColor = getEmbeddingColorForRole(event.actorRole)
 
     // ═══════════════════════════════════════════════════════════════════════════
     // CANONICAL VECTOR SPACE CLUSTERING
@@ -591,62 +666,24 @@ export function createEmbeddingRenderer(svg, options) {
     // Similar patterns cluster together based on semantic meaning, not envelope.
     // ═══════════════════════════════════════════════════════════════════════════
 
-    // Use pre-computed semanticVector if available, otherwise fall back to heuristics
-    let normalizedX, depthT
-    
-    if (event.semanticVector && Array.isArray(event.semanticVector) && event.semanticVector.length === 2) {
-      // Use pre-computed semantic position
-      normalizedX = 0.1 + event.semanticVector[0] * 0.8  // Map to 0.1-0.9 range with padding
-      depthT = 0.1 + event.semanticVector[1] * 0.8      // Y maps to depth (routine=back, exceptional=front)
-    } else {
+    const scenario = getScenario()
+    const { normalizedX, depthT, usedSemanticVector } = computeEmbeddingNormalizedPosition({
+      event,
+      scenario,
+      typeDepthBias: TYPE_DEPTH_BIAS,
+    })
+    if (!usedSemanticVector) {
       console.log(`No semanticVector found for ${event.eventId}, using fallback positioning`)
-      // Fallback: envelope-based positioning (legacy behavior)
-      const scenario = getScenario()
-      const envelopeIds = [...new Set(scenario.envelopes.map(e => e.envelopeId))]
-      const envelopeIndex = envelopeIds.indexOf(event.envelopeId)
-      const envelopeCount = Math.max(envelopeIds.length, 1)
-      
-      const envelopeBaseX = envelopeIndex >= 0 
-        ? 0.15 + (envelopeIndex / Math.max(envelopeCount - 1, 1)) * 0.7
-        : 0.5
-      
-      // Semantic clustering fallback: hash semanticContext
-      const semanticHash = (event.semanticContext || event.label || '').split('').reduce(
-        (acc, char, i) => acc + char.charCodeAt(0) * (i + 1), 0
-      )
-      const semanticOffsetX = ((semanticHash % 100) / 100 - 0.5) * 0.12
-      const semanticOffsetY = (((semanticHash * 7) % 100) / 100 - 0.5) * 0.15
-      
-      normalizedX = Math.max(0.08, Math.min(0.92, envelopeBaseX + semanticOffsetX))
-      
-      // Y-axis (depth): Recency + type bias
-      const scenarioDuration = scenario.durationHours || 24
-      // For historical embeddings (hour < 0), position them at the back
-      const normalizedTime = event.hour < 0 
-        ? 0 // Historical = far back
-        : Math.min(1, event.hour / scenarioDuration)
-      
-      const baseDepthT = normalizedTime * 0.7 + 0.15
-      const typeBias = TYPE_DEPTH_BIAS[event.embeddingType] || 0
-      depthT = Math.max(0.05, Math.min(0.95, baseDepthT + typeBias + semanticOffsetY))
     }
 
-    // Perspective-aware positioning using the helper function
-    const targetX = box3DBounds.getXAtDepth(normalizedX, depthT)
-    const targetY = box3DBounds.backY + depthT * floorDepthRange
-    const depthZ = depthT * 100
-    
-    // Scale based on perspective (smaller at back, larger at front)
-    // depthT: 0=back (small), 1=front (large)
-    const perspectiveScale = 0.45 + depthT * 0.55  // 0.45 to 1.0 (more dramatic)
-    
-    // Opacity fade for atmospheric depth (dimmer at back)
-    const depthOpacity = 0.5 + depthT * 0.5  // 0.5 at back, 1.0 at front
-    
-    // Rotation follows perspective: chips at back should appear to tilt away
-    const perspectiveTilt = -12 * (1 - depthT)  // -12° at back, 0° at front
-    const randomWobble = (Math.random() - 0.5) * 8
-    const rotateAngle = perspectiveTilt + randomWobble
+    const { targetX, targetY, depthZ } = computeEmbeddingTargetPosition({
+      normalizedX,
+      depthT,
+      box3DBounds,
+      floorDepthRange,
+    })
+
+    const { perspectiveScale, depthOpacity, rotateAngle } = computeEmbeddingPerspectiveParams({ depthT })
 
     // Create chip group with detailed 3D design
     const chipGroup = embeddingIconsLayer.append('g')
@@ -656,19 +693,7 @@ export function createEmbeddingRenderer(svg, options) {
       .style('cursor', 'pointer')
       .attr('data-embedding-id', event.embeddingId || event.eventId)
     
-    const embeddingTypeLabel = EMBEDDING_TYPE_LABELS[event.embeddingType] || event.embeddingType || 'Unknown'
-    const isHistorical = event.hour < 0
-    
-    const tooltipData = {
-      type: embeddingTypeLabel,
-      label: event.label || 'Embedding',
-      steward: event.actorRole || 'Unknown',
-      envelope: event.envelopeId || 'N/A',
-      id: event.embeddingId || event.eventId || 'N/A',
-      context: event.semanticContext || event.detail || 'No context available',
-      hour: event.hour,
-      isHistorical
-    }
+    const tooltipData = buildEmbeddingTooltipData(event)
     
     // Add hover interaction with optimized tooltip
     chipGroup.on('mouseenter', function(mouseEvent) {
