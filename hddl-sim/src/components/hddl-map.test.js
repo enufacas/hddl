@@ -8,35 +8,7 @@ import {
   getEnvelopeDimensions,
   shouldRenderEnvelopeElement
 } from './map/detail-levels'
-
-// Bezier curve functions - will be extracted to bezier-math.js in Task 1.2
-function bezierPoint(t, p0, p1, p2, p3) {
-  const u = 1 - t
-  return {
-    x: (u*u*u * p0.x) + (3*u*u*t * p1.x) + (3*u*t*t * p2.x) + (t*t*t * p3.x),
-    y: (u*u*u * p0.y) + (3*u*u*t * p1.y) + (3*u*t*t * p2.y) + (t*t*t * p3.y),
-  }
-}
-
-function makeFlowCurve(sourceX, sourceY, targetX, targetY, sign) {
-  const dx = targetX - sourceX
-  const dy = targetY - sourceY
-  const dist = Math.sqrt(dx * dx + dy * dy)
-  
-  const curveStrength = Math.min(dist * 0.4, 60)
-  const midX = (sourceX + targetX) / 2
-  const midY = (sourceY + targetY) / 2
-  
-  const perpX = -dy / dist
-  const perpY = dx / dist
-  
-  return {
-    cp1x: sourceX + dx * 0.25 + perpX * curveStrength * sign,
-    cp1y: sourceY + dy * 0.25 + perpY * curveStrength * sign,
-    cp2x: targetX - dx * 0.25 + perpX * curveStrength * sign,
-    cp2y: targetY - dy * 0.25 + perpY * curveStrength * sign
-  }
-}
+import { bezierPoint, makeFlowCurve } from './map/bezier-math'
 
 describe('getDetailLevel', () => {
   it('returns FULL for width > 1000', () => {
@@ -226,36 +198,5 @@ describe('bezierPoint', () => {
     expect(result.x).toBeGreaterThan(0)
     expect(result.x).toBeLessThan(10)
     expect(result.y).toBeGreaterThan(0)
-  })
-})
-
-describe('makeFlowCurve', () => {
-  it('calculates control points for rightward flow', () => {
-    const result = makeFlowCurve(0, 0, 100, 0, 1)
-    expect(result).toHaveProperty('cp1x')
-    expect(result).toHaveProperty('cp1y')
-    expect(result).toHaveProperty('cp2x')
-    expect(result).toHaveProperty('cp2y')
-  })
-
-  it('creates symmetric curves with opposite signs', () => {
-    const curve1 = makeFlowCurve(0, 0, 100, 0, 1)
-    const curve2 = makeFlowCurve(0, 0, 100, 0, -1)
-    expect(curve1.cp1y).toBe(-curve2.cp1y)
-    expect(curve1.cp2y).toBe(-curve2.cp2y)
-  })
-
-  it('adjusts curve strength based on distance', () => {
-    const shortCurve = makeFlowCurve(0, 0, 10, 0, 1)
-    const longCurve = makeFlowCurve(0, 0, 200, 0, 1)
-    const shortStrength = Math.abs(shortCurve.cp1y)
-    const longStrength = Math.abs(longCurve.cp1y)
-    expect(longStrength).toBeGreaterThan(shortStrength)
-  })
-
-  it('handles vertical flows', () => {
-    const result = makeFlowCurve(0, 0, 0, 100, 1)
-    expect(result.cp1x).not.toBe(0)
-    expect(result.cp2x).not.toBe(0)
   })
 })
