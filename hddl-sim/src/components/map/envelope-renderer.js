@@ -1,3 +1,66 @@
+export function computeEnvelopeGroupScale(status) {
+  if (status === 'active') return 1.0
+  if (status === 'pending') return 0.92
+  return 0.85
+}
+
+export function computeEnvelopeBodyRect({ r, isRecentlyRevised }) {
+  const rr = Number(r || 0) + (isRecentlyRevised ? 6 : 0)
+  const w = Math.max(84, Math.round(rr * 3.2))
+  const h = Math.max(52, Math.round(rr * 2.05))
+  return { x: -w / 2, y: -h / 2, width: w, height: h }
+}
+
+export function computeEnvelopeAccentColor({ ownerColor, fallback = 'var(--vscode-focusBorder)' }) {
+  return ownerColor || fallback
+}
+
+export function computeEnvelopeBodyStroke({ status, ownerColor }) {
+  const accent = computeEnvelopeAccentColor({ ownerColor })
+  if (status === 'ended') return 'var(--vscode-sideBar-border)'
+  return accent
+}
+
+export function computeEnvelopeStrokeWidth({ status, isRecentlyRevised }) {
+  if (isRecentlyRevised) return 4.5
+  if (status === 'active') return 3.5
+  return 2.5
+}
+
+export function computeEnvelopeStrokeDasharray(status) {
+  return (status === 'ended' || status === 'pending') ? '6 4' : null
+}
+
+export function computeEnvelopeOpacity(status) {
+  if (status === 'ended') return 0.45
+  if (status === 'pending') return 0.75
+  return 1
+}
+
+export function computeEnvelopeFlapPath({ width = 84, height = 52, status = 'pending' }) {
+  const w = width
+  const h = height
+  const left = -w / 2
+  const top = -h / 2
+  const right = w / 2
+
+  if (status === 'active') {
+    const flapHeight = h * 0.4
+    return `M ${left + 4} ${top + 4} L 0 ${top - flapHeight} L ${right - 4} ${top + 4}`
+  }
+
+  return `M ${left + 4} ${top + 4} L 0 ${top + h * 0.45} L ${right - 4} ${top + 4} Z`
+}
+
+export function computeEnvelopeFoldPath({ width = 84, height = 52 }) {
+  const w = width
+  const h = height
+  const left = -w / 2
+  const bottom = h / 2
+  const right = w / 2
+  return `M ${left + 8} ${bottom - 8} L 0 ${bottom - h * 0.25} L ${right - 8} ${bottom - 8}`
+}
+
 export function renderEnvelopeEnter({
   d3,
   nodeSelection,
@@ -142,15 +205,11 @@ export function renderEnvelopeEnter({
     .attr('stroke-linejoin', 'round')
     .style('transform-origin', 'center top')
     .style('transition', 'transform 0.4s ease-out')
-    .attr('d', (d) => {
-      const w = d.envDims?.width || 84
-      const h = d.envDims?.height || 52
-      const left = -w / 2
-      const top = -h / 2
-      const right = w / 2
-      // Triangle flap pointing down into envelope (closed state)
-      return `M ${left + 4} ${top + 4} L 0 ${top + h * 0.45} L ${right - 4} ${top + 4} Z`
-    })
+    .attr('d', (d) => computeEnvelopeFlapPath({
+      width: d.envDims?.width || 84,
+      height: d.envDims?.height || 52,
+      status: 'pending',
+    }))
 
   // Inner fold line (detailed only - gives depth)
   envBodyShape.filter((d) => shouldRenderEnvelopeElement('fold', d.envDims?.density))
@@ -159,15 +218,10 @@ export function renderEnvelopeEnter({
     .attr('fill', 'none')
     .attr('stroke-width', 1.5)
     .attr('stroke-opacity', 0.4)
-    .attr('d', (d) => {
-      const w = d.envDims?.width || 84
-      const h = d.envDims?.height || 52
-      const left = -w / 2
-      const bottom = h / 2
-      const right = w / 2
-      // V shape at bottom suggesting paper inside
-      return `M ${left + 8} ${bottom - 8} L 0 ${bottom - h * 0.25} L ${right - 8} ${bottom - 8}`
-    })
+    .attr('d', (d) => computeEnvelopeFoldPath({
+      width: d.envDims?.width || 84,
+      height: d.envDims?.height || 52,
+    }))
 
   // Envelope status label (OPEN vs CLOSED) - detailed and normal only
   nodeEnter.filter((d) => d.type === 'envelope' && shouldRenderEnvelopeElement('status', d.envDims?.density))
@@ -211,47 +265,21 @@ export function updateEnvelopeRendering({ d3, nodeUpdate }) {
     .transition()
     .duration(400)
     .ease(d3.easeBackOut.overshoot(1.2))
-    .attr('transform', (d) => {
-      const scale = d.status === 'active' ? 1.0 : (d.status === 'pending' ? 0.92 : 0.85)
-      return `scale(${scale})`
-    })
+    .attr('transform', (d) => `scale(${computeEnvelopeGroupScale(d.status)})`)
 
   // Envelope OPEN/CLOSED styling (+ gentle grow on recent revisions)
   nodeUpdate.select('rect.envelope-body')
     .transition()
     .duration(300)
-    .attr('x', (d) => {
-      const rr = d.r + (d.isRecentlyRevised ? 6 : 0)
-      const w = Math.max(84, Math.round(rr * 3.2))
-      return -w / 2
-    })
-    .attr('y', (d) => {
-      const rr = d.r + (d.isRecentlyRevised ? 6 : 0)
-      const h = Math.max(52, Math.round(rr * 2.05))
-      return -h / 2
-    })
-    .attr('width', (d) => {
-      const rr = d.r + (d.isRecentlyRevised ? 6 : 0)
-      return Math.max(84, Math.round(rr * 3.2))
-    })
-    .attr('height', (d) => {
-      const rr = d.r + (d.isRecentlyRevised ? 6 : 0)
-      return Math.max(52, Math.round(rr * 2.05))
-    })
-    .attr('stroke', (d) => {
-      const accent = d.ownerColor || 'var(--vscode-focusBorder)'
-      if (d.status === 'ended') return 'var(--vscode-sideBar-border)'
-      if (d.status === 'pending') return accent
-      return accent
-    })
-    .attr('stroke-width', (d) => (d.isRecentlyRevised ? 4.5 : (d.status === 'active' ? 3.5 : 2.5)))
-    .attr('stroke-dasharray', (d) => (d.status === 'ended' || d.status === 'pending') ? '6 4' : null)
+    .attr('x', (d) => computeEnvelopeBodyRect({ r: d.r, isRecentlyRevised: d.isRecentlyRevised }).x)
+    .attr('y', (d) => computeEnvelopeBodyRect({ r: d.r, isRecentlyRevised: d.isRecentlyRevised }).y)
+    .attr('width', (d) => computeEnvelopeBodyRect({ r: d.r, isRecentlyRevised: d.isRecentlyRevised }).width)
+    .attr('height', (d) => computeEnvelopeBodyRect({ r: d.r, isRecentlyRevised: d.isRecentlyRevised }).height)
+    .attr('stroke', (d) => computeEnvelopeBodyStroke({ status: d.status, ownerColor: d.ownerColor }))
+    .attr('stroke-width', (d) => computeEnvelopeStrokeWidth({ status: d.status, isRecentlyRevised: d.isRecentlyRevised }))
+    .attr('stroke-dasharray', (d) => computeEnvelopeStrokeDasharray(d.status))
     .attr('fill', 'var(--vscode-editor-background)')
-    .attr('opacity', (d) => {
-      if (d.status === 'ended') return 0.45
-      if (d.status === 'pending') return 0.75
-      return 1
-    })
+    .attr('opacity', (d) => computeEnvelopeOpacity(d.status))
 
   // Update icon mode status indicator
   nodeUpdate.selectAll('g.envelope-shape').select('circle.envelope-icon-status')
@@ -377,46 +405,24 @@ export function updateEnvelopeRendering({ d3, nodeUpdate }) {
   // Envelope linework (flap/fold) follows envelope status.
   // Flap opens (rotates back) when envelope is active
   nodeUpdate.selectAll('g.envelope-shape').select('path.envelope-flap')
-    .attr('stroke', (d) => {
-      const accent = d.ownerColor || 'var(--vscode-focusBorder)'
-      if (d.status === 'ended') return 'var(--vscode-sideBar-border)'
-      return accent
-    })
+    .attr('stroke', (d) => computeEnvelopeBodyStroke({ status: d.status, ownerColor: d.ownerColor }))
     .attr('fill', (d) => {
       if (d.status === 'active') return 'none' // Open flap has no fill
       return 'var(--vscode-editor-background)'
     })
     .attr('opacity', (d) => (d.status === 'ended' ? 0.5 : 0.9))
-    .attr('d', (d) => {
-      const w = d.envDims?.width || 84
-      const h = d.envDims?.height || 52
-      const left = -w / 2
-      const top = -h / 2
-      const right = w / 2
-
-      if (d.status === 'active') {
-        // Open envelope: flap rotated back (pointing UP above envelope)
-        const flapHeight = h * 0.4
-        return `M ${left + 4} ${top + 4} L 0 ${top - flapHeight} L ${right - 4} ${top + 4}`
-      }
-      // Closed/pending: flap pointing down into envelope
-      return `M ${left + 4} ${top + 4} L 0 ${top + h * 0.45} L ${right - 4} ${top + 4} Z`
-    })
+    .attr('d', (d) => computeEnvelopeFlapPath({
+      width: d.envDims?.width || 84,
+      height: d.envDims?.height || 52,
+      status: d.status,
+    }))
 
   // Inner fold line
   nodeUpdate.selectAll('g.envelope-shape').select('path.envelope-fold')
-    .attr('stroke', (d) => {
-      const accent = d.ownerColor || 'var(--vscode-focusBorder)'
-      if (d.status === 'ended') return 'var(--vscode-sideBar-border)'
-      return accent
-    })
+    .attr('stroke', (d) => computeEnvelopeBodyStroke({ status: d.status, ownerColor: d.ownerColor }))
     .attr('opacity', (d) => (d.status === 'ended' ? 0.3 : d.status === 'active' ? 0.6 : 0.4))
-    .attr('d', (d) => {
-      const w = d.envDims?.width || 84
-      const h = d.envDims?.height || 52
-      const left = -w / 2
-      const bottom = h / 2
-      const right = w / 2
-      return `M ${left + 8} ${bottom - 8} L 0 ${bottom - h * 0.25} L ${right - 8} ${bottom - 8}`
-    })
+    .attr('d', (d) => computeEnvelopeFoldPath({
+      width: d.envDims?.width || 84,
+      height: d.envDims?.height || 52,
+    }))
 }

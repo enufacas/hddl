@@ -103,6 +103,46 @@ const TYPE_DEPTH_BIAS = {
   'session_artifact': 0.15
 }
 
+export function getEmbeddingTypeLabel(type) {
+  const key = String(type || '')
+  return EMBEDDING_TYPE_LABELS[key] || key || 'Embedding'
+}
+
+export function getStewardColor(role, fallback = 'var(--status-warning)') {
+  const key = String(role || '')
+  return STEWARD_COLORS[key] || fallback
+}
+
+export function computeEmbeddingBoxBounds({ width, embeddingStoreHeight }) {
+  // Perspective dimensions - back is NARROW, front is WIDE
+  const backY = embeddingStoreHeight * 0.25
+  const frontY = embeddingStoreHeight - 8
+
+  // Back edge (narrow) - centered
+  const backLeft = width * 0.25
+  const backRight = width * 0.75
+
+  // Front edge (wide) - spans more
+  const frontLeft = width * 0.08
+  const frontRight = width * 0.92
+
+  function getXAtDepth(normalizedX, depth) {
+    const leftAtDepth = backLeft + depth * (frontLeft - backLeft)
+    const rightAtDepth = backRight + depth * (frontRight - backRight)
+    return leftAtDepth + normalizedX * (rightAtDepth - leftAtDepth)
+  }
+
+  return {
+    backY,
+    frontY,
+    backLeft,
+    backRight,
+    frontLeft,
+    frontRight,
+    getXAtDepth,
+  }
+}
+
 /**
  * Create embedding renderer for the 3D memory visualization
  * 
@@ -194,38 +234,9 @@ export function createEmbeddingRenderer(svg, options) {
   const box3D = embeddingStoreLayer.append('g')
     .attr('class', 'embedding-box-3d')
 
-  // Perspective dimensions - back is NARROW, front is WIDE
-  const backY = embeddingStoreHeight * 0.25      // Top edge (back of floor)
-  const frontY = embeddingStoreHeight - 8         // Bottom edge (front of floor)
+  box3DBounds = computeEmbeddingBoxBounds({ width, embeddingStoreHeight })
+  const { backY, frontY, backLeft, backRight, frontLeft, frontRight, getXAtDepth } = box3DBounds
   const floorDepthRange = frontY - backY
-  
-  // Back edge (narrow) - centered
-  const backLeft = width * 0.25
-  const backRight = width * 0.75
-  
-  // Front edge (wide) - spans more
-  const frontLeft = width * 0.08
-  const frontRight = width * 0.92
-
-  // Helper: interpolate X position at a given depth (0=back, 1=front)
-  function getXAtDepth(normalizedX, depth) {
-    // normalizedX: 0=left edge, 1=right edge
-    // depth: 0=back, 1=front
-    const leftAtDepth = backLeft + depth * (frontLeft - backLeft)
-    const rightAtDepth = backRight + depth * (frontRight - backRight)
-    return leftAtDepth + normalizedX * (rightAtDepth - leftAtDepth)
-  }
-
-  // Store bounds for chip positioning
-  box3DBounds = {
-    backY,
-    frontY,
-    backLeft,
-    backRight,
-    frontLeft,
-    frontRight,
-    getXAtDepth
-  }
 
   // Gradients for 3D depth
   const boxDefs = svg.append('defs')
