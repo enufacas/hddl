@@ -37,6 +37,36 @@ export function computeColumnLayout({ width }) {
   }
 }
 
+export function computeHeaderFontSize({ detailLevel, DETAIL_LEVELS }) {
+  return detailLevel === DETAIL_LEVELS.MINIMAL ? '8px' : '10px'
+}
+
+export function shouldRenderTelemetryHeader({ detailLevel, DETAIL_LEVELS }) {
+  return detailLevel === DETAIL_LEVELS.FULL || detailLevel === DETAIL_LEVELS.STANDARD
+}
+
+export function computePlanetClipEllipse({ width }) {
+  return {
+    cx: width / 2,
+    cy: 40,
+    rx: width * 0.48,
+    ry: 80,
+  }
+}
+
+export function computeEarthImageLayout({ width }) {
+  return {
+    earthImageWidth: width * 0.9,
+    earthImageHeight: 180,
+    earthImageX: width * 0.05,
+    earthImageY: -80,
+  }
+}
+
+export function computeEarthImageTransform({ earthImageY, earthImageHeight }) {
+  return `scale(1, -1) translate(0, ${-(earthImageY * 2 + earthImageHeight)})`
+}
+
 export function renderMapChrome({
   svg,
   headerLayer,
@@ -74,21 +104,19 @@ export function renderMapChrome({
   const planetaryLayer = svg.insert('g', ':first-child').attr('class', 'planetary-limb-layer')
 
   // Use Earth limb image (flipped upside down) - extend upward to cover header area
-  const earthImageWidth = width * 0.9
-  const earthImageHeight = 180
-  const earthImageX = width * 0.05
-  const earthImageY = -80
+  const { earthImageWidth, earthImageHeight, earthImageX, earthImageY } = computeEarthImageLayout({ width })
 
   // Add clipping path to create curved appearance
   const planetDefs = svg.select('defs').empty() ? svg.append('defs') : svg.select('defs')
   const clipPathId = 'earth-limb-clip'
+  const clipEllipse = computePlanetClipEllipse({ width })
   planetDefs.append('clipPath')
     .attr('id', clipPathId)
     .append('ellipse')
-    .attr('cx', width / 2)
-    .attr('cy', 40)
-    .attr('rx', width * 0.48)
-    .attr('ry', 80)
+    .attr('cx', clipEllipse.cx)
+    .attr('cy', clipEllipse.cy)
+    .attr('rx', clipEllipse.rx)
+    .attr('ry', clipEllipse.ry)
 
   // Add the Earth image, flipped vertically
   planetaryLayer.append('image')
@@ -98,7 +126,7 @@ export function renderMapChrome({
     .attr('width', earthImageWidth)
     .attr('height', earthImageHeight)
     .attr('clip-path', `url(#${clipPathId})`)
-    .attr('transform', `scale(1, -1) translate(0, ${-(earthImageY * 2 + earthImageHeight)})`)
+    .attr('transform', computeEarthImageTransform({ earthImageY, earthImageHeight }))
     .attr('opacity', 0.7)
     .attr('preserveAspectRatio', 'xMidYMid slice')
 
@@ -130,7 +158,7 @@ export function renderMapChrome({
     .attr('x', col1Center).attr('y', 18).attr('text-anchor', 'middle')
     .text(getAdaptiveHeader('AGENT FLEETS', detailLevel))
     .attr('fill', 'var(--vscode-editor-foreground)')
-    .style('font-size', detailLevel === DETAIL_LEVELS.MINIMAL ? '8px' : '10px')
+    .style('font-size', computeHeaderFontSize({ detailLevel, DETAIL_LEVELS }))
     .style('font-weight', '800').style('letter-spacing', '0.6px')
     .style('paint-order', 'stroke').style('stroke', 'var(--vscode-editor-background)')
     .style('stroke-width', '3px').style('opacity', 0.85)
@@ -140,7 +168,7 @@ export function renderMapChrome({
     .attr('x', col2Center).attr('y', 18).attr('text-anchor', 'middle')
     .text(getAdaptiveHeader('DECISION ENVELOPES', detailLevel))
     .attr('fill', 'var(--vscode-editor-foreground)')
-    .style('font-size', detailLevel === DETAIL_LEVELS.MINIMAL ? '8px' : '10px')
+    .style('font-size', computeHeaderFontSize({ detailLevel, DETAIL_LEVELS }))
     .style('font-weight', '800').style('letter-spacing', '0.6px')
     .style('paint-order', 'stroke').style('stroke', 'var(--vscode-editor-background)')
     .style('stroke-width', '3px').style('opacity', 0.85)
@@ -150,14 +178,14 @@ export function renderMapChrome({
     .attr('x', col3Center).attr('y', 18).attr('text-anchor', 'middle')
     .text(getAdaptiveHeader('STEWARDS', detailLevel))
     .attr('fill', 'var(--vscode-editor-foreground)')
-    .style('font-size', detailLevel === DETAIL_LEVELS.MINIMAL ? '8px' : '10px')
+    .style('font-size', computeHeaderFontSize({ detailLevel, DETAIL_LEVELS }))
     .style('font-weight', '800').style('letter-spacing', '0.6px')
     .style('paint-order', 'stroke').style('stroke', 'var(--vscode-editor-background)')
     .style('stroke-width', '3px').style('opacity', 0.85)
 
   // Source-of-truth cue for signals so the flow reads as "world -> envelope".
   // Only show on FULL and STANDARD detail levels
-  if (detailLevel === DETAIL_LEVELS.FULL || detailLevel === DETAIL_LEVELS.STANDARD) {
+  if (shouldRenderTelemetryHeader({ detailLevel, DETAIL_LEVELS })) {
     headerLayer.append('text')
       .attr('class', 'header-telemetry')
       .attr('x', col2Center)

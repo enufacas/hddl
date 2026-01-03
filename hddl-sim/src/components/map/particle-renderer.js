@@ -17,6 +17,23 @@ export function computeParticleLabelOpacity(d) {
   return Math.max(0, (d?.labelOpacity || 0) * (d?.life || 0))
 }
 
+export function computeParticleTestId(d) {
+  return `particle-${d?.type}-${d?.id || 'unknown'}`
+}
+
+export function computeParticleStatusAttr(d) {
+  return d?.status || 'none'
+}
+
+export function computeParticleLabelTspanSpecs({ lines, x = 8, lineHeight = 12 }) {
+  if (!Array.isArray(lines) || !lines.length) return []
+  return lines.map((line, index) => ({
+    x,
+    dy: index === 0 ? 0 : lineHeight,
+    text: line,
+  }))
+}
+
 export function renderParticlesTick({ d3, particleLayer, particles, getEventColor, wrapTextLinesByChars }) {
   // Render Particles
   const particleSelection = particleLayer.selectAll('g.particle')
@@ -25,9 +42,9 @@ export function renderParticlesTick({ d3, particleLayer, particles, getEventColo
   const pEnter = particleSelection.enter()
     .append('g')
     .attr('class', 'particle')
-    .attr('data-testid', (d) => `particle-${d.type}-${d.id || 'unknown'}`)
+    .attr('data-testid', (d) => computeParticleTestId(d))
     .attr('data-particle-type', (d) => d.type)
-    .attr('data-particle-status', (d) => d.status || 'none')
+    .attr('data-particle-status', (d) => computeParticleStatusAttr(d))
     .attr('opacity', 0)
 
   pEnter.append('circle')
@@ -62,6 +79,8 @@ export function renderParticlesTick({ d3, particleLayer, particles, getEventColo
     .each(function (d) {
       const el = d3.select(this)
       const maxCharsPerLine = 22
+      const labelX = 8
+      const lineHeight = 12
 
       const lines = computeParticleLabelLines({
         text: d?.text,
@@ -73,11 +92,12 @@ export function renderParticlesTick({ d3, particleLayer, particles, getEventColo
       el.text(null)
       if (!lines.length) return
 
-      lines.forEach((line, i) => {
+      const specs = computeParticleLabelTspanSpecs({ lines, x: labelX, lineHeight })
+      specs.forEach((spec) => {
         el.append('tspan')
-          .attr('x', 8)
-          .attr('dy', i === 0 ? 0 : 12)
-          .text(line)
+          .attr('x', spec.x)
+          .attr('dy', spec.dy)
+          .text(spec.text)
       })
     })
     .attr('opacity', (d) => computeParticleLabelOpacity(d))
