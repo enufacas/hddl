@@ -10,6 +10,18 @@ import {
   buildEmbeddingTooltipData,
   computeEmbeddingBadgeWidth,
   computeEmbeddingBadgeLayout,
+  computeEmbeddingFloorPolygonPoints,
+  computeEmbeddingVerticalGridLine,
+  computeEmbeddingHorizontalGridT,
+  computeEmbeddingHorizontalGridLineOpacity,
+  computeEmbeddingHorizontalGridLine,
+  computeEmbeddingFrontGlowRect,
+  computeEmbeddingFrontWallHeight,
+  computeEmbeddingFrontWallRect,
+  computeEmbeddingDepthAxisLabelTransform,
+  computeEmbeddingChipFacePoints,
+  computeEmbeddingChipFrontFaceAttrs,
+  computeEmbeddingChipTransform,
 } from './embedding-renderer.js'
 
 describe('embedding-renderer helpers', () => {
@@ -187,5 +199,81 @@ describe('embedding-renderer helpers', () => {
     expect(wrapped.badgeX).toBe(22)
     expect(wrapped.badgeY).toBe(12)
     expect(wrapped.transform).toBe('translate(22, 12)')
+  })
+
+  it('grid and box geometry helpers compute expected values', () => {
+    const bounds = computeEmbeddingBoxBounds({ width: 100, embeddingStoreHeight: 200 })
+    const floorDepthRange = bounds.frontY - bounds.backY
+
+    const points = computeEmbeddingFloorPolygonPoints({
+      backLeft: bounds.backLeft,
+      backRight: bounds.backRight,
+      frontRight: bounds.frontRight,
+      frontLeft: bounds.frontLeft,
+      backY: bounds.backY,
+      frontY: bounds.frontY,
+    })
+    expect(points).toContain(`${bounds.backLeft},${bounds.backY}`)
+    expect(points).toContain(`${bounds.frontLeft},${bounds.frontY}`)
+
+    const v0 = computeEmbeddingVerticalGridLine({ index: 0, count: 7, backY: bounds.backY, frontY: bounds.frontY, getXAtDepth: bounds.getXAtDepth })
+    expect(v0.normalizedX).toBe(0)
+    expect(v0.x1).toBe(bounds.backLeft)
+    expect(v0.x2).toBe(bounds.frontLeft)
+
+    const h0 = computeEmbeddingHorizontalGridLine({ index: 0, count: 6, backY: bounds.backY, floorDepthRange, getXAtDepth: bounds.getXAtDepth })
+    expect(h0.t).toBe(0)
+    expect(h0.y1).toBe(bounds.backY)
+    expect(h0.x1).toBe(bounds.backLeft)
+    expect(h0.x2).toBe(bounds.backRight)
+    expect(h0.opacity).toBeCloseTo(0.15)
+
+    const h6 = computeEmbeddingHorizontalGridLine({ index: 6, count: 6, backY: bounds.backY, floorDepthRange, getXAtDepth: bounds.getXAtDepth })
+    expect(h6.t).toBe(1)
+    expect(h6.y1).toBeCloseTo(bounds.frontY)
+    expect(h6.x1).toBe(bounds.frontLeft)
+    expect(h6.x2).toBe(bounds.frontRight)
+    expect(h6.opacity).toBeCloseTo(0.5)
+
+    expect(computeEmbeddingHorizontalGridT({ index: 3, count: 6, exponent: 1 })).toBeCloseTo(0.5)
+    expect(computeEmbeddingHorizontalGridLineOpacity({ t: 0 })).toBeCloseTo(0.15)
+    expect(computeEmbeddingHorizontalGridLineOpacity({ t: 1 })).toBeCloseTo(0.5)
+
+    const glow = computeEmbeddingFrontGlowRect({ frontLeft: bounds.frontLeft, frontRight: bounds.frontRight, frontY: bounds.frontY })
+    expect(glow).toEqual({ x: bounds.frontLeft, y: bounds.frontY - 25, width: bounds.frontRight - bounds.frontLeft, height: 30 })
+
+    const wallHeight = computeEmbeddingFrontWallHeight({ floorDepthRange, factor: 0.7 })
+    expect(wallHeight).toBeCloseTo(floorDepthRange * 0.7)
+    const wallRect = computeEmbeddingFrontWallRect({ frontLeft: bounds.frontLeft, frontRight: bounds.frontRight, frontY: bounds.frontY, frontWallHeight: wallHeight, extraHeight: 5 })
+    expect(wallRect.x).toBe(bounds.frontLeft)
+    expect(wallRect.y).toBeCloseTo(bounds.frontY - wallHeight)
+    expect(wallRect.width).toBe(bounds.frontRight - bounds.frontLeft)
+    expect(wallRect.height).toBeCloseTo(wallHeight + 5)
+
+    expect(computeEmbeddingDepthAxisLabelTransform({ frontLeft: bounds.frontLeft, backY: bounds.backY, frontY: bounds.frontY, offsetX: 5 }))
+      .toBe(`rotate(-90, ${bounds.frontLeft - 5}, ${(bounds.backY + bounds.frontY) / 2})`)
+  })
+
+  it('chip helpers compute points, attrs, and transform deterministically', () => {
+    const faces = computeEmbeddingChipFacePoints({ chipSize: 16, depth3D: 5 })
+    expect(faces.top).toContain('-8,-13')
+    expect(faces.right).toContain('8,-13')
+
+    const hist = computeEmbeddingChipFrontFaceAttrs({ embeddingColor: '#abc', isHistorical: true })
+    expect(hist.strokeWidth).toBe(1)
+    expect(hist.filter).toBe('none')
+    expect(hist.strokeDasharray).toBe('2 2')
+    expect(hist.stopOpacityStart).toBe(0.7)
+    expect(hist.stopOpacityEnd).toBe(0.65)
+
+    const cur = computeEmbeddingChipFrontFaceAttrs({ embeddingColor: '#abc', isHistorical: false })
+    expect(cur.strokeWidth).toBe(1.5)
+    expect(cur.filter).toBe('drop-shadow(0 0 6px #abc)')
+    expect(cur.strokeDasharray).toBe(null)
+    expect(cur.stopOpacityStart).toBe(1)
+    expect(cur.stopOpacityEnd).toBe(0.95)
+
+    expect(computeEmbeddingChipTransform({ x: 10, y: 20, perspectiveScale: 0.75, rotateAngle: -5 }))
+      .toBe('translate(10, 20) scale(0.75) rotate(-5)')
   })
 })

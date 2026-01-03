@@ -245,6 +245,101 @@ export function computeEmbeddingBadgeLayout({
   }
 }
 
+export function computeEmbeddingFloorPolygonPoints({ backLeft, backRight, frontRight, frontLeft, backY, frontY }) {
+  return `
+      ${backLeft},${backY}
+      ${backRight},${backY}
+      ${frontRight},${frontY}
+      ${frontLeft},${frontY}
+    `
+}
+
+export function computeEmbeddingVerticalGridLine({ index, count = 7, backY, frontY, getXAtDepth }) {
+  const normalizedX = Number(count || 0) === 0 ? 0 : Number(index || 0) / Number(count)
+  const x1 = getXAtDepth(normalizedX, 0)
+  const x2 = getXAtDepth(normalizedX, 1)
+  return { normalizedX, x1, y1: backY, x2, y2: frontY }
+}
+
+export function computeEmbeddingHorizontalGridT({ index, count = 6, exponent = 0.7 }) {
+  const denom = Math.max(Number(count || 0), 1)
+  return Math.pow(Number(index || 0) / denom, Number(exponent || 0))
+}
+
+export function computeEmbeddingHorizontalGridLineOpacity({ t, min = 0.15, range = 0.35 }) {
+  return Number(min || 0) + Number(t || 0) * Number(range || 0)
+}
+
+export function computeEmbeddingHorizontalGridLine({ index, count = 6, backY, floorDepthRange, getXAtDepth, exponent = 0.7 }) {
+  const t = computeEmbeddingHorizontalGridT({ index, count, exponent })
+  const y = backY + t * floorDepthRange
+  const leftX = getXAtDepth(0, t)
+  const rightX = getXAtDepth(1, t)
+  const opacity = computeEmbeddingHorizontalGridLineOpacity({ t })
+  return { t, x1: leftX, y1: y, x2: rightX, y2: y, opacity }
+}
+
+export function computeEmbeddingFrontGlowRect({ frontLeft, frontRight, frontY, height = 30, yOffset = 25 }) {
+  return {
+    x: frontLeft,
+    y: frontY - Number(yOffset || 0),
+    width: frontRight - frontLeft,
+    height: Number(height || 0),
+  }
+}
+
+export function computeEmbeddingFrontWallHeight({ floorDepthRange, factor = 0.7 }) {
+  return Number(floorDepthRange || 0) * Number(factor || 0)
+}
+
+export function computeEmbeddingFrontWallRect({ frontLeft, frontRight, frontY, frontWallHeight, extraHeight = 5 }) {
+  return {
+    x: frontLeft,
+    y: frontY - frontWallHeight,
+    width: frontRight - frontLeft,
+    height: frontWallHeight + Number(extraHeight || 0),
+  }
+}
+
+export function computeEmbeddingDepthAxisLabelTransform({ frontLeft, backY, frontY, offsetX = 5 }) {
+  const x = frontLeft - Number(offsetX || 0)
+  const y = (backY + frontY) / 2
+  return `rotate(-90, ${x}, ${y})`
+}
+
+export function computeEmbeddingChipFacePoints({ chipSize = 16, depth3D = 5 }) {
+  const s = Number(chipSize || 0)
+  const d = Number(depth3D || 0)
+  const half = s / 2
+  const top = `
+        ${-half},${-half - d}
+        ${half},${-half - d}
+        ${half + d},${-half - d + 2}
+        ${-half + d},${-half - d + 2}
+      `
+  const right = `
+        ${half},${-half - d}
+        ${half + d},${-half - d + 2}
+        ${half + d},${half - d + 2}
+        ${half},${half}
+      `
+  return { top, right }
+}
+
+export function computeEmbeddingChipFrontFaceAttrs({ embeddingColor, isHistorical }) {
+  return {
+    strokeWidth: isHistorical ? 1 : 1.5,
+    filter: isHistorical ? 'none' : `drop-shadow(0 0 6px ${embeddingColor})`,
+    strokeDasharray: isHistorical ? '2 2' : null,
+    stopOpacityStart: isHistorical ? 0.7 : 1,
+    stopOpacityEnd: isHistorical ? 0.65 : 0.95,
+  }
+}
+
+export function computeEmbeddingChipTransform({ x, y, perspectiveScale, rotateAngle }) {
+  return `translate(${x}, ${y}) scale(${perspectiveScale}) rotate(${rotateAngle})`
+}
+
 /**
  * Create embedding renderer for the 3D memory visualization
  * 
@@ -358,12 +453,7 @@ export function createEmbeddingRenderer(svg, options) {
 
   // Main floor polygon (trapezoid with perspective)
   box3D.append('polygon')
-    .attr('points', `
-      ${backLeft},${backY}
-      ${backRight},${backY}
-      ${frontRight},${frontY}
-      ${frontLeft},${frontY}
-    `)
+    .attr('points', computeEmbeddingFloorPolygonPoints({ backLeft, backRight, frontRight, frontLeft, backY, frontY }))
     .attr('fill', 'url(#embedding-floor)')
     .attr('stroke', 'rgba(100, 120, 150, 0.4)')
     .attr('stroke-width', 1.5)
@@ -388,33 +478,25 @@ export function createEmbeddingRenderer(svg, options) {
 
   // Vertical lines (converging from front to back) - 8 lines
   for (let i = 0; i <= 7; i++) {
-    const normalizedX = i / 7
-    const x1 = getXAtDepth(normalizedX, 0) // back
-    const x2 = getXAtDepth(normalizedX, 1) // front
+    const { x1, y1, x2, y2 } = computeEmbeddingVerticalGridLine({ index: i, count: 7, backY, frontY, getXAtDepth })
     gridLayer.append('line')
       .attr('x1', x1)
-      .attr('y1', backY)
+      .attr('y1', y1)
       .attr('x2', x2)
-      .attr('y2', frontY)
+      .attr('y2', y2)
       .attr('stroke', 'url(#vert-line-fade)')
       .attr('stroke-width', 1)
   }
 
   // Horizontal lines (with perspective compression and opacity fade)
   for (let i = 0; i <= 6; i++) {
-    // Use non-linear spacing - lines compress toward the back
-    const t = Math.pow(i / 6, 0.7) // Power < 1 compresses lines toward back
-    const y = backY + t * floorDepthRange
-    const leftX = getXAtDepth(0, t)
-    const rightX = getXAtDepth(1, t)
-    // Atmospheric perspective: lines fade toward back
-    const lineOpacity = 0.15 + t * 0.35  // 0.15 at back, 0.5 at front
+    const { x1, y1, x2, y2, opacity } = computeEmbeddingHorizontalGridLine({ index: i, count: 6, backY, floorDepthRange, getXAtDepth, exponent: 0.7 })
     gridLayer.append('line')
-      .attr('x1', leftX)
-      .attr('y1', y)
-      .attr('x2', rightX)
-      .attr('y2', y)
-      .attr('stroke', `rgba(100, 140, 180, ${lineOpacity})`)
+      .attr('x1', x1)
+      .attr('y1', y1)
+      .attr('x2', x2)
+      .attr('y2', y2)
+      .attr('stroke', `rgba(100, 140, 180, ${opacity})`)
       .attr('stroke-width', 1)
   }
 
@@ -433,15 +515,15 @@ export function createEmbeddingRenderer(svg, options) {
     .attr('stop-color', 'rgba(75, 150, 255, 0)')
 
   box3D.append('rect')
-    .attr('x', frontLeft)
-    .attr('y', frontY - 25)
-    .attr('width', frontRight - frontLeft)
-    .attr('height', 30)
+    .attr('x', computeEmbeddingFrontGlowRect({ frontLeft, frontRight, frontY }).x)
+    .attr('y', computeEmbeddingFrontGlowRect({ frontLeft, frontRight, frontY }).y)
+    .attr('width', computeEmbeddingFrontGlowRect({ frontLeft, frontRight, frontY }).width)
+    .attr('height', computeEmbeddingFrontGlowRect({ frontLeft, frontRight, frontY }).height)
     .attr('fill', 'url(#front-glow)')
     .attr('pointer-events', 'none')
 
   // Front wall (transparent rectangle for 3D box illusion)
-  const frontWallHeight = floorDepthRange * 0.7  // Taller front wall
+  const frontWallHeight = computeEmbeddingFrontWallHeight({ floorDepthRange, factor: 0.7 })
   const frontWallGradient = boxDefs.append('linearGradient')
     .attr('id', 'front-wall-fade')
     .attr('x1', '0%')
@@ -460,10 +542,10 @@ export function createEmbeddingRenderer(svg, options) {
 
   // Front wall rectangle
   box3D.append('rect')
-    .attr('x', frontLeft)
-    .attr('y', frontY - frontWallHeight)
-    .attr('width', frontRight - frontLeft)
-    .attr('height', frontWallHeight + 5)
+    .attr('x', computeEmbeddingFrontWallRect({ frontLeft, frontRight, frontY, frontWallHeight, extraHeight: 5 }).x)
+    .attr('y', computeEmbeddingFrontWallRect({ frontLeft, frontRight, frontY, frontWallHeight, extraHeight: 5 }).y)
+    .attr('width', computeEmbeddingFrontWallRect({ frontLeft, frontRight, frontY, frontWallHeight, extraHeight: 5 }).width)
+    .attr('height', computeEmbeddingFrontWallRect({ frontLeft, frontRight, frontY, frontWallHeight, extraHeight: 5 }).height)
     .attr('fill', 'url(#front-wall-fade)')
     .attr('pointer-events', 'none')
 
@@ -530,7 +612,7 @@ export function createEmbeddingRenderer(svg, options) {
     .attr('fill', 'rgba(100, 140, 180, 0.5)')
     .attr('font-size', '9px')
     .attr('font-style', 'italic')
-    .attr('transform', `rotate(-90, ${frontLeft - 5}, ${(backY + frontY) / 2})`)
+    .attr('transform', computeEmbeddingDepthAxisLabelTransform({ frontLeft, backY, frontY, offsetX: 5 }))
     .text('← policy ─ operational →')
 
   // Back label (routine patterns)
@@ -763,6 +845,9 @@ export function createEmbeddingRenderer(svg, options) {
     // 3D chip design - isometric cube style with prominent depth
     const chipSize = 16
     const depth3D = 5  // Depth offset for 3D effect
+    const isHistorical = (typeof event?.hour === 'number') ? event.hour < 0 : false
+    const chipFacePoints = computeEmbeddingChipFacePoints({ chipSize, depth3D })
+    const chipFrontAttrs = computeEmbeddingChipFrontFaceAttrs({ embeddingColor, isHistorical })
     
     // Shadow underneath for grounding
     chipGroup.append('ellipse')
@@ -775,12 +860,7 @@ export function createEmbeddingRenderer(svg, options) {
     
     // Top face (lighter - catches "light")
     chipGroup.append('polygon')
-      .attr('points', `
-        ${-chipSize / 2},${-chipSize / 2 - depth3D}
-        ${chipSize / 2},${-chipSize / 2 - depth3D}
-        ${chipSize / 2 + depth3D},${-chipSize / 2 - depth3D + 2}
-        ${-chipSize / 2 + depth3D},${-chipSize / 2 - depth3D + 2}
-      `)
+      .attr('points', chipFacePoints.top)
       .attr('fill', `color-mix(in srgb, ${embeddingColor} 70%, white)`)
       .attr('stroke', embeddingColor)
       .attr('stroke-width', 0.5)
@@ -788,12 +868,7 @@ export function createEmbeddingRenderer(svg, options) {
 
     // Right face (medium - side lighting)
     chipGroup.append('polygon')
-      .attr('points', `
-        ${chipSize / 2},${-chipSize / 2 - depth3D}
-        ${chipSize / 2 + depth3D},${-chipSize / 2 - depth3D + 2}
-        ${chipSize / 2 + depth3D},${chipSize / 2 - depth3D + 2}
-        ${chipSize / 2},${chipSize / 2}
-      `)
+      .attr('points', chipFacePoints.right)
       .attr('fill', `color-mix(in srgb, ${embeddingColor} 50%, black)`)
       .attr('stroke', embeddingColor)
       .attr('stroke-width', 0.5)
@@ -805,11 +880,11 @@ export function createEmbeddingRenderer(svg, options) {
     chipGradient.append('stop')
       .attr('offset', '0%')
       .attr('stop-color', embeddingColor)
-      .attr('stop-opacity', event.hour < 0 ? 0.7 : 1) // Slightly faded for historical
+      .attr('stop-opacity', chipFrontAttrs.stopOpacityStart) // Slightly faded for historical
     chipGradient.append('stop')
       .attr('offset', '100%')
       .attr('stop-color', `color-mix(in srgb, ${embeddingColor} 70%, black)`)
-      .attr('stop-opacity', event.hour < 0 ? 0.65 : 0.95) // Slightly faded for historical
+      .attr('stop-opacity', chipFrontAttrs.stopOpacityEnd) // Slightly faded for historical
 
     chipGroup.append('rect')
       .attr('x', -chipSize / 2)
@@ -819,9 +894,9 @@ export function createEmbeddingRenderer(svg, options) {
       .attr('rx', 2)
       .attr('fill', `url(#chip-gradient-${event.eventId})`)
       .attr('stroke', embeddingColor)
-      .attr('stroke-width', event.hour < 0 ? 1 : 1.5) // Thinner stroke for historical
-      .attr('filter', event.hour < 0 ? 'none' : `drop-shadow(0 0 6px ${embeddingColor})`) // No glow for historical
-      .attr('stroke-dasharray', event.hour < 0 ? '2 2' : null) // Dashed border for historical
+      .attr('stroke-width', chipFrontAttrs.strokeWidth) // Thinner stroke for historical
+      .attr('filter', chipFrontAttrs.filter) // No glow for historical
+      .attr('stroke-dasharray', chipFrontAttrs.strokeDasharray) // Dashed border for historical
 
     // Circuit pattern on chip
     const circuitGroup = chipGroup.append('g')
@@ -880,13 +955,13 @@ export function createEmbeddingRenderer(svg, options) {
     // Skip animation during catch-up window for instant placement
     if (skipAnimation) {
       chipGroup
-        .attr('transform', `translate(${targetX}, ${targetY}) scale(${perspectiveScale}) rotate(${rotateAngle})`)
+        .attr('transform', computeEmbeddingChipTransform({ x: targetX, y: targetY, perspectiveScale, rotateAngle }))
         .attr('opacity', depthOpacity)
     } else {
       chipGroup.transition()
         .duration(2500)
         .ease(d3.easeCubicOut)
-        .attr('transform', `translate(${targetX}, ${targetY}) scale(${perspectiveScale}) rotate(${rotateAngle})`)
+        .attr('transform', computeEmbeddingChipTransform({ x: targetX, y: targetY, perspectiveScale, rotateAngle }))
         .attr('opacity', depthOpacity)
     }
 
