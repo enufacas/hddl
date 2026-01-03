@@ -1,54 +1,12 @@
 import { describe, it, expect } from 'vitest'
-
-// Copy pure functions from workspace.js for testing
-function escapeHtml(value) {
-  return String(value)
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#39;')
-}
-
-function escapeAttr(value) {
-  return escapeHtml(value).replaceAll('`', '&#96;')
-}
-
-function displayEnvelopeId(envelopeId) {
-  return String(envelopeId || '').replace(/^ENV-/, 'DE-')
-}
-
-function isNarratableEventType(type) {
-  return [
-    'envelope_promoted',
-    'signal',
-    'boundary_interaction',
-    'escalation',
-    'revision',
-    'dsg_session',
-    'dsg_message',
-    'annotation',
-    'decision',
-  ].includes(String(type || ''))
-}
-
-function buildNarrativeEventKey(e, index) {
-  const t = String(e?.type || 'event')
-  const h = typeof e?.hour === 'number' ? String(e.hour).replace('.', '_') : 'na'
-  const env = String(e?.envelopeId || e?.envelope_id || e?.sessionId || 'na')
-  return `${t}:${h}:${env}:${index}`
-}
-
-function narrativePrimaryObjectType(e) {
-  const type = String(e?.type || '')
-  if (type === 'decision') return 'decision'
-  if (type === 'revision') return 'revision'
-  if (type === 'boundary_interaction' || type === 'escalation') return 'exception'
-  if (type === 'dsg_session' || type === 'dsg_message') return 'dsg'
-  if (type === 'signal') return 'signal'
-  if (type === 'annotation') return 'memory'
-  return 'envelope'
-}
+import {
+  escapeHtml,
+  escapeAttr,
+  displayEnvelopeId,
+  isNarratableEventType,
+  buildNarrativeEventKey,
+  narrativePrimaryObjectType
+} from './workspace/utils'
 
 describe('escapeHtml', () => {
   it('escapes ampersands', () => {

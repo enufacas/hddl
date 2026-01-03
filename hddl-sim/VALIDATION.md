@@ -271,6 +271,28 @@ npm run conformance
 npm run conformance
 ```
 
+## Testing & Coverage (Unified Model)
+
+HDDL has two complementary “quality loops”:
+
+- **Conformance (schema + closed loops)**: validates scenario data correctness and learning completeness.
+  - Run: `npm run conformance`
+- **Unit tests (Vitest)**: fast, deterministic checks on pure logic.
+  - Run: `npm run test:unit`
+- **Integration tests (Playwright)**: browser-level confidence on critical flows.
+  - Run: `npm test`
+
+Coverage also has two distinct meanings, and we keep their reports separate:
+
+- **Unit coverage (Vitest)**: best proxy for TypeScript migration safety (pure logic boundaries).
+  - Run: `npm run test:unit:coverage`
+  - Report: `coverage/unit/index.html`
+  - Scope: `src/sim/**` and `src/components/map/**` (intentional)
+- **E2E coverage (Playwright + Istanbul)**: “what executed in a real browser journey”.
+  - Run: `npm run test:coverage`
+  - Report: `coverage/e2e/index.html`
+  - Note: this starts its own instrumented dev server on port 5173; stop any existing dev server first.
+
 ## Conformance Checklist
 
 Your scenario MUST pass:

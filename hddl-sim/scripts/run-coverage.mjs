@@ -6,9 +6,12 @@
  * and generates an HTML coverage report.
  * 
  * Usage:
- *   npm run test:coverage           # Full workflow
+ *   npm run test:coverage           # E2E coverage workflow (Playwright/Istanbul)
  *   npm run test:coverage -- -v     # Verbose output
  *   npm run test:coverage -- -s     # Skip opening browser
+ *
+ * Output:
+ *   coverage/e2e/index.html
  */
 import { spawn } from 'child_process';
 import { existsSync, rmSync, readdirSync } from 'fs';
@@ -18,6 +21,7 @@ import { platform } from 'os';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = join(__dirname, '..');
+const reportDir = join(projectRoot, 'coverage', 'e2e');
 
 const args = process.argv.slice(2);
 const verbose = args.includes('--verbose') || args.includes('-v');
@@ -44,13 +48,9 @@ const cmd = base => platform() === 'win32' ? `${base}.cmd` : base;
 
 function clean() {
   step('Cleaning old coverage data...');
-  const dirs = ['.nyc_output', 'coverage'];
-  for (const dir of dirs) {
-    const path = join(projectRoot, dir);
-    if (existsSync(path)) {
-      rmSync(path, { recursive: true, force: true });
-    }
-  }
+  const nycDir = join(projectRoot, '.nyc_output');
+  if (existsSync(nycDir)) rmSync(nycDir, { recursive: true, force: true });
+  if (existsSync(reportDir)) rmSync(reportDir, { recursive: true, force: true });
   ok('Coverage directories cleaned');
 }
 
@@ -58,13 +58,16 @@ function runTests() {
   return new Promise((resolve, reject) => {
     step('Running tests with Istanbul coverage...');
     info('This runs istanbul-coverage.spec.js to collect coverage data');
+    info('Stops and restarts the dev server (no reuse) so instrumentation is guaranteed');
     
     // Run just the istanbul coverage spec
     const testArgs = ['playwright', 'test', 'tests/istanbul-coverage.spec.js', '--reporter=line'];
     
     const test = spawn(cmd('npx'), testArgs, {
       cwd: projectRoot,
-      env: { ...process.env, VITE_COVERAGE: 'true' },
+      // Force Playwright to start a fresh webServer so VITE_COVERAGE takes effect.
+      // (playwright.config.js sets reuseExistingServer = !CI)
+      env: { ...process.env, VITE_COVERAGE: 'true', CI: '1' },
       stdio: verbose ? 'inherit' : 'pipe',
       shell: true
     });
@@ -104,6 +107,8 @@ function checkCoverage() {
   const files = readdirSync(nycDir).filter(f => f.endsWith('.json'));
   if (files.length === 0) {
     err('No coverage JSON files in .nyc_output/');
+    info('If you have a dev server already running on port 5173, stop it and re-run.');
+    info('Coverage runs require an instrumented dev server (VITE_COVERAGE=true).');
     return false;
   }
   
@@ -115,7 +120,7 @@ function generateReport() {
   return new Promise((resolve, reject) => {
     step('Generating coverage report...');
     
-    const nyc = spawn(cmd('npx'), ['nyc', 'report', '--reporter=html', '--reporter=text'], {
+    const nyc = spawn(cmd('npx'), ['nyc', 'report', '--reporter=html', '--reporter=text', `--report-dir=${reportDir}`], {
       cwd: projectRoot,
       stdio: 'inherit',
       shell: true
@@ -136,7 +141,7 @@ function generateReport() {
 }
 
 function openReport() {
-  const reportPath = join(projectRoot, 'coverage', 'index.html');
+  const reportPath = join(reportDir, 'index.html');
   
   if (!existsSync(reportPath)) {
     info('Report file not found');
@@ -153,7 +158,7 @@ function openReport() {
     spawn('xdg-open', [reportPath], { stdio: 'ignore', detached: true }).unref();
   }
   
-  ok('Opened coverage/index.html');
+  ok('Opened coverage/e2e/index.html');
 }
 
 async function main() {
@@ -174,7 +179,7 @@ async function main() {
       openReport();
     }
     
-    console.log(`\n${c.green}✓ Coverage report ready: coverage/index.html${c.reset}\n`);
+    console.log(`\n${c.green}✓ Coverage report ready: coverage/e2e/index.html${c.reset}\n`);
   } catch (error) {
     err(`Error: ${error.message}`);
     process.exit(1);

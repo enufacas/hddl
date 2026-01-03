@@ -94,7 +94,7 @@ npm run test:unit:watch
 
 **Status:** ✅ Fully functional
 
-**Measured Coverage:**
+**Measured Coverage (E2E: Playwright + Istanbul):**
 | Metric | Coverage |
 |--------|----------|
 | Statements | 45.89% |
@@ -104,18 +104,21 @@ npm run test:unit:watch
 
 **Automated Script:**
 ```bash
-npm run test:coverage         # Full workflow, opens browser
+npm run test:unit:coverage    # Unit coverage (Vitest) -> coverage/unit/
+npm run test:coverage         # E2E coverage (Playwright/Istanbul), opens browser
 npm run test:coverage -- -v   # Verbose test output
 npm run test:coverage -- -s   # Skip opening browser
 ```
 
+Unit coverage is intentionally scoped to TS-target surfaces (`src/sim/**`, `src/components/map/**`).
+
 The `run-coverage.mjs` script:
-1. Cleans old coverage data (`.nyc_output/`, `coverage/`)
-2. Runs `istanbul-coverage.spec.js` with `VITE_COVERAGE=true`
+1. Cleans old coverage data (`.nyc_output/`, `coverage/e2e/`)
+2. Runs `istanbul-coverage.spec.js` with `VITE_COVERAGE=true` (and forces a fresh dev server)
 3. Extracts `window.__coverage__` from browser via Playwright
 4. Writes Istanbul-format JSON to `.nyc_output/`
 5. Generates HTML + text reports via nyc
-6. Opens `coverage/index.html` in browser
+6. Opens `coverage/e2e/index.html` in browser
 
 **Tools:**
 - vite-plugin-istanbul - Code instrumentation (populates `window.__coverage__`)
