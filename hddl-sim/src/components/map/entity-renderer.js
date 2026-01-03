@@ -84,6 +84,22 @@ export function computeAgentBotTransform({ gridScale, botScale }) {
   return `scale(${(gridScale || 1.0) * (botScale || 1.0)})`
 }
 
+export function computeAgentBotTestId({ id }) {
+  return `agent-${id || 'unknown'}`
+}
+
+export function computeAgentBotActiveAttr({ isRecentlyActive }) {
+  return isRecentlyActive ? 'true' : 'false'
+}
+
+export function computeAgentBotStroke({ fleetColor, fallback = 'var(--vscode-sideBar-border)' }) {
+  return fleetColor || fallback
+}
+
+export function computeAgentBotFill({ fleetColor, fallback = 'var(--vscode-statusBar-foreground)' }) {
+  return fleetColor || fallback
+}
+
 export function computeAgentNameVisibility({ agentDensityConfig, agent }) {
   const shouldShowName = !!agentDensityConfig?.showName && agent?.showName !== false
   return shouldShowName ? 'visible' : 'hidden'
@@ -132,6 +148,10 @@ export function computeAgentCompactDotFill({ isRecentlyActive, fleetColor, fallb
   return isRecentlyActive ? (fleetColor || fallback) : 'var(--vscode-editor-background)'
 }
 
+export function computeAgentCompactDotStroke({ fleetColor, fallback = 'var(--vscode-sideBar-border)' }) {
+  return fleetColor || fallback
+}
+
 export function computeAgentCompactDotOpacity({ isRecentlyActive }) {
   return isRecentlyActive ? 1 : 0.5
 }
@@ -145,6 +165,10 @@ export function computeAgentMinimalDotOpacity({ isRecentlyActive }) {
   return isRecentlyActive ? 0.9 : 0.4
 }
 
+export function computeAgentMinimalDotFill({ fleetColor, fallback = 'var(--vscode-sideBar-border)' }) {
+  return fleetColor || fallback
+}
+
 export function computeAgentMinimalDotFilter({ isRecentlyActive, fleetColor, fallback = 'var(--vscode-sideBar-border)' }) {
   if (!isRecentlyActive) return 'none'
   return `drop-shadow(0 0 3px ${fleetColor || fallback})`
@@ -156,6 +180,38 @@ export function computeAgentBotPartOpacity({ isActive }) {
 
 export function computeAgentBotEyeOpacity({ isActive }) {
   return isActive ? 1 : 0.35
+}
+
+export function computeAgentHaloPulseKeyframes({ botScale }) {
+  const scale = botScale || 1.0
+  return {
+    low: { opacity: 0.4, r: 16 * scale },
+    high: { opacity: 0.7, r: 18 * scale },
+  }
+}
+
+export function computeLabelTextAnchor({ type }) {
+  if (type === 'agent') return 'end'
+  if (type === 'steward') return 'start'
+  return 'middle'
+}
+
+export function computeLabelX({ type, r }) {
+  if (type === 'agent') return -(r || 0) - 5
+  if (type === 'steward') return (r || 0) + 5
+  return 0
+}
+
+export function computeLabelMainDy({ type }) {
+  return type === 'envelope' ? 5 : 4
+}
+
+export function computeLabelSubDy({ type }) {
+  return type === 'envelope' ? 20 : 15
+}
+
+export function computeLabelFontWeight({ type }) {
+  return type === 'envelope' ? 'bold' : 'normal'
 }
 
 export function computeLabelMainOpacity({ detailLevel, DETAIL_LEVELS, status }) {
@@ -276,10 +332,10 @@ export function renderAgentEnter({
     .attr('cx', 0)
     .attr('cy', 0)
     .attr('r', 6)
-    .attr('fill', (d) => d.fleetColor || 'var(--vscode-sideBar-border)')
+    .attr('fill', (d) => computeAgentMinimalDotFill({ fleetColor: d.fleetColor }))
     .attr('stroke', 'var(--vscode-editor-background)')
     .attr('stroke-width', 1)
-    .attr('opacity', (d) => d.isRecentlyActive ? 0.9 : 0.4)
+    .attr('opacity', (d) => computeAgentMinimalDotOpacity({ isRecentlyActive: d.isRecentlyActive }))
 
   // Compact mode: small dot with count (count rendered at fleet level)
   agentEnter.filter(() => agentDensityConfig.density === 'compact')
@@ -288,24 +344,24 @@ export function renderAgentEnter({
     .attr('cx', 0)
     .attr('cy', 0)
     .attr('r', 8)
-    .attr('fill', (d) => d.isRecentlyActive ? d.fleetColor || 'var(--vscode-textLink-foreground)' : 'var(--vscode-editor-background)')
-    .attr('stroke', (d) => d.fleetColor || 'var(--vscode-sideBar-border)')
+    .attr('fill', (d) => computeAgentCompactDotFill({ isRecentlyActive: d.isRecentlyActive, fleetColor: d.fleetColor }))
+    .attr('stroke', (d) => computeAgentCompactDotStroke({ fleetColor: d.fleetColor }))
     .attr('stroke-width', 2)
-    .attr('opacity', (d) => d.isRecentlyActive ? 1 : 0.5)
+    .attr('opacity', (d) => computeAgentCompactDotOpacity({ isRecentlyActive: d.isRecentlyActive }))
 
   // Bot glyph (head + antenna + eyes) - full and standard modes, scaled by grid
   const bot = agentEnter.filter(() => agentDensityConfig.density === 'full' || agentDensityConfig.density === 'standard')
     .append('g')
     .attr('class', 'agent-bot')
-    .attr('data-testid', (d) => `agent-${d.id}`)
-    .attr('data-agent-active', (d) => d.isRecentlyActive ? 'true' : 'false')
-    .attr('stroke', (d) => d.fleetColor || 'var(--vscode-sideBar-border)')
-    .attr('fill', (d) => d.fleetColor || 'var(--vscode-statusBar-foreground)')
+    .attr('data-testid', (d) => computeAgentBotTestId({ id: d.id }))
+    .attr('data-agent-active', (d) => computeAgentBotActiveAttr({ isRecentlyActive: d.isRecentlyActive }))
+    .attr('stroke', (d) => computeAgentBotStroke({ fleetColor: d.fleetColor }))
+    .attr('fill', (d) => computeAgentBotFill({ fleetColor: d.fleetColor }))
     .attr('tabindex', 0)
     .style('pointer-events', 'all')
     .style('cursor', 'pointer')
     .attr('opacity', 0.95)
-    .attr('transform', (d) => `scale(${(d.gridScale || 1.0) * agentDensityConfig.botScale})`)
+    .attr('transform', (d) => computeAgentBotTransform({ gridScale: d.gridScale, botScale: agentDensityConfig.botScale }))
     .on('pointerenter', (event, d) => {
       showAgentTooltip(d, event, event.currentTarget)
     })
@@ -457,15 +513,17 @@ export function updateAgentRendering({
         const current = halo.datum()
         if (!current || !current.isRecentlyActive) return
 
+        const keyframes = computeAgentHaloPulseKeyframes({ botScale: agentDensityConfig.botScale })
+
         halo
           .transition()
           .duration(1200)
-          .attr('opacity', 0.4)
-          .attr('r', 16 * agentDensityConfig.botScale)
+          .attr('opacity', keyframes.low.opacity)
+          .attr('r', keyframes.low.r)
           .transition()
           .duration(800)
-          .attr('opacity', 0.7)
-          .attr('r', 18 * agentDensityConfig.botScale)
+          .attr('opacity', keyframes.high.opacity)
+          .attr('r', keyframes.high.r)
           .on('end', repeatPulse)
       }
 
@@ -550,19 +608,19 @@ export function updateNodeLabels({
 }) {
   // Update Labels - adaptive based on detail level
   nodeUpdate.select('.label-main')
-    .attr('dy', (d) => d.type === 'envelope' ? 5 : 4)
-    .attr('text-anchor', (d) => d.type === 'agent' ? 'end' : (d.type === 'steward' ? 'start' : 'middle'))
-    .attr('x', (d) => d.type === 'agent' ? -d.r - 5 : (d.type === 'steward' ? d.r + 5 : 0))
+    .attr('dy', (d) => computeLabelMainDy({ type: d.type }))
+    .attr('text-anchor', (d) => computeLabelTextAnchor({ type: d.type }))
+    .attr('x', (d) => computeLabelX({ type: d.type, r: d.r }))
     .attr('fill', 'var(--vscode-editor-foreground)')
     .attr('opacity', (d) => computeLabelMainOpacity({ detailLevel, DETAIL_LEVELS, status: d.status }))
     .style('font-size', (d) => computeLabelMainFontSize({ type: d.type, detailLevel, DETAIL_LEVELS }))
-    .style('font-weight', (d) => d.type === 'envelope' ? 'bold' : 'normal')
+    .style('font-weight', (d) => computeLabelFontWeight({ type: d.type }))
     .text((d) => computeLabelMainText({ node: d, detailLevel, getAdaptiveEnvelopeLabel, getAdaptiveStewardLabel, getAdaptiveAgentName }))
 
   nodeUpdate.select('.label-sub')
-    .attr('dy', (d) => d.type === 'envelope' ? 20 : (d.type === 'steward' ? 15 : 15))
-    .attr('text-anchor', (d) => d.type === 'agent' ? 'end' : (d.type === 'steward' ? 'start' : 'middle'))
-    .attr('x', (d) => d.type === 'agent' ? -d.r - 5 : (d.type === 'steward' ? d.r + 5 : 0))
+    .attr('dy', (d) => computeLabelSubDy({ type: d.type }))
+    .attr('text-anchor', (d) => computeLabelTextAnchor({ type: d.type }))
+    .attr('x', (d) => computeLabelX({ type: d.type, r: d.r }))
     .attr('fill', 'var(--vscode-editor-foreground)')
     .attr('opacity', (d) => computeLabelSubOpacity({ detailLevel, DETAIL_LEVELS, status: d.status }))
     .style('font-size', '9px')
