@@ -421,7 +421,6 @@ export function showAgentTooltip(agentNode, mouseEvent, element, { autoHideMs = 
   if (wasHidden || prevKey !== agentKey) {
     const fleetRole = agentNode?.fleetRole || ''
     const fleetColor = agentNode?.fleetColor || 'var(--vscode-textLink-foreground)'
-    console.log(`[HDDL-MAP] Tooltip for ${agentNode.id}: name=${agentNode.name}, role=${agentNode.role}, fleetRole=${fleetRole}, fleetColor=${fleetColor}, isActive=${agentNode.isRecentlyActive}`)
     tooltipNode
       .attr('data-agent-key', agentKey)
       .html(computeAgentTooltipHtml({

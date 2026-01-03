@@ -87,11 +87,29 @@ export function createHDDLMap(container, options = {}) {
     .attr('width', '100%')
     .attr('height', height + 80)
     .attr('viewBox', [0, -80, width, height + 80])
-    .style('background', `linear-gradient(to bottom, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0.5) 20%, rgba(0, 0, 0, 0.65) 80%, rgba(0, 0, 0, 0.85) 100%), url(${darkBgUrl}) center 55%/cover no-repeat`)
+    .style('background', `linear-gradient(to bottom, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.4) 15%, rgba(0, 0, 0, 0.6) 70%, rgba(0, 0, 0, 0.8) 100%), url(${darkBgUrl}) center 50%/cover no-repeat`)
     .style('border', '1px solid var(--vscode-widget-border)')
     .style('border-radius', '6px')
     .style('overflow', 'visible')
     .style('margin-top', '-80px')
+
+  // Zoom behavior - wrap all content in a zoomable group
+  const zoomGroup = svg.append('g').attr('class', 'zoom-container')
+  
+  let currentZoom = 1
+  const zoom = d3.zoom()
+    .scaleExtent([0.5, 3])  // Allow 50% to 300% zoom
+    .on('zoom', (event) => {
+      currentZoom = event.transform.k
+      zoomGroup.attr('transform', event.transform)
+    })
+  
+  svg.call(zoom)
+  
+  // Double-click to reset zoom
+  svg.on('dblclick.zoom', () => {
+    svg.transition().duration(300).call(zoom.transform, d3.zoomIdentity)
+  })
 
   // 2. Simulation Setup
   // Keep a lightweight simulation running so particles animate smoothly,
@@ -104,14 +122,14 @@ export function createHDDLMap(container, options = {}) {
 
   const { dragstarted, dragged, dragended } = createDragHandlers({ simulation })
 
-  // Layers
-  const headerLayer = svg.append('g').attr('class', 'headers')
-  const cycleLayer = svg.append('g').attr('class', 'cycles')
-  const fleetLayer = svg.append('g').attr('class', 'fleets')
-  const linkLayer = svg.append('g').attr('class', 'links')
-  const exceptionLinkLayer = svg.append('g').attr('class', 'exception-links')
-  const nodeLayer = svg.append('g').attr('class', 'nodes')
-  const particleLayer = svg.append('g').attr('class', 'particles')
+  // Layers (inside zoomGroup so they zoom together)
+  const headerLayer = zoomGroup.append('g').attr('class', 'headers')
+  const cycleLayer = zoomGroup.append('g').attr('class', 'cycles')
+  const fleetLayer = zoomGroup.append('g').attr('class', 'fleets')
+  const linkLayer = zoomGroup.append('g').attr('class', 'links')
+  const exceptionLinkLayer = zoomGroup.append('g').attr('class', 'exception-links')
+  const nodeLayer = zoomGroup.append('g').attr('class', 'nodes')
+  const particleLayer = zoomGroup.append('g').attr('class', 'particles')
 
   const {
     col1Width,
@@ -124,7 +142,7 @@ export function createHDDLMap(container, options = {}) {
     col1Right,
     col3Left,
   } = renderMapChrome({
-    svg,
+    svg: zoomGroup,  // Pass zoomGroup so chrome content zooms too
     headerLayer,
     cycleLayer,
     width,
@@ -322,7 +340,6 @@ export function createHDDLMap(container, options = {}) {
       // Use shared steward color utility for consistency across views
       const color = getStewardColor(fleet.stewardRole)
       stewardColorByRole.set(fleet.stewardRole, color)
-      console.log(`[HDDL-MAP] Steward color mapping: ${fleet.stewardRole} -> ${color}`)
 
       const existing = nodes.find(n => n.id === stewardId)
       if (existing) {
@@ -437,37 +454,38 @@ export function createHDDLMap(container, options = {}) {
       const agentCount = allFleetAgents.length
       
       // Progressive grid configuration based on fleet size
+      // Aggressive sizing: favor larger icons, fewer columns
       let cols, iconScale, showNames, cellPadding
       if (agentCount <= 2) {
         cols = 1
-        iconScale = 1.0
+        iconScale = 1.2
         showNames = true
-        cellPadding = 8
+        cellPadding = 10
       } else if (agentCount <= 4) {
         cols = 2
-        iconScale = 0.9
+        iconScale = 1.1
+        showNames = true
+        cellPadding = 8
+      } else if (agentCount <= 6) {
+        cols = 2
+        iconScale = 1.0
         showNames = true
         cellPadding = 6
-      } else if (agentCount <= 6) {
-        cols = 3
-        iconScale = 0.75
-        showNames = true
-        cellPadding = 4
       } else if (agentCount <= 9) {
         cols = 3
-        iconScale = 0.6
+        iconScale = 0.85
         showNames = false  // Hide names, show on hover/click
-        cellPadding = 3
+        cellPadding = 5
       } else if (agentCount <= 12) {
-        cols = 4
-        iconScale = 0.5
+        cols = 3
+        iconScale = 0.7
         showNames = false
-        cellPadding = 2
+        cellPadding = 4
       } else {
-        cols = 5
-        iconScale = 0.4
+        cols = 4
+        iconScale = 0.6
         showNames = false
-        cellPadding = 2
+        cellPadding = 3
       }
       
       const rows = Math.ceil(agentCount / cols)
@@ -494,12 +512,11 @@ export function createHDDLMap(container, options = {}) {
         const targetX = gridPos.x
         const targetY = gridPos.y
         const agentW = Math.min(cellWidth - cellPadding * 2, 180)
-        const agentR = 12 * gridPos.iconScale
+        const agentR = 16 * gridPos.iconScale  // Increased from 12
 
         const existing = nodes.find(n => n.id === agent.agentId)
         if (existing) {
           // Create new object to force D3 data binding to update
-          console.log(`[HDDL-MAP] Updating working agent: ${agent.agentId} (${agent.name}) fleet=${fleet.stewardRole} color=${fleetColor} (existing.fleetColor=${existing.fleetColor})`)
           newNodes.push({
             ...existing,
             targetX: targetX,
@@ -517,7 +534,6 @@ export function createHDDLMap(container, options = {}) {
             showName: gridPos.showName
           })
         } else if (!newNodes.find(n => n.id === agent.agentId)) {
-          console.log(`[HDDL-MAP] Creating NEW working agent: ${agent.agentId} (${agent.name}) fleet=${fleet.stewardRole} color=${fleetColor}`)
           newNodes.push({
             id: agent.agentId,
             type: 'agent',
@@ -546,12 +562,11 @@ export function createHDDLMap(container, options = {}) {
         const targetX = gridPos.x
         const targetY = gridPos.y
         const agentW = Math.min(cellWidth - cellPadding * 2, 180)
-        const agentR = 12 * gridPos.iconScale
+        const agentR = 16 * gridPos.iconScale  // Increased from 12
 
         const existing = nodes.find(n => n.id === agent.agentId)
         if (existing) {
           // Create new object to force D3 data binding to update
-          console.log(`[HDDL-MAP] Updating idle agent: ${agent.agentId} (${agent.name}) fleet=${fleet.stewardRole} color=${fleetColor} (existing.fleetColor=${existing.fleetColor})`)
           newNodes.push({
             ...existing,
             targetX: targetX,
@@ -569,7 +584,6 @@ export function createHDDLMap(container, options = {}) {
             showName: gridPos.showName
           })
         } else if (!newNodes.find(n => n.id === agent.agentId)) {
-          console.log(`[HDDL-MAP] Creating NEW idle agent: ${agent.agentId} (${agent.name}) fleet=${fleet.stewardRole} color=${fleetColor}`)
           newNodes.push({
             id: agent.agentId,
             type: 'agent',
@@ -819,7 +833,7 @@ export function createHDDLMap(container, options = {}) {
   // EMBEDDING VECTOR SPACE (3D Memory Store)
   // Render embedding visualization using dedicated renderer module
   // ============================================================================
-  const embeddingRenderer = createEmbeddingRenderer(svg, {
+  const embeddingRenderer = createEmbeddingRenderer(zoomGroup, {
     width,
     mapHeight,
     embeddingHeight,

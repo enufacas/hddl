@@ -142,10 +142,10 @@ const ENVELOPE_DENSITY = {
  * radius: radius for icon mode circle
  */
 const ENVELOPE_SIZES = {
-  detailed: { baseWidth: 140, baseHeight: 88, scale: 1.0 },
-  normal: { baseWidth: 110, baseHeight: 68, scale: 0.75 },
-  compact: { baseWidth: 80, baseHeight: 50, scale: 0.55 },
-  icon: { baseWidth: 48, baseHeight: 48, scale: 0.35, radius: 22 }
+  detailed: { baseWidth: 170, baseHeight: 106, scale: 1.0 },
+  normal: { baseWidth: 135, baseHeight: 84, scale: 0.8 },
+  compact: { baseWidth: 100, baseHeight: 62, scale: 0.6 },
+  icon: { baseWidth: 56, baseHeight: 56, scale: 0.4, radius: 26 }
 }
 
 /**

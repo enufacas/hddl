@@ -116,20 +116,20 @@ describe('getEnvelopeDimensions', () => {
   it('returns normal dimensions at STANDARD level', () => {
     const dims = getEnvelopeDimensions('standard', 50)
     expect(dims.density).toBe('normal')
-    expect(dims.scale).toBe(0.75)
+    expect(dims.scale).toBe(0.8)  // Increased for aggressive sizing
   })
 
   it('returns compact dimensions at COMPACT level', () => {
     const dims = getEnvelopeDimensions('compact', 50)
     expect(dims.density).toBe('compact')
-    expect(dims.scale).toBe(0.55)
+    expect(dims.scale).toBe(0.6)  // Increased for aggressive sizing
   })
 
   it('returns icon dimensions at MINIMAL level', () => {
     const dims = getEnvelopeDimensions('minimal', 50)
     expect(dims.density).toBe('icon')
     expect(dims.isIcon).toBe(true)
-    expect(dims.radius).toBe(22)
+    expect(dims.radius).toBe(26)  // Increased for aggressive sizing
   })
 })
 
