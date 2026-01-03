@@ -409,6 +409,38 @@ workspace.js (coordinator, <800 lines)
 
 ---
 
+## Progress Tracker
+
+### ✅ Task 1.1: Extract detail-levels.js (Completed 2026-01-02)
+- Created `src/components/map/detail-levels.js` (221 lines, 8 exports)
+- Updated hddl-map.js: 3,866 → 3,329 lines (-537 lines, -13.9%)
+- Updated hddl-map.test.js to import from module
+- Tests: 66/66 passing
+- Commit: `3bba8ab`
+
+### ✅ Task 1.2: Extract bezier-math.js (Completed 2026-01-02)
+- Created `src/components/map/bezier-math.js` (57 lines, 2 exports)
+- Created `src/components/map/bezier-math.test.js` (10 tests)
+- Updated hddl-map.js: 3,329 → 3,303 lines (-26 lines, -0.8%)
+- Tests: 72/72 passing (includes 10 new tests)
+- Commit: `7fd59c1`
+
+### ✅ Task 1.3: Extract workspace utilities (Completed 2026-01-02)
+- Created `src/components/workspace/glossary.js` (15 lines, HDDL_GLOSSARY)
+- Created `src/components/workspace/utils.js` (120 lines, 8 exports)
+- Updated workspace.js: 3,225 → 3,141 lines (-84 lines, -2.6%)
+- Updated workspace.test.js to import from module
+- Tests: 72/72 passing
+- Commit: `c9b55db`
+
+### 🎯 Phase 1 Summary (In Progress)
+- **Files reduced:** hddl-map.js (-563 lines), workspace.js (-84 lines)
+- **New modules:** detail-levels.js, bezier-math.js, workspace/glossary.js, workspace/utils.js
+- **Test coverage:** Maintained (72/72 unit tests passing)
+- **Next:** Task 1.4 - Validation gate
+
+---
+
 ## Notes & Decisions
 
 ### 2026-01-02: Initial Architecture Survey
@@ -418,17 +450,22 @@ workspace.js (coordinator, <800 lines)
 - **Decision:** Phase order prioritizes low-risk pure functions first
 - **Decision:** Add Playwright snapshot test before extracting particle-engine.js
 
+### 2026-01-02: Phase 1 Extraction Pattern Established
+- **Finding:** Updating test files to import (not copy) validates module exports work correctly
+- **Finding:** workspace.js had inline utility functions scattered throughout file, not consolidated
+- **Decision:** Extract scattered utilities as standalone functions, don't consolidate first
+- **Lesson:** Always update test imports immediately after extraction to catch export errors early
+
 ---
 
 ## Next Steps
 
-**Immediate (Phase 1):**
-1. Start Task 1.1: Extract detail-levels.js
-2. Create `hddl-sim/src/components/map/` directory
-3. Copy lines 11-242 to new file with proper exports
-4. Update hddl-map.js to import from new module
-5. Update hddl-map.test.js to import (not copy) functions
-6. Validate: `npm run test:unit` passes
+**Immediate (Task 1.4 - Validation Gate):**
+1. Run full test suite: `npm test` (Vitest + Playwright)
+2. Verify browser at localhost:5173 (no console errors)
+3. Check test coverage: `npm run test:coverage` (should maintain 46%+)
+4. Manual verification: Check all UI elements, animations, interactions
+5. Create checkpoint tag: `refactor-phase-1-complete`
 
 **Context Management:**
 - This document serves as external memory between tasks
