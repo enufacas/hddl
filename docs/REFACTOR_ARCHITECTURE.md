@@ -10,17 +10,18 @@
 
 | File | Original LOC | Current LOC | Reduction | Status | Target |
 |------|--------------|-------------|-----------|--------|--------|
-| `hddl-map.js` | 3,866 | 1,858 | -2,008 (-52%) | 🟡 In Progress | <800 |
+| `hddl-map.js` | 3,866 | 1,280 | -2,586 (-67%) | 🟡 In Progress | <800 |
 | `workspace.js` | 3,225 | 564 | -2,661 (-83%) | ✅ Complete | <800 |
 | `store.js` | 144 | 144 | - | ✅ Clean | Reference |
 | `selectors.js` | 202 | 202 | - | ✅ Clean | Reference |
-| **Total UI** | **7,091** | **2,768** | **-4,323 (-61%)** | **101/101 tests passing** | **<1,600 lines** |
+| **Total UI** | **7,091** | **2,190** | **-4,901 (-69%)** | **104/104 tests passing** | **<1,600 lines** |
 
-**Extracted Modules (19):**
+**Extracted Modules (24):**
 - `map/detail-levels.js` (221 lines)
 - `map/bezier-math.js` (57 lines)
 - `map/tooltip-manager.js` (429 lines)
 - `map/embedding-renderer.js` (1,093 lines)
+- `map/envelope-renderer.js` (393 lines)
 - `map/agent-layout.js` (84 lines)
 - `map/particle-labels.js` (63 lines)
 - `map/particle-logic.js` (33 lines)
@@ -28,6 +29,10 @@
 - `map/particle-motion.js` (110 lines)
 - `map/text-utils.js` (24 lines)
 - `map/flow-particles.js` (186 lines)
+- `map/exception-links.js` (45 lines)
+- `map/steward-processing.js` (44 lines)
+- `map/render-fleet-links.js` (107 lines)
+- `map/particle-renderer.js` (56 lines)
 - `workspace/utils.js` (113 lines)
 - `workspace/glossary.js` (14 lines)
 - `workspace/ai-narrative.js` (651 lines)
@@ -36,7 +41,7 @@
 - `workspace/state.js` (10 lines)
 - `workspace/telemetry.js` (595 lines)
 - `workspace/mobile.js` (286 lines)
-- **Total extracted:** 4,826 lines across 19 focused modules
+- **Total extracted:** 5,471 lines across 24 focused modules
 
 ---
 
@@ -49,7 +54,7 @@
 | `detail-levels.js` | 11-242 | ~230 | ✅ Yes | None | P0 | Low |
 | `bezier-math.js` | 325-355 | ~30 | ✅ Yes | None | P0 | Low |
 | `tooltip-manager.js` | 468-750 | ~280 | ❌ No | d3 | P1 | Medium |
-| `envelope-renderer.js` | 775-1700 | ~900 | ❌ No | d3, detail-levels | P2 | Medium |
+| `envelope-renderer.js` | 775-1700 | 393 | ❌ No | d3, detail-levels | P2 | Medium |
 | `particle-engine.js` | 2734-3000 | ~270 | ❌ No | d3, bezier-math | P2 | **High** |
 | `entity-renderer.js` | 1700-2730 | ~1000 | ❌ No | d3, detail-levels | P2 | Medium |
 | `embedding-renderer.js` | 3399-3866 | ~470 | ❌ No | d3, selectors | P2 | Medium |
@@ -82,7 +87,7 @@
 3. ✅ **Task 3.3:** Extracted telemetry (595 lines) - event stream, metrics, boundary interactions
 4. ✅ **Mobile extraction:** Extracted mobile UI helpers (286 lines)
 5. ✅ **Result:** workspace.js reduced from 3,225 → 564 lines (-83% reduction)
-6. ✅ **Tests:** 101/101 passing, no console errors
+6. ✅ **Tests:** 104/104 passing, no console errors
 7. ✅ **Architecture:** Clean module boundaries with dependency injection pattern
 
 ---
@@ -157,32 +162,23 @@ export function createTooltipManager() {
 
 ---
 
-### `envelope-renderer.js` (Priority P2) ⚠️ **DEFERRED**
+### `envelope-renderer.js` (Priority P2)
 
-**Status:** DEFERRED to Phase 5 (after D3 update pattern refactoring)
-
-**Purpose:** Render decision envelopes with status, constraints, revisions  
+**Purpose:** Render decision envelopes (enter + update) with status and animations  
 **Exports:**
-- `createEnvelopeRenderer(layer, options)` - Factory
-- Returns API: `render(envelopeData)`, `update()`, `clear()`
+- `renderEnvelopeEnter({ d3, nodeSelection, nodeEnter, shouldRenderEnvelopeElement, showEnvelopeTooltip, hideEnvelopeTooltip, canHoverTooltip, getScenario, getTimeHour, createEnvelopeDetailModal })`
+- `updateEnvelopeRendering({ d3, nodeUpdate })`
 
 **Responsibilities:**
-- Envelope shape generation (flap, body, fold paths)
-- Status indicators (pending/active/ended)
-- Constraint badges
-- Revision burst animation
-- Click handlers for envelope detail modal
+- Envelope shape generation (icon vs body/flap/fold)
+- Tooltip + click handlers (opens envelope detail modal)
+- Status styling (pending/active/ended)
+- Active glow pulse + revision burst animation
+- Status + version badge updates
 
-**Dependencies:** d3, detail-levels.js, steward-colors.js  
-**Test Coverage:** Playwright visual tests  
-**Risk:** **HIGH** - Tightly coupled to D3 update pattern (nodeEnter/nodeUpdate/nodeSelection)
-
-**Deferral Rationale:**
-- Envelope rendering spans 700+ lines (lines 1270-2050+) with 16+ element references
-- Code deeply integrated with D3 update pattern (nodeEnter, nodeUpdate, nodeSelection)
-- Elements involved: envelope-glow, envelope-revision-burst, envelope-body, envelope-flap, envelope-fold, envelope-status, envelope-version-badge
-- Extraction requires refactoring entire D3 render cycle first to avoid breaking changes
-- Defer until Phase 5 when D3 patterns are refactored
+**Dependencies:** d3, detail-levels.js (via injected `shouldRenderEnvelopeElement`)  
+**Test Coverage:** Unit tests cover integration via `hddl-map.test.js`; visuals validated via manual dev server  
+**Risk:** Medium - D3 update pattern extraction but isolated behind two explicit entry points
 
 ---
 
