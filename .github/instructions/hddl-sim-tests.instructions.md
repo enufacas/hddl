@@ -9,9 +9,20 @@ applyTo: "hddl-sim/tests/**,hddl-sim/src/**/*.test.js"
 ## Commands
 - Integration (Playwright): `npm test`
 - Unit (Vitest): `npm run test:unit`
+- Unit (non-watch): `npm run test:unit -- --run` (use this during refactoring to avoid hanging)
 - Unit watch: `npm run test:unit:watch`
 - Coverage (Playwright + Istanbul): `npm run test:coverage`
 - Single Playwright spec: `npx playwright test tests/<file>.spec.js`
+
+## Refactoring Validation Checklist
+When extracting/refactoring code modules, follow this checklist:
+1. **Run tests with `--run` flag**: `npm run test:unit -- --run` (avoids watch mode hanging)
+2. **Check dev server starts**: Verify Vite starts without compilation errors
+3. **Inspect browser console**: Open http://localhost:5173 and check for runtime errors
+4. **Verify functionality**: Click through affected UI to ensure it works
+5. **Commit changes**: Only commit after all validation passes
+
+**Why this matters**: Tests passing doesn't guarantee runtime correctness - missing exports, incorrect imports, or state management issues only show up in the browser console.
 
 ## Test Writing (Playwright)
 - Prefer stable selectors (`data-testid`) over CSS structure.
