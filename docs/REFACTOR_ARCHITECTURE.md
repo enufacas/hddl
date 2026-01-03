@@ -1,6 +1,6 @@
 # HDDL-Sim Refactoring Architecture
 
-**Status:** Phase 3 - Workspace Modules Complete (Tasks 3.1-3.3)  
+**Status:** Phase 3 - Workspace Refactor Complete (Tasks 3.1-3.3 + mobile extraction)  
 **Last Updated:** 2026-01-02  
 **Target:** Break 7,091 lines of monolithic UI code into <800 line modules with clear boundaries
 
@@ -11,12 +11,12 @@
 | File | Original LOC | Current LOC | Reduction | Status | Target |
 |------|--------------|-------------|-----------|--------|--------|
 | `hddl-map.js` | 3,866 | 2,471 | -1,395 (-36%) | 🟡 In Progress | <800 |
-| `workspace.js` | 3,225 | 929 | -2,296 (-71%) | 🟢 Nearly Complete | <800 |
+| `workspace.js` | 3,225 | 564 | -2,661 (-83%) | ✅ Complete | <800 |
 | `store.js` | 144 | 144 | - | ✅ Clean | Reference |
 | `selectors.js` | 202 | 202 | - | ✅ Clean | Reference |
-| **Total UI** | **7,091** | **3,746** | **-3,345 (-47%)** | **72/72 tests passing** | **<1,600 lines** |
+| **Total UI** | **7,091** | **3,381** | **-3,710 (-52%)** | **72/72 tests passing** | **<1,600 lines** |
 
-**Extracted Modules (11):**
+**Extracted Modules (12):**
 - `map/detail-levels.js` (221 lines)
 - `map/bezier-math.js` (57 lines)
 - `map/tooltip-manager.js` (429 lines)
@@ -28,7 +28,8 @@
 - `workspace/panels.js` (476 lines)
 - `workspace/state.js` (10 lines)
 - `workspace/telemetry.js` (595 lines)
-- **Total extracted:** 4,032 lines across 11 focused modules
+- `workspace/mobile.js` (286 lines)
+- **Total extracted:** 4,318 lines across 12 focused modules
 
 ---
 
@@ -65,15 +66,17 @@
 | `workspace/panels.js` | ✅ Complete | 476 | ❌ No | sim-state, ai-narrative | a30e799 |
 | `workspace/state.js` | ✅ Complete | 10 | ✅ Yes | None | a30e799 |
 | `workspace/telemetry.js` | ✅ Complete | 595 | ❌ No | sim-state, colors, glossary | 957a073 |
-| `workspace.js` (refactored) | 🟢 929 lines | 929 | ❌ No | All above | 957a073 |
+| `workspace/mobile.js` | ✅ Complete | 286 | ❌ No | sim-state, router | e3f941c |
+| `workspace.js` (refactored) | ✅ 564 lines | 564 | ❌ No | All above | e3f941c |
 
 **Phase 3 Achievements:**
 1. ✅ **Task 3.1:** Extracted AI narrative (651 lines) - narrative generation, timeline sync, caching
 2. ✅ **Task 3.2:** Extracted sidebar (373 lines) + panels (476 lines) + shared state (10 lines)
 3. ✅ **Task 3.3:** Extracted telemetry (595 lines) - event stream, metrics, boundary interactions
-4. **Result:** workspace.js reduced from 3,225 → 929 lines (-71% reduction)
-5. **Tests:** 72/72 passing, no console errors
-6. **Architecture:** Clean module boundaries with dependency injection pattern
+4. ✅ **Mobile extraction:** Extracted mobile UI helpers (286 lines)
+5. ✅ **Result:** workspace.js reduced from 3,225 → 564 lines (-83% reduction)
+6. ✅ **Tests:** 72/72 passing, no console errors
+7. ✅ **Architecture:** Clean module boundaries with dependency injection pattern
 
 ---
 
@@ -108,8 +111,8 @@
 - Curve memoization cache logic (if needed for performance)
 
 **Dependencies:** None (pure math)  
-**Test Coverage:** Need new unit tests  
-**Migration Path:** Extract, add tests, update hddl-map imports
+**Test Coverage:** ✅ Unit tests in `src/components/map/bezier-math.test.js`  
+**Migration Path:** ✅ Complete
 
 ---
 
@@ -578,22 +581,23 @@ hddl-map.js (coordinator, <800 lines)
 **Target for workspace.js:** ✅ **ACHIEVED**
 
 ```
-workspace.js (coordinator, 929 lines → target <800)
+workspace.js (coordinator, 564 lines ✅ <800)
   ├─ workspace/utils.js (pure, 113 lines) ✅
   ├─ workspace/glossary.js (pure, 14 lines) ✅
   ├─ workspace/state.js (pure, 10 lines) ✅
   ├─ workspace/sidebar.js (DOM, 373 lines) ✅
   ├─ workspace/panels.js (DOM, 476 lines) ✅
   ├─ workspace/ai-narrative.js (state + API, 651 lines) ✅
-  └─ workspace/telemetry.js (metrics + DOM, 595 lines) ✅
+  ├─ workspace/telemetry.js (metrics + DOM, 595 lines) ✅
+  └─ workspace/mobile.js (mobile UI, 286 lines) ✅
 ```
 
 **Phase 3 Summary:**
-- Extracted 7 focused modules (2,232 lines)
-- Reduced workspace.js from 3,225 → 929 lines (-71%)
+- Extracted 8 focused modules (2,518 lines)
+- Reduced workspace.js from 3,225 → 564 lines (-83%)
 - Clean dependency injection pattern (setUpdateTelemetry)
 - All tests passing (72/72)
-- **129 lines over target** - can extract mobile UI (~400 lines available) if needed
+- ✅ Under <800 target (mobile UI extracted)
 
 ---
 
@@ -707,30 +711,41 @@ workspace.js (coordinator, 929 lines → target <800)
 - Tests: 72/72 passing
 - Commit: `957a073`
 
+### ✅ Task 3.4: Extract mobile UI module (Completed 2026-01-02)
+- Created `src/components/workspace/mobile.js` (286 lines)
+- Features:
+  - Mobile nav drawer + overlays
+  - Mobile telemetry bottom sheet
+  - Mobile panel FAB + modal
+- Updated workspace.js: 929 → 564 lines (-365 lines)
+- Tests: 72/72 passing
+- Commit: `e3f941c`
+
 ### 🎯 Phase 3 Summary (✅ COMPLETE)
-- **Files reduced:** workspace.js: 3,225 → 929 lines (-2,296 lines, -71% reduction)
-- **New modules:** 7 focused modules (2,232 lines total)
+- **Files reduced:** workspace.js: 3,225 → 564 lines (-2,661 lines, -83% reduction)
+- **New modules:** 8 focused modules (2,518 lines total)
   - ai-narrative.js (651 lines)
   - sidebar.js (373 lines)
   - panels.js (476 lines)
   - state.js (10 lines)
   - telemetry.js (595 lines)
+  - mobile.js (286 lines)
   - utils.js (113 lines, from Phase 1)
   - glossary.js (14 lines, from Phase 1)
 - **Architecture:** Clean dependency injection pattern (setUpdateTelemetry)
 - **Test coverage:** 72/72 passing (100%)
-- **Status:** workspace.js now 929 lines (129 lines over <800 target)
-- **Next steps:** Optional mobile UI extraction (~400 lines available) to reach <800
+- **Status:** workspace.js now 564 lines (✅ under <800 target)
+- **Next steps:** Continue with hddl-map.js extraction plan
 
 ---
 
 ## Notes & Decisions
 
 ### 2026-01-02: Phase 3 Complete - Workspace Module Extraction Success
-- **Achievement:** workspace.js reduced from 3,225 → 929 lines (-71%)
+- **Achievement:** workspace.js reduced from 3,225 → 564 lines (-83%)
 - **Pattern:** Dependency injection pattern worked well (setUpdateTelemetry for circular dependencies)
-- **Finding:** Mobile UI components (~400 lines) remain in workspace.js, can be extracted if needed
-- **Status:** 129 lines over <800 target, but workspace.js is now maintainable and well-organized
+- **Finding:** Mobile UI components were extracted to workspace/mobile.js
+- **Status:** ✅ Under <800 target, workspace.js is now maintainable and well-organized
 - **Decision:** Phase 3 considered successful - workspace modules have clean boundaries
 
 ### 2026-01-02: Initial Architecture Survey
