@@ -1,5 +1,5 @@
 import { navigateTo } from '../../router'
-import { getEnvelopeStatus, getScenario, getTimeHour, onScenarioChange, onTimeChange } from '../../sim/sim-state'
+import { formatSimTime, getEnvelopeStatus, getScenario, getTimeHour, onScenarioChange, onTimeChange } from '../../sim/sim-state'
 import { getStewardColor } from '../../sim/steward-colors'
 import { navItems } from './sidebar'
 
@@ -289,8 +289,8 @@ function updateBottomSheetContent(container, tabId) {
 export function createMobilePanelFAB() {
   const fab = document.createElement('button')
   fab.className = 'mobile-panel-fab'
-  fab.setAttribute('aria-label', 'Open panel')
-  fab.innerHTML = '<span class="codicon codicon-terminal"></span>'
+  fab.setAttribute('aria-label', 'Open DTS Stream')
+  fab.innerHTML = '<span class="codicon codicon-database"></span>'
 
   fab.addEventListener('click', () => {
     const modal = document.querySelector('.mobile-panel-modal')
@@ -313,14 +313,103 @@ export function createMobilePanelModal() {
   const header = document.createElement('div')
   header.className = 'mobile-panel-modal-header'
   header.innerHTML = `
-    <h3 style="margin: 0;">Terminal</h3>
+    <h3 style="margin: 0;">Decision Telemetry Stream</h3>
     <button class="codicon codicon-close" aria-label="Close" style="background: none; border: none; color: var(--vscode-editor-foreground); font-size: 20px; cursor: pointer; padding: 4px;"></button>
   `
 
   const body = document.createElement('div')
   body.className = 'mobile-panel-modal-body'
-  body.innerHTML = '<div style="font-family: monospace; color: var(--vscode-statusBar-foreground);">Terminal output will appear here...</div>'
+  body.style.padding = '0'
+  body.style.overflow = 'auto'
 
+  // Function to render DTS events
+  function renderDTSContent() {
+    const scenario = getScenario()
+    const currentHour = getTimeHour()
+    const allEvents = scenario?.events || []
+    
+    // Filter events up to current time and get most recent 20
+    const recentEvents = allEvents
+      .filter(event => event.hour === undefined || event.hour <= currentHour)
+      .sort((a, b) => (b.hour || 0) - (a.hour || 0))
+      .slice(0, 20)
+    
+    if (recentEvents.length === 0) {
+      body.innerHTML = `
+        <div style="padding: 20px; text-align: center; color: var(--vscode-statusBar-foreground);">
+          No events in timeline yet
+        </div>
+      `
+      return
+    }
+    
+    body.innerHTML = recentEvents.map(event => {
+      const timestamp = event.hour !== undefined ? formatSimTime(event.hour) : '—'
+      const eventType = event.type || 'unknown'
+      const envelope = event.envelopeId || '—'
+      
+      // Actor with color
+      const actorColor = event.actorRole ? getStewardColor(event.actorRole) : '#666'
+      const actorDisplay = event.actorRole || '—'
+      
+      // Build message
+      let message = event.label || event.detail || ''
+      if (!message) {
+        if (eventType === 'decision') {
+          message = `Decision ${event.status || ''}`
+        } else if (eventType === 'boundary_interaction') {
+          message = `Boundary ${event.boundary_kind || 'interaction'}`
+          if (event.reason) message += `: ${event.reason}`
+        } else if (eventType === 'signal') {
+          message = `Signal ${event.signalKey || ''}`
+        } else if (eventType === 'revision') {
+          message = `Revision v${event.envelope_version || ''}`
+        } else {
+          message = eventType.replace('_', ' ')
+        }
+      }
+      
+      // Get type color
+      const typeColors = {
+        decision: 'var(--status-info)',
+        boundary_interaction: 'var(--status-warning)',
+        signal: 'var(--vscode-charts-blue)',
+        revision: 'var(--vscode-charts-purple)',
+        dsg_session: 'var(--status-error)',
+        envelope_promoted: 'var(--status-success)'
+      }
+      const typeColor = typeColors[eventType] || 'var(--vscode-statusBar-foreground)'
+      
+      return `
+        <div style="padding: 12px 16px; border-bottom: 1px solid var(--vscode-sideBar-border); background: var(--vscode-editor-background);">
+          <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 6px;">
+            <span style="font-size: 11px; font-weight: 600; color: var(--vscode-statusBar-foreground);">${timestamp}</span>
+            <span style="padding: 2px 8px; border-radius: 10px; font-size: 9px; font-weight: 600; text-transform: uppercase; background: color-mix(in srgb, ${typeColor} 25%, transparent); color: ${typeColor}; border: 1px solid ${typeColor};">
+              ${eventType.replace('_', ' ')}
+            </span>
+          </div>
+          <div style="font-size: 12px; margin-bottom: 4px; color: var(--vscode-editor-foreground);">
+            ${message}
+          </div>
+          <div style="display: flex; gap: 12px; font-size: 11px; color: var(--vscode-statusBar-foreground);">
+            <div style="display: flex; align-items: center; gap: 4px;">
+              <span style="width: 6px; height: 6px; border-radius: 50%; background: ${actorColor};"></span>
+              <span>${actorDisplay}</span>
+            </div>
+            <div style="color: var(--vscode-charts-purple); font-weight: 600;">${envelope}</div>
+          </div>
+        </div>
+      `
+    }).join('')
+  }
+  
+  // Initial render
+  renderDTSContent()
+  
+  // Listen for state changes
+  const unsubscribeTime = onTimeChange(() => renderDTSContent())
+  const unsubscribeScenario = onScenarioChange(() => renderDTSContent())
+  
   content.appendChild(header)
   content.appendChild(body)
   modal.appendChild(content)
