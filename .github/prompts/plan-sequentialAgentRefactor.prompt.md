@@ -25,12 +25,13 @@ This prevents rapid iteration and confident changes.
 
 ## Current Repo Status (2026-01-02)
 
-- **workspace.js:** reduced to ~929 lines (from 3,225) via extracted modules:
+- **workspace.js:** reduced to ~564 lines (from 3,225) via extracted modules:
   - `src/components/workspace/ai-narrative.js`
   - `src/components/workspace/sidebar.js`
   - `src/components/workspace/panels.js`
   - `src/components/workspace/state.js`
   - `src/components/workspace/telemetry.js`
+  - `src/components/workspace/mobile.js`
   - `src/components/workspace/utils.js`
   - `src/components/workspace/glossary.js`
 - **hddl-map.js:** reduced to ~2,471 lines (from 3,866) via extracted modules:
