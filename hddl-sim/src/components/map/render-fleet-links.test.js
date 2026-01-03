@@ -5,6 +5,10 @@ import {
   computeLinkStroke,
   computeLinkStrokeWidth,
   computeLinkOpacity,
+  computeFleetBadgeTransform,
+  computeFleetBadgeOpacity,
+  computeFleetBadgeRect,
+  computeLinkKey,
 } from './render-fleet-links'
 
 describe('map/render-fleet-links', () => {
@@ -41,5 +45,30 @@ describe('map/render-fleet-links', () => {
 
     // Cap at +3
     expect(computeLinkStrokeWidth({ type: 'ownership', interactionCount: 100 })).toBe(4.5)
+  })
+
+  test('computeFleetBadgeTransform centers the badge in boundary rect', () => {
+    expect(computeFleetBadgeTransform({ x: 10, y: 20, w: 100, h: 50 })).toBe('translate(60, 45)')
+  })
+
+  test('computeFleetBadgeOpacity shows only in compact/minimal densities', () => {
+    expect(computeFleetBadgeOpacity({ currentAgentDensity: { density: 'compact' } })).toBe(1)
+    expect(computeFleetBadgeOpacity({ currentAgentDensity: { density: 'minimal' } })).toBe(1)
+    expect(computeFleetBadgeOpacity({ currentAgentDensity: { density: 'standard' } })).toBe(0)
+    expect(computeFleetBadgeOpacity({ currentAgentDensity: null })).toBe(0)
+  })
+
+  test('computeFleetBadgeRect returns symmetric rect around origin', () => {
+    expect(computeFleetBadgeRect({ halfWidth: 20, halfHeight: 12 })).toEqual({
+      x: -20,
+      y: -12,
+      width: 40,
+      height: 24,
+    })
+  })
+
+  test('computeLinkKey tolerates id objects or raw ids', () => {
+    expect(computeLinkKey({ source: { id: 'A' }, target: { id: 'B' } })).toBe('A-B')
+    expect(computeLinkKey({ source: 'A', target: 'B' })).toBe('A-B')
   })
 })

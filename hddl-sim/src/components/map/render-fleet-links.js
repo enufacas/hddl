@@ -36,6 +36,30 @@ export function computeLinkOpacity(d) {
   return c > 0 ? 0.8 : 0.45
 }
 
+export function computeFleetBadgeTransform({ x, y, w, h }) {
+  return `translate(${x + w / 2}, ${y + h / 2})`
+}
+
+export function computeFleetBadgeOpacity({ currentAgentDensity }) {
+  const density = currentAgentDensity?.density
+  return density === 'compact' || density === 'minimal' ? 1 : 0
+}
+
+export function computeFleetBadgeRect({ halfWidth = 20, halfHeight = 12 }) {
+  return {
+    x: -halfWidth,
+    y: -halfHeight,
+    width: halfWidth * 2,
+    height: halfHeight * 2,
+  }
+}
+
+export function computeLinkKey(d) {
+  const s = d?.source?.id || d?.source
+  const t = d?.target?.id || d?.target
+  return `${s}-${t}`
+}
+
 export function renderFleetBoundaries({ fleetLayer, fleetBounds, nodes, currentAgentDensity }) {
   const fleetSel = fleetLayer.selectAll('g.fleet')
     .data(fleetBounds, (d) => d.id)
@@ -85,14 +109,15 @@ export function renderFleetBoundaries({ fleetLayer, fleetBounds, nodes, currentA
   const fleetMerged = fleetSel.merge(fleetEnter)
 
   fleetMerged.select('.fleet-count-badge')
-    .attr('transform', (d) => `translate(${d.x + d.w / 2}, ${d.y + d.h / 2})`)
-    .attr('opacity', () => currentAgentDensity.density === 'compact' || currentAgentDensity.density === 'minimal' ? 1 : 0)
+    .attr('transform', (d) => computeFleetBadgeTransform(d))
+    .attr('opacity', () => computeFleetBadgeOpacity({ currentAgentDensity }))
 
+  const badgeRect = computeFleetBadgeRect({ halfWidth: 20, halfHeight: 12 })
   fleetMerged.select('.fleet-count-bg')
-    .attr('x', -20)
-    .attr('y', -12)
-    .attr('width', 40)
-    .attr('height', 24)
+    .attr('x', badgeRect.x)
+    .attr('y', badgeRect.y)
+    .attr('width', badgeRect.width)
+    .attr('height', badgeRect.height)
     .attr('fill', (d) => d.color)
     .attr('opacity', 0.15)
 
@@ -105,11 +130,7 @@ export function renderFleetBoundaries({ fleetLayer, fleetBounds, nodes, currentA
 
 export function renderLinks({ linkLayer, links }) {
   const linkSelection = linkLayer.selectAll('line')
-    .data(links, (d) => {
-      const s = d.source.id || d.source
-      const t = d.target.id || d.target
-      return `${s}-${t}`
-    })
+    .data(links, (d) => computeLinkKey(d))
 
   linkSelection.enter()
     .append('line')
