@@ -10,17 +10,24 @@
 
 | File | Original LOC | Current LOC | Reduction | Status | Target |
 |------|--------------|-------------|-----------|--------|--------|
-| `hddl-map.js` | 3,866 | 2,471 | -1,395 (-36%) | 🟡 In Progress | <800 |
+| `hddl-map.js` | 3,866 | 1,858 | -2,008 (-52%) | 🟡 In Progress | <800 |
 | `workspace.js` | 3,225 | 564 | -2,661 (-83%) | ✅ Complete | <800 |
 | `store.js` | 144 | 144 | - | ✅ Clean | Reference |
 | `selectors.js` | 202 | 202 | - | ✅ Clean | Reference |
-| **Total UI** | **7,091** | **3,381** | **-3,710 (-52%)** | **72/72 tests passing** | **<1,600 lines** |
+| **Total UI** | **7,091** | **2,768** | **-4,323 (-61%)** | **101/101 tests passing** | **<1,600 lines** |
 
-**Extracted Modules (12):**
+**Extracted Modules (19):**
 - `map/detail-levels.js` (221 lines)
 - `map/bezier-math.js` (57 lines)
 - `map/tooltip-manager.js` (429 lines)
 - `map/embedding-renderer.js` (1,093 lines)
+- `map/agent-layout.js` (84 lines)
+- `map/particle-labels.js` (63 lines)
+- `map/particle-logic.js` (33 lines)
+- `map/event-resolution.js` (8 lines)
+- `map/particle-motion.js` (110 lines)
+- `map/text-utils.js` (24 lines)
+- `map/flow-particles.js` (186 lines)
 - `workspace/utils.js` (113 lines)
 - `workspace/glossary.js` (14 lines)
 - `workspace/ai-narrative.js` (651 lines)
@@ -29,7 +36,7 @@
 - `workspace/state.js` (10 lines)
 - `workspace/telemetry.js` (595 lines)
 - `workspace/mobile.js` (286 lines)
-- **Total extracted:** 4,318 lines across 12 focused modules
+- **Total extracted:** 4,826 lines across 19 focused modules
 
 ---
 
@@ -75,7 +82,7 @@
 3. ✅ **Task 3.3:** Extracted telemetry (595 lines) - event stream, metrics, boundary interactions
 4. ✅ **Mobile extraction:** Extracted mobile UI helpers (286 lines)
 5. ✅ **Result:** workspace.js reduced from 3,225 → 564 lines (-83% reduction)
-6. ✅ **Tests:** 72/72 passing, no console errors
+6. ✅ **Tests:** 101/101 passing, no console errors
 7. ✅ **Architecture:** Clean module boundaries with dependency injection pattern
 
 ---
@@ -747,6 +754,41 @@ workspace.js (coordinator, 564 lines ✅ <800)
 - **Finding:** Mobile UI components were extracted to workspace/mobile.js
 - **Status:** ✅ Under <800 target, workspace.js is now maintainable and well-organized
 - **Decision:** Phase 3 considered successful - workspace modules have clean boundaries
+
+### 2026-01-02: Extract agent label layout helpers
+- **Achievement:** Created src/components/map/agent-layout.js (84 lines)
+- **Result:** hddl-map.js reduced from 2,471 → 2,183 lines
+- **Validation:** All unit tests passing (74/74)
+
+### 2026-01-02: Extract particle label helpers
+- **Achievement:** Created src/components/map/particle-labels.js (63 lines)
+- **Result:** hddl-map.js reduced from 2,183 → 2,122 lines
+- **Validation:** All unit tests passing (80/80)
+
+### 2026-01-02: Extract particle timing helpers
+- **Achievement:** Created src/components/map/particle-logic.js (33 lines)
+- **Result:** hddl-map.js reduced from 2,122 → 2,117 lines
+- **Validation:** All unit tests passing (86/86)
+
+### 2026-01-02: Extract event resolution helper
+- **Achievement:** Created src/components/map/event-resolution.js (8 lines)
+- **Result:** hddl-map.js reduced from 2,117 → 2,110 lines
+- **Validation:** All unit tests passing (89/89)
+
+### 2026-01-02: Extract particle motion step helper
+- **Achievement:** Created src/components/map/particle-motion.js (110 lines)
+- **Result:** hddl-map.js reduced from 2,110 → 2,012 lines
+- **Validation:** All unit tests passing (92/92)
+
+### 2026-01-02: Extract node sub-label + truncation helpers
+- **Achievement:** Created src/components/map/text-utils.js (24 lines)
+- **Result:** hddl-map.js reduced from 2,012 → 1,998 lines
+- **Validation:** All unit tests passing (98/98)
+
+### 2026-01-02: Extract flow particle creation
+- **Achievement:** Created src/components/map/flow-particles.js (186 lines)
+- **Result:** hddl-map.js reduced from 1,998 → 1,858 lines
+- **Validation:** All unit tests passing (101/101)
 
 ### 2026-01-02: Initial Architecture Survey
 - **Finding:** sim-state.js already demonstrates target pattern (facade → store + selectors)

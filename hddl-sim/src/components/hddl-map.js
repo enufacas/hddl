@@ -30,6 +30,18 @@ import {
 } from './map/tooltip-manager'
 import { createEmbeddingRenderer } from './map/embedding-renderer'
 import { adjustAgentTextPositions } from './map/agent-layout'
+import { formatParticleLabel, wrapTextLinesByChars } from './map/particle-labels'
+import {
+  getParticleCurveSign,
+  computeOrbitDurationTicks,
+  getParticleLife,
+  computeOrbitTicksLeft,
+  getWaypointPulseMax
+} from './map/particle-logic'
+import { getResolutionTime } from './map/event-resolution'
+import { stepParticle } from './map/particle-motion'
+import { truncateWithEllipsis, getNodeSubLabelText } from './map/text-utils'
+import { nextParticles } from './map/flow-particles'
 
 export function createHDDLMap(container, options = {}) {
   // 1. Setup SVG and Dimensions
@@ -824,229 +836,16 @@ export function createHDDLMap(container, options = {}) {
     })
 
     // --- Particles (Events) ---
-    // Authority-first map story:
-    // - signal: world -> envelope
-    // - boundary_interaction: agent -> envelope -> steward
-    // - revision: steward (actorRole) -> envelope
-    // - retrieval: embedding store -> agent
-    const flowEvents = recentEvents.filter(e =>
-      e.type === 'signal' || e.type === 'boundary_interaction' || e.type === 'revision' || e.type === 'decision' || e.type === 'retrieval'
-    )
-    
-    // Helper to find resolution time for boundary interactions (reuse allEvents from above)
-    function getResolutionTime(eventId) {
-      const resolving = allEvents.find(ev => 
-        (ev.type === 'revision' || ev.type === 'decision') && 
-        ev.resolvesEventId === eventId
-      )
-      return resolving?.hour || null
-    }
-
-    flowEvents.forEach(e => {
-      const pid = e.eventId || e.id || `${e.type}-${String(e.hour)}-${e.envelopeId || e.envelope_id || e.envelope_id}`
-      if (particles.find(p => p.id === pid)) return
-
-      const envelopeId = e.envelopeId || e.envelope_id
-      const envelopeNode = nodes.find(n => n.type === 'envelope' && n.id === envelopeId)
-      if (!envelopeNode) return
-
-      const stewardNode = e.actorRole
-        ? nodes.find(n => n.type === 'steward' && n.name === e.actorRole)
-        : null
-
-      const agentNode = e.agentId ? nodes.find(n => n.type === 'agent' && n.id === e.agentId) : null
-
-      // Default: start off-screen
-      let sourceX = Math.random() < 0.5 ? -20 : width + 20
-      let sourceY = Math.random() * height
-      let targetX = envelopeNode.x
-      let targetY = envelopeNode.y
-
-      if (e.type === 'signal') {
-        // world -> envelope
-        // Always originate from above the envelope lane so it never reads
-        // like it came from a steward.
-        sourceX = envelopeNode.x + (Math.random() * 40 - 20)
-        sourceY = -24
-        targetX = envelopeNode.x
-        targetY = envelopeNode.y
-      }
-
-      if (e.type === 'decision') {
-        // agent -> envelope (all decisions go to envelope first)
-        if (agentNode) {
-          sourceX = agentNode.x
-          sourceY = agentNode.y
-        }
-        // All decisions target envelope first
-        targetX = envelopeNode.x
-        targetY = envelopeNode.y
-      }
-
-      if (e.type === 'boundary_interaction') {
-        // agent -> envelope (agent requests escalation, envelope forwards to steward)
-        // Look up agent by actorName since boundary_interaction events don't have agentId
-        const boundaryAgentNode = e.actorName 
-          ? nodes.find(n => n.type === 'agent' && n.name === e.actorName)
-          : null
-        
-        if (boundaryAgentNode) {
-          sourceX = boundaryAgentNode.x
-          sourceY = boundaryAgentNode.y
-        } else {
-          // Fallback to envelope if agent not found
-          sourceX = envelopeNode.x
-          sourceY = envelopeNode.y
-        }
-        
-        // Target envelope first (boundary check), then forward to steward
-        targetX = envelopeNode.x
-        targetY = envelopeNode.y
-      }
-
-      if (e.type === 'revision') {
-        // steward -> envelope
-        if (stewardNode) {
-          sourceX = stewardNode.x
-          sourceY = stewardNode.y
-        }
-        targetX = envelopeNode.x
-        targetY = envelopeNode.y
-      }
-
-      if (e.type === 'retrieval') {
-        // embedding store -> agent (agent queries decision memory)
-        // Source: embedding store at bottom of map (center of the 3D box)
-        sourceX = width * 0.5 + (Math.random() * 100 - 50) // Center with slight randomness
-        sourceY = mapHeight + 40 // Embedding store area (below the main map)
-        
-        // Target: agent that made the query (via actorName)
-        const retrievalAgentNode = e.actorName 
-          ? nodes.find(n => n.type === 'agent' && n.name === e.actorName)
-          : null
-        
-        if (retrievalAgentNode) {
-          targetX = retrievalAgentNode.x
-          targetY = retrievalAgentNode.y
-        } else {
-          // Fallback to envelope if agent not found
-          targetX = envelopeNode.x
-          targetY = envelopeNode.y
-        }
-      }
-
-      // Calculate orbit duration for boundary interactions based on resolution time
-      const resolutionHour = e.type === 'boundary_interaction' && e.eventId 
-        ? getResolutionTime(e.eventId) 
-        : null
-      const hoursDiff = resolutionHour ? (resolutionHour - e.hour) : 0
-      // Increase ticks per hour for more visible orbiting (25 ticks/hour)
-      // At 0.11 radians/tick, full circle = 57 ticks, so 25 ticks ≈ 0.4 circles
-      const orbitDuration = resolutionHour 
-        ? Math.max(25, Math.min(150, hoursDiff * 25)) // 25 ticks per hour, cap at 25-150 ticks
-        : 30 // Default if no resolution found
-      
-      // Debug logging for boundary interactions
-      // if (e.type === 'boundary_interaction') {
-      //   console.log(`[Boundary Interaction] ${e.eventId}`, {
-      //     currentHour: e.hour,
-      //     resolutionHour,
-      //     hoursDiff,
-      //     orbitDuration,
-      //     orbitCircles: (orbitDuration * 0.11 / (2 * Math.PI)).toFixed(1)
-      //   })
-      // }
-
-      particles.push({
-        id: pid,
-        type: e.type,
-        severity: e.severity || 'info',
-        status: e.status || (e.boundary_kind === 'escalated' ? 'blocked' : 'allowed'),
-        text: (() => {
-          const type = String(e.type || '').toLowerCase()
-          const status = String(e.status || '').toLowerCase()
-          const boundaryKind = String(e.boundary_kind || e.boundaryKind || '').toLowerCase()
-          const boundaryReason = String(e.boundary_reason || '').toLowerCase()
-
-          let prefix = 'Event'
-          if (type === 'signal') prefix = 'Signal'
-          else if (type === 'revision') prefix = 'Revision'
-          else if (type === 'retrieval') prefix = 'Query'
-          else if (type === 'boundary_interaction') {
-            // Use canonical boundary_kind for prefix
-            if (boundaryKind === 'escalated') prefix = 'Exception Request'
-            else if (boundaryKind === 'deferred') prefix = 'Deferred Request'
-            else if (boundaryKind === 'overridden') prefix = 'Override Request'
-            else prefix = 'Boundary'
-          }
-          else if (type === 'decision') prefix = (status === 'blocked' || status === 'denied') ? 'Decision (blocked)' : 'Decision'
-
-          let core = ''
-          if (type === 'signal') core = String(e.label || e.signalKey || 'telemetry')
-          else if (type === 'revision') core = String(e.label || e.revision_id || 'bounds updated')
-          else if (type === 'retrieval') {
-            // Show number of retrieved embeddings and top relevance score
-            const count = (e.retrievedEmbeddings || []).length
-            const topScore = (e.relevanceScores || [])[0]
-            core = count > 0 
-              ? `${count} result${count !== 1 ? 's' : ''}${topScore ? ` (${(topScore * 100).toFixed(0)}%)` : ''}`
-              : 'decision memory'
-          }
-          else if (type === 'boundary_interaction') {
-            // Use boundary_reason for richer context if available
-            core = boundaryReason ? boundaryReason.replace(/_/g, ' ') : String(e.label || boundaryKind || 'interaction')
-          }
-          else if (type === 'decision') core = String(e.label || (status ? status : 'executed'))
-          else core = String(e.label || e.type || 'event')
-
-          return `${prefix}: ${core}`
-        })(),
-        sourceX,
-        sourceY,
-        targetX,
-        targetY,
-        targetNodeId: (e.type === 'revision' && stewardNode)
-          ? stewardNode.id
-          : (e.type === 'boundary_interaction' && stewardNode)
-          ? stewardNode.id
-          : envelopeNode.id,
-        x: sourceX,
-        y: sourceY,
-        t: 0,
-        curve: (() => {
-          const type = String(e.type || '').toLowerCase()
-          const status = String(e.status || '').toLowerCase()
-          // Coordinate system: y increases downward. sign=-1 yields an "upper" arc.
-          if (type === 'revision') return makeFlowCurve(sourceX, sourceY, targetX, targetY, +1)
-          if (type === 'boundary_interaction') return makeFlowCurve(sourceX, sourceY, targetX, targetY, -1)
-          if (type === 'decision') {
-            if (status === 'blocked' || status === 'denied') return makeFlowCurve(sourceX, sourceY, targetX, targetY, -1)
-            return makeFlowCurve(sourceX, sourceY, targetX, targetY, -1)
-          }
-          if (type === 'signal') return makeFlowCurve(sourceX, sourceY, targetX, targetY, -1)
-          return makeFlowCurve(sourceX, sourceY, targetX, targetY, -1)
-        })(),
-        life: e.type === 'boundary_interaction' ? 1.5 : 1.0, // Extra life for orbiting particles
-        labelOpacity: 0.85,
-
-        // Canon cue: boundary interactions orbit steward while processing; allowed decisions orbit envelope.
-        orbit: false,
-        orbitAfterTravel: false, // Boundary interactions orbit at steward, not at envelope
-        orbitAngle: Math.random() * Math.PI * 2,
-        orbitTicksLeft: e.type === 'boundary_interaction' ? orbitDuration : (e.type === 'decision' && e.status !== 'blocked' && e.status !== 'denied' ? 18 : 0),
-        
-        // For boundary_interaction: pulse at envelope then continue to steward
-        hasWaypoint: e.type === 'boundary_interaction',
-        waypointPulseTicks: 0,
-        waypointPulseMax: e.type === 'boundary_interaction' ? 8 : 12, // Shorter pulse for boundary checks (8 ticks)
-        finalTargetX: (e.type === 'boundary_interaction' && stewardNode) ? stewardNode.x : (e.type === 'decision' && (e.status === 'blocked' || e.status === 'denied') && stewardNode) ? stewardNode.x : null,
-        finalTargetY: (e.type === 'boundary_interaction' && stewardNode) ? stewardNode.y : (e.type === 'decision' && (e.status === 'blocked' || e.status === 'denied') && stewardNode) ? stewardNode.y : null,
-        shouldOrbitAfterWaypoint: e.type === 'boundary_interaction', // Flag to orbit at steward after waypoint
-      })
+    particles = nextParticles({
+      particles,
+      recentEvents,
+      nodes,
+      allEvents,
+      hour,
+      width,
+      height,
+      mapHeight
     })
-
-    // Remove old particles
-    particles = particles.filter(p => p.life > 0)
 
     // Lock nodes to their lane coordinates (deterministic / on-rails)
     for (const n of nodes) {
@@ -1649,9 +1448,7 @@ export function createHDDLMap(container, options = {}) {
       .attr('fill', 'var(--vscode-editor-foreground)')
       .attr('opacity', 0.65)
       .text(d => {
-        if (!d.role) return ''
-        const maxLen = 26
-        return d.role.substring(0, maxLen) + (d.role.length > maxLen ? '...' : '')
+        return truncateWithEllipsis(d.role, 26)
       })
 
     // Update agent text elements (visibility controlled by per-node showName property)
@@ -1706,8 +1503,7 @@ export function createHDDLMap(container, options = {}) {
       .text(d => {
         const shouldShowRole = agentDensityConfig.showRole && d.showName !== false
         if (!shouldShowRole || !d.role) return ''
-        const maxLen = 26
-        return d.role.substring(0, maxLen) + (d.role.length > maxLen ? '...' : '')
+        return truncateWithEllipsis(d.role, 26)
       })
 
     // Update agent activity halo with pulsing glow for active agents
@@ -2071,19 +1867,7 @@ export function createHDDLMap(container, options = {}) {
         return 0.7
       })
       .style('font-size', '9px')
-      .text(d => {
-        // Skip sub-labels on COMPACT and MINIMAL
-        if (detailLevel === DETAIL_LEVELS.COMPACT || detailLevel === DETAIL_LEVELS.MINIMAL) return ''
-        if (d.type === 'agent') {
-          if (!d.role) return ''
-          const maxLen = detailLevel === DETAIL_LEVELS.STANDARD ? 16 : 20
-          return d.role.substring(0, maxLen) + (d.role.length > maxLen ? '...' : '')
-        }
-        if (d.type === 'steward') return 'Steward'
-        // Let envelopes carry their name clearly; other types remain compact.
-        const maxLen = d.type === 'envelope' ? (detailLevel === DETAIL_LEVELS.STANDARD ? 18 : 24) : 18
-        return d.name.substring(0, maxLen) + (d.name.length > maxLen ? '...' : '')
-      })
+      .text(d => getNodeSubLabelText(d, detailLevel))
 
     nodeSelection.exit().transition().duration(500).style('opacity', 0).remove()
 
@@ -2116,112 +1900,7 @@ export function createHDDLMap(container, options = {}) {
 
     // Update Particle Positions (follow curved lifecycle lines)
     particles.forEach(p => {
-      // Keep particles tracking their intended endpoints as nodes move.
-      const targetMatch = nodes.find(n => Math.abs(n.x - p.targetX) < 80 && Math.abs(n.y - p.targetY) < 80)
-      if (targetMatch) {
-        p.targetX = targetMatch.x
-        p.targetY = targetMatch.y
-      }
-
-      p.labelOpacity = 0.85
-
-      if (p.orbit && p.orbitTicksLeft > 0) {
-        const center = nodes.find(n => n.id === p.targetNodeId) || null
-        const r = center?.r ? Math.max(10, Math.min(22, center.r * 0.45)) : 16
-        const cx = center?.x ?? p.targetX
-        const cy = center?.y ?? p.targetY
-
-        p.orbitAngle += 0.11
-        p.x = cx + Math.cos(p.orbitAngle) * r
-        p.y = cy + Math.sin(p.orbitAngle) * r
-        p.orbitTicksLeft -= 1
-        // Much slower decay during orbit - needs to survive 150 ticks max
-        p.life -= 0.003
-        return
-      }
-
-      // Move along the curve from source->target.
-      const speed = 0.011
-      p.t = Math.min(1, (p.t ?? 0) + speed)
-
-      if (p.curve) {
-        // Re-bake curve endpoints so the curve stays attached as nodes move.
-        // OPTIMIZATION #2: Only recalculate bezier curve when endpoints change significantly
-        const threshold = 2 // pixels
-        const sign = (p.type === 'revision') ? +1 : -1
-        
-        const needsUpdate = !p.curveCache || 
-          Math.abs(p.sourceX - p.curveCache.sourceX) > threshold ||
-          Math.abs(p.sourceY - p.curveCache.sourceY) > threshold ||
-          Math.abs(p.targetX - p.curveCache.targetX) > threshold ||
-          Math.abs(p.targetY - p.curveCache.targetY) > threshold
-        
-        if (needsUpdate) {
-          p.curveCache = {
-            curve: makeFlowCurve(p.sourceX, p.sourceY, p.targetX, p.targetY, sign),
-            sourceX: p.sourceX,
-            sourceY: p.sourceY,
-            targetX: p.targetX,
-            targetY: p.targetY
-          }
-          p.curve = p.curveCache.curve
-        } else {
-          p.curve = p.curveCache.curve
-        }
-        
-        const pt = bezierPoint(p.t, p.curve.p0, p.curve.p1, p.curve.p2, p.curve.p3)
-        p.x = pt.x
-        p.y = pt.y
-      } else {
-        // Fallback to linear if curve is missing.
-        p.x = p.sourceX + (p.targetX - p.sourceX) * p.t
-        p.y = p.sourceY + (p.targetY - p.sourceY) * p.t
-      }
-
-      if (p.t >= 1) {
-        // Handle waypoint pulse for denied/blocked decisions and boundary_interactions at envelope
-        if (p.hasWaypoint && p.waypointPulseTicks < p.waypointPulseMax) {
-          // Pulse at envelope to show rejection or boundary check
-          p.waypointPulseTicks += 1
-          const pulsePhase = p.waypointPulseTicks / p.waypointPulseMax
-          // Pulse effect: scale particle up/down
-          p.pulseScale = 1.0 + Math.sin(pulsePhase * Math.PI * 3) * 0.5 // 3 pulses
-          p.life -= 0.005
-          
-          // After pulse completes, redirect to steward
-          if (p.waypointPulseTicks >= p.waypointPulseMax && p.finalTargetX && p.finalTargetY) {
-            p.hasWaypoint = false
-            p.sourceX = p.x
-            p.sourceY = p.y
-            p.targetX = p.finalTargetX
-            p.targetY = p.finalTargetY
-            p.t = 0
-            // Invalidate curve cache when redirecting
-            p.curveCache = null
-            p.curve = makeFlowCurve(p.sourceX, p.sourceY, p.targetX, p.targetY, -1)
-            p.pulseScale = 1.0
-            
-            // If this is a boundary_interaction, prepare to orbit at steward
-            if (p.shouldOrbitAfterWaypoint && p.orbitTicksLeft > 0) {
-              p.orbitAfterTravel = true
-            }
-          }
-          return
-        }
-        
-        if (p.orbitAfterTravel && p.orbitTicksLeft > 0) {
-          // Boundary interactions orbit at steward after arrival
-          p.orbit = true
-          p.life -= 0.002
-        } else if (p.type === 'decision' && p.status !== 'blocked' && p.status !== 'denied') {
-          // Allowed decisions orbit at envelope
-          p.orbit = true
-          p.orbitTicksLeft = 18
-          p.life -= 0.01
-        } else {
-          p.life -= 0.025
-        }
-      }
+      stepParticle(p, nodes)
     })
 
     // Render Particles
@@ -2273,36 +1952,7 @@ export function createHDDLMap(container, options = {}) {
         const text = d?.text ? String(d.text) : ''
         const maxCharsPerLine = 22
 
-        function wrapLines(input) {
-          const words = String(input || '').split(/\s+/).filter(Boolean)
-          const lines = []
-          let current = ''
-          for (const word of words) {
-            // If a single word is too long, hard-split it.
-            if (word.length > maxCharsPerLine) {
-              if (current) {
-                lines.push(current)
-                current = ''
-              }
-              for (let i = 0; i < word.length; i += maxCharsPerLine) {
-                lines.push(word.slice(i, i + maxCharsPerLine))
-              }
-              continue
-            }
-
-            const next = current ? `${current} ${word}` : word
-            if (next.length > maxCharsPerLine) {
-              if (current) lines.push(current)
-              current = word
-            } else {
-              current = next
-            }
-          }
-          if (current) lines.push(current)
-          return lines
-        }
-
-        const lines = text ? wrapLines(text) : []
+        const lines = text ? wrapTextLinesByChars(text, maxCharsPerLine) : []
 
         // Clear and rebuild tspans so we can wrap without truncation.
         el.text(null)

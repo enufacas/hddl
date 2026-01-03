@@ -34,12 +34,19 @@ This prevents rapid iteration and confident changes.
   - `src/components/workspace/mobile.js`
   - `src/components/workspace/utils.js`
   - `src/components/workspace/glossary.js`
-- **hddl-map.js:** reduced to ~2,471 lines (from 3,866) via extracted modules:
+- **hddl-map.js:** reduced to ~1,858 lines (from 3,866) via extracted modules:
   - `src/components/map/detail-levels.js`
   - `src/components/map/bezier-math.js`
+  - `src/components/map/agent-layout.js`
+  - `src/components/map/particle-labels.js`
+  - `src/components/map/particle-logic.js`
+  - `src/components/map/event-resolution.js`
+  - `src/components/map/particle-motion.js`
+  - `src/components/map/text-utils.js`
+  - `src/components/map/flow-particles.js`
   - `src/components/map/tooltip-manager.js`
   - `src/components/map/embedding-renderer.js`
-- **Unit tests:** 72/72 passing
+- **Unit tests:** 101/101 passing
 
 Note: Actual execution order deviated from the original phase ordering (workspace extraction happened before hddl-map core coordinator refactor).
 
