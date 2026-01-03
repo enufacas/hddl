@@ -56,6 +56,30 @@ export function renderStewardEnter({
     .attr('d', 'M -18 18 Q 0 3 18 18')
 }
 
+export function computeAgentTextAnchor({ useLeftSide }) {
+  return useLeftSide ? 'end' : 'start'
+}
+
+export function computeAgentNameX({ useLeftSide, gridScale, botScale }) {
+  const scale = (gridScale || 1.0) * (botScale || 1.0)
+  return useLeftSide ? -16 * scale : 16 * scale
+}
+
+export function computeAgentRoleX({ useLeftSide }) {
+  return useLeftSide ? -16 : 16
+}
+
+export function computeAgentFontSizePx({ detailLevel, gridScale, DETAIL_LEVELS }) {
+  const baseSize = detailLevel === DETAIL_LEVELS.STANDARD ? 8 : 9
+  return `${Math.max(7, baseSize * (gridScale || 1.0))}px`
+}
+
+export function computeAgentNameText({ agentDensityConfig, agent, detailLevel, getAdaptiveAgentName }) {
+  const shouldShowName = !!agentDensityConfig?.showName && agent?.showName !== false
+  if (!shouldShowName) return ''
+  return getAdaptiveAgentName(agent?.name, detailLevel)
+}
+
 export function updateStewardRendering({ d3, nodeUpdate }) {
   // Update steward circle rotation based on processing state
   nodeUpdate.filter((d) => d.type === 'steward').select('circle.steward-circle')
@@ -226,17 +250,11 @@ export function renderAgentEnter({
   // Agent name - shown based on per-agent showName property (with collision avoidance)
   agentEnter.append('text')
     .attr('class', 'agent-name')
-    .attr('text-anchor', (d) => d.useLeftSide ? 'end' : 'start')
-    .attr('x', (d) => {
-      const scale = (d.gridScale || 1.0) * agentDensityConfig.botScale
-      return d.useLeftSide ? -16 * scale : 16 * scale
-    })
+    .attr('text-anchor', (d) => computeAgentTextAnchor({ useLeftSide: d.useLeftSide }))
+    .attr('x', (d) => computeAgentNameX({ useLeftSide: d.useLeftSide, gridScale: d.gridScale, botScale: agentDensityConfig.botScale }))
     .attr('y', (d) => -3 + (d.textYOffset || 0))
     .style('pointer-events', 'none')
-    .style('font-size', (d) => {
-      const baseSize = detailLevel === DETAIL_LEVELS.STANDARD ? 8 : 9
-      return `${Math.max(7, baseSize * (d.gridScale || 1.0))}px`
-    })
+    .style('font-size', (d) => computeAgentFontSizePx({ detailLevel, gridScale: d.gridScale, DETAIL_LEVELS }))
     .style('font-weight', '700')
     .style('paint-order', 'stroke')
     .style('stroke', 'var(--vscode-editor-background)')
@@ -244,18 +262,15 @@ export function renderAgentEnter({
     .attr('fill', 'var(--vscode-editor-foreground)')
     .style('opacity', 0) // Start at 0, will be set correctly in update phase
     .attr('opacity', 0) // Start at 0, will be set correctly in update phase
-    .text((d) => {
-      const shouldShowName = agentDensityConfig.showName && d.showName !== false
-      return shouldShowName ? getAdaptiveAgentName(d.name, detailLevel) : ''
-    })
+    .text((d) => computeAgentNameText({ agentDensityConfig, agent: d, detailLevel, getAdaptiveAgentName }))
 
   // Agent role - only shown in full mode (with collision avoidance)
   // Note: also respect per-agent showName gating so large fleets don't render label text.
   agentEnter.filter((d) => agentDensityConfig.showRole && d.showName !== false)
     .append('text')
     .attr('class', 'agent-role')
-    .attr('text-anchor', (d) => d.useLeftSide ? 'end' : 'start')
-    .attr('x', (d) => d.useLeftSide ? -16 : 16)
+    .attr('text-anchor', (d) => computeAgentTextAnchor({ useLeftSide: d.useLeftSide }))
+    .attr('x', (d) => computeAgentRoleX({ useLeftSide: d.useLeftSide }))
     .attr('y', (d) => 10 + (d.textYOffset || 0))
     .style('pointer-events', 'none')
     .style('font-size', '10px')

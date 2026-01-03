@@ -1,3 +1,22 @@
+export function computeParticleGroupTransform(d) {
+  const scale = d?.pulseScale || 1.0
+  return `translate(${d?.x},${d?.y}) scale(${scale})`
+}
+
+export function computeParticleOpacity(d) {
+  return d?.life
+}
+
+export function computeParticleLabelLines({ text, maxCharsPerLine, wrapTextLinesByChars }) {
+  const raw = text ? String(text) : ''
+  if (!raw.trim()) return []
+  return wrapTextLinesByChars(raw, maxCharsPerLine)
+}
+
+export function computeParticleLabelOpacity(d) {
+  return Math.max(0, (d?.labelOpacity || 0) * (d?.life || 0))
+}
+
 export function renderParticlesTick({ d3, particleLayer, particles, getEventColor, wrapTextLinesByChars }) {
   // Render Particles
   const particleSelection = particleLayer.selectAll('g.particle')
@@ -30,11 +49,8 @@ export function renderParticlesTick({ d3, particleLayer, particles, getEventColo
   pEnter.transition().duration(200).attr('opacity', 1)
 
   particleSelection
-    .attr('transform', (d) => {
-      const scale = d.pulseScale || 1.0
-      return `translate(${d.x},${d.y}) scale(${scale})`
-    })
-    .attr('opacity', (d) => d.life)
+    .attr('transform', (d) => computeParticleGroupTransform(d))
+    .attr('opacity', (d) => computeParticleOpacity(d))
 
   particleSelection.select('circle')
     .attr('fill', (d) => {
@@ -45,10 +61,13 @@ export function renderParticlesTick({ d3, particleLayer, particles, getEventColo
   particleSelection.select('text.particle-label')
     .each(function (d) {
       const el = d3.select(this)
-      const text = d?.text ? String(d.text) : ''
       const maxCharsPerLine = 22
 
-      const lines = text ? wrapTextLinesByChars(text, maxCharsPerLine) : []
+      const lines = computeParticleLabelLines({
+        text: d?.text,
+        maxCharsPerLine,
+        wrapTextLinesByChars,
+      })
 
       // Clear and rebuild tspans so we can wrap without truncation.
       el.text(null)
@@ -61,7 +80,7 @@ export function renderParticlesTick({ d3, particleLayer, particles, getEventColo
           .text(line)
       })
     })
-    .attr('opacity', (d) => Math.max(0, (d.labelOpacity || 0) * d.life))
+    .attr('opacity', (d) => computeParticleLabelOpacity(d))
 
   particleSelection.exit().remove()
 }

@@ -1,3 +1,42 @@
+export function computeCycleGeometry({ mapHeight }) {
+  const cycleYTop = 100
+  const cycleYBottom = mapHeight - 48
+  const cycleYMid = (cycleYTop + cycleYBottom) / 2
+  const cycleRy = Math.max(65, (cycleYBottom - cycleYTop) * 0.42)
+  return { cycleYTop, cycleYBottom, cycleYMid, cycleRy }
+}
+
+export function computeCycleLoopPath({ x1, x2, cycleYMid, cycleRy }) {
+  const rx = Math.max(80, Math.abs(x2 - x1) * 0.55)
+  return `M ${x1} ${cycleYMid} A ${rx} ${cycleRy} 0 0 1 ${x2} ${cycleYMid} A ${rx} ${cycleRy} 0 0 1 ${x1} ${cycleYMid}`
+}
+
+export function computeColumnLayout({ width }) {
+  // Give agents and envelopes more space: 35% / 38% / 27%
+  const col1Width = width * 0.35
+  const col2Width = width * 0.38
+  const col3Width = width * 0.27
+  const col1Center = col1Width * 0.5
+  const col2Center = col1Width + (col2Width * 0.5)
+  const col3Center = col1Width + col2Width + (col3Width * 0.5)
+
+  const col1Left = 0
+  const col1Right = col1Width
+  const col3Left = col1Width + col2Width
+
+  return {
+    col1Width,
+    col2Width,
+    col3Width,
+    col1Center,
+    col2Center,
+    col3Center,
+    col1Left,
+    col1Right,
+    col3Left,
+  }
+}
+
 export function renderMapChrome({
   svg,
   headerLayer,
@@ -11,19 +50,11 @@ export function renderMapChrome({
 }) {
   // Lifecycle loop cues (subtle background curves across system boundaries)
   // These are intentionally static: they communicate the conceptual flow.
-  const cycleYTop = 100
-  const cycleYBottom = mapHeight - 48  // Use mapHeight, not total height
-  const cycleYMid = (cycleYTop + cycleYBottom) / 2
-  const cycleRy = Math.max(65, (cycleYBottom - cycleYTop) * 0.42)
-
-  function loopPath(x1, x2) {
-    const rx = Math.max(80, Math.abs(x2 - x1) * 0.55)
-    return `M ${x1} ${cycleYMid} A ${rx} ${cycleRy} 0 0 1 ${x2} ${cycleYMid} A ${rx} ${cycleRy} 0 0 1 ${x1} ${cycleYMid}`
-  }
+  const { cycleYMid, cycleRy } = computeCycleGeometry({ mapHeight })
 
   cycleLayer.append('path')
     .attr('class', 'cycle-loop-left')
-    .attr('d', loopPath(width * 0.15, width * 0.5))
+    .attr('d', computeCycleLoopPath({ x1: width * 0.15, x2: width * 0.5, cycleYMid, cycleRy }))
     .attr('fill', 'none')
     .attr('stroke', 'var(--vscode-editor-lineHighlightBorder)')
     .attr('stroke-width', 2)
@@ -32,7 +63,7 @@ export function renderMapChrome({
 
   cycleLayer.append('path')
     .attr('class', 'cycle-loop-right')
-    .attr('d', loopPath(width * 0.5, width * 0.85))
+    .attr('d', computeCycleLoopPath({ x1: width * 0.5, x2: width * 0.85, cycleYMid, cycleRy }))
     .attr('fill', 'none')
     .attr('stroke', 'var(--vscode-editor-lineHighlightBorder)')
     .attr('stroke-width', 2)
@@ -81,17 +112,17 @@ export function renderMapChrome({
     .attr('fill', 'var(--vscode-editor-background)')
     .attr('opacity', 0)
 
-  // Give agents and envelopes more space: 35% / 38% / 27%
-  const col1Width = width * 0.35
-  const col2Width = width * 0.38
-  const col3Width = width * 0.27
-  const col1Center = col1Width * 0.5
-  const col2Center = col1Width + (col2Width * 0.5)
-  const col3Center = col1Width + col2Width + (col3Width * 0.5)
-
-  const col1Left = 0
-  const col1Right = col1Width
-  const col3Left = col1Width + col2Width
+  const {
+    col1Width,
+    col2Width,
+    col3Width,
+    col1Center,
+    col2Center,
+    col3Center,
+    col1Left,
+    col1Right,
+    col3Left,
+  } = computeColumnLayout({ width })
 
   // Headers with adaptive text based on detail level
   headerLayer.append('text')
