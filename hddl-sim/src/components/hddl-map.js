@@ -29,6 +29,7 @@ import {
   getStewardEnvelopeInteractionCount
 } from './map/tooltip-manager'
 import { createEmbeddingRenderer } from './map/embedding-renderer'
+import { adjustAgentTextPositions } from './map/agent-layout'
 
 export function createHDDLMap(container, options = {}) {
   // 1. Setup SVG and Dimensions
@@ -460,99 +461,6 @@ export function createHDDLMap(container, options = {}) {
       const id = env?.envelopeId
       if (!id) continue
       envelopeStatusById.set(id, getEnvelopeStatus(env, hour))
-    }
-
-    function stackYsInSlot(centerY, count, slotTop, slotBottom) {
-      const pad = 8
-      const minY = Math.max(topMargin, slotTop + pad + (agentH / 2))
-      const maxY = Math.min(topMargin + usableHeight, slotBottom - pad - (agentH / 2))
-      const clampedCenter = Math.max(minY, Math.min(maxY, centerY))
-      if (count <= 1) return [clampedCenter]
-
-      const span = Math.max(0, maxY - minY)
-      // Agent name + role occupy ~30px vertical space (name at y=-2, role at y=12, plus margins)
-      // Increased to 36px for better text separation
-      const safeMinStep = 36
-      const ideal = span / Math.max(1, (count - 1))
-      const step = Math.max(safeMinStep, Math.min(agentStep, ideal))
-      
-      const total = (count - 1) * step
-      let start = clampedCenter - (total / 2)
-      if (start < minY) start = minY
-      if ((start + total) > maxY) start = Math.max(minY, maxY - total)
-
-      const ys = []
-      for (let i = 0; i < count; i++) ys.push(start + i * step)
-      return ys
-    }
-    
-    // Smart text positioning to avoid overlaps
-    function adjustAgentTextPositions(agentNodes) {
-      if (!agentNodes || !agentNodes.length) return []
-      
-      const textBoxes = new Map()
-      const adjusted = []
-      
-      // Group by fleet to check collisions within each fleet
-      const byFleet = d3.group(agentNodes, d => d.fleetRole || 'default')
-      
-      byFleet.forEach((fleetAgents, fleetRole) => {
-        // Sort by y position within fleet
-        const sorted = [...fleetAgents].sort((a, b) => a.targetY - b.targetY)
-        
-        sorted.forEach((agent, index) => {
-          const baseTextY = -3
-          const estimatedTextWidth = (agent.name?.length || 10) * 5.5
-          const textHeight = 24 // Increased for name + role
-          
-          let textYOffset = 0
-          let useLeftSide = false
-          
-          // Check for overlaps with previously placed text in this fleet
-          let hasOverlap = true
-          let attempts = 0
-          
-          while (hasOverlap && attempts < 4) {
-            hasOverlap = false
-            const candidateY = agent.targetY + baseTextY + textYOffset
-            
-            for (const [otherId, box] of textBoxes.entries()) {
-              if (otherId.startsWith(`${fleetRole}:`)) {
-                const yDist = Math.abs(candidateY - box.y)
-                const xOverlap = Math.abs(agent.targetX - box.x) < estimatedTextWidth + 20
-                
-                if (yDist < textHeight && xOverlap) {
-                  hasOverlap = true
-                  // Alternate: try shifting down or flipping to left side
-                  if (attempts < 2) {
-                    textYOffset += 14
-                  } else {
-                    useLeftSide = true
-                  }
-                  break
-                }
-              }
-            }
-            
-            attempts++
-          }
-          
-          textBoxes.set(`${fleetRole}:${agent.id}`, {
-            x: agent.targetX,
-            y: agent.targetY + baseTextY + textYOffset,
-            width: estimatedTextWidth,
-            height: textHeight
-          })
-          
-          adjusted.push({
-            ...agent,
-            textYOffset,
-            useLeftSide
-          })
-        })
-      })
-      
-      return adjusted
     }
 
     for (const fleet of fleetOrder) {
