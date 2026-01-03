@@ -44,9 +44,118 @@ export const canHoverTooltip = () => {
  * @returns {boolean} True if tooltip should be shown
  */
 export const shouldShowHoverTooltip = (evt) => {
-  if (canHoverTooltip()) return true
   const pt = evt?.pointerType
-  return pt === 'mouse' || pt === 'pen'
+  return computeShouldShowHoverTooltipDecision({ canHover: canHoverTooltip(), pointerType: pt })
+}
+
+export function computeShouldShowHoverTooltipDecision({ canHover, pointerType }) {
+  if (canHover) return true
+  return pointerType === 'mouse' || pointerType === 'pen'
+}
+
+export function computeAgentTooltipHtml({ name, role, isRecentlyActive, fleetRole, fleetColor }) {
+  return `
+        <div style="font-weight: 600; margin-bottom: 6px; font-size: 16px;">${name}</div>
+        <div style="font-size: 13px; opacity: 0.85; margin-bottom: 8px;">${role || ''}</div>
+        <div style="font-size: 13px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.1);">
+          <span style="color: ${isRecentlyActive ? '#4ec9b0' : '#cccccc'};">
+            ${isRecentlyActive ? '● Active' : '○ Idle'}
+          </span>
+        </div>
+        ${fleetRole ? `<div style="margin-top: 8px; font-size: 13px; opacity: 0.85;">
+          <span style="opacity:0.75;">Steward:</span>
+          <span style="font-weight: 700; color: ${fleetColor};">${fleetRole}</span>
+        </div>` : ''}
+      `
+}
+
+export function computeEnvelopeTooltipHtml({ label, id, name, ownerRole }) {
+  return `
+      <div style="font-weight: 600; margin-bottom: 6px; font-size: 16px;">${label || id || 'Envelope'}</div>
+      <div style="font-size: 13px; opacity: 0.85; margin-bottom: 8px;">${name || ''}</div>
+      <div style="font-size: 13px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.1);">
+        <span style="opacity:0.75;">Steward:</span>
+        <span style="font-weight: 700;">${ownerRole || 'Unknown'}</span>
+      </div>
+    `
+}
+
+export function computeActiveAgentCount({ agents, events, usedHour, windowHours = 6 }) {
+  const start = usedHour - windowHours
+  const safeAgents = agents || []
+  const safeEvents = events || []
+  let count = 0
+
+  for (const agent of safeAgents) {
+    const agentId = agent?.agentId
+    if (!agentId) continue
+
+    let active = false
+    for (const e of safeEvents) {
+      if (!e || e.agentId !== agentId) continue
+      if (typeof e.hour !== 'number') continue
+      if (e.hour <= usedHour && e.hour > start) {
+        active = true
+        break
+      }
+    }
+
+    if (active) count += 1
+  }
+
+  return count
+}
+
+export function computeStewardTooltipStats({
+  scenario,
+  hour,
+  stewardRole,
+  getEnvelopeStatus: getEnvelopeStatusImpl = getEnvelopeStatus,
+  getTimeHour: getTimeHourImpl = getTimeHour,
+}) {
+  const usedHour = typeof hour === 'number' ? hour : getTimeHourImpl()
+
+  const allEnvelopes = scenario?.envelopes || []
+  const ownedEnvelopes = allEnvelopes.filter(e => e && e.ownerRole === stewardRole)
+  const activeEnvelopes = ownedEnvelopes.filter(e => {
+    const status = getEnvelopeStatusImpl(e, usedHour)
+    return status === 'active'
+  })
+
+  const fleets = scenario?.fleets || []
+  const fleet = fleets.find(f => f && f.stewardRole === stewardRole)
+  const agents = fleet?.agents || []
+
+  return {
+    ownedEnvelopesCount: ownedEnvelopes.length,
+    activeEnvelopesCount: activeEnvelopes.length,
+    agentCount: agents.length,
+    activeAgentCount: computeActiveAgentCount({ agents, events: scenario?.events || [], usedHour, windowHours: 6 }),
+    usedHour,
+  }
+}
+
+export function computeStewardTooltipHtml({ stewardRole, stewardColor, stats }) {
+  const activeEnvelopesCount = stats?.activeEnvelopesCount || 0
+  const ownedEnvelopesCount = stats?.ownedEnvelopesCount || 0
+  const activeAgentCount = stats?.activeAgentCount || 0
+  const agentCount = stats?.agentCount || 0
+
+  return `
+      <div style="font-weight: 800; font-size: 16px; margin-bottom: 6px; color: ${stewardColor};">${stewardRole}</div>
+      <div style="font-size: 13px; opacity: 0.85; margin-bottom: 8px;">Human Decision Authority</div>
+      
+      <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 13px;">
+        <div style="display:flex; justify-content: space-between; gap: 12px; margin-bottom: 6px;">
+          <div style="opacity: 0.75;">Envelopes</div>
+          <div>${activeEnvelopesCount} active / ${ownedEnvelopesCount} total</div>
+        </div>
+        <div style="display:flex; justify-content: space-between; gap: 12px;">
+          <div style="opacity: 0.75;">Fleet</div>
+          <div>${activeAgentCount} working / ${agentCount} agents</div>
+        </div>
+      </div>
+    `
 }
 
 /**
@@ -184,43 +293,11 @@ export function showStewardTooltip(stewardNode, mouseEvent, element, { scenario 
   const stewardRole = stewardNode?.name || ''
   const stewardColor = stewardNode?.color || 'var(--vscode-textLink-foreground)'
 
-  // Count envelopes owned by this steward
-  const allEnvelopes = scenario?.envelopes || []
-  const ownedEnvelopes = allEnvelopes.filter(e => e && e.ownerRole === stewardRole)
-  const usedHour = typeof hour === 'number' ? hour : getTimeHour()
-  const activeEnvelopes = ownedEnvelopes.filter(e => {
-    const status = getEnvelopeStatus(e, usedHour)
-    return status === 'active'
-  })
-
-  // Count agents in this steward's fleet
-  const fleets = scenario?.fleets || []
-  const fleet = fleets.find(f => f && f.stewardRole === stewardRole)
-  const agentCount = fleet?.agents?.length || 0
-  const activeAgentCount = (fleet?.agents || []).filter(a => {
-    const agentEvents = (scenario?.events || []).filter(e => 
-      e && e.agentId === a.agentId && typeof e.hour === 'number' && e.hour <= usedHour && e.hour > (usedHour - 6)
-    )
-    return agentEvents.length > 0
-  }).length
+  const stats = computeStewardTooltipStats({ scenario, hour, stewardRole })
 
   tooltipNode
     .attr('data-steward-key', stewardKey)
-    .html(`
-      <div style="font-weight: 800; font-size: 16px; margin-bottom: 6px; color: ${stewardColor};">${stewardRole}</div>
-      <div style="font-size: 13px; opacity: 0.85; margin-bottom: 8px;">Human Decision Authority</div>
-      
-      <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 13px;">
-        <div style="display:flex; justify-content: space-between; gap: 12px; margin-bottom: 6px;">
-          <div style="opacity: 0.75;">Envelopes</div>
-          <div>${activeEnvelopes.length} active / ${ownedEnvelopes.length} total</div>
-        </div>
-        <div style="display:flex; justify-content: space-between; gap: 12px;">
-          <div style="opacity: 0.75;">Fleet</div>
-          <div>${activeAgentCount} working / ${agentCount} agents</div>
-        </div>
-      </div>
-    `)
+    .html(computeStewardTooltipHtml({ stewardRole, stewardColor, stats }))
 
   positionTooltip(tooltipNode, mouseEvent, element)
 }
@@ -236,14 +313,12 @@ export function showEnvelopeTooltip(envelopeNode, mouseEvent, element, { scenari
   const tooltipNode = ensureEnvelopeTooltip()
 
   tooltipNode
-    .html(`
-      <div style="font-weight: 600; margin-bottom: 6px; font-size: 16px;">${envelopeNode?.label || envelopeNode?.id || 'Envelope'}</div>
-      <div style="font-size: 13px; opacity: 0.85; margin-bottom: 8px;">${envelopeNode?.name || ''}</div>
-      <div style="font-size: 13px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.1);">
-        <span style="opacity:0.75;">Steward:</span>
-        <span style="font-weight: 700;">${envelopeNode?.ownerRole || 'Unknown'}</span>
-      </div>
-    `)
+    .html(computeEnvelopeTooltipHtml({
+      label: envelopeNode?.label,
+      id: envelopeNode?.id,
+      name: envelopeNode?.name,
+      ownerRole: envelopeNode?.ownerRole,
+    }))
     .style('display', 'block')
 
   positionTooltip(tooltipNode, mouseEvent, element)
@@ -349,19 +424,13 @@ export function showAgentTooltip(agentNode, mouseEvent, element, { autoHideMs = 
     console.log(`[HDDL-MAP] Tooltip for ${agentNode.id}: name=${agentNode.name}, role=${agentNode.role}, fleetRole=${fleetRole}, fleetColor=${fleetColor}, isActive=${agentNode.isRecentlyActive}`)
     tooltipNode
       .attr('data-agent-key', agentKey)
-      .html(`
-        <div style="font-weight: 600; margin-bottom: 6px; font-size: 16px;">${agentNode.name}</div>
-        <div style="font-size: 13px; opacity: 0.85; margin-bottom: 8px;">${agentNode.role || ''}</div>
-        <div style="font-size: 13px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.1);">
-          <span style="color: ${agentNode.isRecentlyActive ? '#4ec9b0' : '#cccccc'};">
-            ${agentNode.isRecentlyActive ? '● Active' : '○ Idle'}
-          </span>
-        </div>
-        ${fleetRole ? `<div style="margin-top: 8px; font-size: 13px; opacity: 0.85;">
-          <span style="opacity:0.75;">Steward:</span>
-          <span style="font-weight: 700; color: ${fleetColor};">${fleetRole}</span>
-        </div>` : ''}
-      `)
+      .html(computeAgentTooltipHtml({
+        name: agentNode?.name,
+        role: agentNode?.role,
+        isRecentlyActive: agentNode?.isRecentlyActive,
+        fleetRole,
+        fleetColor,
+      }))
   }
 
   positionTooltip(tooltipNode, mouseEvent, element)

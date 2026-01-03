@@ -2,6 +2,11 @@ import { beforeAll, afterAll, describe, expect, test } from 'vitest'
 
 let getStewardEnvelopeInteractionCount
 let computeTooltipFixedPosition
+let computeShouldShowHoverTooltipDecision
+let computeAgentTooltipHtml
+let computeEnvelopeTooltipHtml
+let computeActiveAgentCount
+let computeStewardTooltipStats
 
 function createLocalStorageMock() {
   const store = new Map()
@@ -17,7 +22,15 @@ beforeAll(async () => {
   // tooltip-manager imports sim-state, which pulls in store/scenario-loader.
   // Those read localStorage during module init, so provide a minimal mock.
   globalThis.localStorage = createLocalStorageMock()
-  ;({ getStewardEnvelopeInteractionCount, computeTooltipFixedPosition } = await import('./tooltip-manager'))
+  ;({
+    getStewardEnvelopeInteractionCount,
+    computeTooltipFixedPosition,
+    computeShouldShowHoverTooltipDecision,
+    computeAgentTooltipHtml,
+    computeEnvelopeTooltipHtml,
+    computeActiveAgentCount,
+    computeStewardTooltipStats,
+  } = await import('./tooltip-manager'))
 })
 
 afterAll(() => {
@@ -25,6 +38,92 @@ afterAll(() => {
 })
 
 describe('map/tooltip-manager', () => {
+  test('computeShouldShowHoverTooltipDecision prefers hover and allows mouse/pen', () => {
+    expect(computeShouldShowHoverTooltipDecision({ canHover: true, pointerType: 'touch' })).toBe(true)
+    expect(computeShouldShowHoverTooltipDecision({ canHover: false, pointerType: 'mouse' })).toBe(true)
+    expect(computeShouldShowHoverTooltipDecision({ canHover: false, pointerType: 'pen' })).toBe(true)
+    expect(computeShouldShowHoverTooltipDecision({ canHover: false, pointerType: 'touch' })).toBe(false)
+    expect(computeShouldShowHoverTooltipDecision({ canHover: false, pointerType: undefined })).toBe(false)
+  })
+
+  test('computeAgentTooltipHtml includes active/idle label and optional steward section', () => {
+    const active = computeAgentTooltipHtml({
+      name: 'Agent A',
+      role: 'Operator',
+      isRecentlyActive: true,
+      fleetRole: 'Data Steward',
+      fleetColor: 'red',
+    })
+    expect(active).toContain('Agent A')
+    expect(active).toContain('Operator')
+    expect(active).toContain('● Active')
+    expect(active).toContain('Data Steward')
+    expect(active).toContain('color: red')
+
+    const idleNoSteward = computeAgentTooltipHtml({
+      name: 'Agent B',
+      role: '',
+      isRecentlyActive: false,
+      fleetRole: '',
+      fleetColor: 'blue',
+    })
+    expect(idleNoSteward).toContain('○ Idle')
+    expect(idleNoSteward).not.toContain('Steward:')
+  })
+
+  test('computeEnvelopeTooltipHtml uses fallbacks and includes steward', () => {
+    const html = computeEnvelopeTooltipHtml({ label: '', id: 'ENV-1', name: 'Policy', ownerRole: 'Data Steward' })
+    expect(html).toContain('ENV-1')
+    expect(html).toContain('Policy')
+    expect(html).toContain('Steward:')
+    expect(html).toContain('Data Steward')
+
+    const html2 = computeEnvelopeTooltipHtml({ label: '', id: '', name: '', ownerRole: '' })
+    expect(html2).toContain('Envelope')
+    expect(html2).toContain('Unknown')
+  })
+
+  test('computeActiveAgentCount counts agents with recent events', () => {
+    const agents = [{ agentId: 'A1' }, { agentId: 'A2' }]
+    const events = [
+      { agentId: 'A1', hour: 9.5 },
+      { agentId: 'A2', hour: 1 },
+      { agentId: 'A1', hour: 2 },
+    ]
+    expect(computeActiveAgentCount({ agents, events, usedHour: 10, windowHours: 6 })).toBe(1)
+    expect(computeActiveAgentCount({ agents, events, usedHour: 10, windowHours: 12 })).toBe(2)
+  })
+
+  test('computeStewardTooltipStats derives envelope and fleet counts', () => {
+    const scenario = {
+      envelopes: [
+        { id: 'ENV-1', ownerRole: 'Data Steward' },
+        { id: 'ENV-2', ownerRole: 'Other Steward' },
+      ],
+      fleets: [
+        { stewardRole: 'Data Steward', agents: [{ agentId: 'A1' }, { agentId: 'A2' }] },
+      ],
+      events: [
+        { agentId: 'A1', hour: 9 },
+        { agentId: 'A2', hour: 2 },
+      ],
+    }
+
+    const stats = computeStewardTooltipStats({
+      scenario,
+      hour: null,
+      stewardRole: 'Data Steward',
+      getTimeHour: () => 10,
+      getEnvelopeStatus: (env) => (env.id === 'ENV-1' ? 'active' : 'idle'),
+    })
+
+    expect(stats.usedHour).toBe(10)
+    expect(stats.ownedEnvelopesCount).toBe(1)
+    expect(stats.activeEnvelopesCount).toBe(1)
+    expect(stats.agentCount).toBe(2)
+    expect(stats.activeAgentCount).toBe(1)
+  })
+
   test('counts steward-envelope interactions in window and flags escalation', () => {
     const scenario = {
       events: [
