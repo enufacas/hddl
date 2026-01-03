@@ -329,7 +329,11 @@ Phase 6: TypeScript Migration
   - ✅ hddl-map.js reduced from 3,866 → 3,329 lines (-537)
   - ✅ Tests updated to import from module (no copied functions)
   - ✅ All unit tests pass (66/66)
-- [ ] **Task 1.2:** Extract bezier-math.js
+- [x] **Task 1.2:** Extract bezier-math.js (2026-01-02)
+  - ✅ Created src/components/map/bezier-math.js (57 lines)
+  - ✅ hddl-map.js reduced from 3,329 → 3,303 lines (-26)
+  - ✅ Added comprehensive unit tests (10 new tests)
+  - ✅ All unit tests pass (72/72)
 - [ ] **Task 1.3:** Extract workspace/utils.js + glossary.js
 - [ ] **Task 1.4:** Validation gate
 - [ ] **Checkpoint:** `refactor-phase-1-complete` tag
