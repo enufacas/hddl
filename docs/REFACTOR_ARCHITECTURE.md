@@ -129,7 +129,9 @@ export function createTooltipManager() {
 
 ---
 
-### `envelope-renderer.js` (Priority P2)
+### `envelope-renderer.js` (Priority P2) ⚠️ **DEFERRED**
+
+**Status:** DEFERRED to Phase 5 (after D3 update pattern refactoring)
 
 **Purpose:** Render decision envelopes with status, constraints, revisions  
 **Exports:**
@@ -145,7 +147,14 @@ export function createTooltipManager() {
 
 **Dependencies:** d3, detail-levels.js, steward-colors.js  
 **Test Coverage:** Playwright visual tests  
-**Risk:** Medium - complex SVG paths
+**Risk:** **HIGH** - Tightly coupled to D3 update pattern (nodeEnter/nodeUpdate/nodeSelection)
+
+**Deferral Rationale:**
+- Envelope rendering spans 700+ lines (lines 1270-2050+) with 16+ element references
+- Code deeply integrated with D3 update pattern (nodeEnter, nodeUpdate, nodeSelection)
+- Elements involved: envelope-glow, envelope-revision-burst, envelope-body, envelope-flap, envelope-fold, envelope-status, envelope-version-badge
+- Extraction requires refactoring entire D3 render cycle first to avoid breaking changes
+- Defer until Phase 5 when D3 patterns are refactored
 
 ---
 
@@ -443,6 +452,29 @@ workspace.js (coordinator, <800 lines)
 
 ---
 
+## 📦 Phase 2: Extract D3 Renderers (IN PROGRESS)
+
+### ✅ Task 2.1: Extract tooltip-manager.js (Completed 2026-01-02)
+- Created `src/components/map/tooltip-manager.js` (429 lines, 9 exports)
+- Updated hddl-map.js: 3,051 lines (removed lines 215-530, tooltip code)
+- Exports: canHoverTooltip, shouldShowHoverTooltip, show/hide functions for 3 tooltip types, getStewardEnvelopeInteractionCount
+- Features: D3-powered tooltips, positioning, hover detection, auto-hide timeouts
+- Tests: 72/72 passing
+- Commit: `20f1782`
+
+### ⚠️ Task 2.2: Extract envelope-renderer.js (DEFERRED)
+- **Status:** DEFERRED to Phase 5 (after D3 update pattern refactoring)
+- **Assessment:** Envelope rendering is too tightly coupled to D3 update pattern
+- **Findings:** 700+ lines spanning 1270-2050+, 16+ element references, nodeEnter/nodeUpdate/nodeSelection throughout
+- **Decision:** Cannot extract without refactoring entire D3 render cycle - defer to Phase 5
+
+### 🔄 Task 2.4: Extract embedding-renderer.js (CURRENT)
+- **Status:** IN PROGRESS
+- **Lines:** ~880 lines (2440-3318)
+- **Assessment:** More self-contained than envelope rendering, less D3 coupling
+
+---
+
 ## Notes & Decisions
 
 ### 2026-01-02: Initial Architecture Survey
@@ -457,6 +489,14 @@ workspace.js (coordinator, <800 lines)
 - **Finding:** workspace.js had inline utility functions scattered throughout file, not consolidated
 - **Decision:** Extract scattered utilities as standalone functions, don't consolidate first
 - **Lesson:** Always update test imports immediately after extraction to catch export errors early
+
+### 2026-01-02: Task 2.2 (envelope-renderer) Deferred
+- **Finding:** Envelope rendering spans 700+ lines (1270-2050+) with 16+ element references
+- **Finding:** Code deeply integrated with D3 update pattern (nodeEnter, nodeUpdate, nodeSelection)
+- **Finding:** Elements include: envelope-glow, envelope-revision-burst, envelope-body, envelope-flap, envelope-fold, envelope-status, envelope-version-badge
+- **Decision:** Cannot extract envelope rendering without refactoring entire D3 render cycle
+- **Decision:** Defer Task 2.2 to Phase 5 after D3 patterns are refactored
+- **Lesson:** Some extractions require architectural refactoring first - don't force it
 
 ---
 
