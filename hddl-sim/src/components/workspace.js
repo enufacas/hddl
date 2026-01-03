@@ -1,15 +1,3 @@
-// HDDL glossary for tooltips
-const HDDL_GLOSSARY = {
-  'envelope': 'A versioned, steward-owned boundary defining what automation/agents may do, under what constraints, and what must be escalated.',
-  'steward': 'A domain-aligned human who holds bounded decision authority. Stewards define and revise envelopes, arbitrate domain conflicts, and preserve human judgment under scale.',
-  'boundary interaction': 'When execution reaches an envelope boundary (escalated, overridden, deferred). These are key signals for steward review.',
-  'revision': 'An authoritative change to an envelope\'s assumptions or constraints. Revisions create lineage and make authority changes inspectable.',
-  'feedback loop': 'The pattern where boundary interactions trigger steward decisions, leading to envelope revisions that update agent behavior.',
-  'decision memory': 'AI-assisted recall layer (embeddings) derived from past decisions and events. Supports precedent discovery but does not hold authority.',
-  'embedding': 'A vectorized memory of a decision, event, or boundary interaction, used for AI recall and precedent discovery.',
-  'agent': 'An automated system or process operating within the constraints of an envelope, subject to escalation and revision by stewards.'
-}
-
 // Workspace layout component
 import { navigateTo } from '../router';
 import { formatSimTime, getBoundaryInteractionCounts, getEnvelopeStatus, getScenario, getTimeHour, onScenarioChange, onTimeChange, getStewardFilter, onFilterChange, getEnvelopeAtTime, getRevisionDiffAtTime, setTimeHour } from '../sim/sim-state'
@@ -18,25 +6,20 @@ import { initGlossaryInline } from './glossary'
 import { getStewardColor, toSemver } from '../sim/steward-colors'
 import { ResizablePanel, initPanelKeyboardShortcuts, PANEL_DEFAULTS, loadPanelWidth, savePanelWidth } from './resizable-panel'
 import { createEnvelopeDetailModal } from './envelope-detail'
+import { HDDL_GLOSSARY } from './workspace/glossary'
+import {
+  escapeHtml,
+  escapeAttr,
+  displayEnvelopeId,
+  isNarratableEventType,
+  buildNarrativeEventKey,
+  narrativePrimaryObjectType,
+  loadLayoutState,
+  saveLayoutState,
+  getDefaultLayoutState
+} from './workspace/utils'
 
 const STORAGE_KEY = 'hddl:layout'
-
-function loadLayoutState() {
-  try {
-    const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}')
-    return parsed && typeof parsed === 'object' ? parsed : {}
-  } catch {
-    return {}
-  }
-}
-
-function saveLayoutState(next) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
-  } catch {
-    // ignore
-  }
-}
 
 function setCssVar(name, value) {
   document.documentElement.style.setProperty(name, value)
@@ -1187,19 +1170,6 @@ function renderStewardFleets(panelEl, scenario, timeHour) {
     .join('')
 }
 
-function escapeHtml(value) {
-  return String(value)
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#39;')
-}
-
-function escapeAttr(value) {
-  return escapeHtml(value).replaceAll('`', '&#96;')
-}
-
 // Update view based on persona selection
 function updatePersonaView(persona) {
   console.log('Viewing as:', persona);
@@ -1362,43 +1332,6 @@ const telemetrySectionState = {
 const telemetryNarrativeState = {
   lastTimeHour: null,
   lastUpdatedAtMs: 0,
-}
-
-function displayEnvelopeId(envelopeId) {
-  return String(envelopeId || '').replace(/^ENV-/, 'DE-')
-}
-
-function isNarratableEventType(type) {
-  return [
-    'envelope_promoted',
-    'signal',
-    'boundary_interaction',
-    'escalation',
-    'revision',
-    'dsg_session',
-    'dsg_message',
-    'annotation',
-    'decision',
-  ].includes(String(type || ''))
-}
-
-function buildNarrativeEventKey(e, index) {
-  const t = String(e?.type || 'event')
-  const h = typeof e?.hour === 'number' ? String(e.hour).replace('.', '_') : 'na'
-  const env = String(e?.envelopeId || e?.envelope_id || e?.sessionId || 'na')
-  return `${t}:${h}:${env}:${index}`
-}
-
-function narrativePrimaryObjectType(e) {
-  const type = String(e?.type || '')
-  if (type === 'decision') return 'decision'
-  if (type === 'revision') return 'revision'
-  if (type === 'boundary_interaction' || type === 'escalation') return 'exception'
-  if (type === 'dsg_session' || type === 'dsg_message') return 'dsg'
-  if (type === 'signal') return 'signal'
-  if (type === 'annotation') return 'memory'
-  // annotations are evidence on an envelope
-  return 'envelope'
 }
 
 function narrativeObjectColor(objectType) {
