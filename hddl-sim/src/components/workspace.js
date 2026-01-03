@@ -215,7 +215,6 @@ function createSidebar() {
 
   rerenderEnvelope()
   onTimeChange(rerenderEnvelope)
-  onTimeChange(updateNarrativeSync)
   onScenarioChange(rerenderEnvelope)
   onFilterChange(rerenderEnvelope)
   
