@@ -22,6 +22,15 @@ import {
   computeEmbeddingChipFacePoints,
   computeEmbeddingChipFrontFaceAttrs,
   computeEmbeddingChipTransform,
+  computeEmbeddingCompactBadgeTransform,
+  computeEmbeddingSourcePosition,
+  computeEmbeddingEventId,
+  computeEmbeddingChipGradientId,
+  computeEmbeddingTooltipPosition,
+  buildEmbeddingTooltipHtml,
+  computeEmbeddingEventsUpToHour,
+  computeShouldClearEmbeddings,
+  computeNewEmbeddingEvents,
 } from './embedding-renderer.js'
 
 describe('embedding-renderer helpers', () => {
@@ -275,5 +284,70 @@ describe('embedding-renderer helpers', () => {
 
     expect(computeEmbeddingChipTransform({ x: 10, y: 20, perspectiveScale: 0.75, rotateAngle: -5 }))
       .toBe('translate(10, 20) scale(0.75) rotate(-5)')
+  })
+
+  it('computeEmbeddingCompactBadgeTransform centers horizontally', () => {
+    expect(computeEmbeddingCompactBadgeTransform({ width: 200, mapHeight: 300, offsetY: 10 }))
+      .toBe('translate(100, 290)')
+  })
+
+  it('computeEmbeddingSourcePosition uses node match or falls back', () => {
+    const nodes = [{ id: 'S1', x: 11, y: 22 }]
+    expect(computeEmbeddingSourcePosition({ event: { actorRole: 'S1' }, nodes, width: 100, mapHeight: 200 }))
+      .toEqual({ sourceX: 11, sourceY: 22 })
+    expect(computeEmbeddingSourcePosition({ event: { actorRole: 'NOPE' }, nodes, width: 100, mapHeight: 200 }))
+      .toEqual({ sourceX: 50, sourceY: 100 })
+  })
+
+  it('computeEmbeddingEventId prefers embeddingId over eventId', () => {
+    expect(computeEmbeddingEventId({ embeddingId: 'EMB', eventId: 'EV' })).toBe('EMB')
+    expect(computeEmbeddingEventId({ eventId: 'EV' })).toBe('EV')
+    expect(computeEmbeddingEventId({})).toBe(undefined)
+  })
+
+  it('computeEmbeddingChipGradientId matches existing id format', () => {
+    expect(computeEmbeddingChipGradientId({ eventId: 'E-1' })).toBe('chip-gradient-E-1')
+    expect(computeEmbeddingChipGradientId({ eventId: undefined })).toBe('chip-gradient-undefined')
+  })
+
+  it('computeEmbeddingTooltipPosition returns px strings', () => {
+    const pos = computeEmbeddingTooltipPosition({ pageX: 10, pageY: 40, tooltipHeight: 12, offsetX: 15, offsetY: 10 })
+    expect(pos).toEqual({ left: '25px', top: '18px' })
+  })
+
+  it('buildEmbeddingTooltipHtml includes historical baseline marker when applicable', () => {
+    const html = buildEmbeddingTooltipHtml({
+      embeddingColor: '#abc',
+      tooltipData: {
+        isHistorical: true,
+        type: 'Decision Pattern',
+        label: 'L',
+        steward: 'S',
+        envelope: 'E',
+        id: 'ID',
+        context: 'CTX',
+        hour: -1,
+      },
+    })
+    expect(html).toContain('Historical Baseline')
+    expect(html).toContain('#abc')
+    expect(html).toContain('Hour -1')
+  })
+
+  it('renderEmbeddings helpers select, clear, and de-dupe events', () => {
+    const scenarioEvents = [
+      { type: 'embedding', hour: 1, eventId: 'A' },
+      { type: 'embedding', hour: 3, eventId: 'B' },
+      { type: 'decision', hour: 2, eventId: 'C' },
+    ]
+    const upTo2 = computeEmbeddingEventsUpToHour({ scenarioEvents, currentHour: 2 })
+    expect(upTo2.map((e) => e.eventId)).toEqual(['A'])
+
+    expect(computeShouldClearEmbeddings({ embeddingElements: [{ event: { hour: 5 } }], currentHour: 2 })).toBe(true)
+    expect(computeShouldClearEmbeddings({ embeddingElements: [{ event: { hour: 1 } }], currentHour: 2 })).toBe(false)
+
+    const embeddingElements = [{ event: { eventId: 'A', hour: 1 } }]
+    const newEvents = computeNewEmbeddingEvents({ embeddingEvents: upTo2, embeddingElements })
+    expect(newEvents).toEqual([])
   })
 })

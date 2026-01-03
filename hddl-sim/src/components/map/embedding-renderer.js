@@ -340,6 +340,81 @@ export function computeEmbeddingChipTransform({ x, y, perspectiveScale, rotateAn
   return `translate(${x}, ${y}) scale(${perspectiveScale}) rotate(${rotateAngle})`
 }
 
+export function computeEmbeddingCompactBadgeTransform({ width, mapHeight, offsetY = 10 }) {
+  return `translate(${Number(width || 0) / 2}, ${Number(mapHeight || 0) - Number(offsetY || 0)})`
+}
+
+export function computeEmbeddingSourcePosition({ event, nodes = [], width, mapHeight }) {
+  const list = Array.isArray(nodes) ? nodes : []
+  const sourceId = event?.primarySteward || event?.actorRole
+  const sourceNode = list.find((n) => n?.id === sourceId)
+  return {
+    sourceX: Number(sourceNode?.x ?? (Number(width || 0) / 2)),
+    sourceY: Number(sourceNode?.y ?? (Number(mapHeight || 0) / 2)),
+  }
+}
+
+export function computeEmbeddingEventId(event) {
+  return event?.embeddingId || event?.eventId
+}
+
+export function computeEmbeddingChipGradientId({ eventId }) {
+  return `chip-gradient-${eventId}`
+}
+
+export function computeEmbeddingTooltipPosition({ pageX, pageY, tooltipHeight, offsetX = 15, offsetY = 10 }) {
+  return {
+    left: `${Number(pageX || 0) + Number(offsetX || 0)}px`,
+    top: `${Number(pageY || 0) - Number(tooltipHeight || 0) - Number(offsetY || 0)}px`,
+  }
+}
+
+export function buildEmbeddingTooltipHtml({ tooltipData, embeddingColor }) {
+  const color = embeddingColor || 'rgba(255,255,255,0.75)'
+  const data = tooltipData || {}
+  return `
+          <div style="border-bottom: 1px solid ${color}; padding-bottom: 8px; margin-bottom: 8px;">
+            ${data.isHistorical ? `<div style="font-size: 10px; color: rgba(255,255,255,0.5); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">📚 Historical Baseline</div>` : ''}
+            <div style="font-size: 11px; color: ${color}; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">${data.type}</div>
+            <div style="font-size: 15px; font-weight: 600; margin-top: 4px;">${data.label}</div>
+          </div>
+          <div style="display: grid; grid-template-columns: auto 1fr; gap: 8px 12px; font-size: 12px;">
+            <div style="color: rgba(255,255,255,0.6);">Steward:</div>
+            <div style="font-weight: 500;">${data.steward}</div>
+            <div style="color: rgba(255,255,255,0.6);">Envelope:</div>
+            <div style="font-weight: 500; font-family: monospace; font-size: 11px;">${data.envelope}</div>
+            <div style="color: rgba(255,255,255,0.6);">ID:</div>
+            <div style="font-family: monospace; font-size: 11px;">${data.id}</div>
+          </div>
+          <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);">
+            <div style="color: rgba(255,255,255,0.6); font-size: 11px; margin-bottom: 4px;">SEMANTIC CONTEXT:</div>
+            <div style="font-size: 12px; line-height: 1.5; color: rgba(255,255,255,0.9);">${data.context}</div>
+          </div>
+          <div style="margin-top: 12px; text-align: right; font-size: 11px; color: ${color}; opacity: 0.8;">
+            ⏱️ Hour ${data.hour}${data.isHistorical ? ' (before scenario window)' : ''}
+          </div>
+        `
+}
+
+export function computeEmbeddingEventsUpToHour({ scenarioEvents, currentHour }) {
+  const list = Array.isArray(scenarioEvents) ? scenarioEvents : []
+  return list
+    .filter((e) => e?.type === 'embedding' && Number(e?.hour) <= Number(currentHour))
+    .sort((a, b) => Number(a?.hour || 0) - Number(b?.hour || 0))
+}
+
+export function computeShouldClearEmbeddings({ embeddingElements, currentHour }) {
+  const list = Array.isArray(embeddingElements) ? embeddingElements : []
+  return list.some((e) => Number(e?.event?.hour) > Number(currentHour))
+}
+
+export function computeNewEmbeddingEvents({ embeddingEvents, embeddingElements }) {
+  const elements = Array.isArray(embeddingElements) ? embeddingElements : []
+  const events = Array.isArray(embeddingEvents) ? embeddingEvents : []
+  const existingIds = new Set(elements.map((e) => e?.event?.eventId).filter(Boolean))
+  return events.filter((e) => !existingIds.has(e?.eventId))
+}
+
 /**
  * Create embedding renderer for the 3D memory visualization
  * 
@@ -393,7 +468,7 @@ export function createEmbeddingRenderer(svg, options) {
   if (detailLevel === DETAIL_LEVELS.COMPACT || detailLevel === DETAIL_LEVELS.MINIMAL) {
     const memoryBadge = svg.append('g')
       .attr('class', 'memory-badge-compact')
-      .attr('transform', `translate(${width / 2}, ${mapHeight - 10})`)
+      .attr('transform', computeEmbeddingCompactBadgeTransform({ width, mapHeight, offsetY: 10 }))
     
     memoryBadge.append('rect')
       .attr('x', -50)
@@ -742,9 +817,7 @@ export function createEmbeddingRenderer(svg, options) {
    */
   function createFloatingEmbedding(event, skipAnimation = false) {
     // Find source node position
-    const sourceNode = nodes.find(n => n.id === event.primarySteward || n.id === event.actorRole)
-    const sourceX = sourceNode ? sourceNode.x : width / 2
-    const sourceY = sourceNode ? sourceNode.y : mapHeight / 2
+    const { sourceX, sourceY } = computeEmbeddingSourcePosition({ event, nodes, width, mapHeight })
 
     const embeddingColor = getEmbeddingColorForRole(event.actorRole)
 
@@ -789,7 +862,7 @@ export function createEmbeddingRenderer(svg, options) {
       .attr('transform', `translate(${sourceX}, ${sourceY - mapHeight})`)
       .attr('opacity', 0)
       .style('cursor', 'pointer')
-      .attr('data-embedding-id', event.embeddingId || event.eventId)
+      .attr('data-embedding-id', computeEmbeddingEventId(event))
     
     const tooltipData = buildEmbeddingTooltipData(event)
     
@@ -801,41 +874,18 @@ export function createEmbeddingRenderer(svg, options) {
       const tooltipNode = tooltip
         .style('border-color', embeddingColor)
         .style('display', 'block')
-        .html(`
-          <div style="border-bottom: 1px solid ${embeddingColor}; padding-bottom: 8px; margin-bottom: 8px;">
-            ${tooltipData.isHistorical ? `<div style="font-size: 10px; color: rgba(255,255,255,0.5); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">📚 Historical Baseline</div>` : ''}
-            <div style="font-size: 11px; color: ${embeddingColor}; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">${tooltipData.type}</div>
-            <div style="font-size: 15px; font-weight: 600; margin-top: 4px;">${tooltipData.label}</div>
-          </div>
-          <div style="display: grid; grid-template-columns: auto 1fr; gap: 8px 12px; font-size: 12px;">
-            <div style="color: rgba(255,255,255,0.6);">Steward:</div>
-            <div style="font-weight: 500;">${tooltipData.steward}</div>
-            <div style="color: rgba(255,255,255,0.6);">Envelope:</div>
-            <div style="font-weight: 500; font-family: monospace; font-size: 11px;">${tooltipData.envelope}</div>
-            <div style="color: rgba(255,255,255,0.6);">ID:</div>
-            <div style="font-family: monospace; font-size: 11px;">${tooltipData.id}</div>
-          </div>
-          <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);">
-            <div style="color: rgba(255,255,255,0.6); font-size: 11px; margin-bottom: 4px;">SEMANTIC CONTEXT:</div>
-            <div style="font-size: 12px; line-height: 1.5; color: rgba(255,255,255,0.9);">${tooltipData.context}</div>
-          </div>
-          <div style="margin-top: 12px; text-align: right; font-size: 11px; color: ${embeddingColor}; opacity: 0.8;">
-            ⏱️ Hour ${tooltipData.hour}${tooltipData.isHistorical ? ' (before scenario window)' : ''}
-          </div>
-        `)
+        .html(buildEmbeddingTooltipHtml({ tooltipData, embeddingColor }))
       
       // Position tooltip above cursor
       const tooltipHeight = tooltipNode.node().offsetHeight
-      tooltip
-        .style('left', (mouseEvent.pageX + 15) + 'px')
-        .style('top', (mouseEvent.pageY - tooltipHeight - 10) + 'px')
+      const pos = computeEmbeddingTooltipPosition({ pageX: mouseEvent.pageX, pageY: mouseEvent.pageY, tooltipHeight, offsetX: 15, offsetY: 10 })
+      tooltip.style('left', pos.left).style('top', pos.top)
     })
     .on('mousemove', function(mouseEvent) {
       // Position tooltip above cursor
       const tooltipHeight = tooltip.node().offsetHeight
-      tooltip
-        .style('left', (mouseEvent.pageX + 15) + 'px')
-        .style('top', (mouseEvent.pageY - tooltipHeight - 10) + 'px')
+      const pos = computeEmbeddingTooltipPosition({ pageX: mouseEvent.pageX, pageY: mouseEvent.pageY, tooltipHeight, offsetX: 15, offsetY: 10 })
+      tooltip.style('left', pos.left).style('top', pos.top)
     })
     .on('mouseleave', function() {
       d3.select(this).transition().duration(200).attr('opacity', depthOpacity)
@@ -876,7 +926,7 @@ export function createEmbeddingRenderer(svg, options) {
 
     // Main front face with gradient
     const chipGradient = boxDefs.append('radialGradient')
-      .attr('id', `chip-gradient-${event.eventId}`)
+      .attr('id', computeEmbeddingChipGradientId({ eventId: event.eventId }))
     chipGradient.append('stop')
       .attr('offset', '0%')
       .attr('stop-color', embeddingColor)
@@ -892,7 +942,7 @@ export function createEmbeddingRenderer(svg, options) {
       .attr('width', chipSize)
       .attr('height', chipSize)
       .attr('rx', 2)
-      .attr('fill', `url(#chip-gradient-${event.eventId})`)
+      .attr('fill', `url(#${computeEmbeddingChipGradientId({ eventId: event.eventId })})`)
       .attr('stroke', embeddingColor)
       .attr('stroke-width', chipFrontAttrs.strokeWidth) // Thinner stroke for historical
       .attr('filter', chipFrontAttrs.filter) // No glow for historical
@@ -984,12 +1034,10 @@ export function createEmbeddingRenderer(svg, options) {
     const currentHour = getTimeHour()
     const skipAnimation = isWithinScrubCatchup()
 
-    const embeddingEvents = scenario.events
-      .filter(e => e.type === 'embedding' && e.hour <= currentHour)
-      .sort((a, b) => a.hour - b.hour)
+    const embeddingEvents = computeEmbeddingEventsUpToHour({ scenarioEvents: scenario.events, currentHour })
 
     // Check if we need to clear (time went backwards)
-    const shouldClear = embeddingElements.some(e => e.event.hour > currentHour)
+    const shouldClear = computeShouldClearEmbeddings({ embeddingElements, currentHour })
     if (shouldClear) {
       console.log('Clearing embeddings (time went backwards)')
       embeddingIconsLayer.selectAll('*').remove()
@@ -1000,8 +1048,7 @@ export function createEmbeddingRenderer(svg, options) {
     }
 
     // Only add new embeddings
-    const existingIds = new Set(embeddingElements.map(e => e.event.eventId))
-    const newEvents = embeddingEvents.filter(e => !existingIds.has(e.eventId))
+    const newEvents = computeNewEmbeddingEvents({ embeddingEvents, embeddingElements })
 
     // During catch-up window, create all embeddings instantly without stagger
     if (skipAnimation && newEvents.length > 0) {
