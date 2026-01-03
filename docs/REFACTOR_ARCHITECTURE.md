@@ -399,10 +399,15 @@ Phase 7: TypeScript Migration
 - [x] **Checkpoint:** Phase 2 partial complete (commit 5143b53)
 
 ### Phase 3: workspace.js Refactoring (CURRENT)
-- [ ] **Task 3.1:** Extract ai-narrative.js ← (Current task)
-  - Target: ~800 lines (lines 138-830+)
-  - Components: aiNarrative* state, updateNarrativeSync, renderNarrativeMarkdown, processNarrativeWithCitations, loadPreGeneratedNarrative, generateAINarrative
-- [ ] **Task 3.2:** Extract sidebar.js + panels.js
+- [x] **Task 3.1:** Extract ai-narrative.js (2026-01-02)
+  - ✅ Created src/components/workspace/ai-narrative.js (704 lines)
+  - ✅ Extracted AI narrative generation, caching, timeline sync
+  - ✅ Functions: mountAINarrative, generateAINarrative, loadPreGeneratedNarrative, processNarrativeWithCitations, renderNarrativeMarkdown
+  - ✅ State management: narrative cache, citations, sync enabled
+  - ✅ workspace.js reduced from 3,158 → 2,464 lines (-694 lines, -22%)
+  - ✅ All 72 unit tests passing
+  - ✅ Commit: d3bd5ad
+- [ ] **Task 3.2:** Extract sidebar.js + panels.js ← (Next)
 - [ ] **Task 3.3:** Validation gate
 - [ ] **Checkpoint:** `refactor-phase-3-complete` tag
 
