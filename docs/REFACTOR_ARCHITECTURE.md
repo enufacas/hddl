@@ -324,7 +324,11 @@ Phase 6: TypeScript Migration
 - [x] **Checkpoint:** `refactor-phase-0-complete` tag
 
 ### Phase 1: Pure Functions
-- [ ] **Task 1.1:** Extract detail-levels.js
+- [x] **Task 1.1:** Extract detail-levels.js (2026-01-02)
+  - ✅ Created src/components/map/detail-levels.js (221 lines)
+  - ✅ hddl-map.js reduced from 3,866 → 3,329 lines (-537)
+  - ✅ Tests updated to import from module (no copied functions)
+  - ✅ All unit tests pass (66/66)
 - [ ] **Task 1.2:** Extract bezier-math.js
 - [ ] **Task 1.3:** Extract workspace/utils.js + glossary.js
 - [ ] **Task 1.4:** Validation gate
