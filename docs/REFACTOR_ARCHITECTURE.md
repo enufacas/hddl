@@ -406,8 +406,11 @@ Phase 7: TypeScript Migration
   - ✅ State management: narrative cache, citations, sync enabled
   - ✅ workspace.js reduced from 3,158 → 2,464 lines (-694 lines, -22%)
   - ✅ All 72 unit tests passing
-  - ✅ Commit: d3bd5ad
-- [ ] **Task 3.2:** Extract sidebar.js + panels.js ← (Next)
+  - ✅ Browser console verified (no errors)
+  - ✅ Commits: d3bd5ad (extraction), 290d347 (fix duplicate hook)
+- [ ] **Task 3.2:** Extract sidebar.js + panels.js ← (Next task)
+  - Target: createSidebar, createActivityBar, createAuxiliaryBar, createBottomPanel
+  - Estimated: ~1200 lines total extraction
 - [ ] **Task 3.3:** Validation gate
 - [ ] **Checkpoint:** `refactor-phase-3-complete` tag
 
