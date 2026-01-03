@@ -16,7 +16,7 @@
 | `selectors.js` | 202 | 202 | - | ✅ Clean | Reference |
 | **Total UI** | **7,091** | **3,746** | **-3,345 (-47%)** | **72/72 tests passing** | **<1,600 lines** |
 
-**Extracted Modules (13):**
+**Extracted Modules (11):**
 - `map/detail-levels.js` (221 lines)
 - `map/bezier-math.js` (57 lines)
 - `map/tooltip-manager.js` (429 lines)
@@ -94,8 +94,8 @@
 - `shouldRenderEnvelopeElement(element, density)` - Element visibility rules
 - `shouldRenderIndividualAgents(level)` - Agent grouping threshold
 
-**Test Coverage:** Already has unit tests in `hddl-map.test.js` (currently copies functions)  
-**Migration Path:** Update tests to import from new module
+**Test Coverage:** Unit tests import from `src/components/map/detail-levels.js` via `hddl-map.test.js`  
+**Migration Path:** ✅ Complete
 
 ---
 
@@ -233,8 +233,8 @@ export function createTooltipManager() {
 - `loadLayoutState()`
 
 **Dependencies:** None (pure functions)  
-**Test Coverage:** workspace.test.js (currently copies functions)  
-**Migration Path:** Update tests to import
+**Test Coverage:** Unit tests import from `src/components/workspace/utils.js` via `workspace.test.js`  
+**Migration Path:** ✅ Complete
 
 ---
 

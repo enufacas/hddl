@@ -7,7 +7,7 @@ A single agent working sequentially changes the approach: context accumulates (g
 The hddl-sim codebase has significant structural debt:
 - **hddl-map.js**: 3,866 lines, mostly one giant closure with mixed concerns
 - **workspace.js**: 3,225 lines, UI + state + API calls intertwined
-- **Test coverage**: 46%, tests copy functions instead of importing them
+- **Test coverage**: Coverage improvement is a later phase; unit tests already import extracted modules (no copied helper functions in unit tests)
 - **No TypeScript**: No compile-time guardrails
 
 This prevents rapid iteration and confident changes.
@@ -20,6 +20,27 @@ This prevents rapid iteration and confident changes.
 - Test coverage ≥ 55% (stretch: 70%)
 - TypeScript with strict mode enabled
 - Safe checkpoint/rollback points throughout
+
+---
+
+## Current Repo Status (2026-01-02)
+
+- **workspace.js:** reduced to ~929 lines (from 3,225) via extracted modules:
+  - `src/components/workspace/ai-narrative.js`
+  - `src/components/workspace/sidebar.js`
+  - `src/components/workspace/panels.js`
+  - `src/components/workspace/state.js`
+  - `src/components/workspace/telemetry.js`
+  - `src/components/workspace/utils.js`
+  - `src/components/workspace/glossary.js`
+- **hddl-map.js:** reduced to ~2,471 lines (from 3,866) via extracted modules:
+  - `src/components/map/detail-levels.js`
+  - `src/components/map/bezier-math.js`
+  - `src/components/map/tooltip-manager.js`
+  - `src/components/map/embedding-renderer.js`
+- **Unit tests:** 72/72 passing
+
+Note: Actual execution order deviated from the original phase ordering (workspace extraction happened before hddl-map core coordinator refactor).
 
 ---
 
@@ -112,7 +133,7 @@ These functions have **no D3 dependencies** and can be unit tested immediately.
 |-------|-------|
 | **Size** | S |
 | **Input** | `hddl-map.js` (search for `bezierPoint`, `getCurvePoint`) |
-| **Output** | `src/sim/bezier-math.js` |
+| **Output** | `src/components/map/bezier-math.js` |
 | **Validation** | Unit tests for curve calculations |
 | **Checkpoint** | No |
 | **Dependencies** | 1.1 |
@@ -304,6 +325,8 @@ export function createHDDLMap(container, options = {}) {
 ---
 
 ## Phase 4: Workspace.js Refactoring
+
+**Status:** ✅ Completed ahead of the original plan ordering.
 
 ### Task 4.1: Extract Sidebar Components
 | Field | Value |
@@ -579,17 +602,6 @@ Phase 6: TypeScript Migration
 
 ---
 
-## Effort Estimate
+## Notes
 
-| Phase | Tasks | Relative Size |
-|-------|-------|---------------|
-| Phase 0 | 2 | S+M = 1.5 |
-| Phase 1 | 4 | M+S+S+S = 2.5 |
-| Phase 2 | 5 | M+L+L+M+M = 4.5 |
-| Phase 3 | 2 | L+M = 2.0 |
-| Phase 4 | 4 | M+M+L+M = 3.5 |
-| Phase 5 | 2 | M+L = 2.0 |
-| Phase 6 | 5 | S+M+L+L+M = 5.0 |
-| **Total** | **24 tasks** | **21 units** |
-
-Where S=0.5, M=1.0, L=1.5 relative units.
+This plan intentionally avoids effort/time estimates. Use git checkpoints/tags and the architecture doc as the primary progress tracker.
