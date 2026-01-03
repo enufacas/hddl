@@ -37,6 +37,112 @@ export function computeEnvelopeOpacity(status) {
   return 1
 }
 
+export function computeEnvelopeIconStatusFill({ status, ownerColor }) {
+  if (status === 'active') return ownerColor || 'var(--status-success)'
+  if (status === 'ended') return 'var(--vscode-input-border)'
+  return 'var(--status-warning)'
+}
+
+export function computeEnvelopeIconStatusOpacity(status) {
+  return status === 'active' ? 0.9 : 0.6
+}
+
+export function computeEnvelopeIconCircleStroke({ ownerColor, fallback = 'var(--vscode-focusBorder)' }) {
+  return ownerColor || fallback
+}
+
+export function computeEnvelopeIconCircleStrokeWidth(status) {
+  return status === 'active' ? 3 : 2
+}
+
+export function computeEnvelopeGlowRect({ width = 84, height = 52, padding = 16 }) {
+  const w = Number(width || 0) + padding
+  const h = Number(height || 0) + padding
+  return { x: -w / 2, y: -h / 2, width: w, height: h }
+}
+
+export function computeEnvelopeGlowKeyframeOpacity(status) {
+  // Used for the pulsing transitions: active alternates between 0.6 and 0.2
+  if (status === 'active') return { high: 0.6, low: 0.2 }
+  return { high: 0, low: 0 }
+}
+
+export function computeEnvelopeRevisionBurstKeyframes({ width = 84, height = 52, expand = 30 }) {
+  const baseW = Number(width || 0)
+  const baseH = Number(height || 0)
+  return {
+    start: { x: -baseW / 2, y: -baseH / 2, width: baseW, height: baseH, opacity: 0.9, strokeWidth: 4 },
+    end: { x: -(baseW + expand) / 2, y: -(baseH + expand) / 2, width: baseW + expand, height: baseH + expand, opacity: 0, strokeWidth: 1 },
+  }
+}
+
+export function computeEnvelopeStatusLabelY({ height = 52 }) {
+  const h = Number(height || 0)
+  return -(h / 2) + 14
+}
+
+export function computeEnvelopeStatusLabelOpacity(status) {
+  return status === 'active' ? 0.85 : 0.65
+}
+
+export function computeEnvelopeStatusLabelText(status) {
+  if (status === 'active') return 'OPEN'
+  if (status === 'ended') return 'CLOSED'
+  return 'PENDING'
+}
+
+export function computeEnvelopeVersionBadgeTransform({ width = 84, height = 52, density = 'normal' }) {
+  const w = Number(width || 0)
+  const h = Number(height || 0)
+  const xOffset = density === 'compact' ? w / 2 - 14 : w / 2 - 20
+  return `translate(${xOffset}, ${h / 2 + 8})`
+}
+
+export function computeEnvelopeVersionBadgeBgRect({ density = 'normal' }) {
+  return {
+    x: density === 'compact' ? -14 : -18,
+    y: -7,
+    width: density === 'compact' ? 28 : 36,
+    height: 14,
+  }
+}
+
+export function computeEnvelopeVersionBadgeBgFill({ isVersionBumped }) {
+  return isVersionBumped ? 'var(--status-warning)' : 'var(--vscode-editor-background)'
+}
+
+export function computeEnvelopeVersionBadgeBgStroke({ isVersionBumped }) {
+  return isVersionBumped ? 'none' : 'var(--vscode-sideBar-border)'
+}
+
+export function computeEnvelopeVersionBadgeTextFill({ isVersionBumped }) {
+  return isVersionBumped ? 'var(--vscode-editor-background)' : 'var(--vscode-editor-foreground)'
+}
+
+export function computeEnvelopeVersionBadgeFontSize({ density = 'normal' }) {
+  return density === 'compact' ? '7px' : '8px'
+}
+
+export function computeEnvelopeVersionBadgeText({ density = 'normal', isVersionBumped, semver }) {
+  if (density === 'compact') return `v${semver}`
+  return isVersionBumped ? `↑ v${semver}` : `v${semver}`
+}
+
+export function computeEnvelopeFlapFill(status) {
+  if (status === 'active') return 'none'
+  return 'var(--vscode-editor-background)'
+}
+
+export function computeEnvelopeFlapOpacity(status) {
+  return status === 'ended' ? 0.5 : 0.9
+}
+
+export function computeEnvelopeFoldOpacity(status) {
+  if (status === 'ended') return 0.3
+  if (status === 'active') return 0.6
+  return 0.4
+}
+
 export function computeEnvelopeFlapPath({ width = 84, height = 52, status = 'pending' }) {
   const w = width
   const h = height
@@ -283,50 +389,40 @@ export function updateEnvelopeRendering({ d3, nodeUpdate }) {
 
   // Update icon mode status indicator
   nodeUpdate.selectAll('g.envelope-shape').select('circle.envelope-icon-status')
-    .attr('fill', (d) => {
-      if (d.status === 'active') return d.ownerColor || 'var(--status-success)'
-      if (d.status === 'ended') return 'var(--vscode-input-border)'
-      return 'var(--status-warning)'
-    })
-    .attr('opacity', (d) => d.status === 'active' ? 0.9 : 0.6)
+    .attr('fill', (d) => computeEnvelopeIconStatusFill({ status: d.status, ownerColor: d.ownerColor }))
+    .attr('opacity', (d) => computeEnvelopeIconStatusOpacity(d.status))
 
   // Update icon mode outer circle
   nodeUpdate.selectAll('g.envelope-shape').select('circle.envelope-icon-circle')
-    .attr('stroke', (d) => d.ownerColor || 'var(--vscode-focusBorder)')
-    .attr('stroke-width', (d) => d.status === 'active' ? 3 : 2)
+    .attr('stroke', (d) => computeEnvelopeIconCircleStroke({ ownerColor: d.ownerColor }))
+    .attr('stroke-width', (d) => computeEnvelopeIconCircleStrokeWidth(d.status))
 
   // Animate envelope glow for active envelopes (pulsing effect) - only if element exists
   nodeUpdate.selectAll('g.envelope-shape').select('rect.envelope-glow')
-    .attr('x', (d) => {
-      const w = (d.envDims?.width || 84) + 16
-      return -w / 2
-    })
-    .attr('y', (d) => {
-      const h = (d.envDims?.height || 52) + 16
-      return -h / 2
-    })
-    .attr('width', (d) => (d.envDims?.width || 84) + 16)
-    .attr('height', (d) => (d.envDims?.height || 52) + 16)
+    .attr('x', (d) => computeEnvelopeGlowRect({ width: d.envDims?.width || 84, height: d.envDims?.height || 52 }).x)
+    .attr('y', (d) => computeEnvelopeGlowRect({ width: d.envDims?.width || 84, height: d.envDims?.height || 52 }).y)
+    .attr('width', (d) => computeEnvelopeGlowRect({ width: d.envDims?.width || 84, height: d.envDims?.height || 52 }).width)
+    .attr('height', (d) => computeEnvelopeGlowRect({ width: d.envDims?.width || 84, height: d.envDims?.height || 52 }).height)
     .attr('stroke', (d) => d.ownerColor || 'var(--vscode-focusBorder)')
     .transition()
     .duration(800)
-    .attr('opacity', (d) => d.status === 'active' ? 0.6 : 0)
+    .attr('opacity', (d) => computeEnvelopeGlowKeyframeOpacity(d.status).high)
     .transition()
     .duration(800)
-    .attr('opacity', (d) => d.status === 'active' ? 0.2 : 0)
+    .attr('opacity', (d) => computeEnvelopeGlowKeyframeOpacity(d.status).low)
     .on('end', function repeat() {
       d3.select(this)
         .transition()
         .duration(800)
         .attr('opacity', function () {
           const d = d3.select(this.parentNode).datum()
-          return d && d.status === 'active' ? 0.6 : 0
+          return d ? computeEnvelopeGlowKeyframeOpacity(d.status).high : 0
         })
         .transition()
         .duration(800)
         .attr('opacity', function () {
           const d = d3.select(this.parentNode).datum()
-          return d && d.status === 'active' ? 0.2 : 0
+          return d ? computeEnvelopeGlowKeyframeOpacity(d.status).low : 0
         })
         .on('end', repeat)
     })
@@ -339,78 +435,62 @@ export function updateEnvelopeRendering({ d3, nodeUpdate }) {
       if (d.isRecentlyRevised) {
         const baseW = d.envDims?.width || 84
         const baseH = d.envDims?.height || 52
+        const keyframes = computeEnvelopeRevisionBurstKeyframes({ width: baseW, height: baseH })
         burst
-          .attr('x', -baseW / 2)
-          .attr('y', -baseH / 2)
-          .attr('width', baseW)
-          .attr('height', baseH)
-          .attr('opacity', 0.9)
-          .attr('stroke-width', 4)
+          .attr('x', keyframes.start.x)
+          .attr('y', keyframes.start.y)
+          .attr('width', keyframes.start.width)
+          .attr('height', keyframes.start.height)
+          .attr('opacity', keyframes.start.opacity)
+          .attr('stroke-width', keyframes.start.strokeWidth)
           .transition()
           .duration(600)
           .ease(d3.easeQuadOut)
-          .attr('x', -(baseW + 30) / 2)
-          .attr('y', -(baseH + 30) / 2)
-          .attr('width', baseW + 30)
-          .attr('height', baseH + 30)
-          .attr('opacity', 0)
-          .attr('stroke-width', 1)
+          .attr('x', keyframes.end.x)
+          .attr('y', keyframes.end.y)
+          .attr('width', keyframes.end.width)
+          .attr('height', keyframes.end.height)
+          .attr('opacity', keyframes.end.opacity)
+          .attr('stroke-width', keyframes.end.strokeWidth)
       } else {
         burst.attr('opacity', 0)
       }
     })
 
   nodeUpdate.select('.envelope-status')
-    .attr('y', (d) => {
-      const h = d.envDims?.height || 52
-      return -(h / 2) + 14
-    })
-    .attr('opacity', (d) => (d.status === 'active' ? 0.85 : 0.65))
-    .text((d) => {
-      if (d.status === 'active') return 'OPEN'
-      if (d.status === 'ended') return 'CLOSED'
-      return 'PENDING'
-    })
+    .attr('y', (d) => computeEnvelopeStatusLabelY({ height: d.envDims?.height || 52 }))
+    .attr('opacity', (d) => computeEnvelopeStatusLabelOpacity(d.status))
+    .text((d) => computeEnvelopeStatusLabelText(d.status))
 
   // Update version badge position and content
   nodeUpdate.select('.envelope-version-badge')
-    .attr('transform', (d) => {
-      const w = d.envDims?.width || 84
-      const h = d.envDims?.height || 52
-      // Position at bottom right of envelope (adjust for compact mode)
-      const xOffset = d.envDims?.density === 'compact' ? w / 2 - 14 : w / 2 - 20
-      return `translate(${xOffset}, ${h / 2 + 8})`
-    })
+    .attr('transform', (d) => computeEnvelopeVersionBadgeTransform({
+      width: d.envDims?.width || 84,
+      height: d.envDims?.height || 52,
+      density: d.envDims?.density,
+    }))
 
   nodeUpdate.select('.version-badge-bg')
-    .attr('x', (d) => d.envDims?.density === 'compact' ? -14 : -18)
-    .attr('y', -7)
-    .attr('width', (d) => d.envDims?.density === 'compact' ? 28 : 36)
-    .attr('height', 14)
-    .attr('fill', (d) => d.isVersionBumped ? 'var(--status-warning)' : 'var(--vscode-editor-background)')
-    .attr('stroke', (d) => d.isVersionBumped ? 'none' : 'var(--vscode-sideBar-border)')
+    .attr('x', (d) => computeEnvelopeVersionBadgeBgRect({ density: d.envDims?.density }).x)
+    .attr('y', (d) => computeEnvelopeVersionBadgeBgRect({ density: d.envDims?.density }).y)
+    .attr('width', (d) => computeEnvelopeVersionBadgeBgRect({ density: d.envDims?.density }).width)
+    .attr('height', (d) => computeEnvelopeVersionBadgeBgRect({ density: d.envDims?.density }).height)
+    .attr('fill', (d) => computeEnvelopeVersionBadgeBgFill({ isVersionBumped: d.isVersionBumped }))
+    .attr('stroke', (d) => computeEnvelopeVersionBadgeBgStroke({ isVersionBumped: d.isVersionBumped }))
     .attr('stroke-width', 1)
     .attr('opacity', 0.95)
 
   nodeUpdate.select('.version-badge-text')
-    .attr('fill', (d) => d.isVersionBumped ? 'var(--vscode-editor-background)' : 'var(--vscode-editor-foreground)')
-    .style('font-size', (d) => d.envDims?.density === 'compact' ? '7px' : '8px')
-    .text((d) => {
-      if (d.envDims?.density === 'compact') {
-        return `v${d.semver}` // Shorter in compact mode
-      }
-      return d.isVersionBumped ? `↑ v${d.semver}` : `v${d.semver}`
-    })
+    .attr('fill', (d) => computeEnvelopeVersionBadgeTextFill({ isVersionBumped: d.isVersionBumped }))
+    .style('font-size', (d) => computeEnvelopeVersionBadgeFontSize({ density: d.envDims?.density }))
+    .text((d) => computeEnvelopeVersionBadgeText({ density: d.envDims?.density, isVersionBumped: d.isVersionBumped, semver: d.semver }))
 
   // Envelope linework (flap/fold) follows envelope status.
   // Flap opens (rotates back) when envelope is active
   nodeUpdate.selectAll('g.envelope-shape').select('path.envelope-flap')
     .attr('stroke', (d) => computeEnvelopeBodyStroke({ status: d.status, ownerColor: d.ownerColor }))
-    .attr('fill', (d) => {
-      if (d.status === 'active') return 'none' // Open flap has no fill
-      return 'var(--vscode-editor-background)'
-    })
-    .attr('opacity', (d) => (d.status === 'ended' ? 0.5 : 0.9))
+    .attr('fill', (d) => computeEnvelopeFlapFill(d.status))
+    .attr('opacity', (d) => computeEnvelopeFlapOpacity(d.status))
     .attr('d', (d) => computeEnvelopeFlapPath({
       width: d.envDims?.width || 84,
       height: d.envDims?.height || 52,
@@ -420,7 +500,7 @@ export function updateEnvelopeRendering({ d3, nodeUpdate }) {
   // Inner fold line
   nodeUpdate.selectAll('g.envelope-shape').select('path.envelope-fold')
     .attr('stroke', (d) => computeEnvelopeBodyStroke({ status: d.status, ownerColor: d.ownerColor }))
-    .attr('opacity', (d) => (d.status === 'ended' ? 0.3 : d.status === 'active' ? 0.6 : 0.4))
+    .attr('opacity', (d) => computeEnvelopeFoldOpacity(d.status))
     .attr('d', (d) => computeEnvelopeFoldPath({
       width: d.envDims?.width || 84,
       height: d.envDims?.height || 52,

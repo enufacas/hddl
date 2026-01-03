@@ -8,6 +8,8 @@ import {
   computeEmbeddingTargetPosition,
   computeEmbeddingPerspectiveParams,
   buildEmbeddingTooltipData,
+  computeEmbeddingBadgeWidth,
+  computeEmbeddingBadgeLayout,
 } from './embedding-renderer.js'
 
 describe('embedding-renderer helpers', () => {
@@ -163,5 +165,27 @@ describe('embedding-renderer helpers', () => {
     expect(data.context).toBe('context')
     expect(data.hour).toBe(-1)
     expect(data.isHistorical).toBe(true)
+  })
+
+  it('computeEmbeddingBadgeWidth clamps to min width and accounts for padding', () => {
+    expect(computeEmbeddingBadgeWidth({ badgeTextWidth: 0, badgePaddingX: 12, minWidth: 70 })).toBe(70)
+    expect(computeEmbeddingBadgeWidth({ badgeTextWidth: 10, badgePaddingX: 12, minWidth: 70 })).toBe(70)
+    // 100 + 24 = 124
+    expect(computeEmbeddingBadgeWidth({ badgeTextWidth: 100, badgePaddingX: 12, minWidth: 70 })).toBe(124)
+  })
+
+  it('computeEmbeddingBadgeLayout wraps when badge would overflow', () => {
+    // Wide enough: inline
+    const inline = computeEmbeddingBadgeLayout({ titleWidth: 100, badgeWidth: 70, svgWidth: 500 })
+    expect(inline.wrapped).toBe(false)
+    expect(inline.badgeY).toBe(-8)
+    expect(inline.transform).toMatch(/^translate\(\d+, -8\)$/)
+
+    // Too narrow: wrapped to next line at titleX
+    const wrapped = computeEmbeddingBadgeLayout({ titleWidth: 300, badgeWidth: 150, svgWidth: 400 })
+    expect(wrapped.wrapped).toBe(true)
+    expect(wrapped.badgeX).toBe(22)
+    expect(wrapped.badgeY).toBe(12)
+    expect(wrapped.transform).toBe('translate(22, 12)')
   })
 })

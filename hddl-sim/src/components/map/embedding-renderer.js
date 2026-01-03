@@ -218,6 +218,33 @@ export function buildEmbeddingTooltipData(event) {
   }
 }
 
+export function computeEmbeddingBadgeWidth({ badgeTextWidth, badgePaddingX = 12, minWidth = 70 }) {
+  const width = Math.ceil((Number(badgeTextWidth || 0)) + (Number(badgePaddingX || 0) * 2))
+  return Math.max(Number(minWidth || 0), width)
+}
+
+export function computeEmbeddingBadgeLayout({
+  titleWidth,
+  badgeWidth,
+  svgWidth,
+  titleX = 22,
+  gap = 12,
+  margin = 16,
+  inlineY = -8,
+  wrappedY = 12,
+}) {
+  let x = Math.ceil(Number(titleX || 0) + Number(titleWidth || 0) + Number(gap || 0))
+  const maxX = Math.max(margin, (Number(svgWidth || 0) - margin) - Number(badgeWidth || 0))
+  const wrapped = x > maxX
+  if (wrapped) x = Number(titleX || 0)
+  return {
+    badgeX: x,
+    badgeY: wrapped ? wrappedY : inlineY,
+    wrapped,
+    transform: `translate(${x}, ${wrapped ? wrappedY : inlineY})`,
+  }
+}
+
 /**
  * Create embedding renderer for the 3D memory visualization
  * 
@@ -590,24 +617,13 @@ export function createEmbeddingRenderer(svg, options) {
     const titleWidth = titleNode.getComputedTextLength?.() ?? 0
     const badgeTextWidth = badgeTextNode.getComputedTextLength?.() ?? 0
     const badgePaddingX = 12
-    const badgeWidth = Math.max(70, Math.ceil(badgeTextWidth + badgePaddingX * 2))
+    const badgeWidth = computeEmbeddingBadgeWidth({ badgeTextWidth, badgePaddingX, minWidth: 70 })
 
     embeddingBadgeRect.attr('width', badgeWidth)
     embeddingBadgeText.attr('x', badgeWidth / 2)
 
-    const titleX = 22
-    const gap = 12
-    let badgeX = Math.ceil(titleX + titleWidth + gap)
-
-    // If the badge would overflow the embedding box, wrap it to the next line.
-    const maxBadgeX = Math.max(16, (width - 16) - badgeWidth)
-    const wrapped = badgeX > maxBadgeX
-    if (wrapped) {
-      badgeX = titleX
-      embeddingBadge.attr('transform', `translate(${badgeX}, 12)`)
-    } else {
-      embeddingBadge.attr('transform', `translate(${badgeX}, -8)`)
-    }
+    const layout = computeEmbeddingBadgeLayout({ titleWidth, badgeWidth, svgWidth: width, titleX: 22, gap: 12, margin: 16, inlineY: -8, wrappedY: 12 })
+    embeddingBadge.attr('transform', layout.transform)
   }
 
   // Initial layout after nodes exist
