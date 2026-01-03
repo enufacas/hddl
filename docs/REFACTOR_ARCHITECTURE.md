@@ -10,17 +10,19 @@
 
 | File | Original LOC | Current LOC | Reduction | Status | Target |
 |------|--------------|-------------|-----------|--------|--------|
-| `hddl-map.js` | 3,866 | 911 | -2,955 (-76%) | 🟡 In Progress | <800 |
+| `hddl-map.js` | 3,866 | 780 | -3,086 (-80%) | ✅ Under Target | <800 |
 | `workspace.js` | 3,225 | 564 | -2,661 (-83%) | ✅ Complete | <800 |
 | `store.js` | 144 | 144 | - | ✅ Clean | Reference |
 | `selectors.js` | 202 | 202 | - | ✅ Clean | Reference |
-| **Total UI** | **7,091** | **1,821** | **-5,270 (-74%)** | **104/104 tests passing** | **<1,600 lines** |
+| **Total UI** | **7,091** | **1,344** | **-5,747 (-81%)** | **104/104 tests passing** | **<1,600 lines** |
 
-**Extracted Modules (25):**
+**Extracted Modules (27):**
 - `map/detail-levels.js` (221 lines)
 - `map/bezier-math.js` (57 lines)
 - `map/tooltip-manager.js` (429 lines)
 - `map/embedding-renderer.js` (1,093 lines)
+- `map/map-chrome.js` (141 lines)
+- `map/simulation-handlers.js` (64 lines)
 - `map/envelope-renderer.js` (393 lines)
 - `map/entity-renderer.js` (458 lines)
 - `map/agent-layout.js` (84 lines)
@@ -42,7 +44,7 @@
 - `workspace/state.js` (10 lines)
 - `workspace/telemetry.js` (595 lines)
 - `workspace/mobile.js` (286 lines)
-- **Total extracted:** 5,929 lines across 25 focused modules
+- **Total extracted:** 6,134 lines across 27 focused modules
 
 ---
 

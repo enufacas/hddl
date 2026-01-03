@@ -34,7 +34,7 @@ This prevents rapid iteration and confident changes.
   - `src/components/workspace/mobile.js`
   - `src/components/workspace/utils.js`
   - `src/components/workspace/glossary.js`
-- **hddl-map.js:** reduced to ~911 lines (from 3,866) via extracted modules:
+- **hddl-map.js:** reduced to ~780 lines (from 3,866) via extracted modules:
   - `src/components/map/detail-levels.js`
   - `src/components/map/bezier-math.js`
   - `src/components/map/agent-layout.js`
@@ -48,6 +48,8 @@ This prevents rapid iteration and confident changes.
   - `src/components/map/steward-processing.js`
   - `src/components/map/render-fleet-links.js`
   - `src/components/map/particle-renderer.js`
+  - `src/components/map/map-chrome.js`
+  - `src/components/map/simulation-handlers.js`
   - `src/components/map/envelope-renderer.js`
   - `src/components/map/entity-renderer.js`
   - `src/components/map/tooltip-manager.js`
