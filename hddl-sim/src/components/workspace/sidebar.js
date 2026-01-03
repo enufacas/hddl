@@ -212,93 +212,127 @@ function renderEnvelopeDetails(panelEl, scenario, timeHour, stewardFilter) {
   const meta = panelEl.querySelector('#envelope-meta')
   if (!body) return
 
+  const effectiveStewardFilter = (stewardFilter && stewardFilter !== 'all')
+    ? stewardFilter
+    : null
+
   const envelopes = scenario?.envelopes ?? []
-  const activeEnvelopes = envelopes.filter(env => {
-    const status = getEnvelopeStatus(env, timeHour)
-    if (status !== 'active') return false
-    if (stewardFilter && env.ownerRole !== stewardFilter) return false
-    return true
-  })
+  const filteredEnvelopes = effectiveStewardFilter
+    ? envelopes.filter(env => env.ownerRole === effectiveStewardFilter)
+    : envelopes
+  const activeEnvelopes = filteredEnvelopes.filter(e => getEnvelopeStatus(e, timeHour) === 'active')
 
   // Update metadata count
-  if (meta) {
-    meta.textContent = `(${activeEnvelopes.length})`
-  }
+  if (meta) meta.textContent = activeEnvelopes.length ? `${activeEnvelopes.length}` : '0'
 
-  if (activeEnvelopes.length === 0) {
-    body.innerHTML = `<div style="padding: 12px 0; color: var(--vscode-descriptionForeground); font-size: 12px;">No active envelopes at ${formatSimTime(timeHour)}${stewardFilter ? ` for ${stewardFilter}` : ''}</div>`
+  if (!activeEnvelopes.length) {
+    body.innerHTML = `<div class="sidebar-envelope__empty">No active envelopes at ${escapeHtml(formatSimTime(timeHour))}${effectiveStewardFilter ? ` for ${escapeHtml(effectiveStewardFilter)}` : ''}.</div>`
     return
   }
 
-  // Render each active envelope as a card
-  body.innerHTML = ''
-  activeEnvelopes.forEach(env => {
-    const card = document.createElement('div')
-    card.className = 'sidebar-envelope__card'
-    card.style.cssText = `
-      padding: 10px;
-      margin-bottom: 8px;
-      border-radius: 4px;
-      background: color-mix(in srgb, ${getStewardColor(env.ownerRole)} 12%, var(--vscode-sideBar-background));
-      border-left: 3px solid ${getStewardColor(env.ownerRole)};
-      cursor: pointer;
-      transition: all 0.2s ease;
-    `
+  // Helper to get prohibited constraints
+  const getProhibitedConstraints = (constraints) => {
+    const items = Array.isArray(constraints) ? constraints : []
+    return items.filter(c => {
+      const s = String(c || '')
+      return s.startsWith('No ') || s.includes('Not permitted') || s.startsWith('Human-only') || s.includes('Human-only')
+    })
+  }
 
-    // Hover effect
+  // Render boundary badges
+  const renderBoundaryBadges = (envelopeId) => {
+    const boundary = getBoundaryInteractionCounts(scenario, timeHour, 24)
+    const bucket = boundary?.byEnvelope?.get?.(envelopeId)
+    if (!bucket) return ''
+    const escalated = bucket.escalated ?? 0
+    const overridden = bucket.overridden ?? 0
+    const deferred = bucket.deferred ?? 0
+    if (!escalated && !overridden && !deferred) return ''
+
+    const parts = []
+    if (escalated) parts.push(`<span style="border: 1px solid var(--vscode-sideBar-border); border-left: 3px solid var(--status-warning); background: var(--vscode-editor-background); color: var(--vscode-statusBar-foreground); padding: 2px 8px; border-radius: 999px;" title="Boundary escalations (last 24h)">Esc ${escalated}</span>`)
+    if (overridden) parts.push(`<span style="border: 1px solid var(--vscode-sideBar-border); border-left: 3px solid var(--status-error); background: var(--vscode-editor-background); color: var(--vscode-statusBar-foreground); padding: 2px 8px; border-radius: 999px;" title="Boundary overrides (last 24h)">Ovr ${overridden}</span>`)
+    if (deferred) parts.push(`<span style="border: 1px solid var(--vscode-sideBar-border); border-left: 3px solid var(--status-info); background: var(--vscode-editor-background); color: var(--vscode-statusBar-foreground); padding: 2px 8px; border-radius: 999px;" title="Boundary deferrals (last 24h)">Def ${deferred}</span>`)
+    return parts.join('')
+  }
+
+  // Render all active envelopes using the original rich card template
+  body.innerHTML = activeEnvelopes.map(env => {
+    const effective = getEnvelopeAtTime(scenario, env.envelopeId, timeHour) || env
+    const statusIcon = 'pass-filled'
+    const statusColor = 'var(--status-success)'
+    const statusLabel = 'Active at selected time'
+
+    const version = effective?.envelope_version ?? 1
+    const baseVersion = env?.envelope_version ?? 1
+    const semver = toSemver(version)
+    const isVersionBumped = version > baseVersion
+    const revisionId = effective?.revision_id || '-'
+
+    const prohibitedAll = getProhibitedConstraints(effective?.constraints)
+    const hardStopCount = prohibitedAll.length
+    const hardStopPreview = prohibitedAll.slice(0, 3)
+    const boundaryBadges = renderBoundaryBadges(env.envelopeId)
+
+    // Get steward color for visual correlation with map
+    const stewardColor = getStewardColor(env.ownerRole)
+    const borderStyle = `3px solid ${stewardColor}`
+    const accentBar = `<div style="position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: ${stewardColor}; border-radius: 6px 0 0 6px;"></div>`
+
+    // Version badge with bump indicator
+    const versionBadge = isVersionBumped
+      ? `<span style="background: var(--status-warning); color: var(--vscode-editor-background); padding: 2px 6px; border-radius: 3px; font-weight: 600;">⚡ v${escapeHtml(semver)}</span>`
+      : `<span style="padding: 2px 6px;">v${escapeHtml(semver)}</span>`
+
+    return `
+      <div class="envelope-card" data-envelope="${escapeAttr(env.envelopeId)}" data-steward-color="${escapeAttr(stewardColor)}" style="--envelope-accent: ${stewardColor}; position: relative; background: var(--vscode-sideBar-background); border: ${borderStyle}; padding: 12px; padding-left: 16px; border-radius: 6px; cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s; margin-bottom: 12px;">
+        ${accentBar}
+        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+          <div>
+            <div style="font-family: monospace; font-size: 11px; color: var(--vscode-statusBar-foreground);">${escapeHtml(displayEnvelopeId(env.envelopeId))}</div>
+            <h3 style="margin: 4px 0; font-size: 13px;">${escapeHtml(env.name)}</h3>
+            <div style="display:flex; gap: 10px; flex-wrap: wrap; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; font-size: 11px; color: var(--vscode-statusBar-foreground);">
+              ${versionBadge}
+              <span>rev: ${escapeHtml(revisionId)}</span>
+            </div>
+          </div>
+          <span class="codicon codicon-${statusIcon}" style="color: ${statusColor};"></span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 12px;">
+          <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: ${stewardColor};"></span>
+          <span>${escapeHtml(env.ownerRole)}</span>
+        </div>
+        <div style="font-size: 12px; color: var(--vscode-statusBar-foreground); margin-bottom: 12px;">${statusLabel}</div>
+        <div style="font-size: 12px; color: var(--vscode-statusBar-foreground); margin-bottom: 12px;">Window: ${escapeHtml(formatSimTime(env.createdHour))} -> ${escapeHtml(formatSimTime(env.endHour))}</div>
+        <div style="display: flex; gap: 6px; font-size: 11px; flex-wrap: wrap;">
+          <span style="border: 1px solid var(--vscode-sideBar-border); border-left: 3px solid var(--status-info); background: var(--vscode-editor-background); color: var(--vscode-statusBar-foreground); padding: 2px 8px; border-radius: 999px;" title="Total constraints">${(effective.constraints ?? []).length} constraints</span>
+          <span style="border: 1px solid var(--vscode-sideBar-border); background: var(--vscode-editor-background); color: var(--vscode-statusBar-foreground); padding: 2px 8px; border-radius: 999px;" title="Domain">${escapeHtml(env.domain)}</span>
+          ${hardStopCount ? `<span style="border: 1px solid var(--vscode-sideBar-border); border-left: 3px solid var(--status-warning); background: var(--vscode-editor-background); color: var(--vscode-statusBar-foreground); padding: 2px 8px; border-radius: 999px;" title="${escapeAttr(`Hard stop constraints:\n${hardStopPreview.join('\n')}${hardStopCount > hardStopPreview.length ? `\n+${hardStopCount - hardStopPreview.length} more` : ''}`)}">Hard stops: ${hardStopCount}</span>` : ''}
+          ${boundaryBadges ? `<span>${boundaryBadges}</span>` : ''}
+        </div>
+      </div>
+    `
+  }).join('')
+
+  // Attach handlers for hover and click
+  const envelopeCards = body.querySelectorAll('.envelope-card')
+  envelopeCards.forEach(card => {
+    const stewardColor = card.dataset.stewardColor || 'var(--status-info)'
     card.addEventListener('mouseenter', () => {
-      card.style.background = `color-mix(in srgb, ${getStewardColor(env.ownerRole)} 20%, var(--vscode-sideBar-background))`
+      card.style.borderColor = stewardColor
+      card.style.boxShadow = `0 0 8px ${stewardColor}40`
     })
     card.addEventListener('mouseleave', () => {
-      card.style.background = `color-mix(in srgb, ${getStewardColor(env.ownerRole)} 12%, var(--vscode-sideBar-background))`
+      card.style.borderColor = stewardColor
+      card.style.boxShadow = 'none'
     })
-
-    // Click to show modal
-    card.addEventListener('click', () => {
-      createEnvelopeDetailModal(env, timeHour, scenario)
+    card.addEventListener('click', (e) => {
+      e.stopPropagation()
+      const envelopeId = card.dataset.envelope
+      const modal = createEnvelopeDetailModal(envelopeId)
+      const app = document.querySelector('#app')
+      if (app) app.appendChild(modal)
     })
-
-    // Envelope ID + Name
-    const header = document.createElement('div')
-    header.style.cssText = 'display: flex; flex-direction: column; gap: 4px; margin-bottom: 6px;'
-
-    const idEl = document.createElement('div')
-    idEl.style.cssText = 'font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--vscode-foreground); opacity: 0.9;'
-    idEl.textContent = displayEnvelopeId(env.id)
-
-    const nameEl = document.createElement('div')
-    nameEl.style.cssText = 'font-size: 12px; font-weight: 600; line-height: 1.3; color: var(--vscode-foreground);'
-    nameEl.textContent = env.name
-
-    header.appendChild(idEl)
-    header.appendChild(nameEl)
-
-    // Owner role badge
-    const ownerBadge = document.createElement('div')
-    ownerBadge.style.cssText = `
-      display: inline-block;
-      font-size: 10px;
-      font-weight: 600;
-      padding: 3px 6px;
-      border-radius: 3px;
-      background: ${getStewardColor(env.ownerRole)};
-      color: var(--vscode-button-foreground);
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-    `
-    ownerBadge.textContent = env.ownerRole
-
-    // Version (semver if available)
-    const versionEl = document.createElement('div')
-    versionEl.style.cssText = 'font-size: 11px; color: var(--vscode-descriptionForeground); margin-top: 4px;'
-    const semver = toSemver(env.version)
-    versionEl.innerHTML = `<span style="opacity: 0.7;">Version:</span> <code style="font-size: 10px; background: color-mix(in srgb, var(--vscode-textCodeBlock-background) 50%, transparent); padding: 1px 4px; border-radius: 2px;">${semver}</code>`
-
-    card.appendChild(header)
-    card.appendChild(ownerBadge)
-    card.appendChild(versionEl)
-
-    body.appendChild(card)
   })
 }
 

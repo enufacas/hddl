@@ -79,7 +79,7 @@ Note: Actual execution order deviated from the original phase ordering (workspac
 |-------|-------|
 | **Size** | M |
 | **Input** | `hddl-map.js` full file, `workspace.js` full file |
-| **Output** | `docs/REFACTOR_ARCHITECTURE.md` (living document) |
+| **Output** | Use git history + coverage reports as the source of truth |
 | **Validation** | Document lists modules, their line ranges, and dependencies |
 | **Checkpoint** | ✅ Yes - clean slate, no code changes yet |
 | **Dependencies** | 0.1 |
@@ -183,7 +183,7 @@ These functions have **no D3 dependencies** and can be unit tested immediately.
 |-------|-------|
 | **Size** | S |
 | **Input** | All modified files |
-| **Output** | Update `docs/REFACTOR_ARCHITECTURE.md` progress tracker |
+| **Output** | Prefer git history + coverage reports (no progress tracker doc) |
 | **Validation** | `npm test` passes (all tests), no new console errors in browser |
 | **Checkpoint** | ✅ Yes - Phase 1 complete, safe restart point |
 | **Dependencies** | 1.1, 1.2, 1.3 |
@@ -276,7 +276,7 @@ These have D3 dependencies but are relatively self-contained.
 |-------|-------|
 | **Size** | M |
 | **Input** | All modified files |
-| **Output** | Update `docs/REFACTOR_ARCHITECTURE.md`, updated test coverage |
+| **Output** | Updated test coverage (coverage reports) |
 | **Validation** | Full test suite, manual browser verification of all visual elements |
 | **Checkpoint** | ✅ Yes - All D3 renderers extracted, safe restart |
 | **Dependencies** | 2.1, 2.2, 2.3, 2.4 |
@@ -584,7 +584,7 @@ Phase 6: TypeScript Migration
 - [ ] `npm run test:coverage` - coverage not decreased
 - [ ] `npm run performance` - no performance regression
 - [ ] Git tag created
-- [ ] `docs/REFACTOR_ARCHITECTURE.md` updated
+- [ ] Documentation lives in git history + coverage outputs
 ```
 
 ---
