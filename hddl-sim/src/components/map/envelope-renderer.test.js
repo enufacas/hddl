@@ -30,6 +30,17 @@ import {
   computeEnvelopeFoldOpacity,
   computeEnvelopeFlapPath,
   computeEnvelopeFoldPath,
+  computeEnvelopeTestId,
+  computeEnvelopeIconRadius,
+  computeEnvelopeIconStatusRadius,
+  computeEnvelopeBodyCornerRadius,
+  computeEnvelopeBodyEnterStrokeWidth,
+  computeEnvelopeBodyRectFromDims,
+  computeEnvelopeBodyTestId,
+  computeEnvelopeGlowPhaseOpacity,
+  computeEnvelopeGlowPhaseOpacityForDatum,
+  computeEnvelopeGlowStroke,
+  computeEnvelopeStatusLabelFontSize,
 } from './envelope-renderer.js'
 
 describe('envelope-renderer helpers', () => {
@@ -54,6 +65,60 @@ describe('envelope-renderer helpers', () => {
     const revised = computeEnvelopeBodyRect({ r: 30, isRecentlyRevised: true })
     expect(revised.width).toBeGreaterThan(rect2.width)
     expect(revised.height).toBeGreaterThan(rect2.height)
+  })
+
+  it('computeEnvelopeBodyRectFromDims centers the rect', () => {
+    expect(computeEnvelopeBodyRectFromDims({ width: 84, height: 52 })).toEqual({ x: -42, y: -26, width: 84, height: 52 })
+    expect(computeEnvelopeBodyRectFromDims({ width: 0, height: 0 })).toEqual({ x: 0, y: 0, width: 0, height: 0 })
+  })
+
+  it('computeEnvelopeTestId / computeEnvelopeBodyTestId are stable', () => {
+    expect(computeEnvelopeTestId({ id: 'E-1' })).toBe('envelope-E-1')
+    expect(computeEnvelopeTestId({ id: '' })).toBe('envelope-unknown')
+    expect(computeEnvelopeBodyTestId({ id: 'E-1' })).toBe('envelope-body-E-1')
+    expect(computeEnvelopeBodyTestId({ id: null })).toBe('envelope-body-unknown')
+  })
+
+  it('computeEnvelopeBodyCornerRadius matches density', () => {
+    expect(computeEnvelopeBodyCornerRadius({ density: 'compact' })).toBe(4)
+    expect(computeEnvelopeBodyCornerRadius({ density: 'detailed' })).toBe(6)
+    expect(computeEnvelopeBodyCornerRadius({ density: undefined })).toBe(6)
+  })
+
+  it('computeEnvelopeBodyEnterStrokeWidth matches density', () => {
+    expect(computeEnvelopeBodyEnterStrokeWidth({ density: 'compact' })).toBe(2)
+    expect(computeEnvelopeBodyEnterStrokeWidth({ density: 'detailed' })).toBe(3)
+    expect(computeEnvelopeBodyEnterStrokeWidth({ density: undefined })).toBe(3)
+  })
+
+  it('computeEnvelopeIconRadius / computeEnvelopeIconStatusRadius default correctly', () => {
+    expect(computeEnvelopeIconRadius({ radius: 0, fallback: 18 })).toBe(18)
+    expect(computeEnvelopeIconRadius({ radius: 22, fallback: 18 })).toBe(22)
+    expect(computeEnvelopeIconStatusRadius({ radius: 22, fallback: 18 })).toBe(11)
+  })
+
+  it('computeEnvelopeStatusLabelFontSize matches density', () => {
+    expect(computeEnvelopeStatusLabelFontSize({ density: 'detailed' })).toBe('11px')
+    expect(computeEnvelopeStatusLabelFontSize({ density: 'compact' })).toBe('10px')
+    expect(computeEnvelopeStatusLabelFontSize({ density: undefined })).toBe('10px')
+  })
+
+  it('computeEnvelopeGlowStroke uses ownerColor fallback', () => {
+    expect(computeEnvelopeGlowStroke({ ownerColor: '#abc' })).toBe('#abc')
+    expect(computeEnvelopeGlowStroke({ ownerColor: '' })).toBe('var(--vscode-focusBorder)')
+  })
+
+  it('computeEnvelopeGlowPhaseOpacity selects high/low by phase', () => {
+    const active = computeEnvelopeGlowKeyframeOpacity('active')
+    expect(computeEnvelopeGlowPhaseOpacity({ status: 'active', phase: 'high' })).toBe(active.high)
+    expect(computeEnvelopeGlowPhaseOpacity({ status: 'active', phase: 'low' })).toBe(active.low)
+    expect(computeEnvelopeGlowPhaseOpacity({ status: 'pending', phase: 'high' })).toBe(0)
+  })
+
+  it('computeEnvelopeGlowPhaseOpacityForDatum is null-safe', () => {
+    expect(computeEnvelopeGlowPhaseOpacityForDatum({ datum: null, phase: 'high' })).toBe(0)
+    const active = computeEnvelopeGlowKeyframeOpacity('active')
+    expect(computeEnvelopeGlowPhaseOpacityForDatum({ datum: { status: 'active' }, phase: 'high' })).toBe(active.high)
   })
 
   it('computeEnvelopeAccentColor prefers ownerColor and falls back', () => {

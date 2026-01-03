@@ -11,6 +11,62 @@ export function computeEnvelopeBodyRect({ r, isRecentlyRevised }) {
   return { x: -w / 2, y: -h / 2, width: w, height: h }
 }
 
+export function computeEnvelopeBodyRectFromDims({ width = 84, height = 52 }) {
+  const w = Number(width || 0)
+  const h = Number(height || 0)
+  const x = -w / 2
+  const y = -h / 2
+  return {
+    x: Object.is(x, -0) ? 0 : x,
+    y: Object.is(y, -0) ? 0 : y,
+    width: w,
+    height: h,
+  }
+}
+
+export function computeEnvelopeTestId({ id }) {
+  return `envelope-${id || 'unknown'}`
+}
+
+export function computeEnvelopeBodyTestId({ id }) {
+  return `envelope-body-${id || 'unknown'}`
+}
+
+export function computeEnvelopeBodyCornerRadius({ density }) {
+  return density === 'compact' ? 4 : 6
+}
+
+export function computeEnvelopeBodyEnterStrokeWidth({ density }) {
+  return density === 'compact' ? 2 : 3
+}
+
+export function computeEnvelopeIconRadius({ radius, fallback = 18 }) {
+  return Number(radius || 0) || fallback
+}
+
+export function computeEnvelopeIconStatusRadius({ radius, fallback = 18 }) {
+  const r = computeEnvelopeIconRadius({ radius, fallback })
+  return r * 0.5
+}
+
+export function computeEnvelopeStatusLabelFontSize({ density }) {
+  return density === 'detailed' ? '11px' : '10px'
+}
+
+export function computeEnvelopeGlowStroke({ ownerColor, fallback = 'var(--vscode-focusBorder)' }) {
+  return ownerColor || fallback
+}
+
+export function computeEnvelopeGlowPhaseOpacity({ status, phase }) {
+  const { high, low } = computeEnvelopeGlowKeyframeOpacity(status)
+  return phase === 'high' ? high : low
+}
+
+export function computeEnvelopeGlowPhaseOpacityForDatum({ datum, phase }) {
+  if (!datum) return 0
+  return computeEnvelopeGlowPhaseOpacity({ status: datum.status, phase })
+}
+
 export function computeEnvelopeAccentColor({ ownerColor, fallback = 'var(--vscode-focusBorder)' }) {
   return ownerColor || fallback
 }
@@ -186,7 +242,7 @@ export function renderEnvelopeEnter({
   const envShape = nodeEnter.filter((d) => d.type === 'envelope')
     .append('g')
     .attr('class', (d) => `envelope-shape envelope-density-${d.envDims?.density || 'normal'}`)
-    .attr('data-testid', (d) => `envelope-${d.id}`)
+    .attr('data-testid', (d) => computeEnvelopeTestId({ id: d.id }))
     .attr('tabindex', 0)
 
   // Apply handlers to ALL envelope shapes (both new and existing)
@@ -232,7 +288,7 @@ export function renderEnvelopeEnter({
     .attr('class', 'envelope-icon-circle')
     .attr('cx', 0)
     .attr('cy', 0)
-    .attr('r', (d) => d.envDims?.radius || 18)
+    .attr('r', (d) => computeEnvelopeIconRadius({ radius: d.envDims?.radius, fallback: 18 }))
     .attr('fill', 'var(--vscode-editor-background)')
     .attr('stroke', 'var(--vscode-focusBorder)')
     .attr('stroke-width', 3)
@@ -243,9 +299,9 @@ export function renderEnvelopeEnter({
     .attr('class', 'envelope-icon-status')
     .attr('cx', 0)
     .attr('cy', 0)
-    .attr('r', (d) => (d.envDims?.radius || 18) * 0.5)
-    .attr('fill', (d) => d.status === 'active' ? 'var(--status-success)' : 'var(--vscode-input-border)')
-    .attr('opacity', 0.8)
+    .attr('r', (d) => computeEnvelopeIconStatusRadius({ radius: d.envDims?.radius, fallback: 18 }))
+    .attr('fill', (d) => computeEnvelopeIconStatusFill({ status: d.status, ownerColor: d.ownerColor }))
+    .attr('opacity', (d) => computeEnvelopeIconStatusOpacity(d.status))
 
   // Non-icon modes: render envelope shape elements
   const envBodyShape = envShape.filter((d) => !d.envDims?.isIcon)
@@ -254,16 +310,10 @@ export function renderEnvelopeEnter({
   envBodyShape.filter((d) => shouldRenderEnvelopeElement('glow', d.envDims?.density))
     .append('rect')
     .attr('class', 'envelope-glow')
-    .attr('x', (d) => {
-      const dims = d.envDims || { width: 84, height: 52 }
-      return -(dims.width + 16) / 2
-    })
-    .attr('y', (d) => {
-      const dims = d.envDims || { width: 84, height: 52 }
-      return -(dims.height + 16) / 2
-    })
-    .attr('width', (d) => (d.envDims?.width || 84) + 16)
-    .attr('height', (d) => (d.envDims?.height || 52) + 16)
+    .attr('x', (d) => computeEnvelopeGlowRect({ width: d.envDims?.width || 84, height: d.envDims?.height || 52 }).x)
+    .attr('y', (d) => computeEnvelopeGlowRect({ width: d.envDims?.width || 84, height: d.envDims?.height || 52 }).y)
+    .attr('width', (d) => computeEnvelopeGlowRect({ width: d.envDims?.width || 84, height: d.envDims?.height || 52 }).width)
+    .attr('height', (d) => computeEnvelopeGlowRect({ width: d.envDims?.width || 84, height: d.envDims?.height || 52 }).height)
     .attr('rx', 8)
     .attr('ry', 8)
     .attr('fill', 'none')
@@ -276,10 +326,10 @@ export function renderEnvelopeEnter({
   envBodyShape.filter((d) => shouldRenderEnvelopeElement('revisionBurst', d.envDims?.density))
     .append('rect')
     .attr('class', 'envelope-revision-burst')
-    .attr('x', (d) => -(d.envDims?.width || 84) / 2)
-    .attr('y', (d) => -(d.envDims?.height || 52) / 2)
-    .attr('width', (d) => d.envDims?.width || 84)
-    .attr('height', (d) => d.envDims?.height || 52)
+    .attr('x', (d) => computeEnvelopeRevisionBurstKeyframes({ width: d.envDims?.width || 84, height: d.envDims?.height || 52 }).start.x)
+    .attr('y', (d) => computeEnvelopeRevisionBurstKeyframes({ width: d.envDims?.width || 84, height: d.envDims?.height || 52 }).start.y)
+    .attr('width', (d) => computeEnvelopeRevisionBurstKeyframes({ width: d.envDims?.width || 84, height: d.envDims?.height || 52 }).start.width)
+    .attr('height', (d) => computeEnvelopeRevisionBurstKeyframes({ width: d.envDims?.width || 84, height: d.envDims?.height || 52 }).start.height)
     .attr('rx', 6)
     .attr('ry', 6)
     .attr('fill', 'none')
@@ -290,17 +340,17 @@ export function renderEnvelopeEnter({
   // Envelope body - all non-icon modes
   envBodyShape.append('rect')
     .attr('class', 'envelope-body')
-    .attr('data-testid', (d) => `envelope-body-${d.id}`)
+    .attr('data-testid', (d) => computeEnvelopeBodyTestId({ id: d.id }))
     .attr('data-envelope-status', (d) => d.status || 'unknown')
-    .attr('x', (d) => -(d.envDims?.width || 84) / 2)
-    .attr('y', (d) => -(d.envDims?.height || 52) / 2)
-    .attr('width', (d) => d.envDims?.width || 84)
-    .attr('height', (d) => d.envDims?.height || 52)
-    .attr('rx', (d) => d.envDims?.density === 'compact' ? 4 : 6)
-    .attr('ry', (d) => d.envDims?.density === 'compact' ? 4 : 6)
+    .attr('x', (d) => computeEnvelopeBodyRectFromDims({ width: d.envDims?.width || 84, height: d.envDims?.height || 52 }).x)
+    .attr('y', (d) => computeEnvelopeBodyRectFromDims({ width: d.envDims?.width || 84, height: d.envDims?.height || 52 }).y)
+    .attr('width', (d) => computeEnvelopeBodyRectFromDims({ width: d.envDims?.width || 84, height: d.envDims?.height || 52 }).width)
+    .attr('height', (d) => computeEnvelopeBodyRectFromDims({ width: d.envDims?.width || 84, height: d.envDims?.height || 52 }).height)
+    .attr('rx', (d) => computeEnvelopeBodyCornerRadius({ density: d.envDims?.density }))
+    .attr('ry', (d) => computeEnvelopeBodyCornerRadius({ density: d.envDims?.density }))
     .attr('fill', 'var(--vscode-editor-background)')
     .attr('stroke', 'var(--vscode-focusBorder)')
-    .attr('stroke-width', (d) => d.envDims?.density === 'compact' ? 2 : 3)
+    .attr('stroke-width', (d) => computeEnvelopeBodyEnterStrokeWidth({ density: d.envDims?.density }))
 
   // Envelope flap - triangular top (detailed and normal only)
   envBodyShape.filter((d) => shouldRenderEnvelopeElement('flap', d.envDims?.density))
@@ -338,7 +388,7 @@ export function renderEnvelopeEnter({
     .style('paint-order', 'stroke')
     .style('stroke', 'var(--vscode-editor-background)')
     .style('stroke-width', '4px')
-    .style('font-size', (d) => d.envDims?.density === 'detailed' ? '11px' : '10px')
+    .style('font-size', (d) => computeEnvelopeStatusLabelFontSize({ density: d.envDims?.density }))
     .style('font-weight', '800')
     .attr('fill', 'var(--vscode-statusBar-foreground)')
 
@@ -396,6 +446,7 @@ export function updateEnvelopeRendering({ d3, nodeUpdate }) {
   nodeUpdate.selectAll('g.envelope-shape').select('circle.envelope-icon-circle')
     .attr('stroke', (d) => computeEnvelopeIconCircleStroke({ ownerColor: d.ownerColor }))
     .attr('stroke-width', (d) => computeEnvelopeIconCircleStrokeWidth(d.status))
+    .attr('r', (d) => computeEnvelopeIconRadius({ radius: d.envDims?.radius, fallback: 18 }))
 
   // Animate envelope glow for active envelopes (pulsing effect) - only if element exists
   nodeUpdate.selectAll('g.envelope-shape').select('rect.envelope-glow')
@@ -403,26 +454,26 @@ export function updateEnvelopeRendering({ d3, nodeUpdate }) {
     .attr('y', (d) => computeEnvelopeGlowRect({ width: d.envDims?.width || 84, height: d.envDims?.height || 52 }).y)
     .attr('width', (d) => computeEnvelopeGlowRect({ width: d.envDims?.width || 84, height: d.envDims?.height || 52 }).width)
     .attr('height', (d) => computeEnvelopeGlowRect({ width: d.envDims?.width || 84, height: d.envDims?.height || 52 }).height)
-    .attr('stroke', (d) => d.ownerColor || 'var(--vscode-focusBorder)')
+    .attr('stroke', (d) => computeEnvelopeGlowStroke({ ownerColor: d.ownerColor }))
     .transition()
     .duration(800)
-    .attr('opacity', (d) => computeEnvelopeGlowKeyframeOpacity(d.status).high)
+    .attr('opacity', (d) => computeEnvelopeGlowPhaseOpacity({ status: d.status, phase: 'high' }))
     .transition()
     .duration(800)
-    .attr('opacity', (d) => computeEnvelopeGlowKeyframeOpacity(d.status).low)
+    .attr('opacity', (d) => computeEnvelopeGlowPhaseOpacity({ status: d.status, phase: 'low' }))
     .on('end', function repeat() {
       d3.select(this)
         .transition()
         .duration(800)
         .attr('opacity', function () {
           const d = d3.select(this.parentNode).datum()
-          return d ? computeEnvelopeGlowKeyframeOpacity(d.status).high : 0
+          return computeEnvelopeGlowPhaseOpacityForDatum({ datum: d, phase: 'high' })
         })
         .transition()
         .duration(800)
         .attr('opacity', function () {
           const d = d3.select(this.parentNode).datum()
-          return d ? computeEnvelopeGlowKeyframeOpacity(d.status).low : 0
+          return computeEnvelopeGlowPhaseOpacityForDatum({ datum: d, phase: 'low' })
         })
         .on('end', repeat)
     })
@@ -461,6 +512,7 @@ export function updateEnvelopeRendering({ d3, nodeUpdate }) {
     .attr('y', (d) => computeEnvelopeStatusLabelY({ height: d.envDims?.height || 52 }))
     .attr('opacity', (d) => computeEnvelopeStatusLabelOpacity(d.status))
     .text((d) => computeEnvelopeStatusLabelText(d.status))
+    .style('font-size', (d) => computeEnvelopeStatusLabelFontSize({ density: d.envDims?.density }))
 
   // Update version badge position and content
   nodeUpdate.select('.envelope-version-badge')
