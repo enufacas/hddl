@@ -80,6 +80,118 @@ export function computeAgentNameText({ agentDensityConfig, agent, detailLevel, g
   return getAdaptiveAgentName(agent?.name, detailLevel)
 }
 
+export function computeAgentBotTransform({ gridScale, botScale }) {
+  return `scale(${(gridScale || 1.0) * (botScale || 1.0)})`
+}
+
+export function computeAgentNameVisibility({ agentDensityConfig, agent }) {
+  const shouldShowName = !!agentDensityConfig?.showName && agent?.showName !== false
+  return shouldShowName ? 'visible' : 'hidden'
+}
+
+export function computeAgentNameOpacity({ agentDensityConfig, agent }) {
+  const shouldShowName = !!agentDensityConfig?.showName && agent?.showName !== false
+  if (!shouldShowName) return 0
+  return agent?.isRecentlyActive ? 1 : 0.55
+}
+
+export function computeAgentNameFontSizePxForUpdate({ detailLevel, gridScale, DETAIL_LEVELS }) {
+  const baseSize = detailLevel === DETAIL_LEVELS.STANDARD ? 10 : 11
+  return `${Math.max(9, baseSize * (gridScale || 1.0))}px`
+}
+
+export function computeAgentRoleVisibility({ agentDensityConfig, agent }) {
+  const shouldShowRole = !!agentDensityConfig?.showRole && agent?.showName !== false
+  return shouldShowRole ? 'visible' : 'hidden'
+}
+
+export function computeAgentRoleOpacity({ agentDensityConfig, agent }) {
+  const shouldShowRole = !!agentDensityConfig?.showRole && agent?.showName !== false
+  return shouldShowRole ? 0.65 : 0
+}
+
+export function computeAgentRoleText({ agentDensityConfig, agent, truncateWithEllipsis }) {
+  const shouldShowRole = !!agentDensityConfig?.showRole && agent?.showName !== false
+  if (!shouldShowRole || !agent?.role) return ''
+  return truncateWithEllipsis(agent.role, 26)
+}
+
+export function computeAgentHaloStroke({ isRecentlyActive, fleetColor, fallback = 'var(--vscode-textLink-foreground)' }) {
+  return isRecentlyActive ? (fleetColor || fallback) : 'transparent'
+}
+
+export function computeAgentHaloOpacity({ isRecentlyActive }) {
+  return isRecentlyActive ? 0.7 : 0
+}
+
+export function computeAgentHaloRadius({ isRecentlyActive, botScale }) {
+  return (isRecentlyActive ? 18 : 16) * (botScale || 1.0)
+}
+
+export function computeAgentCompactDotFill({ isRecentlyActive, fleetColor, fallback = 'var(--vscode-textLink-foreground)' }) {
+  return isRecentlyActive ? (fleetColor || fallback) : 'var(--vscode-editor-background)'
+}
+
+export function computeAgentCompactDotOpacity({ isRecentlyActive }) {
+  return isRecentlyActive ? 1 : 0.5
+}
+
+export function computeAgentCompactDotFilter({ isRecentlyActive, fleetColor, fallback = 'var(--vscode-textLink-foreground)' }) {
+  if (!isRecentlyActive) return 'none'
+  return `drop-shadow(0 0 4px ${fleetColor || fallback})`
+}
+
+export function computeAgentMinimalDotOpacity({ isRecentlyActive }) {
+  return isRecentlyActive ? 0.9 : 0.4
+}
+
+export function computeAgentMinimalDotFilter({ isRecentlyActive, fleetColor, fallback = 'var(--vscode-sideBar-border)' }) {
+  if (!isRecentlyActive) return 'none'
+  return `drop-shadow(0 0 3px ${fleetColor || fallback})`
+}
+
+export function computeAgentBotPartOpacity({ isActive }) {
+  return isActive ? 1 : 0.45
+}
+
+export function computeAgentBotEyeOpacity({ isActive }) {
+  return isActive ? 1 : 0.35
+}
+
+export function computeLabelMainOpacity({ detailLevel, DETAIL_LEVELS, status }) {
+  if (detailLevel === DETAIL_LEVELS.MINIMAL) return 0
+  if (status === 'pending') return 0.6
+  if (status === 'ended') return 0.75
+  return 1
+}
+
+export function computeLabelMainFontSize({ type, detailLevel, DETAIL_LEVELS }) {
+  if (type === 'envelope') {
+    return detailLevel === DETAIL_LEVELS.COMPACT ? '10px' : '12px'
+  }
+  return detailLevel === DETAIL_LEVELS.COMPACT ? '8px' : '10px'
+}
+
+export function computeLabelMainText({ node, detailLevel, getAdaptiveEnvelopeLabel, getAdaptiveStewardLabel, getAdaptiveAgentName }) {
+  if (node?.type === 'envelope') {
+    const adaptive = getAdaptiveEnvelopeLabel(node.label, node.name, detailLevel)
+    return adaptive.label
+  }
+  if (node?.type === 'steward') {
+    const adaptive = getAdaptiveStewardLabel(node.name, '', detailLevel)
+    return adaptive.name
+  }
+  if (node?.type === 'agent') return getAdaptiveAgentName(node.name, detailLevel)
+  return ''
+}
+
+export function computeLabelSubOpacity({ detailLevel, DETAIL_LEVELS, status }) {
+  if (detailLevel === DETAIL_LEVELS.COMPACT || detailLevel === DETAIL_LEVELS.MINIMAL) return 0
+  if (status === 'pending') return 0.5
+  if (status === 'ended') return 0.6
+  return 0.7
+}
+
 export function updateStewardRendering({ d3, nodeUpdate }) {
   // Update steward circle rotation based on processing state
   nodeUpdate.filter((d) => d.type === 'steward').select('circle.steward-circle')
@@ -301,7 +413,7 @@ export function updateAgentRendering({
     .attr('stroke', (d) => d?.fleetColor || 'var(--vscode-sideBar-border)')
     .attr('fill', (d) => d?.fleetColor || 'var(--vscode-statusBar-foreground)')
     .attr('data-agent-active', (d) => d?.isRecentlyActive ? 'true' : 'false')
-    .attr('transform', (d) => `scale(${(d?.gridScale || 1.0) * agentDensityConfig.botScale})`)
+    .attr('transform', (d) => computeAgentBotTransform({ gridScale: d?.gridScale, botScale: agentDensityConfig.botScale }))
 
   // Update agent text elements (visibility controlled by per-node showName property)
   const agentNameSelection = nodeUpdate.filter((d) => d.type === 'agent').select('.agent-name')
@@ -311,60 +423,30 @@ export function updateAgentRendering({
 
   agentNameSelection
     .interrupt() // Cancel any ongoing transitions
-    .attr('text-anchor', (d) => d.useLeftSide ? 'end' : 'start')
-    .attr('x', (d) => {
-      const scale = (d.gridScale || 1.0) * agentDensityConfig.botScale
-      return d.useLeftSide ? -16 * scale : 16 * scale
-    })
+    .attr('text-anchor', (d) => computeAgentTextAnchor({ useLeftSide: d.useLeftSide }))
+    .attr('x', (d) => computeAgentNameX({ useLeftSide: d.useLeftSide, gridScale: d.gridScale, botScale: agentDensityConfig.botScale }))
     .attr('y', (d) => -3 + (d.textYOffset || 0))
-    .style('visibility', (d) => {
-      const shouldShowName = agentDensityConfig.showName && d.showName !== false
-      return shouldShowName ? 'visible' : 'hidden'
-    })
-    .style('opacity', (d) => {
-      const shouldShowName = agentDensityConfig.showName && d.showName !== false
-      if (!shouldShowName) return 0
-      return d.isRecentlyActive ? 1 : 0.55
-    })
-    .attr('opacity', (d) => {
-      const shouldShowName = agentDensityConfig.showName && d.showName !== false
-      if (!shouldShowName) return 0
-      return d.isRecentlyActive ? 1 : 0.55
-    })
-    .style('font-size', (d) => {
-      const baseSize = detailLevel === DETAIL_LEVELS.STANDARD ? 10 : 11
-      return `${Math.max(9, baseSize * (d.gridScale || 1.0))}px`
-    })
-    .text((d) => {
-      const shouldShowName = agentDensityConfig.showName && d.showName !== false
-      return shouldShowName ? getAdaptiveAgentName(d.name, detailLevel) : ''
-    })
+    .style('visibility', (d) => computeAgentNameVisibility({ agentDensityConfig, agent: d }))
+    .style('opacity', (d) => computeAgentNameOpacity({ agentDensityConfig, agent: d }))
+    .attr('opacity', (d) => computeAgentNameOpacity({ agentDensityConfig, agent: d }))
+    .style('font-size', (d) => computeAgentNameFontSizePxForUpdate({ detailLevel, gridScale: d.gridScale, DETAIL_LEVELS }))
+    .text((d) => computeAgentNameText({ agentDensityConfig, agent: d, detailLevel, getAdaptiveAgentName }))
 
   nodeUpdate.select('.agent-role')
-    .attr('text-anchor', (d) => d.useLeftSide ? 'end' : 'start')
-    .attr('x', (d) => d.useLeftSide ? -16 : 16)
+    .attr('text-anchor', (d) => computeAgentTextAnchor({ useLeftSide: d.useLeftSide }))
+    .attr('x', (d) => computeAgentRoleX({ useLeftSide: d.useLeftSide }))
     .attr('y', (d) => 10 + (d.textYOffset || 0))
-    .style('visibility', (d) => {
-      const shouldShowRole = agentDensityConfig.showRole && d.showName !== false
-      return shouldShowRole ? 'visible' : 'hidden'
-    })
-    .attr('opacity', (d) => {
-      const shouldShowRole = agentDensityConfig.showRole && d.showName !== false
-      return shouldShowRole ? 0.65 : 0
-    })
-    .text((d) => {
-      const shouldShowRole = agentDensityConfig.showRole && d.showName !== false
-      if (!shouldShowRole || !d.role) return ''
-      return truncateWithEllipsis(d.role, 26)
-    })
+    .style('visibility', (d) => computeAgentRoleVisibility({ agentDensityConfig, agent: d }))
+    .attr('opacity', (d) => computeAgentRoleOpacity({ agentDensityConfig, agent: d }))
+    .text((d) => computeAgentRoleText({ agentDensityConfig, agent: d, truncateWithEllipsis }))
 
   // Update agent activity halo with pulsing glow for active agents
   nodeUpdate.select('circle.agent-activity-halo')
     .transition()
     .duration(800)
-    .attr('stroke', (d) => d.isRecentlyActive ? d.fleetColor || 'var(--vscode-textLink-foreground)' : 'transparent')
-    .attr('opacity', (d) => d.isRecentlyActive ? 0.7 : 0)
-    .attr('r', (d) => d.isRecentlyActive ? 18 * agentDensityConfig.botScale : 16 * agentDensityConfig.botScale)
+    .attr('stroke', (d) => computeAgentHaloStroke({ isRecentlyActive: d.isRecentlyActive, fleetColor: d.fleetColor }))
+    .attr('opacity', (d) => computeAgentHaloOpacity({ isRecentlyActive: d.isRecentlyActive }))
+    .attr('r', (d) => computeAgentHaloRadius({ isRecentlyActive: d.isRecentlyActive, botScale: agentDensityConfig.botScale }))
     .on('end', function (event, d) {
       if (!d || !d.isRecentlyActive) return
 
@@ -392,14 +474,14 @@ export function updateAgentRendering({
 
   // Update compact and minimal agent indicators with glow
   nodeUpdate.select('circle.agent-compact-dot')
-    .attr('fill', (d) => d.isRecentlyActive ? d.fleetColor || 'var(--vscode-textLink-foreground)' : 'var(--vscode-editor-background)')
-    .attr('opacity', (d) => d.isRecentlyActive ? 1 : 0.5)
-    .style('filter', (d) => d.isRecentlyActive ? `drop-shadow(0 0 4px ${d.fleetColor || 'var(--vscode-textLink-foreground)'})` : 'none')
+    .attr('fill', (d) => computeAgentCompactDotFill({ isRecentlyActive: d.isRecentlyActive, fleetColor: d.fleetColor }))
+    .attr('opacity', (d) => computeAgentCompactDotOpacity({ isRecentlyActive: d.isRecentlyActive }))
+    .style('filter', (d) => computeAgentCompactDotFilter({ isRecentlyActive: d.isRecentlyActive, fleetColor: d.fleetColor }))
 
   nodeUpdate.select('circle.agent-minimal-dot')
     .attr('fill', (d) => d.fleetColor || 'var(--vscode-sideBar-border)')
-    .attr('opacity', (d) => d.isRecentlyActive ? 0.9 : 0.4)
-    .style('filter', (d) => d.isRecentlyActive ? `drop-shadow(0 0 3px ${d.fleetColor || 'var(--vscode-sideBar-border)'})` : 'none')
+    .attr('opacity', (d) => computeAgentMinimalDotOpacity({ isRecentlyActive: d.isRecentlyActive }))
+    .style('filter', (d) => computeAgentMinimalDotFilter({ isRecentlyActive: d.isRecentlyActive, fleetColor: d.fleetColor }))
 
   // Bot glyph styling (active agents read brighter)
   // IMPORTANT: When switching scenarios without a full reload, D3 may reuse
@@ -423,11 +505,11 @@ export function updateAgentRendering({
 
       bot.selectAll('rect.agent-bot-head, line.agent-bot-antenna')
         .attr('stroke', fleetColor)
-        .attr('opacity', isActive ? 1 : 0.45)
+        .attr('opacity', computeAgentBotPartOpacity({ isActive }))
 
       bot.selectAll('circle.agent-bot-eye')
         .attr('fill', eyeColor)
-        .attr('opacity', isActive ? 1 : 0.35)
+        .attr('opacity', computeAgentBotEyeOpacity({ isActive }))
     })
 
   // Activity halo styling
@@ -472,44 +554,17 @@ export function updateNodeLabels({
     .attr('text-anchor', (d) => d.type === 'agent' ? 'end' : (d.type === 'steward' ? 'start' : 'middle'))
     .attr('x', (d) => d.type === 'agent' ? -d.r - 5 : (d.type === 'steward' ? d.r + 5 : 0))
     .attr('fill', 'var(--vscode-editor-foreground)')
-    .attr('opacity', (d) => {
-      if (detailLevel === DETAIL_LEVELS.MINIMAL) return 0
-      if (d.status === 'pending') return 0.6
-      if (d.status === 'ended') return 0.75
-      return 1
-    })
-    .style('font-size', (d) => {
-      if (d.type === 'envelope') {
-        return detailLevel === DETAIL_LEVELS.COMPACT ? '10px' : '12px'
-      }
-      return detailLevel === DETAIL_LEVELS.COMPACT ? '8px' : '10px'
-    })
+    .attr('opacity', (d) => computeLabelMainOpacity({ detailLevel, DETAIL_LEVELS, status: d.status }))
+    .style('font-size', (d) => computeLabelMainFontSize({ type: d.type, detailLevel, DETAIL_LEVELS }))
     .style('font-weight', (d) => d.type === 'envelope' ? 'bold' : 'normal')
-    .text((d) => {
-      if (d.type === 'envelope') {
-        const adaptive = getAdaptiveEnvelopeLabel(d.label, d.name, detailLevel)
-        return adaptive.label
-      }
-      if (d.type === 'steward') {
-        const adaptive = getAdaptiveStewardLabel(d.name, '', detailLevel)
-        return adaptive.name
-      }
-      if (d.type === 'agent') return getAdaptiveAgentName(d.name, detailLevel)
-      return ''
-    })
+    .text((d) => computeLabelMainText({ node: d, detailLevel, getAdaptiveEnvelopeLabel, getAdaptiveStewardLabel, getAdaptiveAgentName }))
 
   nodeUpdate.select('.label-sub')
     .attr('dy', (d) => d.type === 'envelope' ? 20 : (d.type === 'steward' ? 15 : 15))
     .attr('text-anchor', (d) => d.type === 'agent' ? 'end' : (d.type === 'steward' ? 'start' : 'middle'))
     .attr('x', (d) => d.type === 'agent' ? -d.r - 5 : (d.type === 'steward' ? d.r + 5 : 0))
     .attr('fill', 'var(--vscode-editor-foreground)')
-    .attr('opacity', (d) => {
-      // Hide sub-labels on COMPACT and MINIMAL
-      if (detailLevel === DETAIL_LEVELS.COMPACT || detailLevel === DETAIL_LEVELS.MINIMAL) return 0
-      if (d.status === 'pending') return 0.5
-      if (d.status === 'ended') return 0.6
-      return 0.7
-    })
+    .attr('opacity', (d) => computeLabelSubOpacity({ detailLevel, DETAIL_LEVELS, status: d.status }))
     .style('font-size', '9px')
     .text((d) => getNodeSubLabelText(d, detailLevel))
 }
