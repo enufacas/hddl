@@ -1,7 +1,7 @@
 # HDDL-Sim Refactoring Architecture
 
 **Status:** Phase 3 - Workspace Refactor Complete (Tasks 3.1-3.3 + mobile extraction)  
-**Last Updated:** 2026-01-02  
+**Last Updated:** 2026-01-03  
 **Target:** Break 7,091 lines of monolithic UI code into <800 line modules with clear boundaries
 
 ---
@@ -10,18 +10,19 @@
 
 | File | Original LOC | Current LOC | Reduction | Status | Target |
 |------|--------------|-------------|-----------|--------|--------|
-| `hddl-map.js` | 3,866 | 1,280 | -2,586 (-67%) | 🟡 In Progress | <800 |
+| `hddl-map.js` | 3,866 | 911 | -2,955 (-76%) | 🟡 In Progress | <800 |
 | `workspace.js` | 3,225 | 564 | -2,661 (-83%) | ✅ Complete | <800 |
 | `store.js` | 144 | 144 | - | ✅ Clean | Reference |
 | `selectors.js` | 202 | 202 | - | ✅ Clean | Reference |
-| **Total UI** | **7,091** | **2,190** | **-4,901 (-69%)** | **104/104 tests passing** | **<1,600 lines** |
+| **Total UI** | **7,091** | **1,821** | **-5,270 (-74%)** | **104/104 tests passing** | **<1,600 lines** |
 
-**Extracted Modules (24):**
+**Extracted Modules (25):**
 - `map/detail-levels.js` (221 lines)
 - `map/bezier-math.js` (57 lines)
 - `map/tooltip-manager.js` (429 lines)
 - `map/embedding-renderer.js` (1,093 lines)
 - `map/envelope-renderer.js` (393 lines)
+- `map/entity-renderer.js` (458 lines)
 - `map/agent-layout.js` (84 lines)
 - `map/particle-labels.js` (63 lines)
 - `map/particle-logic.js` (33 lines)
@@ -41,7 +42,7 @@
 - `workspace/state.js` (10 lines)
 - `workspace/telemetry.js` (595 lines)
 - `workspace/mobile.js` (286 lines)
-- **Total extracted:** 5,471 lines across 24 focused modules
+- **Total extracted:** 5,929 lines across 25 focused modules
 
 ---
 
@@ -56,7 +57,7 @@
 | `tooltip-manager.js` | 468-750 | ~280 | ❌ No | d3 | P1 | Medium |
 | `envelope-renderer.js` | 775-1700 | 393 | ❌ No | d3, detail-levels | P2 | Medium |
 | `particle-engine.js` | 2734-3000 | ~270 | ❌ No | d3, bezier-math | P2 | **High** |
-| `entity-renderer.js` | 1700-2730 | ~1000 | ❌ No | d3, detail-levels | P2 | Medium |
+| `entity-renderer.js` | 1700-2730 | 458 | ❌ No | d3, detail-levels | P2 | Medium |
 | `embedding-renderer.js` | 3399-3866 | ~470 | ❌ No | d3, selectors | P2 | Medium |
 | `hddl-map.js` (refactored) | All | ~600 | ❌ No | All above | P3 | High |
 

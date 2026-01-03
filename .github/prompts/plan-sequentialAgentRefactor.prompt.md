@@ -23,7 +23,7 @@ This prevents rapid iteration and confident changes.
 
 ---
 
-## Current Repo Status (2026-01-02)
+## Current Repo Status (2026-01-03)
 
 - **workspace.js:** reduced to ~564 lines (from 3,225) via extracted modules:
   - `src/components/workspace/ai-narrative.js`
@@ -34,7 +34,7 @@ This prevents rapid iteration and confident changes.
   - `src/components/workspace/mobile.js`
   - `src/components/workspace/utils.js`
   - `src/components/workspace/glossary.js`
-- **hddl-map.js:** reduced to ~1,280 lines (from 3,866) via extracted modules:
+- **hddl-map.js:** reduced to ~911 lines (from 3,866) via extracted modules:
   - `src/components/map/detail-levels.js`
   - `src/components/map/bezier-math.js`
   - `src/components/map/agent-layout.js`
@@ -49,6 +49,7 @@ This prevents rapid iteration and confident changes.
   - `src/components/map/render-fleet-links.js`
   - `src/components/map/particle-renderer.js`
   - `src/components/map/envelope-renderer.js`
+  - `src/components/map/entity-renderer.js`
   - `src/components/map/tooltip-manager.js`
   - `src/components/map/embedding-renderer.js`
 - **Unit tests:** 104/104 passing
