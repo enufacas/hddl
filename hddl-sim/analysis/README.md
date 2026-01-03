@@ -202,3 +202,4 @@ Each tool has a specific purpose and should stay focused.
 - [`../tests/README.md`](../tests/README.md) - Testing infrastructure (Playwright, Vitest)
 - [`../.github/copilot-instructions.md`](../../.github/copilot-instructions.md) - Development workflow
 - [`../docs/PARTICLE_FLOW_RULES.md`](../docs/PARTICLE_FLOW_RULES.md) - Visualization requirements
+- [Map_TS_Readiness_Coverage_Log.md](./Map_TS_Readiness_Coverage_Log.md) - Running log of map helper-extraction coverage waves
