@@ -12,8 +12,9 @@ npm run test:unit:watch    # Auto-rerun unit tests on change
 npx playwright test --ui   # Interactive Playwright UI
 
 # Coverage (automated)
-npm run test:coverage       # Run tests with coverage, generate report, open in browser
-npm run test:coverage:verbose  # Show detailed test output
+npm run test:unit:coverage  # Unit coverage (Vitest) -> coverage/unit/index.html
+npm run test:coverage       # E2E coverage (Playwright/Istanbul) -> coverage/e2e/index.html
+npm run test:coverage:verbose  # E2E coverage with verbose output
 ```
 
 ## Test Suite Status
@@ -40,9 +41,11 @@ For detailed breakdown see [TEST_REPORT.md](TEST_REPORT.md)
    - Slow (~1-2min), requires dev server
 
 3. **Coverage Analysis**
-   - Run: `npm run test:coverage`
-   - Requires: `VITE_COVERAGE=true` environment variable
-   - Output: `coverage/index.html`
+    - Unit coverage (fast, TS-focused): `npm run test:unit:coverage`
+       - Output: `coverage/unit/index.html`
+    - E2E coverage (user-journey execution): `npm run test:coverage`
+       - Output: `coverage/e2e/index.html`
+       - Note: requires port 5173 to be free (coverage run starts its own instrumented dev server)
 
 4. **Performance Testing** - Browser rendering metrics
    - Location: `analysis/performance-metrics.mjs`
@@ -109,7 +112,10 @@ npm run test:unit -- --run
 ### Coverage Analysis
 
 ```bash
-# Run coverage report (fully automated)
+# Unit coverage (Vitest)
+npm run test:unit:coverage
+
+# E2E coverage report (Playwright + Istanbul)
 npm run test:coverage
 
 # Verbose mode (see test output)
