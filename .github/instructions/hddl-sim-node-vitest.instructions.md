@@ -35,6 +35,11 @@ These instructions apply to `hddl-sim/src/**` JavaScript files.
 - Co-locate unit tests as `*.test.js` near the source.
 - Do not change production code purely to make it easier to test; test through the existing public surface.
 
+### Coverage intent
+
+- Treat **unit coverage** as the TS-readiness KPI. The Vitest coverage report is intentionally scoped to `src/sim/**` and `src/components/map/**`.
+- Treat **E2E/Istanbul coverage** as a critical-flow KPI (what the browser journey executed), not as an “everything is covered” target.
+
 ### Integration tests (Playwright)
 
 - Use Playwright for end-to-end UI and interaction flows.

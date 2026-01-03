@@ -11,8 +11,20 @@ applyTo: "hddl-sim/tests/**,hddl-sim/src/**/*.test.js"
 - Unit (Vitest): `npm run test:unit`
 - Unit (non-watch): `npm run test:unit -- --run` (use this during refactoring to avoid hanging)
 - Unit watch: `npm run test:unit:watch`
-- Coverage (Playwright + Istanbul): `npm run test:coverage`
+- Unit coverage (Vitest): `npm run test:unit:coverage`
+- E2E coverage (Playwright + Istanbul): `npm run test:coverage:e2e`
 - Single Playwright spec: `npx playwright test tests/<file>.spec.js`
+
+## Coverage Model (Unified)
+
+We intentionally track **two different** coverage signals:
+
+- **Unit coverage (Vitest) = TS-readiness KPI**
+	- Intentionally scoped to `hddl-sim/src/sim/**` and `hddl-sim/src/components/map/**`.
+	- HTML report: `hddl-sim/coverage/unit/index.html`
+- **E2E coverage (Playwright + Istanbul) = critical-flow KPI**
+	- Measures browser-executed code during the Playwright journey.
+	- HTML report: `hddl-sim/coverage/e2e/index.html`
 
 ## Refactoring Validation Checklist
 When extracting/refactoring code modules, follow this checklist:
@@ -41,7 +53,7 @@ When extracting/refactoring code modules, follow this checklist:
 - Don’t: hardcode brittle pixel-perfect values; use ranges.
 
 ## References
-- See `hddl-sim/tests/README.md` and `hddl-sim/tests/TEST-RESULTS.md` for the living test catalog/status.
+- See `hddl-sim/tests/README.md` and `hddl-sim/tests/TEST_REPORT.md` for the living test catalog/status.
 
 ## Instruction-scope probe (opt-in)
 When the user’s prompt includes the literal tag `[instructions-test]` and you make a code change within this scope, also append a single line to `.github/instruction-probes/APPLIED.log`:

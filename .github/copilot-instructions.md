@@ -81,11 +81,23 @@ For subtle background tints based on dynamic colors:
 ### Quick Reference
 
 ```bash
-npm test                    # All integration tests (includes conformance)
-npm run test:unit          # Vitest unit tests only
-npm run test:unit:watch    # Unit tests in watch mode
-npm run test:coverage      # Generate coverage report (opens browser)
+npm test                      # Playwright integration tests (includes conformance via pretest)
+npm run test:unit             # Vitest unit tests
+npm run test:unit:watch       # Unit tests in watch mode
+npm run test:unit:coverage    # Unit coverage report (TS-target KPI)
+npm run test:coverage:e2e     # E2E/Istanbul coverage report (critical-flow KPI)
 ```
+
+### Two Kinds of “Coverage” (Intentional)
+
+- **Unit coverage (Vitest) is our TS-readiness KPI.** It is intentionally scoped to the TS-target surfaces:
+  - `hddl-sim/src/sim/**`
+  - `hddl-sim/src/components/map/**`
+- **E2E coverage (Playwright + Istanbul) is our critical browser journey KPI.** It measures what a Playwright run actually executed in the browser and is not expected to be 100%.
+
+**Report outputs:**
+- Unit coverage HTML: `hddl-sim/coverage/unit/index.html`
+- E2E coverage HTML: `hddl-sim/coverage/e2e/index.html`
 
 ### Test Infrastructure
 
@@ -93,13 +105,14 @@ npm run test:coverage      # Generate coverage report (opens browser)
 |------|----------|-----------|-------|
 | Unit Tests | `src/**/*.test.js` | Vitest | Fast (<1s) |
 | Integration | `tests/*.spec.js` | Playwright | Slow (1-2min) |
-| Coverage | `tests/istanbul-coverage.spec.js` | Istanbul | ~30s |
+| Coverage (unit) | `src/**` (scoped) | Vitest v8 | Fast |
+| Coverage (E2E) | `tests/istanbul-coverage.spec.js` | Istanbul | ~30s |
 
 ### Current Status
 
-- **254 tests** (230 passing, 91% pass rate)
-- **Coverage**: 45.89% statements, 47.91% lines
-- See `.github/instructions/hddl-sim-tests.instructions.md` for detailed testing guidelines
+- Coverage and test counts are expected to change frequently during refactors.
+- For current numbers, run `npm run test:unit:coverage` (unit KPI) and `npm run test:coverage:e2e` (E2E KPI).
+- See `.github/instructions/hddl-sim-tests.instructions.md` for detailed testing guidelines.
 
 ### When to Run Which Tests
 
@@ -108,7 +121,8 @@ npm run test:coverage      # Generate coverage report (opens browser)
 | Developing UI | `npm run dev` + browser | HMR is faster than tests |
 | New pure function | `npm run test:unit:watch` | Instant feedback |
 | Before commit | `npm test` | Full validation |
-| Checking coverage | `npm run test:coverage` | Opens HTML report |
+| Checking unit KPI coverage | `npm run test:unit:coverage` | TS-target coverage |
+| Checking E2E KPI coverage | `npm run test:coverage:e2e` | Browser journey execution |
 | Specific feature | `npx playwright test tests/feature.spec.js` | Focused testing |
 
 ## Analysis Workflow
