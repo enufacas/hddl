@@ -1,3 +1,41 @@
+export function computeFleetAgentCounts({ nodes, fleetRole }) {
+  const safeNodes = Array.isArray(nodes) ? nodes : []
+  const role = String(fleetRole || '')
+
+  let total = 0
+  let active = 0
+  for (const n of safeNodes) {
+    if (n?.type !== 'agent') continue
+    if (String(n?.fleetRole || '') !== role) continue
+    total += 1
+    if (n?.isRecentlyActive) active += 1
+  }
+
+  return { active, total }
+}
+
+export function formatFleetCountText({ nodes, fleetRole }) {
+  const { active, total } = computeFleetAgentCounts({ nodes, fleetRole })
+  return `${active}/${total}`
+}
+
+export function computeLinkStroke(d) {
+  if (d?.type === 'ownership' && d?.hasEscalation) return 'var(--status-warning)'
+  return 'var(--vscode-editor-lineHighlightBorder)'
+}
+
+export function computeLinkStrokeWidth(d) {
+  if (d?.type !== 'ownership') return 1.5
+  const c = Number(d?.interactionCount || 0)
+  return 1.5 + Math.min(3, c * 0.6)
+}
+
+export function computeLinkOpacity(d) {
+  if (d?.type !== 'ownership') return 0.35
+  const c = Number(d?.interactionCount || 0)
+  return c > 0 ? 0.8 : 0.45
+}
+
 export function renderFleetBoundaries({ fleetLayer, fleetBounds, nodes, currentAgentDensity }) {
   const fleetSel = fleetLayer.selectAll('g.fleet')
     .data(fleetBounds, (d) => d.id)
@@ -60,12 +98,7 @@ export function renderFleetBoundaries({ fleetLayer, fleetBounds, nodes, currentA
 
   fleetMerged.select('.fleet-count-text')
     .attr('fill', (d) => d.color)
-    .text((d) => {
-      // Count agents in this fleet
-      const count = nodes.filter((n) => n.type === 'agent' && n.fleetRole === d.role).length
-      const active = nodes.filter((n) => n.type === 'agent' && n.fleetRole === d.role && n.isRecentlyActive).length
-      return `${active}/${count}`
-    })
+    .text((d) => formatFleetCountText({ nodes, fleetRole: d.role }))
 
   fleetSel.exit().remove()
 }
@@ -86,20 +119,9 @@ export function renderLinks({ linkLayer, links }) {
     .attr('opacity', 0.55)
 
   linkSelection
-    .attr('stroke', (d) => {
-      if (d.type === 'ownership' && d.hasEscalation) return 'var(--status-warning)'
-      return 'var(--vscode-editor-lineHighlightBorder)'
-    })
-    .attr('stroke-width', (d) => {
-      if (d.type !== 'ownership') return 1.5
-      const c = Number(d.interactionCount || 0)
-      return 1.5 + Math.min(3, c * 0.6)
-    })
-    .attr('opacity', (d) => {
-      if (d.type !== 'ownership') return 0.35
-      const c = Number(d.interactionCount || 0)
-      return c > 0 ? 0.8 : 0.45
-    })
+    .attr('stroke', (d) => computeLinkStroke(d))
+    .attr('stroke-width', (d) => computeLinkStrokeWidth(d))
+    .attr('opacity', (d) => computeLinkOpacity(d))
 
   linkSelection.exit().remove()
 }
