@@ -264,28 +264,34 @@ Phase 1: Pure Functions (Low Risk)
   ├─ Task 1.3: workspace/utils.js + workspace/glossary.js
   └─ Task 1.4: Validation gate [CHECKPOINT]
 
-Phase 2: D3 Renderers (Medium/High Risk)
-  ├─ Task 2.1: tooltip-manager.js
-  ├─ Task 2.2: envelope-renderer.js
-  ├─ Task 2.3: particle-engine.js ⚠️ (Highest risk)
-  ├─ Task 2.4: embedding-renderer.js
-  └─ Task 2.5: Validation gate [CHECKPOINT]
+Phase 2: D3 Renderers (Medium/High Risk) [PARTIAL - 2 of 4 tasks]
+  ├─ Task 2.1: tooltip-manager.js ✅
+  ├─ Task 2.2: envelope-renderer.js ⚠️ DEFERRED (tight D3 coupling)
+  ├─ Task 2.3: particle-engine.js ⚠️ DEFERRED (highest risk, needs D3 refactor)
+  ├─ Task 2.4: embedding-renderer.js ✅
+  └─ Task 2.5: Validation gate ✅ [CHECKPOINT]
 
-Phase 3: hddl-map.js Coordinator (High Risk)
-  ├─ Task 3.1: Refactor core to thin coordinator
-  └─ Task 3.2: Validation gate [CHECKPOINT]
+Phase 3: workspace.js Refactoring (Medium Risk) [CURRENT]
+  ├─ Task 3.1: ai-narrative.js ← (Current task)
+  ├─ Task 3.2: sidebar.js + panels.js
+  └─ Task 3.3: Validation gate [CHECKPOINT]
 
-Phase 4: workspace.js Refactoring (Medium Risk)
-  ├─ Task 4.1: sidebar.js + panels.js
-  ├─ Task 4.2: ai-narrative.js
-  └─ Task 4.3: Validation gate [CHECKPOINT]
+Phase 4: hddl-map.js Coordinator (High Risk) [DEFERRED]
+  ├─ Task 4.1: Refactor core to thin coordinator
+  └─ Task 4.2: Validation gate [CHECKPOINT]
 
-Phase 5: Test Infrastructure
-  ├─ Task 5.1: Fix test imports (no copied functions)
-  ├─ Task 5.2: Add unit tests for new modules
-  └─ Task 5.3: Coverage 55%+ [CHECKPOINT]
+Phase 5: D3 Pattern Refactoring (High Risk) [DEFERRED]
+  ├─ Task 5.1: Extract particle-engine.js (revisit after D3 refactor)
+  ├─ Task 5.2: Extract envelope-renderer.js (revisit after D3 refactor)
+  ├─ Task 5.3: Refactor D3 update pattern (nodeEnter/nodeUpdate)
+  └─ Task 5.4: Validation gate [CHECKPOINT]
 
-Phase 6: TypeScript Migration
+Phase 6: Test Infrastructure
+  ├─ Task 6.1: Fix test imports (no copied functions)
+  ├─ Task 6.2: Add unit tests for new modules
+  └─ Task 6.3: Coverage 55%+ [CHECKPOINT]
+
+Phase 7: TypeScript Migration
   ├─ Task 6.1: Add tsconfig.json
   ├─ Task 6.2: Convert pure utilities
   ├─ Task 6.3: Add D3 types, convert renderers
@@ -516,6 +522,19 @@ workspace.js (coordinator, <800 lines)
 - **Decision:** Cannot extract envelope rendering without refactoring entire D3 render cycle
 - **Decision:** Defer Task 2.2 to Phase 5 after D3 patterns are refactored
 - **Lesson:** Some extractions require architectural refactoring first - don't force it
+
+### 2026-01-02: Task 2.3 (particle-engine) Deferred
+- **Finding:** Particle engine marked HIGHEST RISK in original assessment
+- **Finding:** Likely has similar D3 coupling issues as envelope-renderer
+- **Decision:** Defer Task 2.3 to Phase 5, revisit after D3 update pattern is refactored
+- **Decision:** Proceed with Phase 3 (workspace.js) which has clearer extraction targets
+- **Rationale:** workspace.js AI narrative manager is ~800 lines, self-contained, lower risk
+
+### 2026-01-02: Phase Reordering Decision
+- **Original Plan:** Phase 2 → Phase 3 (hddl-map coordinator) → Phase 4 (workspace)
+- **New Plan:** Phase 2 (partial) → Phase 3 (workspace) → Phase 4 (coordinator) → Phase 5 (D3 refactor)
+- **Rationale:** Extract lower-risk workspace.js modules first, save high-risk D3 refactoring for later
+- **Benefit:** Maintains momentum, gets more code modularized before tackling architectural challenges
 
 ---
 
