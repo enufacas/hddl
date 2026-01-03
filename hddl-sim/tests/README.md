@@ -43,6 +43,7 @@ For detailed breakdown see [TEST_REPORT.md](TEST_REPORT.md)
 3. **Coverage Analysis**
     - Unit coverage (fast, TS-focused): `npm run test:unit:coverage`
        - Output: `coverage/unit/index.html`
+       - Scope: `src/sim/**` and `src/components/map/**` (intentional)
     - E2E coverage (user-journey execution): `npm run test:coverage`
        - Output: `coverage/e2e/index.html`
        - Note: requires port 5173 to be free (coverage run starts its own instrumented dev server)

@@ -9,8 +9,17 @@ export default defineConfig({
       enabled: false,
       reporter: ['text', 'html', 'lcov'],
       reportsDirectory: 'coverage/unit',
-      include: ['src/**/*.js'],
-      exclude: ['node_modules/**', 'tests/**', 'src/**/*.test.js', '**/*.spec.js'],
+      // Unit coverage is intentionally scoped to the TS-target surfaces.
+      // The app UI (pages + DOM-heavy components) is primarily covered by Playwright E2E.
+      include: ['src/sim/**/*.js', 'src/components/map/**/*.js'],
+      exclude: [
+        'node_modules/**',
+        'tests/**',
+        'src/**/*.test.js',
+        '**/*.spec.js',
+        '**/*.json',
+        'src/sim/scenarios/**',
+      ],
     },
   },
 })

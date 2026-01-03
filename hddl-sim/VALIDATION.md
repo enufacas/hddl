@@ -287,6 +287,7 @@ Coverage also has two distinct meanings, and we keep their reports separate:
 - **Unit coverage (Vitest)**: best proxy for TypeScript migration safety (pure logic boundaries).
   - Run: `npm run test:unit:coverage`
   - Report: `coverage/unit/index.html`
+  - Scope: `src/sim/**` and `src/components/map/**` (intentional)
 - **E2E coverage (Playwright + Istanbul)**: “what executed in a real browser journey”.
   - Run: `npm run test:coverage`
   - Report: `coverage/e2e/index.html`

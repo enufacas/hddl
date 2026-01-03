@@ -110,6 +110,8 @@ npm run test:coverage -- -v   # Verbose test output
 npm run test:coverage -- -s   # Skip opening browser
 ```
 
+Unit coverage is intentionally scoped to TS-target surfaces (`src/sim/**`, `src/components/map/**`).
+
 The `run-coverage.mjs` script:
 1. Cleans old coverage data (`.nyc_output/`, `coverage/e2e/`)
 2. Runs `istanbul-coverage.spec.js` with `VITE_COVERAGE=true` (and forces a fresh dev server)
