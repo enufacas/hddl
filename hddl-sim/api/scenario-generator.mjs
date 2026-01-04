@@ -74,8 +74,12 @@ export async function generateScenario(userPrompt) {
     // Step 3: Merge skeleton structure with narrative data
     const scenario = mergeSkeletonWithNarrative(skeleton, narrativeData);
     
-    // Validate structure
-    const warnings = validateScenario(scenario);
+    // Validate structure (strict: fail fast on critical issues)
+    const { warnings, errors } = validateScenario(scenario);
+    if (errors.length > 0) {
+      const topErrors = errors.slice(0, 8).map(e => `- ${e}`).join('\n')
+      throw new Error(`Generated scenario failed validation:\n${topErrors}${errors.length > 8 ? `\n- ...and ${errors.length - 8} more` : ''}`)
+    }
     
     const duration = (Date.now() - startTime) / 1000;
     
@@ -355,6 +359,26 @@ Replace ALL_CAPS placeholders. Be CONCISE (≤80 chars per string).
 
 ${compactSkeleton}
 
+ENVELOPE MODEL (CRITICAL):
+- Exactly ONE envelope object per envelopeId (no duplicates in scenario.envelopes).
+- Each envelope must be active for the full scenario: createdHour near start (0-2) and endHour = durationHours.
+- DO NOT create separate envelope entries for v2/v3. Use revision events to evolve the envelope.
+
+REVISION MODEL (CRITICAL):
+- Every revision MUST include: envelopeId, envelope_version (integer), revision_id (string), nextAssumptions (array), nextConstraints (array).
+- nextAssumptions/nextConstraints must be the full updated lists (not deltas).
+- Revisions that change a version should occur before the changed policy is used by later events.
+
+WINDOW CONSISTENCY (CRITICAL):
+- Every event with an envelopeId must occur within that envelope's createdHour..endHour.
+
+AGENT NAMING: Agents are software. Name them after their function or domain object:
+- Healthcare: "Triage Bot", "Diagnosis Engine", "Med Checker"
+- Insurance: "Claims Validator", "Risk Scorer", "Policy Bot"
+- Finance: "Credit Analyzer", "Fraud Detector", "Loan Processor"
+- General: "Data Processor", "Workflow Engine", "Query Handler"
+- NOT people names: Avoid "Sarah", "Marcus", "John", etc.
+
 CRITICAL: STEWARD_ROLE_1/2/3 MUST be DISTINCT names. Use IDENTICAL names in:
 - fleets[0].stewardRole and envelopes[0].ownerRole (both use STEWARD_ROLE_1)
 - fleets[1].stewardRole and envelopes[1].ownerRole (both use STEWARD_ROLE_2)
@@ -420,6 +444,7 @@ ${userPrompt}`;
  */
 function validateScenario(scenario) {
   const warnings = [];
+  const errors = [];
   
   // Check required top-level fields
   if (!scenario.schemaVersion) warnings.push('Missing required field: schemaVersion');
@@ -429,6 +454,43 @@ function validateScenario(scenario) {
   if (!scenario.envelopes) warnings.push('Missing required field: envelopes');
   if (!scenario.fleets) warnings.push('Missing required field: fleets');
   if (!scenario.events) warnings.push('Missing required field: events');
+
+  // Stop early if structural fields missing
+  if (!scenario.envelopes || !scenario.events || !scenario.durationHours) {
+    return { warnings, errors: ['Scenario missing envelopes/events/durationHours'] };
+  }
+
+  // EnvelopeId uniqueness (generator contract)
+  const envelopeIds = scenario.envelopes.map(e => e.envelopeId).filter(Boolean)
+  const uniqueEnvelopeIds = new Set(envelopeIds)
+  if (uniqueEnvelopeIds.size !== envelopeIds.length) {
+    errors.push('Duplicate envelopeId entries found in scenario.envelopes (generator requires one envelope object per envelopeId)')
+  }
+
+  // Envelope time bounds
+  scenario.envelopes.forEach(env => {
+    if (typeof env.createdHour !== 'number' || typeof env.endHour !== 'number') {
+      errors.push(`Envelope ${env.envelopeId} missing createdHour/endHour`) 
+      return
+    }
+    if (env.createdHour < 0 || env.endHour > scenario.durationHours || env.createdHour >= env.endHour) {
+      errors.push(`Envelope ${env.envelopeId} has invalid time window ${env.createdHour}-${env.endHour} for durationHours=${scenario.durationHours}`)
+    }
+  })
+
+  // Event-in-envelope-window check
+  const envelopeWindowById = new Map(scenario.envelopes.map(env => [env.envelopeId, env]))
+  scenario.events.forEach(e => {
+    if (!e || !e.envelopeId || typeof e.hour !== 'number') return
+    const env = envelopeWindowById.get(e.envelopeId)
+    if (!env) {
+      errors.push(`Event at hour ${e.hour} references unknown envelopeId ${e.envelopeId}`)
+      return
+    }
+    if (e.hour < env.createdHour || e.hour > env.endHour) {
+      errors.push(`Event at hour ${e.hour} for ${e.envelopeId} occurs outside envelope window ${env.createdHour}-${env.endHour}`)
+    }
+  })
   
   // Check event count
   const eventCount = scenario.events?.length || 0;
@@ -467,6 +529,14 @@ function validateScenario(scenario) {
   if (boundaryEmbeddings.length < boundaries.length) {
     warnings.push(`Missing embeddings: ${boundaries.length - boundaryEmbeddings.length} boundaries lack embeddings`);
   }
+
+  // Revision completeness (generator contract)
+  revisions.forEach(r => {
+    if (r.envelope_version == null) errors.push(`Revision ${r.eventId || '(no eventId)'} missing envelope_version`)
+    if (!r.revision_id) errors.push(`Revision ${r.eventId || '(no eventId)'} missing revision_id`)
+    if (!Array.isArray(r.nextAssumptions)) errors.push(`Revision ${r.eventId || '(no eventId)'} missing nextAssumptions array`)
+    if (!Array.isArray(r.nextConstraints)) errors.push(`Revision ${r.eventId || '(no eventId)'} missing nextConstraints array`)
+  })
   
   // Check chronological ordering
   for (let i = 1; i < events.length; i++) {
@@ -518,7 +588,7 @@ function validateScenario(scenario) {
     }
   });
   
-  return warnings;
+  return { warnings, errors };
 }
 
 /**

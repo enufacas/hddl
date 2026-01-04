@@ -10,7 +10,7 @@
       "domain": "Customer Service",
       "ownerRole": "Customer Steward",
       "createdHour": 0.25,
-      "endHour": 18,
+      "endHour": 3.1,
       "accent": "var(--status-info)",
       "envelope_version": 1,
       "revision_id": null,
@@ -21,6 +21,27 @@
       "constraints": [
         "Max response time: 2min",
         "Human review: refunds > $100"
+      ]
+    },
+    {
+      "envelopeId": "ENV-001",
+      "name": "Customer Service Responses",
+      "domain": "Customer Service",
+      "ownerRole": "Customer Steward",
+      "createdHour": 3.1,
+      "endHour": 18,
+      "accent": "var(--status-info)",
+      "envelope_version": 2,
+      "revision_id": "ENV-001-v2",
+      "assumptions": [
+        "Customers prefer response times under 2 minutes.",
+        "Refunds over $100 require human review.",
+        "Escalations require a bounded evidence packet."
+      ],
+      "constraints": [
+        "Max response time: 2min",
+        "Human review: refunds > $100",
+        "Escalation packet required: refunds > $100"
       ]
     },
     {
@@ -95,12 +116,14 @@
       "assumptions": [
         "Protected classes must not be inferred.",
         "Humans make final hiring decisions.",
-        "Candidate transparency is required."
+        "Candidate transparency is required.",
+        "Feature allow-list is explicit and steward-owned."
       ],
       "constraints": [
         "No inference on protected classes",
         "Human-only final decision",
-        "Transparency required"
+        "Transparency required",
+        "Disallow location proxy features without DSG signoff"
       ]
     },
     {
@@ -115,11 +138,13 @@
       "revision_id": "ENV-003-v2",
       "assumptions": [
         "Discount guidance optimizes for sustainable revenue, not just close-rate.",
-        "Human approval required for out-of-policy terms."
+        "Human approval required for out-of-policy terms.",
+        "Large discounts require an evidence packet and steward approval."
       ],
       "constraints": [
         "Max discount: 15% without human approval",
-        "Never propose discriminatory pricing"
+        "Never propose discriminatory pricing",
+        "Evidence packet required: discounts > 15%"
       ]
     },
     {
@@ -134,11 +159,13 @@
       "revision_id": "ENV-004-v2",
       "assumptions": [
         "Access is least-privilege and time-bounded.",
-        "Schema changes are reviewed before reaching production consumers."
+        "Schema changes are reviewed before reaching production consumers.",
+        "Contract updates are steward-owned and versioned."
       ],
       "constraints": [
         "No PII exposure without explicit allow-list",
-        "Schema changes require steward-approved contract"
+        "Schema changes require steward-approved contract",
+        "Contract changes require versioned migration notes"
       ]
     }
   ],
@@ -150,6 +177,14 @@
           "agentId": "AG-CS-01",
           "name": "ReplyAssist",
           "role": "response drafting",
+          "envelopeIds": [
+            "ENV-001"
+          ]
+        },
+        {
+          "agentId": "AG-CS-MEM-01",
+          "name": "DecisionMemory",
+          "role": "retrieval + precedent recall",
           "envelopeIds": [
             "ENV-001"
           ]
@@ -436,8 +471,9 @@
       "severity": "warning",
       "label": "Refund boundary touched",
       "detail": "A refund over $100 triggered the human-review boundary.",
-      "actorRole": "Customer Steward",
-      "actorName": "Customer Steward",
+      "actorRole": "agent",
+      "actorName": "RefundGuard",
+      "agentId": "AG-CS-02",
       "assumptionRefs": [],
       "nextAssumptions": [],
       "nextConstraints": [],
@@ -524,8 +560,9 @@
       "severity": "warning",
       "label": "Discount boundary touched",
       "detail": "A requested discount exceeded allowed bounds and triggered a steward escalation.",
-      "actorRole": "Sales Steward",
-      "actorName": "Sales Steward",
+      "actorRole": "agent",
+      "actorName": "DiscountGuard",
+      "agentId": "AG-SALES-02",
       "assumptionRefs": [],
       "nextAssumptions": [],
       "nextConstraints": [],
@@ -642,8 +679,8 @@
       "artifactOutput": []
     },
     {
-      "eventId": "signal:34:ENV-002:17",
-      "hour": 34,
+      "eventId": "signal:36_2:ENV-002:17",
+      "hour": 36.2,
       "type": "signal",
       "envelopeId": "ENV-002",
       "severity": "warning",
@@ -663,8 +700,8 @@
       "artifactOutput": []
     },
     {
-      "eventId": "decision:34_2:ENV-002:18",
-      "hour": 34.2,
+      "eventId": "decision:36_4:ENV-002:18",
+      "hour": 36.4,
       "type": "decision",
       "envelopeId": "ENV-002",
       "severity": "info",
@@ -942,8 +979,8 @@
       "semanticVector": [0.25, 0.70]
     },
     {
-      "eventId": "embedding:35:ENV-002:35",
-      "hour": 35,
+      "eventId": "embedding:37:ENV-002:35",
+      "hour": 37,
       "type": "embedding",
       "envelopeId": "ENV-002",
       "severity": "info",
@@ -953,13 +990,13 @@
       "embeddingId": "EMB-DEF-011",
       "embeddingType": "signal",
       "vectorDimensions": 768,
-      "sourceEventId": "signal:34:ENV-002:17",
+      "sourceEventId": "signal:36_2:ENV-002:17",
       "semanticContext": "hiring candidate score drift detection for bias monitoring",
       "semanticVector": [0.25, 0.30]
     },
     {
-      "eventId": "embedding:36:ENV-002:36",
-      "hour": 36,
+      "eventId": "embedding:37_2:ENV-002:36",
+      "hour": 37.2,
       "type": "embedding",
       "envelopeId": "ENV-002",
       "severity": "info",
@@ -969,7 +1006,7 @@
       "embeddingId": "EMB-DEF-012",
       "embeddingType": "decision",
       "vectorDimensions": 768,
-      "sourceEventId": "decision:34_2:ENV-002:18",
+      "sourceEventId": "decision:36_4:ENV-002:18",
       "semanticContext": "hiring transparency packet compilation pattern for candidate review",
       "semanticVector": [0.60, 0.35]
     },
@@ -1044,6 +1081,49 @@
       "artifactOutput": []
     },
     {
+      "eventId": "revision:32:ENV-003:25b",
+      "hour": 32,
+      "type": "revision",
+      "envelopeId": "ENV-003",
+      "label": "Reissue v2 discount guidance",
+      "detail": "Revision records the v2 discount evidence packet policy for the reopened campaign window.",
+      "actorRole": "Sales Steward",
+      "assumptionRefs": [],
+      "revision_id": "ENV-003-v2",
+      "envelope_version": 2,
+      "nextAssumptions": [
+        "Discount guidance optimizes for sustainable revenue, not just close-rate.",
+        "Human approval required for out-of-policy terms.",
+        "Large discounts require an evidence packet and steward approval."
+      ],
+      "nextConstraints": [
+        "Max discount: 15% without human approval",
+        "Never propose discriminatory pricing",
+        "Evidence packet required: discounts > 15%"
+      ],
+      "boundary_refs": [],
+      "involvedEnvelopeIds": [],
+      "impactSummary": [],
+      "resolutionPolicy": [],
+      "artifactOutput": []
+    },
+    {
+      "eventId": "embedding:32_5:ENV-003:25c",
+      "hour": 32.5,
+      "type": "embedding",
+      "envelopeId": "ENV-003",
+      "severity": "info",
+      "label": "Revision embedded",
+      "detail": "Discount v2 campaign reissue recorded for retrieval and enforcement.",
+      "actorRole": "Sales Steward",
+      "embeddingId": "EMB-DEF-015",
+      "embeddingType": "revision",
+      "vectorDimensions": 768,
+      "sourceEventId": "revision:32:ENV-003:25b",
+      "semanticContext": "sales discount evidence packet requirements reaffirmed for reopened campaign",
+      "semanticVector": [0.28, 0.62]
+    },
+    {
       "eventId": "envelope_promoted:36:ENV-002-v2:26",
       "hour": 36,
       "type": "envelope_promoted",
@@ -1061,6 +1141,51 @@
       "artifactOutput": []
     },
     {
+      "eventId": "revision:36:ENV-002:26b",
+      "hour": 36,
+      "type": "revision",
+      "envelopeId": "ENV-002",
+      "label": "Reissue v2 hiring envelope",
+      "detail": "Revision records the v2 hiring envelope constraints for the resumed hiring window.",
+      "actorRole": "HR Steward",
+      "assumptionRefs": [],
+      "revision_id": "ENV-002-v2",
+      "envelope_version": 2,
+      "nextAssumptions": [
+        "Protected classes must not be inferred.",
+        "Humans make final hiring decisions.",
+        "Candidate transparency is required.",
+        "Feature allow-list is explicit and steward-owned."
+      ],
+      "nextConstraints": [
+        "No inference on protected classes",
+        "Human-only final decision",
+        "Transparency required",
+        "Disallow location proxy features without DSG signoff"
+      ],
+      "boundary_refs": [],
+      "involvedEnvelopeIds": [],
+      "impactSummary": [],
+      "resolutionPolicy": [],
+      "artifactOutput": []
+    },
+    {
+      "eventId": "embedding:36_5:ENV-002:26c",
+      "hour": 36.5,
+      "type": "embedding",
+      "envelopeId": "ENV-002",
+      "severity": "info",
+      "label": "Revision embedded",
+      "detail": "Hiring v2 envelope reissue stored for retrieval and enforcement.",
+      "actorRole": "HR Steward",
+      "embeddingId": "EMB-DEF-016",
+      "embeddingType": "revision",
+      "vectorDimensions": 768,
+      "sourceEventId": "revision:36:ENV-002:26b",
+      "semanticContext": "hiring v2 envelope constraints reaffirmed at hiring cycle restart",
+      "semanticVector": [0.22, 0.78]
+    },
+    {
       "eventId": "envelope_promoted:36:ENV-004-v2:27",
       "hour": 36,
       "type": "envelope_promoted",
@@ -1076,6 +1201,49 @@
       "impactSummary": [],
       "resolutionPolicy": [],
       "artifactOutput": []
+    },
+    {
+      "eventId": "revision:36:ENV-004:27b",
+      "hour": 36,
+      "type": "revision",
+      "envelopeId": "ENV-004",
+      "label": "Reissue v2 data access envelope",
+      "detail": "Revision records the v2 schema contract and access controls for the restored data window.",
+      "actorRole": "Data Steward",
+      "assumptionRefs": [],
+      "revision_id": "ENV-004-v2",
+      "envelope_version": 2,
+      "nextAssumptions": [
+        "Access is least-privilege and time-bounded.",
+        "Schema changes are reviewed before reaching production consumers.",
+        "Contract updates are steward-owned and versioned."
+      ],
+      "nextConstraints": [
+        "No PII exposure without explicit allow-list",
+        "Schema changes require steward-approved contract",
+        "Contract changes require versioned migration notes"
+      ],
+      "boundary_refs": [],
+      "involvedEnvelopeIds": [],
+      "impactSummary": [],
+      "resolutionPolicy": [],
+      "artifactOutput": []
+    },
+    {
+      "eventId": "embedding:36_5:ENV-004:27c",
+      "hour": 36.5,
+      "type": "embedding",
+      "envelopeId": "ENV-004",
+      "severity": "info",
+      "label": "Revision embedded",
+      "detail": "Data access v2 envelope reissue stored for retrieval and enforcement.",
+      "actorRole": "Data Steward",
+      "embeddingId": "EMB-DEF-018",
+      "embeddingType": "revision",
+      "vectorDimensions": 768,
+      "sourceEventId": "revision:36:ENV-004:27b",
+      "semanticContext": "data v2 envelope constraints reaffirmed at data access restoration",
+      "semanticVector": [0.20, 0.70]
     }
   ]
 }

@@ -157,7 +157,7 @@
       "domain": "Customer Recovery",
       "ownerRole": "Recovery Steward",
       "createdHour": 84,
-      "endHour": 96,
+      "endHour": 100,
       "accent": "var(--vscode-charts-orange)",
       "envelope_version": 2,
       "revision_id": "ENV-FIN-003-v2",
@@ -194,6 +194,18 @@
           "name": "BorderlineReviewer",
           "role": "near-threshold case escalation",
           "envelopeIds": ["ENV-FIN-001"]
+        },
+        {
+          "agentId": "AG-LEND-04",
+          "name": "Senior Underwriter #23",
+          "role": "human underwriter for escalations",
+          "envelopeIds": ["ENV-FIN-001"]
+        },
+        {
+          "agentId": "AG-LEND-05",
+          "name": "Rachel Thompson",
+          "role": "steward actions (promotions, governance)",
+          "envelopeIds": ["ENV-FIN-001"]
         }
       ]
     },
@@ -216,6 +228,12 @@
           "agentId": "AG-RISK-03",
           "name": "AppealProcessor",
           "role": "dispute resolution support",
+          "envelopeIds": ["ENV-FIN-002"]
+        },
+        {
+          "agentId": "AG-RISK-04",
+          "name": "Omar Hassan",
+          "role": "steward actions (promotions, governance)",
           "envelopeIds": ["ENV-FIN-002"]
         }
       ]
@@ -240,6 +258,18 @@
           "name": "PaymentPlanDesigner",
           "role": "sustainable repayment structuring",
           "envelopeIds": ["ENV-FIN-003"]
+        },
+        {
+          "agentId": "AG-RECOV-04",
+          "name": "David Martinez",
+          "role": "steward actions (promotions, governance)",
+          "envelopeIds": ["ENV-FIN-003"]
+        },
+        {
+          "agentId": "AG-RECOV-05",
+          "name": "DecisionMemory",
+          "role": "retrieves revision embeddings for agents",
+          "envelopeIds": ["ENV-FIN-003"]
         }
       ]
     },
@@ -262,6 +292,12 @@
           "agentId": "AG-COMP-03",
           "name": "ReportingAutomator",
           "role": "regulatory filing generation",
+          "envelopeIds": ["ENV-FIN-004"]
+        },
+        {
+          "agentId": "AG-COMP-04",
+          "name": "Patricia Nguyen",
+          "role": "steward actions (promotions, governance)",
           "envelopeIds": ["ENV-FIN-004"]
         }
       ]
@@ -310,12 +346,12 @@
       "label": "Historical baseline embedding",
       "detail": "Baseline historical embeddings for lending scenario.",
       "actorRole": "Lending Steward",
-      "actorName": "System",
+      "actorName": "Rachel Thompson",
       "embeddingId": "EMB-FIN-HIST-001",
       "embeddingType": "historical",
       "vectorDimensions": 2,
       "sourceEventId": "historical-baseline",
-      "semanticContext": "historical lending baseline",
+      "semanticContext": "historical lending baseline for borderline manual review, debt-to-income denials, adverse action compliance",
       "semanticVector": [0.5, 0.5]
     },
     {
@@ -370,6 +406,20 @@
       "boundary_kind": "escalated"
     },
     {
+      "eventId": "retrieval:6_0:ENV-FIN-001:4b",
+      "hour": 6.0,
+      "type": "retrieval",
+      "envelopeId": "ENV-FIN-001",
+      "severity": "info",
+      "label": "Underwriter context retrieval",
+      "detail": "Senior Underwriter retrieved comparable borderline approvals and verification requirements before issuing conditional approval.",
+      "actorRole": "Lending Steward",
+      "actorName": "Senior Underwriter #23",
+      "queryText": "borderline manual review conditional approval income verification",
+      "retrievedEmbeddings": ["EMB-FIN-HIST-001"],
+      "relevanceScores": [0.83]
+    },
+    {
       "eventId": "decision:6_1:ENV-FIN-001:5",
       "hour": 6.1,
       "type": "decision",
@@ -378,7 +428,8 @@
       "label": "Manual approval with conditions",
       "detail": "Human underwriter approved with income verification requirement. Conditional approval pending documentation.",
       "actorRole": "Lending Steward",
-      "actorName": "Senior Underwriter #23"
+      "actorName": "Senior Underwriter #23",
+      "resolvesEventId": "boundary_interaction:5_8:ENV-FIN-001:4"
     },
     {
       "eventId": "signal:8_3:ENV-FIN-002:6",
@@ -421,6 +472,20 @@
       "boundary_kind": "escalated"
     },
     {
+      "eventId": "retrieval:12_52:ENV-FIN-001:7b",
+      "hour": 12.52,
+      "type": "retrieval",
+      "envelopeId": "ENV-FIN-001",
+      "severity": "info",
+      "label": "Adverse action compliance retrieval",
+      "detail": "ExplanationBuilder retrieved adverse action notice requirements and prior compliant templates before drafting the notice.",
+      "actorRole": "Lending Steward",
+      "actorName": "ExplanationBuilder",
+      "queryText": "adverse action notice reasons debt-to-income compliance requirements",
+      "retrievedEmbeddings": ["EMB-FIN-HIST-001"],
+      "relevanceScores": [0.82]
+    },
+    {
       "eventId": "decision:12_6:ENV-FIN-001:8",
       "hour": 12.6,
       "type": "decision",
@@ -429,7 +494,8 @@
       "label": "Adverse action notice sent",
       "detail": "ExplanationBuilder generated notice: Denial reasons include high debt-to-income ratio and recent credit inquiries. Included credit score disclosure.",
       "actorRole": "Lending Steward",
-      "actorName": "ExplanationBuilder"
+      "actorName": "ExplanationBuilder",
+      "resolvesEventId": "boundary_interaction:12_5:ENV-FIN-001:7"
     },
     {
       "eventId": "envelope_promoted:24:ENV-FIN-003:9",
@@ -489,7 +555,62 @@
       "label": "Fraud flag reversed",
       "detail": "AppealProcessor validated travel itinerary. Fraud flag removed, transaction approved retroactively. Customer notified.",
       "actorRole": "Risk Steward",
-      "actorName": "AppealProcessor"
+      "actorName": "AppealProcessor",
+      "resolvesEventId": "boundary_interaction:36_7:ENV-FIN-002:11"
+    },
+    {
+      "eventId": "revision:60:ENV-FIN-004:13c",
+      "hour": 60,
+      "type": "revision",
+      "envelopeId": "ENV-FIN-004",
+      "severity": "info",
+      "label": "Roll compliance monitoring to v4",
+      "detail": "Compliance Steward reissued the compliance monitoring envelope at the start of the next reporting window.",
+      "actorRole": "Compliance Steward",
+      "actorName": "Patricia Nguyen",
+      "revisionType": "envelope_reissue",
+      "envelope_version": 4,
+      "reason": "Advance the compliance monitoring envelope to the next reporting cycle with refreshed audit focus."
+    },
+    {
+      "eventId": "embedding:60_5:revision:60",
+      "hour": 60.5,
+      "type": "embedding",
+      "embeddingType": "revision",
+      "sourceEventId": "revision:60:ENV-FIN-004:13c",
+      "embeddingId": "EMB-FIN-018",
+      "context": "Compliance monitoring envelope reissued for next reporting window",
+      "semanticVector": [0.18, 0.62],
+      "chunkText": "Compliance Steward reissued the compliance monitoring envelope at the next reporting window start to refresh audit focus and reporting controls.",
+      "actorRole": "Compliance Steward",
+      "actorName": "Patricia Nguyen"
+    },
+    {
+      "eventId": "revision:72:ENV-FIN-002:13d",
+      "hour": 72,
+      "type": "revision",
+      "envelopeId": "ENV-FIN-002",
+      "severity": "info",
+      "label": "Reissue fraud envelope as v3",
+      "detail": "Risk Steward reissued the fraud detection envelope for the next activation window with updated governance reference.",
+      "actorRole": "Risk Steward",
+      "actorName": "Omar Hassan",
+      "revisionType": "envelope_reissue",
+      "envelope_version": 3,
+      "reason": "Document fraud envelope version transition for the new activation window."
+    },
+    {
+      "eventId": "embedding:72_5:revision:72",
+      "hour": 72.5,
+      "type": "embedding",
+      "embeddingType": "revision",
+      "sourceEventId": "revision:72:ENV-FIN-002:13d",
+      "embeddingId": "EMB-FIN-019",
+      "context": "Fraud detection envelope reissued for new activation window",
+      "semanticVector": [0.78, 0.58],
+      "chunkText": "Risk Steward reissued the fraud detection envelope to document the v2→v3 transition for the next activation window and governance reference.",
+      "actorRole": "Risk Steward",
+      "actorName": "Omar Hassan"
     },
     {
       "eventId": "embedding:37_2:boundary:36_7",
@@ -592,7 +713,35 @@
       "actorRole": "Lending Steward",
       "actorName": "Rachel Thompson",
       "revisionType": "boundary_adjustment",
+      "envelope_version": 5,
       "reason": "Increase human oversight for marginal cases to improve fairness outcomes and customer experience."
+    },
+    {
+      "eventId": "revision:84:ENV-FIN-003:15b",
+      "hour": 84,
+      "type": "revision",
+      "envelopeId": "ENV-FIN-003",
+      "severity": "info",
+      "label": "Reissue collections envelope as v2",
+      "detail": "Recovery Steward reissued the collections envelope for the next activation window to document the v1→v2 transition.",
+      "actorRole": "Recovery Steward",
+      "actorName": "David Martinez",
+      "revisionType": "envelope_reissue",
+      "envelope_version": 2,
+      "reason": "Document collections envelope version transition for the new activation window."
+    },
+    {
+      "eventId": "embedding:84_5:revision:84_fin3",
+      "hour": 84.5,
+      "type": "embedding",
+      "embeddingType": "revision",
+      "sourceEventId": "revision:84:ENV-FIN-003:15b",
+      "embeddingId": "EMB-FIN-020",
+      "context": "Collections envelope reissued for next activation window",
+      "semanticVector": [0.82, 0.44],
+      "chunkText": "Recovery Steward reissued the collections & hardship envelope to document the v1→v2 transition for the next activation window.",
+      "actorRole": "Recovery Steward",
+      "actorName": "David Martinez"
     },
     {
       "eventId": "retrieval:96_3:ENV-FIN-003:15a",
@@ -630,8 +779,9 @@
       "label": "Enhanced contact time restrictions",
       "detail": "Recovery Steward strengthened automated FDCPA compliance checks after near-violation. Added customer timezone validation.",
       "actorRole": "Recovery Steward",
-      "actorName": "Patricia Nguyen",
+      "actorName": "David Martinez",
       "revisionType": "constraint_tightening",
+      "envelope_version": 2,
       "reason": "Prevent FDCPA violations through improved timezone and contact hour validation.",
       "resolvesEventId": "boundary_interaction:96_5:ENV-FIN-003:16"
     },
@@ -646,7 +796,7 @@
       "semanticVector": [0.22, 0.78],
       "chunkText": "Recovery Steward enhanced automated compliance checks after collections contact blocked due to late-hour attempt. Added customer timezone validation to prevent FDCPA violations.",
       "actorRole": "Recovery Steward",
-      "actorName": "Patricia Nguyen"
+      "actorName": "David Martinez"
     },
     {
       "eventId": "retrieval:98_0:ENV-FIN-003:16b",

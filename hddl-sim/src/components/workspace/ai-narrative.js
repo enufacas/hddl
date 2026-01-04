@@ -438,7 +438,7 @@ const processAutoGenerationQueue = async () => {
         <span class="codicon codicon-loading codicon-modifier-spin" style="font-size: 32px; color: var(--vscode-textLink-foreground);"></span>
         <div>
           <div style="font-size: 14px; font-weight: 600; margin-bottom: 8px;">Scenario Complete — Generating Narrative</div>
-          <div style="font-size: 12px; opacity: 0.8;">This may take 10-30 seconds...</div>
+          <div style="font-size: 12px; opacity: 0.8;">Using Gemini 3 Flash Preview (10-30 seconds)...</div>
         </div>
       </div>
     `.trim()
@@ -568,7 +568,7 @@ const processAutoGenerationQueue = async () => {
         const isProduction = window.location.hostname === 'enufacas.github.io'
         const helpText = isProduction
           ? 'The narrative generation service may be temporarily unavailable.'
-          : 'Make sure the API server is running at localhost:8080 (npm run api:dev)'
+          : 'Make sure the API server is running at http://localhost:8080'
         
         contentEl.innerHTML = `
           <div style="
@@ -628,7 +628,7 @@ const generateAINarrative = async (containerEl) => {
   contentEl.innerHTML = `
     <div style="display: flex; align-items: center; gap: 8px; color: var(--vscode-descriptionForeground);">
       <span class="codicon codicon-loading codicon-modifier-spin"></span>
-      <span>Generating narrative for ${scenario.title || scenarioKey}...</span>
+      <span>Generating narrative using Gemini 3 Flash Preview...</span>
     </div>
   `.trim()
 
@@ -717,7 +717,7 @@ const generateAINarrative = async (containerEl) => {
     const isProduction = window.location.hostname === 'enufacas.github.io'
     const helpText = isProduction
       ? 'The narrative generation service may be temporarily unavailable. Please try again.'
-      : 'Make sure the API server is running at localhost:8080 (npm run api:dev)'
+      : 'Make sure the API server is running at http://localhost:8080'
     
     contentEl.innerHTML = `
       <div style="color: var(--status-error); padding: 12px; background: color-mix(in srgb, var(--status-error) 10%, transparent); border-radius: 4px; border: 1px solid var(--status-error);">

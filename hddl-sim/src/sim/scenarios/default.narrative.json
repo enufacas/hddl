@@ -2,46 +2,38 @@
   "scenarioId": "default",
   "scenarioName": "default",
   "title": "HDDL Replay (Simplified) — Four Fleets",
-  "narrative": "# HDDL Replay (Simplified) — Four Fleets\n\nInside the corporate headquarters' operations center, the day began with the activation of four distinct authority layers designed to manage a fleet of automated agents. Very early on day one, the Customer Steward promoted the first envelope to set the boundaries for response automation, while the Sales, Data, and HR Stewards followed suit to establish constraints for their respective domains^[envelope_promoted:10:ENV-002:2]. The agents initially operated smoothly within these envelope constraints, with ReplyAssist successfully drafting responses that remained well within the two-minute latency goal^[decision:11_35:ENV-001:5]. However, the stewards were not merely watching; they were monitoring signals for when the automation reached the edges of its defined authority.\n\nThe first significant feedback loop emerged early on day one when refund pressure began to rise, eventually leading RefundGuard to block a request exceeding $100^[decision:12_55:ENV-001:7]. This boundary interaction triggered an immediate steward review, where the Customer Steward consulted decision memory to examine precedents for high-value escalations^[retrieval:12_1:ENV-001:8]. To ensure the agent could handle similar cases more effectively, the steward revised the envelope to require a specific evidence packet for all future escalations^[revision:13_1:ENV-001:9]. A similar pattern played out midway through the first day in the sales domain, where DiscountGuard blocked a proposal that went beyond the 15% limit^[decision:16_35:ENV-003:11]. The Sales Steward responded by revising the envelope to clarify the evidence required for large discounts, ensuring that while the agent could propose terms, the final authority for out-of-policy pricing remained strictly human^[revision:17:ENV-003:13].\n\nAs the second day progressed, the governance framework expanded to handle more complex cross-domain challenges. After detecting schema drift in the database, the Data Steward revised the data access envelope to mandate versioned migration notes for any contract changes^[revision:20_8:ENV-004:16]. Later on day two, a drift in candidate scoring signals prompted the HR Steward to convene a formal session to review fairness across the hiring fleet^[signal:34:ENV-002:17]. During this session, the Customer Steward provided a note on proxy-inference precedents, leading the HR Steward to revise the hiring envelope to explicitly disallow location-based proxy features without higher-level signoff^[dsg_message:39_2:ENV-002:21]. By storing this precedent in decision memory, the stewards ensured that future agents would treat proxy-inference indicators as immediate triggers for human intervention^[revision:39_6:ENV-002:22].\n\nThis evolution of envelopes demonstrates how the HDDL framework allows for scaled autonomy without the loss of human oversight. By treating boundary interactions as signals for steward review rather than failures, the organization was able to refine its constraints based on real-world operational experience^[annotation:39_8:ENV-002:23]. The stewards did not act as gatekeepers for every minor task; instead, they focused their energy on revising envelopes to reflect updated assumptions as new challenges arose. This continuous feedback loop ensures that as agents become more capable, the human authority governing them becomes more precise, transparent, and grounded in explicit decision memory.",
+  "narrative": "# HDDL Replay (Simplified) — Four Fleets\n\nInside the busy corporate headquarters, the digital pulse of four distinct operational fleets began to beat under the watchful eyes of their human stewards. Early in the scenario, the Customer Steward promoted the first authority envelope to govern response automation, setting a clear two-minute response constraint for the ReplyAssist agent^[envelope_promoted:2:ENV-001:0]. While the system initially hummed along with stable latency, the human impact of these boundaries became clear when a customer requested a high-value refund. The RefundGuard agent identified a request exceeding $100 and, following its envelope constraints, blocked the autonomous action and routed the case to me for review^[decision:12_55:ENV-001:7]. This boundary interaction was a critical signal that the system had reached the edge of its delegated authority^[BI-ENV-001-001]. To evolve the process, I looked through the decision memory for precedents and then revised the envelope to version 2, adding a new assumption that all such escalations must now include a bounded evidence packet to streamline my review process^[revision:13_1:ENV-001:9].\n\nMidway through the first day, a similar feedback loop unfolded in the sales department when the DiscountGuard agent blocked a deal that exceeded the 15% discount limit^[decision:16_35:ENV-003:11]. As the Sales Steward, I saw the pressure for higher discounts rising and realized the agents needed a more structured way to handle these outliers without proposing discriminatory pricing^[BI-ENV-003-001]. I closed the loop by revising the sales envelope to require an explicit evidence packet for any discount over the threshold, ensuring that human judgment remains the final arbiter for high-stakes revenue decisions^[revision:17:ENV-003:13]. Simultaneously, the Data Steward was managing technical boundaries as SchemaGuard detected drift in the database schema that threatened production consumers^[signal:20:ENV-004:14]. By revising the data access envelope, the steward ensured that all future schema changes would require a versioned migration note and a steward-approved contract, preventing silent failures in the data pipeline^[revision:20_8:ENV-004:16].\n\nToward the end of the second day, the most sensitive boundary interaction occurred within the hiring fleet when the HR Steward noticed a drift in candidate scoring distributions^[signal:36_2:ENV-002:17]. Our core assumptions in this domain are non-negotiable: protected classes must never be inferred, and humans must always make the final hiring call. To address the signal divergence, we held a cross-domain fairness review session to ensure that no proxy features—like candidate location—were being used by the agents to bypass our bias guardrails^[dsg_session:39:ENV-002:20]. I decided to tighten the feature allow-list, revising the hiring envelope to version 2 to explicitly disallow location-based proxy features without a formal signoff^[revision:39_6:ENV-002:22]. This revision was immediately committed to decision memory, serving as a permanent precedent that proxy-inference indicators are treated as immediate escalation triggers^[annotation:39_8:ENV-002:23]. \n\nBy the end of the 48-hour window, these four fleets demonstrated how HDDL enables scaled autonomy while preserving human authority. Rather than acting as gatekeepers for every minor task, the stewards used boundary interactions as signals to refine the envelopes agents operate within. This process of constant revision and feedback ensures that as the business scales, the AI remains bounded by human-derived values and explicit constraints. Whether it was managing a $100 refund or protecting the integrity of the hiring process, the framework ensured that every significant decision was traceable, versioned, and ultimately steered by a human steward.",
   "citations": [
     {
-      "eventId": "envelope_promoted:10:ENV-002:2",
-      "offset": 437,
-      "context": "...establish constraints for their respective domains^[envelope_promoted:10:ENV-002:2]. The agents initially operated smoothly within th...",
-      "hour": 1,
+      "eventId": "envelope_promoted:2:ENV-001:0",
+      "offset": 384,
+      "context": "...nute response constraint for the ReplyAssist agent^[envelope_promoted:2:ENV-001:0]. While the system initially hummed along with sta...",
+      "hour": 0.25,
       "type": "envelope_promoted",
-      "envelopeId": "ENV-002"
-    },
-    {
-      "eventId": "decision:11_35:ENV-001:5",
-      "offset": 648,
-      "context": "...t remained well within the two-minute latency goal^[decision:11_35:ENV-001:5]. However, the stewards were not merely watching; ...",
-      "hour": 1.35,
-      "type": "decision",
       "envelopeId": "ENV-001"
     },
     {
       "eventId": "decision:12_55:ENV-001:7",
-      "offset": 984,
-      "context": "...ding RefundGuard to block a request exceeding $100^[decision:12_55:ENV-001:7]. This boundary interaction triggered an immediate...",
+      "offset": 741,
+      "context": "...nomous action and routed the case to me for review^[decision:12_55:ENV-001:7]. This boundary interaction was a critical signal ...",
       "hour": 2.55,
       "type": "decision",
       "envelopeId": "ENV-001",
       "actorRole": "Customer Steward"
     },
     {
-      "eventId": "retrieval:12_1:ENV-001:8",
-      "offset": 1179,
-      "context": "...y to examine precedents for high-value escalations^[retrieval:12_1:ENV-001:8]. To ensure the agent could handle similar cases m...",
-      "hour": 2.1,
-      "type": "retrieval",
+      "eventId": "BI-ENV-001-001",
+      "offset": 881,
+      "context": "...em had reached the edge of its delegated authority^[BI-ENV-001-001]. To evolve the process, I looked through the deci...",
+      "hour": 2.6,
+      "type": "boundary_interaction",
       "envelopeId": "ENV-001",
-      "actorRole": "Customer Steward"
+      "actorRole": "agent"
     },
     {
       "eventId": "revision:13_1:ENV-001:9",
-      "offset": 1370,
-      "context": "...pecific evidence packet for all future escalations^[revision:13_1:ENV-001:9]. A similar pattern played out midway through the ...",
+      "offset": 1143,
+      "context": "...ed evidence packet to streamline my review process^[revision:13_1:ENV-001:9].  Midway through the first day, a similar feedbac...",
       "hour": 3.1,
       "type": "revision",
       "envelopeId": "ENV-001",
@@ -49,51 +41,68 @@
     },
     {
       "eventId": "decision:16_35:ENV-003:11",
-      "offset": 1546,
-      "context": "... blocked a proposal that went beyond the 15% limit^[decision:16_35:ENV-003:11]. The Sales Steward responded by revising the enve...",
+      "offset": 1339,
+      "context": "...locked a deal that exceeded the 15% discount limit^[decision:16_35:ENV-003:11]. As the Sales Steward, I saw the pressure for hig...",
       "hour": 6.35,
       "type": "decision",
       "envelopeId": "ENV-003",
       "actorRole": "Sales Steward"
     },
     {
+      "eventId": "BI-ENV-003-001",
+      "offset": 1556,
+      "context": "... outliers without proposing discriminatory pricing^[BI-ENV-003-001]. I closed the loop by revising the sales envelope...",
+      "hour": 6.4,
+      "type": "boundary_interaction",
+      "envelopeId": "ENV-003",
+      "actorRole": "agent"
+    },
+    {
       "eventId": "revision:17:ENV-003:13",
-      "offset": 1803,
-      "context": "... for out-of-policy pricing remained strictly human^[revision:17:ENV-003:13].  As the second day progressed, the governance fr...",
+      "offset": 1788,
+      "context": "...he final arbiter for high-stakes revenue decisions^[revision:17:ENV-003:13]. Simultaneously, the Data Steward was managing te...",
       "hour": 7,
       "type": "revision",
       "envelopeId": "ENV-003",
       "actorRole": "Sales Steward"
     },
     {
+      "eventId": "signal:20:ENV-004:14",
+      "offset": 1971,
+      "context": "...tabase schema that threatened production consumers^[signal:20:ENV-004:14]. By revising the data access envelope, the stewar...",
+      "hour": 10,
+      "type": "signal",
+      "envelopeId": "ENV-004"
+    },
+    {
       "eventId": "revision:20_8:ENV-004:16",
-      "offset": 2100,
-      "context": "...versioned migration notes for any contract changes^[revision:20_8:ENV-004:16]. Later on day two, a drift in candidate scoring s...",
+      "offset": 2206,
+      "context": "...t, preventing silent failures in the data pipeline^[revision:20_8:ENV-004:16].  Toward the end of the second day, the most sens...",
       "hour": 10.8,
       "type": "revision",
       "envelopeId": "ENV-004",
       "actorRole": "Data Steward"
     },
     {
-      "eventId": "signal:34:ENV-002:17",
-      "offset": 2278,
-      "context": "...session to review fairness across the hiring fleet^[signal:34:ENV-002:17]. During this session, the Customer Steward provid...",
-      "hour": 34,
+      "eventId": "signal:36_2:ENV-002:17",
+      "offset": 2413,
+      "context": "...noticed a drift in candidate scoring distributions^[signal:36_2:ENV-002:17]. Our core assumptions in this domain are non-nego...",
+      "hour": 36.2,
       "type": "signal",
       "envelopeId": "ENV-002"
     },
     {
-      "eventId": "dsg_message:39_2:ENV-002:21",
-      "offset": 2526,
-      "context": "...-based proxy features without higher-level signoff^[dsg_message:39_2:ENV-002:21]. By storing this precedent in decision memory, th...",
-      "hour": 39.2,
-      "type": "dsg_message",
+      "eventId": "dsg_session:39:ENV-002:20",
+      "offset": 2786,
+      "context": "...g used by the agents to bypass our bias guardrails^[dsg_session:39:ENV-002:20]. I decided to tighten the feature allow-list, rev...",
+      "hour": 39,
+      "type": "dsg_session",
       "envelopeId": "ENV-002"
     },
     {
       "eventId": "revision:39_6:ENV-002:22",
-      "offset": 2727,
-      "context": "...ators as immediate triggers for human intervention^[revision:39_6:ENV-002:22].  This evolution of envelopes demonstrates how th...",
+      "offset": 2980,
+      "context": "...tion-based proxy features without a formal signoff^[revision:39_6:ENV-002:22]. This revision was immediately committed to decis...",
       "hour": 39.6,
       "type": "revision",
       "envelopeId": "ENV-002",
@@ -101,8 +110,8 @@
     },
     {
       "eventId": "annotation:39_8:ENV-002:23",
-      "offset": 3065,
-      "context": "...traints based on real-world operational experience^[annotation:39_8:ENV-002:23]. The stewards did not act as gatekeepers for ever...",
+      "offset": 3178,
+      "context": "...ators are treated as immediate escalation triggers^[annotation:39_8:ENV-002:23].   By the end of the 48-hour window, these four f...",
       "hour": 39.8,
       "type": "annotation",
       "envelopeId": "ENV-002"
@@ -111,12 +120,12 @@
   "metadata": {
     "model": "gemini-3-flash-preview",
     "method": "llm-full-context",
-    "tokensIn": 12176,
-    "tokensOut": 738,
-    "cost": 0.008302,
-    "generatedAt": "2026-01-02T19:32:20.620Z",
+    "tokensIn": 13984,
+    "tokensOut": 836,
+    "cost": 0.0095,
+    "generatedAt": "2026-01-04T07:25:44.698Z",
+    "duration": 17909,
     "generatedBy": "scripts/generate-narratives.mjs",
-    "scenarioVersion": 2,
-    "duration": 27286
+    "scenarioVersion": 2
   }
 }

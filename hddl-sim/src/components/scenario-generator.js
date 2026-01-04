@@ -454,8 +454,8 @@ function showScenarioGeneratorModal() {
   generateBtn.addEventListener('click', async () => {
     const prompt = promptInput.value.trim()
     
-    if (prompt.length < 10) {
-      showStatus('error', 'Please enter a more detailed prompt (at least 10 characters)')
+    if (prompt.length < 3) {
+      showStatus('error', 'Please enter a more detailed prompt (at least 3 characters)')
       return
     }
     
@@ -469,7 +469,7 @@ function showScenarioGeneratorModal() {
     // Close modal immediately and show toast
     overlay.remove()
     
-    const toast = createToast('Generating scenario with AI...', 'loading')
+    const toast = createToast('Generating scenario using Gemini 2.5 Flash Lite...', 'loading')
     
     try {
       // Use Cloud Run in production (GitHub Pages), localhost in development

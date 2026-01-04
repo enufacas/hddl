@@ -270,13 +270,14 @@ Object.entries(actorEvents)
 console.log()
 
 // ============================================================================
-// PART 7: ENVELOPE TIMELINE
+// PART 7: ENVELOPE TIMELINE & VERSIONING VALIDATION
 // ============================================================================
 
-console.log('📦 ENVELOPE TIMELINE')
+console.log('📦 ENVELOPE TIMELINE & VERSIONING VALIDATION')
 console.log('─'.repeat(60))
 
 const envelopeTimeline = {}
+const envelopeEntries = new Map() // Store full envelope objects keyed by envelopeId-version (best-effort)
 scenario.envelopes.forEach(env => {
   const key = `${env.envelopeId}`
   if (!envelopeTimeline[key]) {
@@ -287,26 +288,226 @@ scenario.envelopes.forEach(env => {
     start: env.createdHour,
     end: env.endHour,
     name: env.name,
-    ownerRole: env.ownerRole
+    ownerRole: env.ownerRole,
+    assumptions: env.assumptions,
+    constraints: env.constraints,
+    revision_id: env.revision_id
   })
+
+  const versionKey = `${env.envelopeId}-v${env.envelope_version}`
+  if (envelopeEntries.has(versionKey)) {
+    // Two envelope windows with the same envelope_version. This is allowed, but makes version-based lookups ambiguous.
+    // Keep first entry and report later.
+  } else {
+    envelopeEntries.set(versionKey, env)
+  }
 })
+
+const versioningIssues = []
 
 Object.entries(envelopeTimeline).forEach(([envId, versions]) => {
   versions.sort((a, b) => a.start - b.start)
   console.log(`${envId}: ${versions[0].name}`)
+
+  // Detect repeated envelope_version numbers across windows
+  const seenVersions = new Set()
+  const repeatedVersions = new Set()
   versions.forEach(v => {
-    console.log(`  v${v.version}: Hour ${v.start}-${v.end} (${v.end - v.start}h duration)`)
+    if (seenVersions.has(v.version)) repeatedVersions.add(v.version)
+    seenVersions.add(v.version)
+  })
+  if (repeatedVersions.size > 0) {
+    versioningIssues.push({
+      severity: 'warning',
+      type: 'duplicate-envelope-version-number',
+      envelopeId: envId,
+      message: `${envId} repeats envelope_version across windows: ${[...repeatedVersions].map(v => `v${v}`).join(', ')}`
+    })
+  }
+  
+  // Multiple entries for an envelopeId typically represent multiple activation windows.
+  // This is valid, but we validate the transitions and ensure events don't occur during inactive periods.
+  if (versions.length > 1) {
+    console.log(`  ℹ️  MULTI-WINDOW ENVELOPE: ${versions.length} activation windows`)
+    versioningIssues.push({
+      severity: 'info',
+      type: 'multi-window-envelope',
+      envelopeId: envId,
+      message: `${envId} has ${versions.length} activation windows (same envelopeId appears multiple times)`
+    })
+  }
+  
+  versions.forEach(v => {
+    console.log(`  v${v.version}: Hour ${v.start}-${v.end} (${(v.end - v.start).toFixed(2)}h duration)`)
   })
   
-  // Check for gaps
+  // Validate ordering and continuity between windows
   for (let i = 1; i < versions.length; i++) {
     const gap = versions[i].start - versions[i-1].end
     if (gap > 0) {
-      console.log(`    ⚠️  GAP: ${gap} hours between v${versions[i-1].version} and v${versions[i].version}`)
+      console.log(`    ℹ️  GAP: ${gap} hours between v${versions[i-1].version} and v${versions[i].version}`)
+
+      const gapStart = versions[i - 1].end
+      const gapEnd = versions[i].start
+      const eventsDuringGap = events.filter(e =>
+        e.envelopeId === envId &&
+        typeof e.hour === 'number' &&
+        e.hour > gapStart &&
+        e.hour < gapEnd
+      )
+
+      if (eventsDuringGap.length > 0) {
+        versioningIssues.push({
+          severity: 'error',
+          type: 'events-during-inactive-window',
+          envelopeId: envId,
+          message: `${envId} has ${eventsDuringGap.length} events during inactive gap (hour ${gapStart}-${gapEnd})`
+        })
+      } else {
+        versioningIssues.push({
+          severity: 'info',
+          type: 'inactive-gap',
+          envelopeId: envId,
+          message: `${envId} inactive for ${gap}h between windows (hour ${gapStart}-${gapEnd})`
+        })
+      }
     } else if (gap < 0) {
       console.log(`    ⚠️  OVERLAP: ${Math.abs(gap)} hours between v${versions[i-1].version} and v${versions[i].version}`)
+      versioningIssues.push({
+        severity: 'error',
+        type: 'envelope-overlap',
+        envelopeId: envId,
+        message: `${envId} has ${Math.abs(gap)}h overlap between v${versions[i-1].version} and v${versions[i].version} - two versions active simultaneously`
+      })
+    }
+
+    const prevVersion = versions[i - 1].version
+    const nextVersion = versions[i].version
+    if (typeof prevVersion === 'number' && typeof nextVersion === 'number' && nextVersion < prevVersion) {
+      versioningIssues.push({
+        severity: 'error',
+        type: 'version-regression',
+        envelopeId: envId,
+        message: `${envId} version regresses from v${prevVersion} to v${nextVersion}`
+      })
+    }
+
+    // If the version increases, we expect a revision to document the change (either during the gap or at the next window start).
+    if (typeof prevVersion === 'number' && typeof nextVersion === 'number' && nextVersion > prevVersion) {
+      const prevEnd = versions[i - 1].end
+      const nextStart = versions[i].start
+      const transitionRevision = revisions.find(r =>
+        r.envelopeId === envId &&
+        typeof r.hour === 'number' &&
+        r.hour >= prevEnd &&
+        r.hour <= nextStart
+      )
+
+      if (!transitionRevision) {
+        const nextEntry = scenario.envelopes.find(e => e.envelopeId === envId && e.envelope_version === nextVersion && e.createdHour === nextStart)
+        const revisionIdHint = nextEntry?.revision_id
+        const hint = revisionIdHint ? ` (envelope has revision_id="${revisionIdHint}")` : ''
+        versioningIssues.push({
+          severity: 'warning',
+          type: 'version-change-without-revision',
+          envelopeId: envId,
+          message: `${envId} transitions v${prevVersion}→v${nextVersion} (hour ${prevEnd}-${nextStart}) without a revision event in that interval${hint}`
+        })
+      }
     }
   }
+  
+  // Check if revisions exist for this envelope
+  const envelopeRevisions = revisions.filter(r => r.envelopeId === envId).sort((a, b) => a.hour - b.hour)
+  if (envelopeRevisions.length > 0) {
+    console.log(`  Revisions: ${envelopeRevisions.length}`)
+    envelopeRevisions.forEach(rev => {
+      const revVersionLabel = rev.envelope_version ?? '?' 
+      console.log(`    - Hour ${rev.hour}: v${revVersionLabel} (${rev.label})`)
+
+      if (rev.envelope_version == null) {
+        versioningIssues.push({
+          severity: 'warning',
+          type: 'revision-missing-envelope-version',
+          envelopeId: envId,
+          message: `${envId} revision at hour ${rev.hour} is missing envelope_version (harder to verify version progression)`
+        })
+      }
+      
+      // Check if revision happens during an envelope's lifetime or in a gap
+      const activeEnvelope = versions.find(v => v.start <= rev.hour && rev.hour <= v.end)
+      if (!activeEnvelope) {
+        console.log(`      ℹ️  Revision occurs outside any active window`)
+
+        const prevWindow = [...versions].reverse().find(v => v.end <= rev.hour)
+        const nextWindow = versions.find(v => v.start >= rev.hour)
+        if (prevWindow && nextWindow && prevWindow.end < rev.hour && rev.hour < nextWindow.start) {
+          versioningIssues.push({
+            severity: 'info',
+            type: 'revision-between-windows',
+            envelopeId: envId,
+            message: `${envId} revision at hour ${rev.hour} occurs between windows (hour ${prevWindow.end}-${nextWindow.start})`
+          })
+        } else {
+          versioningIssues.push({
+            severity: 'warning',
+            type: 'revision-outside-windows',
+            envelopeId: envId,
+            message: `${envId} revision at hour ${rev.hour} occurs outside any defined envelope window`
+          })
+        }
+      }
+      
+      // If the revision includes nextAssumptions/nextConstraints, validate they match the envelope entry for that version.
+      const hasNextAssumptions = Array.isArray(rev.nextAssumptions)
+      const hasNextConstraints = Array.isArray(rev.nextConstraints)
+      if (rev.envelope_version != null && (hasNextAssumptions || hasNextConstraints)) {
+        const matchingEnvelope = envelopeEntries.get(`${envId}-v${rev.envelope_version}`)
+        if (!matchingEnvelope) {
+          versioningIssues.push({
+            severity: 'warning',
+            type: 'revision-version-without-envelope-entry',
+            envelopeId: envId,
+            message: `${envId} revision at hour ${rev.hour} targets v${rev.envelope_version}, but scenario.envelopes has no entry for that version`
+          })
+        } else {
+          const assumptionsMatch = !hasNextAssumptions ||
+            (Array.isArray(matchingEnvelope.assumptions) &&
+             JSON.stringify([...rev.nextAssumptions].sort()) === JSON.stringify([...matchingEnvelope.assumptions].sort()))
+
+          const constraintsMatch = !hasNextConstraints ||
+            (Array.isArray(matchingEnvelope.constraints) &&
+             JSON.stringify([...rev.nextConstraints].sort()) === JSON.stringify([...matchingEnvelope.constraints].sort()))
+          
+          if (!assumptionsMatch || !constraintsMatch) {
+            console.log(`      ❌ INCONSISTENCY: Envelope v${rev.envelope_version} does not match revision nextAssumptions/nextConstraints`)
+            versioningIssues.push({
+              severity: 'error',
+              type: 'revision-envelope-mismatch',
+              envelopeId: envId,
+              message: `${envId} v${rev.envelope_version}: Envelope entry does not reflect revision changes from hour ${rev.hour}`
+            })
+          }
+        }
+      } else if (rev.envelope_version != null && !hasNextAssumptions && !hasNextConstraints) {
+        versioningIssues.push({
+          severity: 'info',
+          type: 'revision-missing-next-state',
+          envelopeId: envId,
+          message: `${envId} revision at hour ${rev.hour} omits nextAssumptions/nextConstraints (cannot validate envelope content alignment)`
+        })
+      }
+    })
+  } else if (versions.length > 1) {
+    console.log(`  ⚠️  Multiple windows but NO revision events`)
+    versioningIssues.push({
+      severity: 'warning',
+      type: 'no-revisions-for-multi-window',
+      envelopeId: envId,
+      message: `${envId} has multiple activation windows but no revision events in this scenario`
+    })
+  }
+  
   console.log()
 })
 
@@ -371,7 +572,8 @@ Object.entries(particleFlows).forEach(([flowType, evts]) => {
       if (evts.length > 0) {
         evts.forEach(e => {
           const count = e.retrievedEmbeddings?.length || 0
-          const maxScore = Math.max(...(e.relevanceScores || [0])) * 100
+          const scores = Array.isArray(e.relevanceScores) ? e.relevanceScores : []
+          const maxScore = scores.length > 0 ? (Math.max(...scores) * 100) : 0
           console.log(`    - Hour ${e.hour}: ${e.actorName} retrieves ${count} embeddings (top: ${maxScore.toFixed(0)}%)`)
         })
       }
@@ -1051,6 +1253,7 @@ const allValidationIssues = [
   ...effectivenessIssues,
   ...temporalIssues,
   ...behaviorIssues,
+  ...versioningIssues,
   ...issues
 ]
 
