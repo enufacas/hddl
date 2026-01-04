@@ -173,7 +173,10 @@ export function createWorkspace() {
   // AI Narrative panel: always default to open for desktop users.
   setAuxCollapsed(false)
 
-  setSidebarCollapsed(persisted.sidebarCollapsed !== undefined ? persisted.sidebarCollapsed : false)
+  // On mobile (<768px), default sidebar to collapsed on first load
+  const isMobile = window.innerWidth < 768
+  const defaultSidebarCollapsed = isMobile ? true : false
+  setSidebarCollapsed(persisted.sidebarCollapsed !== undefined ? persisted.sidebarCollapsed : defaultSidebarCollapsed)
   // Always start with bottom panel collapsed (ignore persisted state).
   setBottomCollapsed(true)
 
