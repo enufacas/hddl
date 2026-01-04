@@ -1,6 +1,6 @@
 import { navigateTo } from '../../router'
 import { formatSimTime, getEnvelopeStatus, getScenario, getTimeHour, onScenarioChange, onTimeChange } from '../../sim/sim-state'
-import { getStewardColor } from '../../sim/steward-colors'
+import { getStewardColor, toSemver } from '../../sim/steward-colors'
 import { navItems } from './sidebar'
 
 export function createMobileNavDrawer() {
@@ -363,7 +363,8 @@ export function createMobilePanelModal() {
         } else if (eventType === 'signal') {
           message = `Signal ${event.signalKey || ''}`
         } else if (eventType === 'revision') {
-          message = `Revision v${event.envelope_version || ''}`
+          const v = event.envelope_version
+          message = v == null ? 'Revision' : `Revision v${toSemver(v)}`
         } else {
           message = eventType.replace('_', ' ')
         }

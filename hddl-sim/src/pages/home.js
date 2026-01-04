@@ -13,6 +13,22 @@ let activeMapCleanup = null
 let activeMapInstance = null
 let activeMapResizeObserver = null
 let activeMapMountRaf = null
+let activeScenarioGenCueCleanup = null
+
+function pulseScenarioGenButton(targetEl, durationMs = 4000) {
+  if (!targetEl || !targetEl.isConnected) return () => {}
+
+  targetEl.classList.add('scenario-gen-button--pulse')
+
+  const timeout = window.setTimeout(() => {
+    targetEl.classList.remove('scenario-gen-button--pulse')
+  }, durationMs)
+
+  return () => {
+    window.clearTimeout(timeout)
+    targetEl.classList.remove('scenario-gen-button--pulse')
+  }
+}
 
 export function renderHome(container) {
   // Cleanup previous map if it exists
@@ -20,6 +36,11 @@ export function renderHome(container) {
     activeMapCleanup()
     activeMapCleanup = null
     activeMapInstance = null
+  }
+
+  if (activeScenarioGenCueCleanup) {
+    activeScenarioGenCueCleanup()
+    activeScenarioGenCueCleanup = null
   }
 
   if (activeMapResizeObserver) {
@@ -156,6 +177,9 @@ export function renderHome(container) {
     
     const scenarioGenButton = createScenarioGeneratorButton()
     tourButtonContainer.appendChild(scenarioGenButton)
+
+    // On-load attention cue (auto-removes after ~4s)
+    activeScenarioGenCueCleanup = pulseScenarioGenButton(scenarioGenButton, 4000)
   }
 
   // Add static timeline button when filtered to single steward

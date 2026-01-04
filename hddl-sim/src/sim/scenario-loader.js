@@ -42,7 +42,7 @@ function loadGeneratedScenariosFromStorage() {
 export const SCENARIOS = {
   'default': {
     id: 'default',
-    title: 'HDDL Replay — Four Fleets (Default)',
+    title: 'HDDL Example Company',
     description: 'Customer Service, HR, Sales, and Data Stewardship across 48 hours.',
     data: defaultScenario,
     tags: ['default', 'multi-domain', 'foundational'],
