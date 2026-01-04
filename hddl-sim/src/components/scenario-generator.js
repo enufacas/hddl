@@ -459,6 +459,13 @@ function showScenarioGeneratorModal() {
       return
     }
     
+    // Reset peek bar state when starting new scenario generation
+    import('../router').then(({ resetAuxPeekState }) => {
+      resetAuxPeekState()
+    }).catch(err => {
+      console.warn('Could not reset peek bar state:', err)
+    })
+    
     // Close modal immediately and show toast
     overlay.remove()
     
@@ -499,6 +506,13 @@ function showScenarioGeneratorModal() {
       
       // Refresh the scenario selector dropdown
       window.dispatchEvent(new CustomEvent('scenario-list-updated'))
+      
+      // Trigger auto-generation of narrative
+      import('./workspace/ai-narrative').then(({ autoGenerateNarrative }) => {
+        autoGenerateNarrative(scenarioId, true)
+      }).catch(err => {
+        console.error('Failed to trigger narrative auto-generation:', err)
+      })
       
       // Auto-close toast after 3 seconds
       setTimeout(() => toast.remove(), 3000)

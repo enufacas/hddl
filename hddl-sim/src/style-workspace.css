@@ -2168,6 +2168,41 @@ body.aux-hidden .aux-peek {
     font-size: 16px;
 }
 
+/* Aux peek bar states for narrative generation */
+.aux-peek.generating {
+    background: color-mix(in srgb, #007acc 40%, var(--vscode-activityBar-background)) !important;
+    border-left-color: #007acc;
+    width: 32px !important;
+    animation: peekPulse 2s ease-in-out infinite;
+}
+
+.aux-peek.complete {
+    background: color-mix(in srgb, var(--status-success) 15%, var(--vscode-activityBar-background));
+    border-left-color: var(--status-success);
+}
+
+.aux-peek.error {
+    background: color-mix(in srgb, var(--status-error) 10%, var(--vscode-activityBar-background));
+    border-left-color: var(--status-error);
+}
+
+@keyframes peekPulse {
+    0%, 100% {
+        opacity: 1;
+        border-left-width: 2px;
+    }
+    50% {
+        opacity: 0.7;
+        border-left-width: 4px;
+    }
+}
+
+.aux-peek.generating:hover,
+.aux-peek.complete:hover,
+.aux-peek.error:hover {
+    opacity: 1;
+}
+
 
 /* Bottom panel (Terminal) stays under editor only (not under auxiliary) */
 .part.panel {

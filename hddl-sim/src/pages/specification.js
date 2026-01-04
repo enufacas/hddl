@@ -234,6 +234,28 @@ export function render(container) {
   // Define the specifications for each object type
   const specifications = [
     {
+      title: 'Scenario',
+      description: 'Complete simulation scenario with envelopes, fleets, and events.',
+      schema: {
+        schemaVersion: 'number (schema version)',
+        id: 'string (scenario identifier)',
+        title: 'string (scenario name)',
+        durationHours: 'number (total duration)',
+        envelopes: 'DecisionEnvelope[] (array of envelopes)',
+        fleets: 'AgentFleet[] (array of fleets)',
+        events: 'DTSEvent[] (array of events)'
+      },
+      example: {
+        schemaVersion: 2,
+        id: 'scenario-default-002',
+        title: 'HDDL Replay (Simplified)',
+        durationHours: 48,
+        envelopes: [],
+        fleets: [],
+        events: []
+      }
+    },
+    {
       title: 'Decision Envelope',
       description: 'Defines a bounded context of decision authority with assumptions and constraints.',
       schema: {
@@ -271,7 +293,7 @@ export function render(container) {
     },
     {
       title: 'Agent Fleet',
-      description: 'A collection of AI agents that operate within decision envelopes.',
+      description: 'A collection of AI agents that operate within decision envelopes, owned by a steward.',
       schema: {
         stewardRole: 'string (owning steward)',
         agents: 'Agent[] (array of agents)'
@@ -281,36 +303,43 @@ export function render(container) {
         agents: [
           {
             agentId: 'CustomerSupportBot',
-            role: 'Support Bot',
-            capabilities: ['analyze sentiment', 'suggest responses', 'escalate issues']
+            name: 'Support Bot',
+            role: 'Customer Support Agent',
+            envelopeIds: ['ENV-001']
           }
         ]
       }
     },
     {
-      title: 'DTS Event',
-      description: 'Decision Telemetry Standard event for tracking system activity.',
+      title: 'Agent',
+      description: 'Individual AI agent that operates within assigned decision envelopes.',
+      schema: {
+        agentId: 'string (unique identifier)',
+        name: 'string (display name)',
+        role: 'string (agent role/capability)',
+        envelopeIds: 'string[] (assigned envelopes)'
+      },
+      example: {
+        agentId: 'CustomerSupportBot',
+        name: 'Support Bot',
+        role: 'Customer Support Agent',
+        envelopeIds: ['ENV-001', 'ENV-002']
+      }
+    },
+    {
+      title: 'Event',
+      description: 'Base event schema for Decision Telemetry Standard (DTS) events. All events share these core fields, with additional type-specific fields.',
       schema: {
         eventId: 'string (unique identifier)',
         hour: 'number (simulation time)',
-        type: 'string (event type)',
+        type: 'string (see Event Types below)',
         envelopeId: 'string (related envelope)',
         severity: '"info" | "warning" | "error"',
         label: 'string (short description)',
         detail: 'string (detailed description)',
         actorName: 'string (who performed action)',
         actorRole: 'string (role of actor)',
-        boundaryType: 'string (boundary interaction type)',
-        assumptionRefs: 'string[] (referenced assumptions)',
-        nextAssumptions: 'string[] (new assumptions)',
-        nextConstraints: 'string[] (new constraints)',
-        boundary_refs: 'string[] (related boundaries)',
-        involvedEnvelopeIds: 'string[] (affected envelopes)',
-        impactSummary: 'string[] (impact descriptions)',
-        resolutionPolicy: 'string[] (resolution policies)',
-        artifactOutput: 'string[] (generated artifacts)',
-        semanticVector: 'number[] (embedding vector)',
-        value: 'number (numeric value)'
+        '...': 'type-specific fields'
       },
       example: {
         eventId: 'decision:4:ENV-001:0',
@@ -322,76 +351,46 @@ export function render(container) {
         detail: 'System provided pre-approved response to common inquiry',
         actorName: 'CustomerSupportBot',
         actorRole: 'Support Bot',
-        assumptionRefs: ['tone-analysis-accurate'],
-        boundary_refs: [],
-        semanticVector: [0.75, 0.25, 0.45]
+        status: 'allowed'
       }
+    }
+  ]
+
+  const eventTypes = [
+    {
+      type: 'signal',
+      description: 'Telemetry or outcome divergence detected',
+      fields: 'signalKey, value, assumptionRefs'
     },
     {
-      title: 'Scenario',
-      description: 'Complete simulation scenario with envelopes, fleets, and events.',
-      schema: {
-        schemaVersion: 'number (schema version)',
-        id: 'string (scenario identifier)',
-        title: 'string (scenario name)',
-        durationHours: 'number (total duration)',
-        envelopes: 'DecisionEnvelope[] (array of envelopes)',
-        fleets: 'AgentFleet[] (array of fleets)',
-        events: 'DTSEvent[] (array of events)'
-      },
-      example: {
-        schemaVersion: 2,
-        id: 'scenario-default-002',
-        title: 'HDDL Replay (Simplified)',
-        durationHours: 48,
-        envelopes: [],
-        fleets: [],
-        events: []
-      }
+      type: 'decision',
+      description: 'Agent execution inside envelope bounds',
+      fields: 'agentId, status (allowed/blocked)'
     },
     {
-      title: 'Boundary Interaction',
-      description: 'Interaction with decision envelope boundaries (escalation, override, etc.).',
-      schema: {
-        type: '"boundary_interaction"',
-        boundaryType: 'string (interaction type)',
-        reason: 'string (why interaction occurred)',
-        resolution: 'string (how resolved)'
-      },
-      example: {
-        eventId: 'boundary_interaction:12:ENV-001:5',
-        hour: 12,
-        type: 'boundary_interaction',
-        envelopeId: 'ENV-001',
-        severity: 'warning',
-        label: 'Escalation required',
-        detail: 'Request exceeded automated authority',
-        boundaryType: 'manual_review_required',
-        reason: 'Refund amount ($125) exceeds automated threshold',
-        actorName: 'CustomerSupportBot'
-      }
+      type: 'boundary_interaction',
+      description: 'Agent reached envelope boundary',
+      fields: 'boundary_kind (escalated/deferred/overridden), boundary_reason, boundary_refs'
     },
     {
-      title: 'Decision Memory Entry',
-      description: 'Semantic embedding of decisions for recall and pattern matching.',
-      schema: {
-        decision_id: 'string (unique identifier)',
-        envelope_id: 'string (source envelope)',
-        actor_name: 'string (who made decision)',
-        hour: 'number (when decision made)',
-        semanticVector: 'number[] (embedding)',
-        confidence: 'number (0-1)',
-        context: 'string (decision context)'
-      },
-      example: {
-        decision_id: 'dec_001',
-        envelope_id: 'ENV-001',
-        actor_name: 'CustomerSupportBot',
-        hour: 4,
-        semanticVector: [0.75, 0.25, 0.45, 0.82],
-        confidence: 0.92,
-        context: 'Approved refund for defective product'
-      }
+      type: 'revision',
+      description: 'Steward updated envelope authority',
+      fields: 'revision_id, envelope_version, nextAssumptions, nextConstraints, resolvesEventId'
+    },
+    {
+      type: 'embedding',
+      description: 'Decision memory vector stored',
+      fields: 'embeddingId, embeddingType, sourceEventId, semanticContext, semanticVector'
+    },
+    {
+      type: 'retrieval',
+      description: 'Agent queried decision memory',
+      fields: 'queryText, retrievedEmbeddings, relevanceScores'
+    },
+    {
+      type: 'dsg_session',
+      description: 'Decision Stewardship Group governance session',
+      fields: 'sessionId, facilitatorRole, involvedEnvelopeIds, resolutionPolicy'
     }
   ]
 
@@ -440,4 +439,52 @@ export function render(container) {
     section.appendChild(content)
     specContent.appendChild(section)
   })
+
+  // Add Event Types section
+  const eventTypesSection = document.createElement('div')
+  eventTypesSection.style.cssText = 'margin-top: 32px; padding-top: 24px; border-top: 2px solid var(--vscode-sideBar-border);'
+  eventTypesSection.innerHTML = `
+    <h2 style="font-size: 24px; font-weight: 600; margin-bottom: 16px; color: var(--vscode-foreground);">
+      <span class="codicon codicon-symbol-event" style="margin-right: 8px;"></span>
+      Event Types
+    </h2>
+    <p style="font-size: 14px; color: var(--vscode-descriptionForeground); margin-bottom: 24px;">
+      All events share the base Event schema. Each type adds specific fields for its purpose.
+    </p>
+  `
+
+  const eventTypesGrid = document.createElement('div')
+  eventTypesGrid.style.cssText = 'display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px;'
+
+  eventTypes.forEach(evt => {
+    const card = document.createElement('div')
+    card.style.cssText = `
+      background: var(--vscode-sideBar-background);
+      border: 1px solid var(--vscode-sideBar-border);
+      border-radius: 6px;
+      padding: 16px;
+    `
+    card.innerHTML = `
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+        <code style="
+          background: color-mix(in srgb, var(--vscode-textLink-foreground) 15%, transparent);
+          color: var(--vscode-textLink-foreground);
+          padding: 2px 8px;
+          border-radius: 4px;
+          font-size: 13px;
+          font-weight: 600;
+        ">${evt.type}</code>
+      </div>
+      <p style="font-size: 13px; color: var(--vscode-descriptionForeground); margin-bottom: 8px;">
+        ${evt.description}
+      </p>
+      <div style="font-size: 11px; color: var(--vscode-descriptionForeground); opacity: 0.8;">
+        <strong>Additional fields:</strong> ${evt.fields}
+      </div>
+    `
+    eventTypesGrid.appendChild(card)
+  })
+
+  eventTypesSection.appendChild(eventTypesGrid)
+  specContent.appendChild(eventTypesSection)
 }

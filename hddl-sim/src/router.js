@@ -78,6 +78,9 @@ function ensurePeekHandles() {
     }
   })
   
+  // Store reference for state updates
+  window.__auxPeekHandle = auxPeek
+  
   // Append to editor area (will be preserved during navigations)
   editorArea.appendChild(sidebarPeek)
   editorArea.appendChild(auxPeek)
@@ -165,4 +168,45 @@ function normalizePath(pathname) {
   // Back-compat: old route name.
   if (noQuery === '/capability-matrix') return '/steward-fleets'
   return noQuery
+}
+
+/**
+ * Update aux peek bar state for narrative generation status
+ * @param {string} state - 'idle' | 'generating' | 'complete' | 'error'
+ */
+export function updateAuxPeekState(state) {
+  const auxPeek = window.__auxPeekHandle || document.querySelector('.aux-peek')
+  if (!auxPeek) return
+  
+  const label = auxPeek.querySelector('.aux-peek__label')
+  if (!label) return
+  
+  // Remove all state classes
+  auxPeek.classList.remove('generating', 'complete', 'error')
+  
+  switch (state) {
+    case 'generating':
+      label.textContent = 'AI NARRATIVE GENERATING'
+      auxPeek.classList.add('generating')
+      break
+    case 'complete':
+      label.textContent = 'AI NARRATIVE COMPLETE'
+      auxPeek.classList.add('complete')
+      break
+    case 'error':
+      label.textContent = 'AI NARRATIVE'
+      auxPeek.classList.add('error')
+      break
+    case 'idle':
+    default:
+      label.textContent = 'AI NARRATIVE'
+      break
+  }
+}
+
+/**
+ * Reset aux peek bar to idle state
+ */
+export function resetAuxPeekState() {
+  updateAuxPeekState('idle')
 }

@@ -16,6 +16,11 @@ let aiNarrativeTimeHooked = false
 const aiNarrativeCache = {} // Cache generated narratives per scenario: { scenarioKey: { html, citations, generated } }
 let aiNarrativeCurrentScenario = null // Track current scenario for caching on switch
 
+// Auto-generation state
+let autoGenerationQueue = [] // Queue of pending auto-generation requests
+let isAutoGenerating = false // Flag to track if auto-generation is in progress
+let autoGenerationController = null // AbortController for cancelling requests
+
 // Helper to rewire citation click handlers
 const rewireCitationLinks = (containerEl) => {
   containerEl.querySelectorAll('.citation-link').forEach(link => {
@@ -336,6 +341,206 @@ const loadPreGeneratedNarrative = async (scenarioKey, containerEl) => {
   }
 }
 
+/**
+ * Auto-generate narrative for a scenario (triggered after scenario generation)
+ * @param {string} scenarioId - ID of the scenario to generate narrative for
+ * @param {boolean} autoOpen - Whether to auto-open the panel when complete
+ */
+const autoGenerateNarrative = async (scenarioId, autoOpen = true) => {
+  // Add to queue
+  autoGenerationQueue.push({ scenarioId, autoOpen })
+  console.log(`[Auto-Generate] Queued narrative for ${scenarioId}. Queue length: ${autoGenerationQueue.length}`)
+  
+  // Process queue if not already processing
+  if (!isAutoGenerating) {
+    processAutoGenerationQueue()
+  }
+}
+
+/**
+ * Process the auto-generation queue
+ */
+const processAutoGenerationQueue = async () => {
+  if (isAutoGenerating || autoGenerationQueue.length === 0) return
+  
+  isAutoGenerating = true
+  const { scenarioId, autoOpen } = autoGenerationQueue.shift()
+  
+  console.log(`[Auto-Generate] Processing narrative for ${scenarioId}. Remaining queue: ${autoGenerationQueue.length}`)
+  
+  // Update peek bar to generating state
+  const { updateAuxPeekState } = await import('../../router')
+  updateAuxPeekState('generating')
+  
+  // Get the narrative panel container
+  const containerEl = document.querySelector('[data-testid="ai-narrative-panel"]')
+  const contentEl = containerEl?.querySelector?.('#ai-narrative-content')
+  
+  // Update panel content to show generating state
+  if (contentEl) {
+    contentEl.style.backgroundImage = 'none'
+    contentEl.innerHTML = `
+      <div style="
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        padding: 32px;
+        color: var(--vscode-descriptionForeground);
+        text-align: center;
+      ">
+        <span class="codicon codicon-loading codicon-modifier-spin" style="font-size: 32px; color: var(--vscode-textLink-foreground);"></span>
+        <div>
+          <div style="font-size: 14px; font-weight: 600; margin-bottom: 8px;">Generating AI Narrative</div>
+          <div style="font-size: 12px; opacity: 0.8;">This may take 10-30 seconds...</div>
+        </div>
+      </div>
+    `.trim()
+  }
+  
+  try {
+    const scenario = getScenario()
+    if (!scenario || getCurrentScenarioId() !== scenarioId) {
+      throw new Error('Scenario changed or not loaded')
+    }
+    
+    // Use Cloud Run in production (GitHub Pages), localhost in development
+    const isProduction = window.location.hostname === 'enufacas.github.io'
+    const apiUrl = isProduction 
+      ? 'https://narrative-api-alm36fcxzq-uc.a.run.app/generate'
+      : 'http://localhost:8080/generate'
+    
+    // Create abort controller for this request
+    autoGenerationController = new AbortController()
+    
+    const requestBody = {
+      scenarioData: scenario,
+      fullContext: true,
+      userAddendum: ''
+    }
+    
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestBody),
+      signal: autoGenerationController.signal
+    })
+    
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status} ${response.statusText}`)
+    }
+    
+    const data = await response.json()
+    aiNarrativeCitations = data.citations || []
+    
+    // Use shared citation processing pipeline
+    const html = processNarrativeWithCitations(data.narrative || data.markdown, aiNarrativeCitations, scenario)
+    
+    // Add metadata footer
+    const metadata = data.metadata || {}
+    const metadataHtml = `
+      <div style="
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px solid var(--vscode-sideBar-border);
+        font-size: 10px;
+        color: var(--vscode-descriptionForeground);
+      ">
+        <strong>Generation Metadata:</strong><br>
+        Model: ${metadata.model || 'unknown'} |
+        Cost: $${(metadata.cost || 0).toFixed(6)} |
+        Tokens: ${metadata.tokensIn || 0} in / ${metadata.tokensOut || 0} out |
+        Duration: ${(metadata.duration || 0).toFixed(2)}s |
+        Day-based reveal: enabled | Auto-generated
+      </div>
+    `
+    
+    // Store the full HTML for sync mode
+    aiNarrativeFullHtml = html + metadataHtml
+    aiNarrativeGenerated = true
+    
+    // Cache the narrative
+    aiNarrativeCache[scenarioId] = {
+      html: aiNarrativeFullHtml,
+      citations: [...aiNarrativeCitations],
+      generated: true
+    }
+    
+    // Update panel content
+    if (contentEl) {
+      contentEl.innerHTML = aiNarrativeFullHtml
+      contentEl.style.backgroundImage = 'none'
+      injectAINarrativeStyles()
+      rewireCitationLinks(contentEl)
+      
+      if (aiNarrativeSyncEnabled) {
+        updateNarrativeSync()
+      }
+    }
+    
+    // Update peek bar to complete state
+    updateAuxPeekState('complete')
+    
+    // Auto-open panel if requested
+    if (autoOpen) {
+      setTimeout(() => {
+        document.body.classList.remove('aux-hidden')
+        const state = JSON.parse(localStorage.getItem('hddl:layout') || '{}')
+        localStorage.setItem('hddl:layout', JSON.stringify({ ...state, auxCollapsed: false }))
+      }, 500) // Small delay for visual feedback
+    }
+    
+    console.log(`[Auto-Generate] ✓ Narrative generated for ${scenarioId}`)
+    
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      console.log(`[Auto-Generate] Narrative generation cancelled for ${scenarioId}`)
+    } else {
+      console.error('[Auto-Generate] Failed to generate narrative:', error)
+      
+      // Update peek bar to error state
+      const { updateAuxPeekState } = await import('../../router')
+      updateAuxPeekState('error')
+      
+      // Update panel content to show error
+      if (contentEl) {
+        const isProduction = window.location.hostname === 'enufacas.github.io'
+        const helpText = isProduction
+          ? 'The narrative generation service may be temporarily unavailable.'
+          : 'Make sure the API server is running at localhost:8080 (npm run api:dev)'
+        
+        contentEl.innerHTML = `
+          <div style="
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            padding: 24px;
+            color: var(--status-error);
+            text-align: center;
+          ">
+            <span class="codicon codicon-error" style="font-size: 24px;"></span>
+            <div>
+              <div style="font-weight: 600; margin-bottom: 8px;">Auto-generation Failed</div>
+              <div style="font-size: 12px; opacity: 0.8;">${escapeHtml(helpText)}</div>
+              <div style="font-size: 11px; margin-top: 8px; opacity: 0.6;">${escapeHtml(error.message)}</div>
+            </div>
+          </div>
+        `.trim()
+      }
+    }
+  } finally {
+    autoGenerationController = null
+    isAutoGenerating = false
+    
+    // Process next item in queue
+    if (autoGenerationQueue.length > 0) {
+      processAutoGenerationQueue()
+    }
+  }
+}
+
 const generateAINarrative = async (containerEl) => {
   const contentEl = containerEl?.querySelector?.('#ai-narrative-content')
   const generateBtn = containerEl?.querySelector?.('#generate-ai-narrative')
@@ -607,11 +812,39 @@ const mountAINarrative = (containerEl) => {
     const scenario = getScenario()
     const scenarioKey = getCurrentScenarioId()
     aiNarrativeCurrentScenario = scenarioKey // Initialize tracker
-    if (scenario && scenarioKey && !scenarioKey.startsWith('generated-scenario-')) {
-      // Async load - will update UI when complete
+    
+    // Check if this is a generated scenario that will be auto-generated
+    const isGeneratedScenario = scenarioKey && scenarioKey.startsWith('generated-scenario-')
+    
+    if (scenario && scenarioKey && !isGeneratedScenario) {
+      // Async load - will update UI when complete (for built-in scenarios)
       loadPreGeneratedNarrative(scenarioKey, containerEl).catch(err => {
         console.log('No pre-generated narrative available:', err.message)
       })
+    } else if (isGeneratedScenario) {
+      // Show initial message for generated scenarios (will be replaced by auto-generation)
+      const contentEl = containerEl.querySelector('#ai-narrative-content')
+      if (contentEl && !isAutoGenerating) {
+        contentEl.style.backgroundImage = 'none'
+        contentEl.innerHTML = `
+          <div style="
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 32px;
+            color: var(--vscode-descriptionForeground);
+            text-align: center;
+          ">
+            <span class="codicon codicon-sparkle" style="font-size: 28px; color: var(--vscode-textLink-foreground);"></span>
+            <div>
+              <div style="font-size: 14px; font-weight: 600; margin-bottom: 8px;">Narrative will be generated automatically</div>
+              <div style="font-size: 12px; opacity: 0.8;">Please wait while we create a contextual narrative for this scenario...</div>
+            </div>
+          </div>
+        `.trim()
+      }
     }
   } else {
     // If narrative already loaded (from previous session), display it
@@ -625,7 +858,7 @@ const mountAINarrative = (containerEl) => {
   }
 
   // Handle scenario changes - cache current narrative and restore for new scenario
-  onScenarioChange(() => {
+  onScenarioChange(async () => {
     console.log('[AI Narrative] Scenario changed')
     
     // Save current narrative to cache using tracked scenario key
@@ -642,6 +875,12 @@ const mountAINarrative = (containerEl) => {
     aiNarrativeFullHtml = ''
     aiNarrativeCitations = []
     aiNarrativeGenerated = false
+    
+    // Reset peek bar state (unless auto-generation is in progress)
+    if (!isAutoGenerating) {
+      const { updateAuxPeekState } = await import('../../router')
+      updateAuxPeekState('idle')
+    }
     
     // Update current scenario tracker
     const scenarioKey = getCurrentScenarioId()
@@ -700,5 +939,5 @@ const mountAINarrative = (containerEl) => {
   })
 }
 
-// Export the mount function as the main API
-export { mountAINarrative }
+// Export the mount function and auto-generation as the main API
+export { mountAINarrative, autoGenerateNarrative }

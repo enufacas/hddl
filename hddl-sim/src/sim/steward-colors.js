@@ -15,8 +15,10 @@ export const STEWARD_COLORS = {
   'Business Domain Steward': 'var(--steward-business, #dcdcaa)',
 }
 
-// Ordered palette array for indexed access
+// Extended palette array for indexed access (24 distinct colors)
+// Ensures variety when scenarios have custom steward roles
 export const STEWARD_PALETTE = [
+  // Core 8 (match STEWARD_COLORS)
   '#3794ff', // Customer - Blue
   '#89d185', // HR - Green  
   '#cca700', // Sales - Yellow/Gold
@@ -25,6 +27,24 @@ export const STEWARD_PALETTE = [
   '#4ec9b0', // Engineering - Teal
   '#ce9178', // Resiliency - Orange/Brown
   '#dcdcaa', // Business - Tan
+  
+  // Extended 16 (for custom roles)
+  '#ff6b9d', // Pink
+  '#76b9ed', // Sky Blue
+  '#a8d08d', // Sage Green
+  '#f4a261', // Coral Orange
+  '#9d84b7', // Dusty Purple
+  '#6eb5d0', // Ocean Blue
+  '#e9c46a', // Warm Gold
+  '#d4a373', // Caramel
+  '#8ab4f8', // Periwinkle
+  '#81c995', // Sea Green
+  '#ffb347', // Pastel Orange
+  '#b392ac', // Mauve
+  '#7eb8da', // Steel Blue
+  '#c9a0dc', // Lilac
+  '#a8c256', // Lime
+  '#ff9a8b', // Salmon Pink
 ]
 
 // Distinct envelope color palette (different from steward colors)
@@ -43,11 +63,19 @@ export const ENVELOPE_PALETTE = [
 
 /**
  * Get color for a steward role
+ * Uses named colors for standard roles, deterministic hash-based colors for custom roles.
  * @param {string} role - The steward role name
  * @returns {string} CSS color value
  */
 export function getStewardColor(role) {
-  return STEWARD_COLORS[role] || STEWARD_PALETTE[hashRole(role) % STEWARD_PALETTE.length]
+  // Use explicit color for known roles
+  if (STEWARD_COLORS[role]) {
+    return STEWARD_COLORS[role]
+  }
+  
+  // For custom roles, use extended palette with better distribution
+  const hash = hashRole(role)
+  return STEWARD_PALETTE[hash % STEWARD_PALETTE.length]
 }
 
 /**
@@ -65,16 +93,24 @@ export function getEnvelopeColor(envelopeId, index) {
 }
 
 /**
- * Simple hash for consistent color assignment to unknown roles
+ * Improved hash function for consistent color assignment to custom roles.
+ * Uses a better distribution algorithm to minimize collisions.
+ * Same input always produces same output (deterministic).
+ * 
+ * @param {string} role - The role name to hash
+ * @returns {number} Non-negative integer hash
  */
 function hashRole(role) {
-  let hash = 0
   const str = String(role || '')
+  let hash = 5381 // DJB2 hash algorithm - better distribution than simple hash
+  
   for (let i = 0; i < str.length; i++) {
-    hash = ((hash << 5) - hash) + str.charCodeAt(i)
-    hash = hash & hash
+    const char = str.charCodeAt(i)
+    hash = ((hash << 5) + hash) + char // hash * 33 + char
   }
-  return Math.abs(hash)
+  
+  // Ensure positive and distribute across palette
+  return Math.abs(hash >>> 0) // unsigned right shift for positive int
 }
 
 /**
