@@ -10,11 +10,26 @@ The HDDL project includes a suite of validation scripts that ensure scenario fil
 - **Feedback-complete** - Have required embeddings for agent learning
 - **Chronologically consistent** - Retrievals don't reference future knowledge
 
+This repo also includes a **scenario generation test harness** for validating the end-to-end loop of:
+Docker API  `POST /generate-scenario`  analyzer output.
+
+It is intentionally separate from `npm run conformance` because it depends on local credentials and a billable external API.
+
+See: `hddl-sim/docs/Scenario_Generation_Test_Harness.md`
+
 ## Running Validation
 
 ```bash
 cd hddl-sim
 npm run conformance
+```
+
+## Scenario Generation Harness (Docker + Analyzer)
+
+Use the harness when changing scenario generation prompt/validation (`hddl-sim/api/**`) or when investigating analyzer failures in generated scenarios.
+
+```powershell
+.\scripts\scenario-generation-harness.ps1
 ```
 
 This orchestrates all validators in sequence and stops on first failure.

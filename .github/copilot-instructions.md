@@ -29,6 +29,14 @@ docker run -d -p 8080:8080 \
   narrative-api
 ```
 
+**Scenario generation harness (recommended for repeatable checks):**
+```powershell
+# Uses hddl-sim/.env if present (GOOGLE_CLOUD_PROJECT, GOOGLE_CLOUD_LOCATION)
+.\hddl-sim\scripts\scenario-generation-harness.ps1
+```
+
+**Harness docs:** `hddl-sim/docs/Scenario_Generation_Test_Harness.md`
+
 **Key points:**
 - The `-v "$env:APPDATA\gcloud:/root/.config/gcloud:ro"` mount is **required** to pass host gcloud credentials into the container
 - Without this mount, you'll get `GoogleAuthError: Unable to authenticate` 
@@ -46,6 +54,11 @@ docker run -d -p 8080:8080 \
 - After completing a feature set
 - When explicitly requested
 - NOT after every small UI tweak
+
+### When to Run the Scenario Generation Harness
+- After changing scenario generation prompt/validation (`hddl-sim/api/**`)
+- When investigating analyzer failures/warnings for generated scenarios
+- Not for tight UI iteration; it requires Docker + Vertex AI credentials
 
 ## Code Patterns
 
@@ -86,6 +99,10 @@ npm run test:unit             # Vitest unit tests
 npm run test:unit:watch       # Unit tests in watch mode
 npm run test:unit:coverage    # Unit coverage report (TS-target KPI)
 npm run test:coverage:e2e     # E2E/Istanbul coverage report (critical-flow KPI)
+```
+
+```powershell
+.\hddl-sim\scripts\scenario-generation-harness.ps1   # Docker + /generate-scenario + analyzer loop
 ```
 
 ### Two Kinds of “Coverage” (Intentional)

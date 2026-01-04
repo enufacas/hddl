@@ -15,6 +15,17 @@ applyTo: "hddl-sim/tests/**,hddl-sim/src/**/*.test.js"
 - E2E coverage (Playwright + Istanbul): `npm run test:coverage:e2e`
 - Single Playwright spec: `npx playwright test tests/<file>.spec.js`
 
+## Scenario Generation Harness (Manual)
+
+Some changes (especially scenario generation prompt/validation) span Docker + Vertex AI + analyzer output. For a repeatable local check, use:
+
+- `hddl-sim/scripts/scenario-generation-harness.ps1`
+- Doc: `hddl-sim/docs/Scenario_Generation_Test_Harness.md`
+
+Notes:
+- This is *not* a unit/integration test and is not CI-friendly (requires credentials + billable external API).
+- Use it when changing `hddl-sim/api/**` scenario generation behavior, or when debugging analyzer errors/warnings for generated scenarios.
+
 ## Coverage Model (Unified)
 
 We intentionally track **two different** coverage signals:
