@@ -186,7 +186,7 @@ export function updateAuxPeekState(state) {
   
   switch (state) {
     case 'generating':
-      label.textContent = 'AI NARRATIVE GENERATING'
+      label.textContent = 'SCENARIO COMPLETE — GENERATING NARRATIVE'
       auxPeek.classList.add('generating')
       break
     case 'complete':

@@ -75,6 +75,21 @@
     outline-offset: 2px;
 }
 
+/* Button disabled state utility */
+button:disabled,
+input[type="button"]:disabled,
+input[type="submit"]:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+#generate-ai-narrative:disabled {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+}
+
 /* ===== BASE STYLES ===== */
 *,
 *::before,
@@ -3408,6 +3423,11 @@ body.mobile-nav-open .mobile-nav-overlay {
     
     #generate-ai-narrative .codicon {
         font-size: 16px !important;
+    }
+    
+    #generate-ai-narrative:disabled {
+        opacity: 0.5 !important;
+        cursor: not-allowed !important;
     }
     
     /* Hide generate scenario button text on mobile, show only icon */

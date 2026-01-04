@@ -13,8 +13,47 @@ let aiNarrativeSyncEnabled = false
 let aiNarrativeFullHtml = ''
 let aiNarrativeUserAddendum = ''
 let aiNarrativeTimeHooked = false
-const aiNarrativeCache = {} // Cache generated narratives per scenario: { scenarioKey: { html, citations, generated } }
 let aiNarrativeCurrentScenario = null // Track current scenario for caching on switch
+
+// Cache helpers - use localStorage for persistence across tabs/sessions
+const CACHE_KEY = 'hddl:narrative-cache'
+const CACHE_VERSION = 1
+const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000 // 7 days
+
+const getCacheFromStorage = () => {
+  try {
+    const stored = localStorage.getItem(CACHE_KEY)
+    if (!stored) return {}
+    const parsed = JSON.parse(stored)
+    if (parsed.version !== CACHE_VERSION) return {}
+    
+    // Clean expired entries
+    const now = Date.now()
+    const cleaned = {}
+    for (const [key, entry] of Object.entries(parsed.cache || {})) {
+      if (entry.timestamp && (now - entry.timestamp) < CACHE_MAX_AGE_MS) {
+        cleaned[key] = entry
+      }
+    }
+    return cleaned
+  } catch (e) {
+    console.warn('[AI Narrative] Failed to load cache from localStorage:', e)
+    return {}
+  }
+}
+
+const saveCacheToStorage = (cache) => {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify({
+      version: CACHE_VERSION,
+      cache
+    }))
+  } catch (e) {
+    console.warn('[AI Narrative] Failed to save cache to localStorage:', e)
+  }
+}
+
+const aiNarrativeCache = getCacheFromStorage() // Load cache on module init
 
 // Auto-generation state
 let autoGenerationQueue = [] // Queue of pending auto-generation requests
@@ -372,6 +411,12 @@ const processAutoGenerationQueue = async () => {
   const { updateAuxPeekState } = await import('../../router')
   updateAuxPeekState('generating')
   
+  // Disable generate button during auto-generation
+  const generateBtn = document.querySelector('#generate-ai-narrative')
+  if (generateBtn) {
+    generateBtn.disabled = true
+  }
+  
   // Get the narrative panel container
   const containerEl = document.querySelector('[data-testid="ai-narrative-panel"]')
   const contentEl = containerEl?.querySelector?.('#ai-narrative-content')
@@ -392,7 +437,7 @@ const processAutoGenerationQueue = async () => {
       ">
         <span class="codicon codicon-loading codicon-modifier-spin" style="font-size: 32px; color: var(--vscode-textLink-foreground);"></span>
         <div>
-          <div style="font-size: 14px; font-weight: 600; margin-bottom: 8px;">Generating AI Narrative</div>
+          <div style="font-size: 14px; font-weight: 600; margin-bottom: 8px;">Scenario Complete — Generating Narrative</div>
           <div style="font-size: 12px; opacity: 0.8;">This may take 10-30 seconds...</div>
         </div>
       </div>
@@ -460,12 +505,21 @@ const processAutoGenerationQueue = async () => {
     aiNarrativeFullHtml = html + metadataHtml
     aiNarrativeGenerated = true
     
-    // Cache the narrative
+    // Update current scenario tracker BEFORE caching
+    aiNarrativeCurrentScenario = scenarioId
+    
+    // Cache the narrative (in-memory and localStorage)
     aiNarrativeCache[scenarioId] = {
       html: aiNarrativeFullHtml,
       citations: [...aiNarrativeCitations],
-      generated: true
+      generated: true,
+      timestamp: Date.now()
     }
+    saveCacheToStorage(aiNarrativeCache)
+    
+    console.log(`[Auto-Generate] ✓ Cached narrative for "${scenarioId}" (persisted to localStorage)`)
+    console.log(`[Auto-Generate] Cache now contains:`, Object.keys(aiNarrativeCache))
+    console.log(`[Auto-Generate] aiNarrativeCurrentScenario set to: "${aiNarrativeCurrentScenario}"`)
     
     // Update panel content
     if (contentEl) {
@@ -481,6 +535,12 @@ const processAutoGenerationQueue = async () => {
     
     // Update peek bar to complete state
     updateAuxPeekState('complete')
+    
+    // Re-enable generate button
+    const generateBtn = document.querySelector('#generate-ai-narrative')
+    if (generateBtn) {
+      generateBtn.disabled = false
+    }
     
     // Auto-open panel if requested
     if (autoOpen) {
@@ -533,6 +593,12 @@ const processAutoGenerationQueue = async () => {
   } finally {
     autoGenerationController = null
     isAutoGenerating = false
+    
+    // Always re-enable button when generation completes (success or error)
+    const generateBtn = document.querySelector('#generate-ai-narrative')
+    if (generateBtn) {
+      generateBtn.disabled = false
+    }
     
     // Process next item in queue
     if (autoGenerationQueue.length > 0) {
@@ -813,15 +879,48 @@ const mountAINarrative = (containerEl) => {
     const scenarioKey = getCurrentScenarioId()
     aiNarrativeCurrentScenario = scenarioKey // Initialize tracker
     
+    console.log(`[AI Narrative Mount] Initial load for: "${scenarioKey}"`)
+    
+    // First check cache (for previously generated narratives, including in other tabs)
+    if (scenarioKey && aiNarrativeCache[scenarioKey]) {
+      console.log(`[AI Narrative Mount] ✓ Found cached narrative for "${scenarioKey}"`)
+      const cached = aiNarrativeCache[scenarioKey]
+      aiNarrativeFullHtml = cached.html
+      aiNarrativeCitations = [...cached.citations]
+      aiNarrativeGenerated = true
+      
+      // Update UI with cached content immediately
+      const contentEl = containerEl.querySelector('#ai-narrative-content')
+      if (contentEl) {
+        contentEl.innerHTML = aiNarrativeFullHtml
+        contentEl.style.backgroundImage = 'none'
+        injectAINarrativeStyles()
+        rewireCitationLinks(contentEl)
+        if (aiNarrativeSyncEnabled) updateNarrativeSync()
+      }
+      
+      // Update button text
+      const generateBtn = containerEl.querySelector('#generate-ai-narrative')
+      if (generateBtn) {
+        const buttonText = generateBtn.querySelector('.generate-narrative-text')
+        if (buttonText) buttonText.textContent = 'Regenerate'
+      }
+      
+      console.log(`[AI Narrative Mount] Restored cached narrative on initial load`)
+      return // Early return - we're done
+    }
+    
     // Check if this is a generated scenario that will be auto-generated
     const isGeneratedScenario = scenarioKey && scenarioKey.startsWith('generated-scenario-')
     
     if (scenario && scenarioKey && !isGeneratedScenario) {
+      console.log(`[AI Narrative Mount] Checking for pre-generated narrative...`)
       // Async load - will update UI when complete (for built-in scenarios)
       loadPreGeneratedNarrative(scenarioKey, containerEl).catch(err => {
-        console.log('No pre-generated narrative available:', err.message)
+        console.log('[AI Narrative Mount] No pre-generated narrative available:', err.message)
       })
     } else if (isGeneratedScenario) {
+      console.log(`[AI Narrative Mount] No cache found, showing waiting message for generated scenario`)
       // Show initial message for generated scenarios (will be replaced by auto-generation)
       const contentEl = containerEl.querySelector('#ai-narrative-content')
       if (contentEl && !isAutoGenerating) {
@@ -859,16 +958,19 @@ const mountAINarrative = (containerEl) => {
 
   // Handle scenario changes - cache current narrative and restore for new scenario
   onScenarioChange(async () => {
-    console.log('[AI Narrative] Scenario changed')
+    const newScenarioKey = getCurrentScenarioId()
+    console.log(`[AI Narrative] Scenario changed: ${aiNarrativeCurrentScenario} → ${newScenarioKey}`)
     
     // Save current narrative to cache using tracked scenario key
     if (aiNarrativeCurrentScenario && aiNarrativeGenerated && aiNarrativeFullHtml) {
       aiNarrativeCache[aiNarrativeCurrentScenario] = {
         html: aiNarrativeFullHtml,
         citations: [...aiNarrativeCitations],
-        generated: true
+        generated: true,
+        timestamp: Date.now()
       }
-      console.log(`[AI Narrative] Cached narrative for ${aiNarrativeCurrentScenario}`)
+      saveCacheToStorage(aiNarrativeCache)
+      console.log(`[AI Narrative] ✓ Cached narrative for "${aiNarrativeCurrentScenario}" (persisted)`)
     }
     
     // Clear current state
@@ -882,9 +984,10 @@ const mountAINarrative = (containerEl) => {
       updateAuxPeekState('idle')
     }
     
-    // Update current scenario tracker
+    // Update current scenario tracker BEFORE trying to restore
     const scenarioKey = getCurrentScenarioId()
     aiNarrativeCurrentScenario = scenarioKey
+    console.log(`[AI Narrative] Updated current tracker to: "${aiNarrativeCurrentScenario}"`)
     
     // Update UI to show loading state
     const contentEl = containerEl.querySelector('#ai-narrative-content')
@@ -904,9 +1007,13 @@ const mountAINarrative = (containerEl) => {
     // Try to restore narrative for new scenario
     const scenario = getScenario()
     
+    console.log(`[AI Narrative] Looking up narrative for: "${scenarioKey}"`)
+    console.log(`[AI Narrative] Cache keys available:`, Object.keys(aiNarrativeCache))
+    console.log(`[AI Narrative] Cache match found:`, !!aiNarrativeCache[scenarioKey])
+    
     // First check cache (for previously generated narratives)
     if (scenarioKey && aiNarrativeCache[scenarioKey]) {
-      console.log(`[AI Narrative] Restoring from cache: ${scenarioKey}`)
+      console.log(`[AI Narrative] ✓ Cache HIT - Restoring narrative for "${scenarioKey}"`)
       const cached = aiNarrativeCache[scenarioKey]
       aiNarrativeFullHtml = cached.html
       aiNarrativeCitations = [...cached.citations]
