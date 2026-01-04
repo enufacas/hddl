@@ -1,15 +1,24 @@
-## Summary
+## Description
 
-<!-- Brief description of what this PR accomplishes -->
+[Describe the changes in this PR]
 
-## Changes
+## Problem
 
-<!-- List key changes made in this PR -->
+[What issue does this PR solve?]
+
+## Solution
+
+[How does this PR address the problem?]
 
 ## Testing
 
-<!-- How were these changes tested? -->
+- [ ] Tested locally
+- [ ] Added/updated tests if applicable
+- [ ] Verified on mobile/tablet if UI change
 
-## Context
+## Checklist
 
-<!-- Any additional context or background information -->
+- [ ] Code follows project style guidelines
+- [ ] Self-review completed
+- [ ] Documentation updated if needed
+- [ ] No breaking changes (or documented if unavoidable)
