@@ -42,7 +42,7 @@ function loadGeneratedScenariosFromStorage() {
 export const SCENARIOS = {
   'default': {
     id: 'default',
-    title: 'HDDL Replay — Four Fleets (Default)',
+    title: 'HDDL Example Company',
     description: 'Customer Service, HR, Sales, and Data Stewardship across 48 hours.',
     data: defaultScenario,
     tags: ['default', 'multi-domain', 'foundational'],
@@ -248,10 +248,33 @@ export function registerGeneratedScenario(scenarioData) {
 
 /**
  * Clear all generated scenarios from localStorage
+ * Also clears associated narrative cache entries
  */
 export function clearGeneratedScenarios() {
   try {
     localStorage.removeItem(GENERATED_SCENARIOS_KEY)
+    
+    // Clear narrative cache for generated scenarios
+    const NARRATIVE_CACHE_KEY = 'hddl:narrative-cache'
+    try {
+      const narrativeCacheRaw = localStorage.getItem(NARRATIVE_CACHE_KEY)
+      if (narrativeCacheRaw) {
+        const narrativeCache = JSON.parse(narrativeCacheRaw)
+        if (narrativeCache.cache) {
+          // Remove entries for generated scenarios
+          Object.keys(narrativeCache.cache).forEach(key => {
+            if (key.startsWith('generated-scenario-')) {
+              delete narrativeCache.cache[key]
+            }
+          })
+          localStorage.setItem(NARRATIVE_CACHE_KEY, JSON.stringify(narrativeCache))
+          console.log('Cleared narrative cache for generated scenarios')
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to clear narrative cache:', err)
+    }
+    
     // Remove from catalog
     Object.keys(SCENARIOS).forEach(id => {
       if (SCENARIOS[id].generated) {

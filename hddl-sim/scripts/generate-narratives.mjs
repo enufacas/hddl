@@ -16,11 +16,15 @@
  *   --scenario <name>   Generate for specific scenario only
  *   --dry-run           Show what would be generated without making LLM calls
  *   --force             Regenerate even if narrative already exists
+ *   --use-api           Generate via HTTP API instead of direct module call
+ *   --api-url <url>     Narrative API base URL (default: http://localhost:8080)
+ *   --origin <origin>   Origin header for API calls (default: http://localhost:5173)
  * 
  * Examples:
  *   node scripts/generate-narratives.mjs --dry-run
  *   node scripts/generate-narratives.mjs --scenario insurance-underwriting
  *   node scripts/generate-narratives.mjs --force
+ *   node scripts/generate-narratives.mjs --scenario default --force --use-api
  */
 
 import { readFile, writeFile, readdir } from 'fs/promises';
@@ -35,9 +39,18 @@ const __dirname = dirname(__filename);
 const args = process.argv.slice(2);
 const dryRun = args.includes('--dry-run');
 const force = args.includes('--force');
+const useApi = args.includes('--use-api');
 const scenarioFilter = args.includes('--scenario') 
   ? args[args.indexOf('--scenario') + 1] 
   : null;
+
+const apiUrl = args.includes('--api-url')
+  ? args[args.indexOf('--api-url') + 1]
+  : (process.env.NARRATIVE_API_URL || 'http://localhost:8080');
+
+const apiOrigin = args.includes('--origin')
+  ? args[args.indexOf('--origin') + 1]
+  : (process.env.NARRATIVE_API_ORIGIN || 'http://localhost:5173');
 
 // Paths
 const SCENARIOS_DIR = join(__dirname, '..', 'src', 'sim', 'scenarios');
@@ -133,13 +146,40 @@ async function generateNarrativeForScenario(scenarioName) {
   log(`  Events: ${analysis.metadata.totalEvents}`, 'gray');
   
   // Generate narrative
-  log('🤖 Generating narrative with Gemini...', 'yellow');
+  log(useApi ? `🌐 Generating narrative via API (${apiUrl})...` : '🤖 Generating narrative with Gemini...', 'yellow');
   const startTime = Date.now();
   
   try {
-    const result = await generateLLMNarrative(analysis, scenario, { 
-      fullContext: true 
-    });
+    let result;
+    if (useApi) {
+      const response = await fetch(new URL('/generate', apiUrl), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Origin': apiOrigin
+        },
+        body: JSON.stringify({
+          scenario: scenarioName,
+          fullContext: true
+        })
+      });
+
+      if (!response.ok) {
+        const text = await response.text().catch(() => '');
+        throw new Error(`API request failed (${response.status}): ${text || response.statusText}`);
+      }
+
+      const apiResult = await response.json();
+      result = {
+        markdown: apiResult.narrative,
+        citations: apiResult.citations || [],
+        metadata: apiResult.metadata || {}
+      };
+    } else {
+      result = await generateLLMNarrative(analysis, scenario, {
+        fullContext: true
+      });
+    }
     
     const duration = Date.now() - startTime;
     
@@ -196,15 +236,19 @@ async function main() {
   log('='.repeat(80), 'blue');
   
   // Check environment
-  if (!process.env.GOOGLE_CLOUD_PROJECT && !dryRun) {
+  if (!dryRun && !useApi && !process.env.GOOGLE_CLOUD_PROJECT) {
     log('\n❌ GOOGLE_CLOUD_PROJECT not set', 'red');
-    log('   Set environment variable or create .env file:', 'yellow');
-    log('   GOOGLE_CLOUD_PROJECT=your-gcp-project-id\n', 'gray');
+    log('   Either set GOOGLE_CLOUD_PROJECT (direct mode) or use the local API:', 'yellow');
+    log('   node scripts/generate-narratives.mjs --scenario <name> --force --use-api\n', 'gray');
     process.exit(1);
   }
   
   if (dryRun) {
     log('\n🔍 DRY RUN MODE - No LLM calls will be made\n', 'yellow');
+  }
+
+  if (useApi) {
+    log(`\n🌐 API MODE - Using ${apiUrl} (Origin: ${apiOrigin})\n`, 'yellow');
   }
   
   if (force) {

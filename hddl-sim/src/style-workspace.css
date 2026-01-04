@@ -75,6 +75,21 @@
     outline-offset: 2px;
 }
 
+/* Button disabled state utility */
+button:disabled,
+input[type="button"]:disabled,
+input[type="submit"]:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+#generate-ai-narrative:disabled {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+}
+
 /* ===== BASE STYLES ===== */
 *,
 *::before,
@@ -2168,6 +2183,41 @@ body.aux-hidden .aux-peek {
     font-size: 16px;
 }
 
+/* Aux peek bar states for narrative generation */
+.aux-peek.generating {
+    background: color-mix(in srgb, #007acc 40%, var(--vscode-activityBar-background)) !important;
+    border-left-color: #007acc;
+    width: 32px !important;
+    animation: peekPulse 2s ease-in-out infinite;
+}
+
+.aux-peek.complete {
+    background: color-mix(in srgb, var(--status-success) 15%, var(--vscode-activityBar-background));
+    border-left-color: var(--status-success);
+}
+
+.aux-peek.error {
+    background: color-mix(in srgb, var(--status-error) 10%, var(--vscode-activityBar-background));
+    border-left-color: var(--status-error);
+}
+
+@keyframes peekPulse {
+    0%, 100% {
+        opacity: 1;
+        border-left-width: 2px;
+    }
+    50% {
+        opacity: 0.7;
+        border-left-width: 4px;
+    }
+}
+
+.aux-peek.generating:hover,
+.aux-peek.complete:hover,
+.aux-peek.error:hover {
+    opacity: 1;
+}
+
 
 /* Bottom panel (Terminal) stays under editor only (not under auxiliary) */
 .part.panel {
@@ -3373,6 +3423,11 @@ body.mobile-nav-open .mobile-nav-overlay {
     
     #generate-ai-narrative .codicon {
         font-size: 16px !important;
+    }
+    
+    #generate-ai-narrative:disabled {
+        opacity: 0.5 !important;
+        cursor: not-allowed !important;
     }
     
     /* Hide generate scenario button text on mobile, show only icon */

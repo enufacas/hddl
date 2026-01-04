@@ -1,5 +1,8 @@
 # Narrative Generation Implementation Notes
 
+For the current end-to-end workflow (with ASCII diagrams and the recommended local container flow), see:
+- `hddl-sim/docs/Narrative_Generation_Workflow.md`
+
 ## Overview
 
 AI-generated narratives now include HDDL conceptual framing, teaching readers the framework while telling the scenario story.
@@ -12,12 +15,12 @@ AI-generated narratives now include HDDL conceptual framing, teaching readers th
 - **Output**: ~200 lines with sections for actors, events, cycles
 - **Cost**: Free (no API calls)
 
-### LLM Generation (Gemini 2.0 Flash)
+### LLM Generation (Gemini via Vertex AI)
 - **Method**: Natural language generation with HDDL context injection
 - **Use case**: Readable narratives for documentation, presentations
-- **Output**: 3-4 paragraph flowing narrative with HDDL terminology
-- **Cost**: ~$0.0015 per narrative (full context mode)
-- **Token usage**: ~18,000 tokens input (scenario JSON + HDDL context)
+- **Output**: Flowing narrative using HDDL terminology
+- **Cost**: Depends on model + scenario size (see `metadata.cost` in results)
+- **Token usage**: Depends on scenario size (see `metadata.tokensIn` / `metadata.tokensOut`)
 
 ### Hybrid Generation
 - **Method**: Template structure + LLM-enriched conclusion
@@ -61,18 +64,22 @@ Prompts instruct the LLM to:
 
 ## Implementation
 
-**File**: `hddl-sim/analysis/narrative-generator.mjs`
+**File**: `hddl-sim/api/narrative-generator.mjs`
+
+**Pre-generation script**: `hddl-sim/scripts/generate-narratives.mjs`
+
+**Local API server**: `hddl-sim/api/server.mjs` (endpoint: `POST /generate`)
 
 ### Command-Line Interface
+
+Pre-generate and store `*.narrative.json` artifacts:
+
 ```bash
-# Template generation (default)
-node analysis/narrative-generator.mjs <scenario-name>
+# Dry run (no LLM calls)
+node scripts/generate-narratives.mjs --dry-run
 
-# LLM generation with HDDL framing
-node analysis/narrative-generator.mjs <scenario-name> --method llm --full-context
-
-# Save to file
-node analysis/narrative-generator.mjs <scenario-name> --method llm --full-context --output analysis/narratives/<name>.md
+# Regenerate a single scenario (via local API container)
+node scripts/generate-narratives.mjs --scenario default --force --use-api
 ```
 
 ### Key Functions

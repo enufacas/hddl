@@ -70,12 +70,24 @@ export async function generateScenario(userPrompt) {
       console.error('Finish reason:', geminiResult.finishReason);
       throw new Error(`JSON parse failed: ${parseError.message}. Response may be truncated (length: ${jsonText.length}, finish: ${geminiResult.finishReason})`);
     }
+
+    // Step 2.5: Enforce generator contract: the LLM must not change structure.
+    // It may only replace ALL_CAPS placeholder strings.
+    validateScenarioMatchesSkeleton(skeleton, narrativeData);
     
     // Step 3: Merge skeleton structure with narrative data
     const scenario = mergeSkeletonWithNarrative(skeleton, narrativeData);
+
+    // Step 3.5: Deterministically ensure envelope objects reflect latest revision state.
+    // Aligns with analyzer expectations and prevents envelope/revision drift.
+    reconcileEnvelopeStateFromRevisions(scenario);
     
-    // Validate structure
-    const warnings = validateScenario(scenario);
+    // Validate structure (strict: fail fast on critical issues)
+    const { warnings, errors } = validateScenario(scenario);
+    if (errors.length > 0) {
+      const topErrors = errors.slice(0, 8).map(e => `- ${e}`).join('\n')
+      throw new Error(`Generated scenario failed validation:\n${topErrors}${errors.length > 8 ? `\n- ...and ${errors.length - 8} more` : ''}`)
+    }
     
     const duration = (Date.now() - startTime) / 1000;
     
@@ -349,11 +361,54 @@ function buildNarrativePrompt(userPrompt, skeleton) {
   
   return `You are a JSON generator. Output ONLY valid JSON. No markdown or explanations.
 
+ABSOLUTE RULES (NON-NEGOTIABLE):
+- Output must be a single JSON object.
+- Do NOT add, remove, reorder, or rename any keys.
+- Do NOT add or remove envelopes, fleets, agents, or events.
+- Do NOT change any eventId, envelopeId, agentId, hour, type, or resolvesEventId.
+- ONLY replace ALL_CAPS placeholder strings with real values.
+
 REQUEST: ${userPrompt}
 
 Replace ALL_CAPS placeholders. Be CONCISE (≤80 chars per string).
 
 ${compactSkeleton}
+
+ENVELOPE MODEL (CRITICAL):
+- Exactly ONE envelope object per envelopeId (no duplicates in scenario.envelopes).
+- Each envelope must be active for the full scenario: createdHour near start (0-2) and endHour = durationHours.
+- DO NOT create separate envelope entries for v2/v3. Use revision events to evolve the envelope.
+
+REVISION MODEL (CRITICAL):
+- Every revision MUST include: envelopeId, envelope_version (integer), revision_id (string), nextAssumptions (array), nextConstraints (array).
+- nextAssumptions/nextConstraints must be the full updated lists (not deltas).
+- Revisions that change a version should occur before the changed policy is used by later events.
+
+ENVELOPE STATE (CRITICAL):
+- The envelope objects in scenario.envelopes must reflect the LATEST state:
+  - envelope.envelope_version must equal the latest version after revisions.
+  - envelope.assumptions must match the latest revision.nextAssumptions.
+  - envelope.constraints must match the latest revision.nextConstraints.
+
+WINDOW CONSISTENCY (CRITICAL):
+- For events at hour >= 0: every event with an envelopeId must occur within that envelope's createdHour..endHour.
+- Historical baseline events (hour < 0) may reference envelopes as pre-existing memory.
+
+AGENT SCOPE (CRITICAL):
+- If an event has agentId (or actorRole 'agent'), its envelopeId MUST be one of that agent's envelopeIds from fleets[].agents[].
+- Do NOT invent new agentIds.
+
+BOUNDARY COMPLETENESS (CRITICAL):
+- Every boundary_interaction MUST include boundary_kind (either "escalated" or "overridden").
+- Every boundary_interaction MUST be resolved by a steward decision (decision.resolvesEventId = that boundary eventId).
+- Every boundary_interaction MUST be followed by a revision (revision.resolvesEventId = that boundary eventId).
+
+AGENT NAMING: Agents are software. Name them after their function or domain object:
+- Healthcare: "Triage Bot", "Diagnosis Engine", "Med Checker"
+- Insurance: "Claims Validator", "Risk Scorer", "Policy Bot"
+- Finance: "Credit Analyzer", "Fraud Detector", "Loan Processor"
+- General: "Data Processor", "Workflow Engine", "Query Handler"
+- NOT people names: Avoid "Sarah", "Marcus", "John", etc.
 
 CRITICAL: STEWARD_ROLE_1/2/3 MUST be DISTINCT names. Use IDENTICAL names in:
 - fleets[0].stewardRole and envelopes[0].ownerRole (both use STEWARD_ROLE_1)
@@ -370,9 +425,69 @@ Output JSON only.`;
  * Merge skeleton structure with LLM-generated narrative
  */
 function mergeSkeletonWithNarrative(skeleton, narrative) {
-  // The LLM should return the complete structure with placeholders filled
-  // Just validate it has the same structure
-  return narrative;
+  if (!narrative || typeof narrative !== 'object') return skeleton
+
+  const merged = mergeByPlaceholder(skeleton, narrative)
+
+  // Stabilize array merges by ID to avoid order drift.
+  // Envelopes: merge by envelopeId
+  if (Array.isArray(skeleton.envelopes)) {
+    const narrativeByEnvelopeId = new Map((narrative.envelopes || []).map(e => [e?.envelopeId, e]))
+    merged.envelopes = skeleton.envelopes.map(env => mergeByPlaceholder(env, narrativeByEnvelopeId.get(env?.envelopeId) || {}))
+  }
+
+  // Fleets/agents: merge fleets by index; agents by agentId
+  if (Array.isArray(skeleton.fleets)) {
+    merged.fleets = skeleton.fleets.map((fleet, fleetIdx) => {
+      const nFleet = (Array.isArray(narrative.fleets) ? narrative.fleets[fleetIdx] : null) || {}
+      const outFleet = mergeByPlaceholder(fleet, nFleet)
+
+      if (Array.isArray(fleet?.agents)) {
+        const nAgentsById = new Map((nFleet.agents || []).map(a => [a?.agentId, a]))
+        outFleet.agents = fleet.agents.map(a => mergeByPlaceholder(a, nAgentsById.get(a?.agentId) || {}))
+      }
+
+      return outFleet
+    })
+  }
+
+  // Events: merge by eventId (preserve skeleton ordering and immutable fields)
+  if (Array.isArray(skeleton.events)) {
+    const narrativeByEventId = new Map((narrative.events || []).map(e => [e?.eventId, e]))
+    merged.events = skeleton.events.map(ev => mergeByPlaceholder(ev, narrativeByEventId.get(ev?.eventId) || {}))
+  }
+
+  return merged
+}
+
+function isAllCapsPlaceholder(value) {
+  return typeof value === 'string' && /^[A-Z0-9_]+$/.test(value)
+}
+
+function mergeByPlaceholder(skeletonValue, narrativeValue) {
+  // If the skeleton declares a placeholder string, allow replacement.
+  if (isAllCapsPlaceholder(skeletonValue)) {
+    return (typeof narrativeValue === 'string' && narrativeValue.trim() !== '') ? narrativeValue : skeletonValue
+  }
+
+  // Arrays: merge by index, preserving skeleton length and non-placeholder scalars.
+  if (Array.isArray(skeletonValue)) {
+    const nArr = Array.isArray(narrativeValue) ? narrativeValue : []
+    return skeletonValue.map((sv, idx) => mergeByPlaceholder(sv, nArr[idx]))
+  }
+
+  // Objects: merge only keys present in skeleton; ignore extra keys from narrative.
+  if (skeletonValue && typeof skeletonValue === 'object') {
+    const nObj = (narrativeValue && typeof narrativeValue === 'object') ? narrativeValue : {}
+    const out = Array.isArray(skeletonValue) ? [] : {}
+    for (const key of Object.keys(skeletonValue)) {
+      out[key] = mergeByPlaceholder(skeletonValue[key], nObj[key])
+    }
+    return out
+  }
+
+  // Numbers/booleans/null/real strings are treated as immutable.
+  return skeletonValue
 }
 
 /**
@@ -420,6 +535,7 @@ ${userPrompt}`;
  */
 function validateScenario(scenario) {
   const warnings = [];
+  const errors = [];
   
   // Check required top-level fields
   if (!scenario.schemaVersion) warnings.push('Missing required field: schemaVersion');
@@ -429,6 +545,74 @@ function validateScenario(scenario) {
   if (!scenario.envelopes) warnings.push('Missing required field: envelopes');
   if (!scenario.fleets) warnings.push('Missing required field: fleets');
   if (!scenario.events) warnings.push('Missing required field: events');
+
+  // Stop early if structural fields missing
+  if (!scenario.envelopes || !scenario.events || !scenario.durationHours) {
+    return { warnings, errors: ['Scenario missing envelopes/events/durationHours'] };
+  }
+
+  // EnvelopeId uniqueness (generator contract)
+  const envelopeIds = scenario.envelopes.map(e => e.envelopeId).filter(Boolean)
+  const uniqueEnvelopeIds = new Set(envelopeIds)
+  if (uniqueEnvelopeIds.size !== envelopeIds.length) {
+    errors.push('Duplicate envelopeId entries found in scenario.envelopes (generator requires one envelope object per envelopeId)')
+  }
+
+  // Envelope time bounds
+  scenario.envelopes.forEach(env => {
+    if (typeof env.createdHour !== 'number' || typeof env.endHour !== 'number') {
+      errors.push(`Envelope ${env.envelopeId} missing createdHour/endHour`) 
+      return
+    }
+    if (env.createdHour < 0 || env.endHour > scenario.durationHours || env.createdHour >= env.endHour) {
+      errors.push(`Envelope ${env.envelopeId} has invalid time window ${env.createdHour}-${env.endHour} for durationHours=${scenario.durationHours}`)
+    }
+  })
+
+  // Event-in-envelope-window check
+  const envelopeWindowById = new Map(scenario.envelopes.map(env => [env.envelopeId, env]))
+  scenario.events.forEach(e => {
+    if (!e || !e.envelopeId || typeof e.hour !== 'number') return
+    // Historical baseline events (hour < 0) are allowed to reference envelopes as pre-existing memory.
+    if (e.hour < 0) return
+    const env = envelopeWindowById.get(e.envelopeId)
+    if (!env) {
+      errors.push(`Event at hour ${e.hour} references unknown envelopeId ${e.envelopeId}`)
+      return
+    }
+    if (e.hour < env.createdHour || e.hour > env.endHour) {
+      errors.push(`Event at hour ${e.hour} for ${e.envelopeId} occurs outside envelope window ${env.createdHour}-${env.endHour}`)
+    }
+  })
+
+  // Agent scope check: event envelopeId must be in agent.envelopeIds
+  const allowedEnvelopesByAgentId = new Map()
+  scenario.fleets?.forEach(fleet => {
+    fleet?.agents?.forEach(agent => {
+      if (!agent?.agentId) return
+      const allowed = Array.isArray(agent.envelopeIds) ? agent.envelopeIds : []
+      allowedEnvelopesByAgentId.set(agent.agentId, new Set(allowed))
+    })
+  })
+
+  scenario.events.forEach(e => {
+    if (!e || typeof e.hour !== 'number') return
+    const agentId = e.agentId
+    const isAgentEvent = e.actorRole === 'agent' || Boolean(agentId)
+    if (!isAgentEvent) return
+    if (!agentId) {
+      errors.push(`Agent event at hour ${e.hour} is missing agentId`) 
+      return
+    }
+    const allowedSet = allowedEnvelopesByAgentId.get(agentId)
+    if (!allowedSet) {
+      errors.push(`Event at hour ${e.hour} references unknown agentId ${agentId}`)
+      return
+    }
+    if (e.envelopeId && !allowedSet.has(e.envelopeId)) {
+      errors.push(`Agent ${agentId} used outside scope: event at hour ${e.hour} targets ${e.envelopeId}, allowed: ${Array.from(allowedSet).join(', ')}`)
+    }
+  })
   
   // Check event count
   const eventCount = scenario.events?.length || 0;
@@ -456,6 +640,34 @@ function validateScenario(scenario) {
   const revisions = events.filter(e => e.type === 'revision');
   const boundaries = events.filter(e => e.type === 'boundary_interaction');
   const embeddings = events.filter(e => e.type === 'embedding');
+
+  // Envelope state must reflect latest revision
+  const envById = new Map((scenario.envelopes || []).map(env => [env.envelopeId, env]))
+  const revisionsByEnv = new Map()
+  revisions.forEach(r => {
+    if (!r?.envelopeId) return
+    if (!revisionsByEnv.has(r.envelopeId)) revisionsByEnv.set(r.envelopeId, [])
+    revisionsByEnv.get(r.envelopeId).push(r)
+  })
+
+  for (const [envelopeId, env] of envById.entries()) {
+    const envRevs = (revisionsByEnv.get(envelopeId) || []).slice().sort((a, b) => (a.hour ?? 0) - (b.hour ?? 0))
+    if (envRevs.length === 0) continue
+    const lastRev = envRevs[envRevs.length - 1]
+
+    if (env.envelope_version == null || lastRev.envelope_version == null) {
+      errors.push(`Envelope ${envelopeId} or its latest revision is missing envelope_version`)
+    } else if (env.envelope_version !== lastRev.envelope_version) {
+      errors.push(`Envelope ${envelopeId} envelope_version (${env.envelope_version}) does not match latest revision (${lastRev.envelope_version})`)
+    }
+
+    if (Array.isArray(lastRev.nextAssumptions) && JSON.stringify(env.assumptions || []) !== JSON.stringify(lastRev.nextAssumptions)) {
+      errors.push(`Envelope ${envelopeId} assumptions do not match latest revision.nextAssumptions (rev ${lastRev.eventId || lastRev.revision_id || 'unknown'})`)
+    }
+    if (Array.isArray(lastRev.nextConstraints) && JSON.stringify(env.constraints || []) !== JSON.stringify(lastRev.nextConstraints)) {
+      errors.push(`Envelope ${envelopeId} constraints do not match latest revision.nextConstraints (rev ${lastRev.eventId || lastRev.revision_id || 'unknown'})`)
+    }
+  }
   
   const revisionEmbeddings = embeddings.filter(e => e.embeddingType === 'revision');
   const boundaryEmbeddings = embeddings.filter(e => e.embeddingType === 'boundary_interaction');
@@ -467,6 +679,62 @@ function validateScenario(scenario) {
   if (boundaryEmbeddings.length < boundaries.length) {
     warnings.push(`Missing embeddings: ${boundaries.length - boundaryEmbeddings.length} boundaries lack embeddings`);
   }
+
+  // Boundary kind required + must be valid
+  const allowedBoundaryKinds = new Set(['escalated', 'overridden'])
+  boundaries.forEach(b => {
+    if (!b.eventId) {
+      errors.push('boundary_interaction missing eventId')
+      return
+    }
+    if (!b.boundary_kind) {
+      errors.push(`Boundary ${b.eventId} missing boundary_kind`)
+    } else if (!allowedBoundaryKinds.has(b.boundary_kind)) {
+      errors.push(`Boundary ${b.eventId} has invalid boundary_kind: ${b.boundary_kind}`)
+    }
+  })
+
+  // Boundary must be resolved by steward decision + revision
+  const decisions = events.filter(e => e.type === 'decision')
+  const revisionByResolves = new Map()
+  revisions.forEach(r => {
+    if (r?.resolvesEventId) revisionByResolves.set(r.resolvesEventId, r)
+  })
+  const decisionsByResolves = new Map()
+  decisions.forEach(d => {
+    if (!d?.resolvesEventId) return
+    if (!decisionsByResolves.has(d.resolvesEventId)) decisionsByResolves.set(d.resolvesEventId, [])
+    decisionsByResolves.get(d.resolvesEventId).push(d)
+  })
+
+  boundaries.forEach(b => {
+    const resolvingDecisions = decisionsByResolves.get(b.eventId) || []
+    if (resolvingDecisions.length === 0) {
+      errors.push(`Boundary ${b.eventId} has no resolving decision (decision.resolvesEventId)`)
+    }
+    const revision = revisionByResolves.get(b.eventId)
+    if (!revision) {
+      errors.push(`Boundary ${b.eventId} has no resolving revision (revision.resolvesEventId)`)
+    }
+
+    // Temporal ordering sanity
+    resolvingDecisions.forEach(d => {
+      if (typeof d.hour === 'number' && d.hour < b.hour) {
+        warnings.push(`Boundary ${b.eventId} resolved by decision occurring before boundary (decision at ${d.hour}, boundary at ${b.hour})`)
+      }
+    })
+    if (revision && typeof revision.hour === 'number' && revision.hour < b.hour) {
+      warnings.push(`Boundary ${b.eventId} resolved by revision occurring before boundary (revision at ${revision.hour}, boundary at ${b.hour})`)
+    }
+  })
+
+  // Revision completeness (generator contract)
+  revisions.forEach(r => {
+    if (r.envelope_version == null) errors.push(`Revision ${r.eventId || '(no eventId)'} missing envelope_version`)
+    if (!r.revision_id) errors.push(`Revision ${r.eventId || '(no eventId)'} missing revision_id`)
+    if (!Array.isArray(r.nextAssumptions)) errors.push(`Revision ${r.eventId || '(no eventId)'} missing nextAssumptions array`)
+    if (!Array.isArray(r.nextConstraints)) errors.push(`Revision ${r.eventId || '(no eventId)'} missing nextConstraints array`)
+  })
   
   // Check chronological ordering
   for (let i = 1; i < events.length; i++) {
@@ -506,11 +774,15 @@ function validateScenario(scenario) {
   
   // Validate semantic vectors
   embeddings.forEach(emb => {
-    if (emb.vector && Array.isArray(emb.vector)) {
-      if (emb.vector.length !== 2) {
-        warnings.push(`Embedding ${emb.embeddingId} has invalid vector length (expected 2, got ${emb.vector.length})`);
+    const vec = (Array.isArray(emb.semanticVector) ? emb.semanticVector
+      : Array.isArray(emb.vector) ? emb.vector
+      : null)
+
+    if (vec) {
+      if (vec.length !== 2) {
+        warnings.push(`Embedding ${emb.embeddingId} has invalid vector length (expected 2, got ${vec.length})`);
       }
-      emb.vector.forEach((coord, idx) => {
+      vec.forEach((coord, idx) => {
         if (coord < 0 || coord > 1) {
           warnings.push(`Embedding ${emb.embeddingId} vector[${idx}] out of range [0,1]: ${coord}`);
         }
@@ -518,7 +790,42 @@ function validateScenario(scenario) {
     }
   });
   
-  return warnings;
+  return { warnings, errors };
+}
+
+function reconcileEnvelopeStateFromRevisions(scenario) {
+  const envelopes = Array.isArray(scenario?.envelopes) ? scenario.envelopes : []
+  const events = Array.isArray(scenario?.events) ? scenario.events : []
+
+  const revisionsByEnvelope = new Map()
+  for (const ev of events) {
+    if (ev?.type !== 'revision') continue
+    if (!ev?.envelopeId) continue
+    if (!revisionsByEnvelope.has(ev.envelopeId)) revisionsByEnvelope.set(ev.envelopeId, [])
+    revisionsByEnvelope.get(ev.envelopeId).push(ev)
+  }
+
+  for (const env of envelopes) {
+    const envRevs = (revisionsByEnvelope.get(env?.envelopeId) || []).slice().sort((a, b) => (a.hour ?? 0) - (b.hour ?? 0))
+    if (envRevs.length === 0) continue
+    const lastRev = envRevs[envRevs.length - 1]
+
+    if (lastRev?.envelope_version != null) env.envelope_version = lastRev.envelope_version
+    if (Array.isArray(lastRev?.nextAssumptions)) env.assumptions = lastRev.nextAssumptions
+    if (Array.isArray(lastRev?.nextConstraints)) env.constraints = lastRev.nextConstraints
+  }
+}
+
+function validateScenarioMatchesSkeleton(skeleton, candidate) {
+  if (!candidate || typeof candidate !== 'object') {
+    throw new Error('Generated scenario is not an object')
+  }
+
+  // Minimal structural guardrails: we can merge by ID/index even if the model drifts.
+  // If these aren't arrays, we can't reliably merge placeholders.
+  if (!Array.isArray(candidate.envelopes)) throw new Error('Generated scenario must include scenario.envelopes array')
+  if (!Array.isArray(candidate.fleets)) throw new Error('Generated scenario must include scenario.fleets array')
+  if (!Array.isArray(candidate.events)) throw new Error('Generated scenario must include scenario.events array')
 }
 
 /**

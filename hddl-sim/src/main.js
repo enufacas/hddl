@@ -155,7 +155,7 @@ const isTestEnv = window.navigator.webdriver || window.Playwright
 import('./sim/scenario-loader.js').then(loaderModule => {
   window.clearGeneratedScenarios = () => {
     loaderModule.clearGeneratedScenarios()
-    console.log('✓ Cleared generated scenarios. Reload the page to see changes.')
+    console.log('✓ Cleared generated scenarios and their narratives. Reload the page to see changes.')
   }
 })
 

@@ -1,5 +1,12 @@
 # Scripts Documentation
 
+## Scenario Generation Harness
+
+For the Docker generate-scenario → analyzer loop (a mix of contract/e2e/AI testing), use:
+
+- Script: `scripts/scenario-generation-harness.ps1`
+- Doc: `docs/Scenario_Generation_Test_Harness.md`
+
 ## Narrative Pre-Generation
 
 ### Overview

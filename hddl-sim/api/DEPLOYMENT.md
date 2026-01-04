@@ -51,6 +51,21 @@ docker run -d -p 8080:8080 \
   narrative-api
 ```
 
+### Scenario Generation Harness (Recommended)
+
+For a repeatable local loop that:
+- rebuilds/restarts the Docker API,
+- calls `POST /generate-scenario`, and
+- runs `analysis/scenario-analysis.mjs` while capturing artifacts,
+
+use:
+
+```powershell
+.\scripts\scenario-generation-harness.ps1
+```
+
+Docs: `hddl-sim/docs/Scenario_Generation_Test_Harness.md`
+
 Visit: `http://localhost:8080/health`
 
 Test rate limiting:

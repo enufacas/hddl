@@ -184,22 +184,21 @@ export async function startTour() {
         position: 'top'
       },
       {
-        element: '.auxiliarybar',
-        title: 'AI-Generated Narrative',
+        element: '.scenario-gen-button',
+        title: 'Generate Scenario (AI)',
         intro: `
           <div style="font-size: 14px; line-height: 1.6;">
-            <p>The <strong>AI Narrative panel</strong> generates contextual explanations of what's happening in the simulation.</p>
-            <p>Features:</p>
+            <p>Use <strong>Generate Scenario</strong> to create a custom scenario from a prompt.</p>
+            <p>What happens next:</p>
             <ul style="margin: 8px 0; padding-left: 20px;">
-              <li><strong>Generate Narrative</strong> – Creates a natural language summary of the current scenario state</li>
-              <li><strong>Sync with Timeline</strong> – Automatically updates as you scrub through time</li>
-              <li><strong>Additional Instructions</strong> – Guide the AI to focus on specific aspects</li>
+              <li><strong>Scenario loads immediately</strong> – The simulation updates with your generated data</li>
+              <li><strong>Narrative is auto-generated</strong> – A contextual explanation is created after generation</li>
+              <li><strong>Optional refinement</strong> – Use instructions in the AI Narrative panel to steer the explanation</li>
             </ul>
-            <p style="margin-top: 8px;">This helps translate complex technical patterns into understandable stories about how the system is operating.</p>
+            <p style="margin-top: 8px;">This is the fastest way to explore new domains without hand-authoring JSON.</p>
           </div>
         `,
-        position: 'left',
-        scrollTo: 'tooltip'
+        position: 'bottom'
       },
       {
         title: "You're Ready!",
@@ -214,7 +213,7 @@ export async function startTour() {
               <li style="margin-bottom: 6px;"><strong>Stewards</strong> – Humans who maintain envelopes</li>
               <li style="margin-bottom: 6px;"><strong>Agent Fleets</strong> – AI operating within bounds</li>
               <li style="margin-bottom: 6px;"><strong>Embeddings</strong> – Learning from past decisions</li>
-              <li style="margin-bottom: 6px;"><strong>AI Narrative</strong> – Natural language explanations</li>
+              <li style="margin-bottom: 6px;"><strong>Generate Scenario (AI)</strong> – Create a scenario + narrative</li>
             </ul>
             <p style="margin-top: 12px;">Explore the simulation by switching scenarios, filtering by steward, clicking envelopes, and scrubbing the timeline!</p>
           </div>
@@ -232,13 +231,15 @@ export async function startTour() {
   
   // Before changing to each step, ensure auxiliary panel is open when needed
   intro.onbeforechange(function(targetElement) {
-    const stepIndex = this._currentStep
-    // Step 8 is the AI Narrative panel step (0-indexed, so it's the 9th step)
-    if (stepIndex === 8) {
-      // Open auxiliary panel if it's closed
-      if (document.body.classList.contains('aux-hidden')) {
-        document.body.classList.remove('aux-hidden')
-      }
+    // Only force-open the auxiliary panel if the step is targeting it.
+    const isAuxStep = !!targetElement && (
+      targetElement.classList?.contains('auxiliarybar') ||
+      targetElement.closest?.('.auxiliarybar')
+    )
+    if (!isAuxStep) return
+
+    if (document.body.classList.contains('aux-hidden')) {
+      document.body.classList.remove('aux-hidden')
     }
   })
   

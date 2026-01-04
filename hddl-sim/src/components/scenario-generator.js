@@ -43,6 +43,7 @@ function updateToast(toast, message, type) {
 
 export function createScenarioGeneratorButton() {
   const button = document.createElement('button')
+  button.dataset.attentionTarget = 'scenario-generator'
   button.innerHTML = `
     <span class="codicon codicon-sparkle"></span>
     <span class="scenario-gen-button-text">Generate Scenario</span>
@@ -67,7 +68,27 @@ export function createScenarioGeneratorButton() {
       cursor: pointer;
       transition: all 0.15s ease;
     }
-    
+
+    .scenario-gen-button.scenario-gen-button--pulse {
+      animation: hddl-scenario-gen-button-pulse 0.9s ease-in-out infinite;
+      box-shadow: 0 0 0 0 color-mix(in srgb, var(--vscode-button-background) 45%, transparent);
+    }
+
+    @keyframes hddl-scenario-gen-button-pulse {
+      0% {
+        transform: translateY(0) scale(1);
+        box-shadow: 0 0 0 0 color-mix(in srgb, var(--vscode-button-background) 45%, transparent);
+      }
+      50% {
+        transform: translateY(-1px) scale(1.04);
+        box-shadow: 0 0 0 8px color-mix(in srgb, var(--vscode-button-background) 18%, transparent);
+      }
+      100% {
+        transform: translateY(0) scale(1);
+        box-shadow: 0 0 0 0 color-mix(in srgb, var(--vscode-button-background) 0%, transparent);
+      }
+    }
+
     .scenario-gen-button:hover {
       background: var(--vscode-button-hoverBackground);
       border-color: var(--vscode-button-border, var(--vscode-button-hoverBackground));
@@ -413,7 +434,7 @@ function showScenarioGeneratorModal() {
         placeholder="E.g., 'You're a Safety Steward at SpaceX managing cargo drones' or 'Agricultural robots in rural Kenya' or 'Hospital ER in São Paulo where AI triages patients' or 'Wall Street trading desk, 1980s style but with modern AI'…"
       ></textarea>
       <div class="scenario-gen-hint">
-        Keep it simple and just name an industry, or get more detailed with a time period, specific company, actors, and decision patterns. Start with the big picture, then add what agents decide, when they escalate, and who oversees them.
+        Keep it simple and just name an industry, or get more detailed with a time period, specific company, actors, and decision patterns.
       </div>
     </div>
     
@@ -454,15 +475,22 @@ function showScenarioGeneratorModal() {
   generateBtn.addEventListener('click', async () => {
     const prompt = promptInput.value.trim()
     
-    if (prompt.length < 10) {
-      showStatus('error', 'Please enter a more detailed prompt (at least 10 characters)')
+    if (prompt.length < 3) {
+      showStatus('error', 'Please enter a more detailed prompt (at least 3 characters)')
       return
     }
+    
+    // Reset peek bar state when starting new scenario generation
+    import('../router').then(({ resetAuxPeekState }) => {
+      resetAuxPeekState()
+    }).catch(err => {
+      console.warn('Could not reset peek bar state:', err)
+    })
     
     // Close modal immediately and show toast
     overlay.remove()
     
-    const toast = createToast('Generating scenario with AI...', 'loading')
+    const toast = createToast('Generating scenario using Gemini 2.5 Flash Lite...', 'loading')
     
     try {
       // Use Cloud Run in production (GitHub Pages), localhost in development
@@ -499,6 +527,13 @@ function showScenarioGeneratorModal() {
       
       // Refresh the scenario selector dropdown
       window.dispatchEvent(new CustomEvent('scenario-list-updated'))
+      
+      // Trigger auto-generation of narrative
+      import('./workspace/ai-narrative').then(({ autoGenerateNarrative }) => {
+        autoGenerateNarrative(scenarioId, true)
+      }).catch(err => {
+        console.error('Failed to trigger narrative auto-generation:', err)
+      })
       
       // Auto-close toast after 3 seconds
       setTimeout(() => toast.remove(), 3000)
