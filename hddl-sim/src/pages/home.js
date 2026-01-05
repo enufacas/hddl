@@ -6,7 +6,7 @@ import { createHDDLMap } from '../components/hddl-map'
 import { getStewardColor, toSemver } from '../sim/steward-colors'
 import { createTourButton } from '../components/tour'
 import { createStaticTimelineButton } from '../components/static-timeline-view'
-import { createScenarioGeneratorButton } from '../components/scenario-generator'
+import { createScenarioGeneratorButton, createShareScenarioButton } from '../components/scenario-generator'
 
 // Track active map cleanup to prevent leaks
 let activeMapCleanup = null
@@ -180,6 +180,13 @@ export function renderHome(container) {
 
     // On-load attention cue (auto-removes after ~4s)
     activeScenarioGenCueCleanup = pulseScenarioGenButton(scenarioGenButton, 4000)
+  }
+
+  // Add share button next to steward filter
+  const stewardFilterContainer = container.querySelector('#steward-filter')?.parentElement
+  if (stewardFilterContainer) {
+    const shareButton = createShareScenarioButton()
+    stewardFilterContainer.insertBefore(shareButton, stewardFilterContainer.querySelector('#steward-filter'))
   }
 
   // Add static timeline button when filtered to single steward

@@ -521,6 +521,15 @@ const processAutoGenerationQueue = async () => {
     console.log(`[Auto-Generate] Cache now contains:`, Object.keys(aiNarrativeCache))
     console.log(`[Auto-Generate] aiNarrativeCurrentScenario set to: "${aiNarrativeCurrentScenario}"`)
     
+    // Dispatch event for share card feature
+    window.dispatchEvent(new CustomEvent('hddl:narrative-generated', {
+      detail: {
+        narrative: data.narrative || data.markdown,
+        scenarioId: scenarioId,
+        citations: aiNarrativeCitations
+      }
+    }))
+    
     // Update panel content
     if (contentEl) {
       contentEl.innerHTML = aiNarrativeFullHtml
