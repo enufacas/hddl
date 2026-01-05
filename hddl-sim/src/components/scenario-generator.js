@@ -1,5 +1,7 @@
 import { setScenario, setTimeHour } from '../sim/store'
 import { registerGeneratedScenario } from '../sim/scenario-loader'
+import { showShareModal } from './share-card.js'
+import './share-card.css'
 
 /**
  * Creates a toast notification for non-blocking status updates
@@ -96,6 +98,35 @@ export function createScenarioGeneratorButton() {
     
     .scenario-gen-button:active {
       transform: translateY(1px);
+    }
+    
+    .scenario-share-button {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: color-mix(in srgb, var(--vscode-button-secondaryBackground) 90%, transparent);
+      color: var(--vscode-button-secondaryForeground);
+      border: 1px solid var(--vscode-button-border, transparent);
+      border-radius: 4px;
+      padding: 6px 12px;
+      font-family: var(--vscode-font-family);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    
+    .scenario-share-button:hover:not(:disabled) {
+      background: var(--vscode-button-secondaryHoverBackground);
+      border-color: var(--vscode-button-border, var(--vscode-button-secondaryHoverBackground));
+    }
+    
+    .scenario-share-button:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+    
+    .scenario-share-button:disabled {
+      cursor: not-allowed;
     }
     
     .scenario-gen-modal-overlay {
@@ -411,6 +442,91 @@ export function createScenarioGeneratorButton() {
   return button
 }
 
+// Store last generated scenario data for sharing
+let lastGeneratedScenario = null
+
+// Check localStorage for cached scenario on module load
+function checkCachedScenario() {
+  try {
+    const cachedScenario = localStorage.getItem('hddl:last-generated-scenario')
+    const cachedNarrative = localStorage.getItem('hddl:last-generated-narrative')
+    
+    if (cachedScenario) {
+      const scenarioData = JSON.parse(cachedScenario)
+      lastGeneratedScenario = {
+        prompt: scenarioData.prompt || 'Custom Scenario',
+        narrative: cachedNarrative || '',
+        scenarioTitle: scenarioData.title || scenarioData.scenario?.title || 'Custom Scenario',
+        scenario: scenarioData.scenario || scenarioData
+      }
+      
+      // Enable share buttons if they exist
+      setTimeout(() => {
+        const shareButtons = document.querySelectorAll('.scenario-share-button')
+        shareButtons.forEach(btn => {
+          btn.disabled = false
+          btn.style.opacity = '1'
+        })
+      }, 100)
+    }
+  } catch (err) {
+    console.warn('Could not load cached scenario for share button:', err)
+  }
+}
+
+// Run on module load
+checkCachedScenario()
+
+// Listen for narrative generation completion
+window.addEventListener('hddl:narrative-generated', (e) => {
+  const { narrative } = e.detail
+  if (lastGeneratedScenario && narrative) {
+    lastGeneratedScenario.narrative = narrative
+    // Update cache
+    localStorage.setItem('hddl:last-generated-narrative', narrative)
+  }
+})
+
+export function createShareScenarioButton() {
+  const button = document.createElement('button')
+  button.innerHTML = `
+    <span class="codicon codicon-link-external"></span>
+    <span>Share</span>
+  `
+  button.className = 'scenario-share-button'
+  button.title = 'Share your custom scenario'
+  button.disabled = true
+  button.style.opacity = '0.5'
+  
+  button.addEventListener('click', () => {
+    if (lastGeneratedScenario) {
+      showShareModal(lastGeneratedScenario)
+    }
+  })
+  
+  return button
+}
+
+export function enableShareButton(scenarioData) {
+  lastGeneratedScenario = scenarioData
+  
+  // Cache for persistence across page loads
+  try {
+    localStorage.setItem('hddl:last-generated-scenario', JSON.stringify(scenarioData))
+    if (scenarioData.narrative) {
+      localStorage.setItem('hddl:last-generated-narrative', scenarioData.narrative)
+    }
+  } catch (err) {
+    console.warn('Could not cache scenario data:', err)
+  }
+  
+  const shareButtons = document.querySelectorAll('.scenario-share-button')
+  shareButtons.forEach(btn => {
+    btn.disabled = false
+    btn.style.opacity = '1'
+  })
+}
+
 function showScenarioGeneratorModal() {
   const overlay = document.createElement('div')
   overlay.className = 'scenario-gen-modal-overlay'
@@ -528,11 +644,33 @@ function showScenarioGeneratorModal() {
       // Refresh the scenario selector dropdown
       window.dispatchEvent(new CustomEvent('scenario-list-updated'))
       
-      // Trigger auto-generation of narrative
+      // Trigger auto-generation of narrative and capture it for sharing
       import('./workspace/ai-narrative').then(({ autoGenerateNarrative }) => {
         autoGenerateNarrative(scenarioId, true)
+        
+        // Listen for narrative completion
+        window.addEventListener('hddl:narrative-generated', function narrativeHandler(e) {
+          if (e.detail && e.detail.narrative) {
+            // Enable share button with scenario data including narrative
+            enableShareButton({
+              prompt: prompt,
+              narrative: e.detail.narrative,
+              scenarioTitle: result.scenario.title,
+              scenario: result.scenario
+            })
+            // Remove listener after first narrative
+            window.removeEventListener('hddl:narrative-generated', narrativeHandler)
+          }
+        }, { once: true })
       }).catch(err => {
         console.error('Failed to trigger narrative auto-generation:', err)
+        // Enable share button anyway, just without narrative
+        enableShareButton({
+          prompt: prompt,
+          narrative: '',
+          scenarioTitle: result.scenario.title,
+          scenario: result.scenario
+        })
       })
       
       // Auto-close toast after 3 seconds
