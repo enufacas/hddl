@@ -1,0 +1,23 @@
+{
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "settings": {
+    // Inherit workspace settings from .vscode/settings.json
+  },
+  "launch": {
+    "configurations": [],
+    "compounds": []
+  },
+  "tasks": {
+    "version": "2.0.0",
+    "tasks": []
+  },
+  "extensions": {
+    "recommendations": [
+      "ms-playwright.playwright"
+    ]
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl:*)",
+      "Bash(node api-monitor-server.mjs:*)",
+      "Bash(gh copilot:*)",
+      "Bash(copilot:*)",
+      "Bash(chmod:*)",
+      "Bash(~/.claude/agents/init-session.sh)",
+      "Bash(~/.claude/agents/quick-helper.sh \"List all files in the .claude/skills directory\")",
+      "Bash(echo:*)",
+      "Bash(~/.claude/agents/quick-helper.sh \"How many skills are in the .claude/skills directory?\")",
+      "Bash(cat:*)",
+      "WebFetch(domain:raw.githubusercontent.com)"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "gcp-logging"
+  ],
+  "enabledPlugins": {
+    "feature-dev@claude-plugins-official": true
+  },
+  "outputStyle": "Explanatory"
+}

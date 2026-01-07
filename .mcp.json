@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "gcp-logging": {
+      "command": "node",
+      "args": [".claude/mcp-servers/gcp-logging-server.mjs"],
+      "env": {
+        "GOOGLE_CLOUD_PROJECT": "${GOOGLE_CLOUD_PROJECT:-your-gcp-project-id}",
+        "LOG_FILTER": "resource.type=\"cloud_run_revision\" AND resource.labels.service_name=\"narrative-api\""
+      }
+    }
+  }
+}

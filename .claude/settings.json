@@ -1,0 +1,43 @@
+{
+  "enabledPlugins": {
+    "frontend-design@claude-plugins-official": true,
+    "github@claude-plugins-official": true,
+    "playwright@claude-plugins-official": true,
+    "explanatory-output-style@claude-plugins-official": true,
+    "ralph-wiggum@claude-plugins-official": true
+  },
+  "permissions": {
+    "allow": [
+      "Bash(curl:*)",
+      "Bash(node api-monitor-server.mjs:*)",
+      "Bash(gh copilot:*)",
+      "Bash(copilot:*)",
+      "Bash(chmod:*)",
+      "Bash(~/.claude/agents/init-session.sh:*)",
+      "Bash(~/.claude/agents/quick-helper.sh:*)",
+      "Bash(~/.claude/agents/gpt-reviewer.sh:*)",
+      "Bash(echo:*)",
+      "Bash(cat:*)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(npm:*)",
+      "Bash(npm run:*)",
+      "Bash(npx:*)",
+      "Bash(node:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git add:*)",
+      "Bash(git branch:*)",
+      "Bash(git checkout:*)",
+      "Bash(docker ps:*)",
+      "Bash(docker logs:*)",
+      "Bash(docker build:*)",
+      "Bash(docker run:*)",
+      "Bash(gh pr:*)",
+      "Bash(gh issue:*)",
+      "Bash(ls:*)",
+      "Bash(pwd:*)",
+      "Bash(cd:*)"
+    ]
+  }
+}
